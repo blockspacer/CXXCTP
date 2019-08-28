@@ -2,6 +2,8 @@
 // see https://github.com/galsasson/ofxCling
 // see https://github.com/0xfd000000/qling/blob/22e56c4be0bbccb1d0437f610bfa37374b44b87f/qling/qling.cpp
 
+#if 0
+
 #include <cling/Interpreter/Interpreter.h>
 #include <cling/Interpreter/Value.h>
 #include "cling/Interpreter/CIFactory.h"
@@ -17,10 +19,10 @@
 #include "cling/Interpreter/LookupHelper.h"
 #include "cling/Utils/AST.h"
 
-
 #include "llvm/Config/llvm-config.h"
 #include "llvm/ADT/StringRef.h"
 #include "llvm/ExecutionEngine/ExecutionEngine.h"
+#include <llvm/Support/raw_os_ostream.h>
 
 /*#include "clang/Basic/FileManager.h"
 #include "clang/Basic/LangOptions.h"
@@ -38,6 +40,23 @@
 #include "clang/AST/Type.h"
 #include "clang/Frontend/CompilerInstance.h"
 #include "clang/Sema/Sema.h"
+#include <clang/Lex/Lexer.h>
+#include <clang/Frontend/FrontendAction.h>
+#include <clang/Frontend/ASTConsumers.h>
+#include <clang/Frontend/CompilerInstance.h>
+#include <clang/Tooling/Tooling.h>
+#include <clang/Rewrite/Core/Rewriter.h>
+#include "clang/Driver/Options.h"
+#include "clang/AST/AST.h"
+#include "clang/AST/ASTContext.h"
+#include "clang/AST/ASTConsumer.h"
+#include "clang/AST/RecursiveASTVisitor.h"
+#include "clang/Frontend/ASTConsumers.h"
+#include "clang/Frontend/FrontendActions.h"
+#include "clang/Frontend/CompilerInstance.h"
+#include "clang/Tooling/CommonOptionsParser.h"
+#include "clang/Tooling/Tooling.h"
+#include "clang/Rewrite/Core/Rewriter.h"
 
 #include <iostream>
 #include <string>
@@ -59,6 +78,16 @@
 #include <string>
 #include <thread>
 #include <vector>
+#include <filesystem>
+#include <memory>
+#include <numeric>
+#include <string_view>
+
+using namespace std;
+using namespace clang;
+using namespace clang::driver;
+using namespace clang::tooling;
+using namespace llvm;
 
 /*
  * DispatchQueue: Based on
@@ -695,6 +724,22 @@ void cling_func() {
 }
 
 int main(int argc, const char* const* argv) {
+    std::vector<std::string> args_storage;
+    args_storage.push_back("test.c");
+
+    std::vector< const char* > args_vec;
+    {
+        std::vector< std::string >::const_iterator iarg;
+        for( iarg = args_storage.begin() ; iarg != args_storage.end() ; ++iarg ) {
+            args_vec.push_back(iarg->c_str());
+        }
+    }
+    CommonOptionsParser op(args_vec.size(), &(args_vec[0]));
+    ClangTool Tool(op.getCompilations(), op.getSourcePathList());
+
+    return 0;
+
+
     std::cout << "input_func!... " << '\n';
     std::thread inp_thread(input_func);
     inp_thread.detach();
@@ -828,4 +873,6 @@ int main(int argc, const char* const* argv) {
 
     return 0;
 }
+#endif // 0
+
 #endif // 0

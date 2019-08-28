@@ -16,10 +16,20 @@
 #include <cling/Utils/Casting.h>
 #include "cling/Interpreter/LookupHelper.h"
 #include "cling/Utils/AST.h"
-
-#include "llvm/Config/llvm-config.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/ExecutionEngine/ExecutionEngine.h"
+#include <cling/Interpreter/Interpreter.h>
+#include <cling/Interpreter/Value.h>
+#include "cling/Interpreter/CIFactory.h"
+#include "cling/Interpreter/Interpreter.h"
+#include "cling/Interpreter/InterpreterCallbacks.h"
+//#include "cling/Interpreter/IncrementalExecutor.h"
+//#include "cling/Interpreter/IncrementalParser.h"
+#include "cling/Interpreter/Transaction.h"
+#include "cling/Interpreter/Value.h"
+#include "cling/Interpreter/CValuePrinter.h"
+#include "cling/MetaProcessor/MetaProcessor.h"
+#include <cling/Utils/Casting.h>
+#include "cling/Interpreter/LookupHelper.h"
+#include "cling/Utils/AST.h"
 
 /*#include "clang/Basic/FileManager.h"
 #include "clang/Basic/LangOptions.h"
@@ -37,15 +47,110 @@
 #include "clang/AST/Type.h"
 #include "clang/Frontend/CompilerInstance.h"
 #include "clang/Sema/Sema.h"
+/*#include "clang/Basic/FileManager.h"
+#include "clang/Basic/LangOptions.h"
+#include "clang/Basic/SourceManager.h"
+#include "clang/Frontend/CompilerInstance.h"
+#include "clang/Lex/HeaderSearchOptions.h"
+#include "clang/Frontend/ASTUnit.h"
+#include "clang/Basic/DiagnosticCommonKinds.inc"*/
+#include "clang/Parse/Parser.h"
+#include "clang/AST/ASTContext.h"
+#include "clang/AST/Decl.h"
+#include "clang/AST/DeclBase.h"
+#include "clang/AST/DeclCXX.h"
+#include "clang/AST/PrettyPrinter.h"
+#include "clang/AST/Type.h"
+#include "clang/Frontend/CompilerInstance.h"
+#include "clang/Sema/Sema.h"
+#include <clang/Lex/Lexer.h>
+#include <clang/Frontend/FrontendAction.h>
+#include <clang/Frontend/ASTConsumers.h>
+#include <clang/Frontend/CompilerInstance.h>
+#include <clang/Tooling/Tooling.h>
+#include <clang/Rewrite/Core/Rewriter.h>
+#include "clang/Driver/Options.h"
+#include "clang/AST/AST.h"
+#include "clang/AST/ASTContext.h"
+#include "clang/AST/ASTConsumer.h"
+#include "clang/AST/RecursiveASTVisitor.h"
+#include "clang/Frontend/ASTConsumers.h"
+#include "clang/Frontend/FrontendActions.h"
+#include "clang/Frontend/CompilerInstance.h"
+#include "clang/Tooling/CommonOptionsParser.h"
+#include "clang/Tooling/Tooling.h"
+#include "clang/Rewrite/Core/Rewriter.h"
 
-#include "boost/unordered_map.hpp"
-#include <boost/multi_index_container.hpp>
-#include <boost/multi_index/member.hpp>
-#include <boost/multi_index/ordered_index.hpp>
-#include <boost/multi_index/hashed_index.hpp>
-#include <boost/multi_index/sequenced_index.hpp>
-#include <boost/multi_index/random_access_index.hpp>
-#include <boost/multi_index/identity.hpp>
+#include "clang/ASTMatchers/ASTMatchers.h"
+
+#include "clang/AST/ASTContext.h"
+#include "clang/ASTMatchers/ASTMatchFinder.h"
+#include "clang/ASTMatchers/ASTMatchers.h"
+#include "clang/ASTMatchers/ASTMatchersMacros.h"
+#include "clang/Basic/CharInfo.h"
+#include "clang/Basic/SourceManager.h"
+#include "clang/Frontend/CompilerInstance.h"
+#include "clang/Frontend/FrontendActions.h"
+#include "clang/Lex/Lexer.h"
+#include "clang/Lex/MacroArgs.h"
+#include "clang/Lex/PPCallbacks.h"
+#include "clang/Lex/Preprocessor.h"
+#include "clang/Tooling/CommonOptionsParser.h"
+#include "clang/Tooling/Refactoring.h"
+#include "clang/Tooling/Tooling.h"
+#include "clang/AST/AST.h"
+#include "clang/AST/ASTConsumer.h"
+#include "clang/AST/ASTContext.h"
+#include "clang/AST/AttrIterator.h"
+#include "clang/AST/Decl.h"
+#include "clang/AST/DeclCXX.h"
+#include "clang/AST/DeclarationName.h"
+#include "clang/AST/RecursiveASTVisitor.h"
+#include "clang/Basic/Diagnostic.h"
+#include "clang/Basic/SourceLocation.h"
+#include "clang/Basic/SourceManager.h"
+#include "clang/Basic/TokenKinds.h"
+#include "clang/Frontend/CompilerInstance.h"
+#include "clang/Frontend/FrontendAction.h"
+#include "clang/Lex/Lexer.h"
+#include "clang/Rewrite/Core/RewriteBuffer.h"
+#include "clang/Rewrite/Core/Rewriter.h"
+#include "clang/Tooling/CommonOptionsParser.h"
+#include "clang/Tooling/Tooling.h"
+
+#include "llvm/Support/CommandLine.h"
+#include "llvm/Support/ErrorOr.h"
+#include "llvm/Support/LineIterator.h"
+#include "llvm/Support/MemoryBuffer.h"
+#include "llvm/Support/Path.h"
+#include "llvm/Support/TargetSelect.h"
+
+#include "llvm/Config/llvm-config.h"
+#include "llvm/ADT/StringRef.h"
+#include "llvm/ExecutionEngine/ExecutionEngine.h"
+#include <llvm/Support/raw_os_ostream.h>
+
+#include "llvm/Config/llvm-config.h"
+#include "llvm/ADT/StringRef.h"
+#include "llvm/ExecutionEngine/ExecutionEngine.h"
+
+// LLVM includes
+#include "llvm//Support/Path.h"
+#include "llvm/ADT/ArrayRef.h"
+#include "llvm/ADT/StringRef.h"
+#include "llvm/ADT/Twine.h"
+#include "llvm/Support/Casting.h"
+#include "llvm/Support/CommandLine.h"
+#include "llvm/Support/raw_ostream.h"
+
+//#include "boost/unordered_map.hpp"
+//#include <boost/multi_index_container.hpp>
+//#include <boost/multi_index/member.hpp>
+//#include <boost/multi_index/ordered_index.hpp>
+//#include <boost/multi_index/hashed_index.hpp>
+//#include <boost/multi_index/sequenced_index.hpp>
+//#include <boost/multi_index/random_access_index.hpp>
+//#include <boost/multi_index/identity.hpp>
 
 #include <iostream>
 #include <string>
@@ -67,6 +172,56 @@
 #include <string>
 #include <thread>
 #include <vector>
+//#include <filesystem>
+#include <memory>
+#include <numeric>
+#include <string_view>
+#include <optional>
+#include <condition_variable>
+// Standard includes
+#include <algorithm>
+#include <cassert>
+#include <cstddef>
+#include <functional>
+#include <iterator>
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
+#include <iostream>
+#include <string>
+#include <sstream>
+#include <fstream>
+#include <streambuf>
+#include <thread>
+#include <mutex>
+#include <chrono>
+#include <vector>
+#include <functional>
+#include <unordered_map>
+#include <map>
+#include <condition_variable>
+#include <cstdio>
+#include <functional>
+#include <mutex>
+#include <queue>
+#include <string>
+#include <thread>
+#include <vector>
+
+using namespace std;
+using namespace clang;
+using namespace clang::driver;
+using namespace clang::tooling;
+using namespace llvm;
+using namespace clang::ast_matchers;
+using clang::tooling::CommonOptionsParser;
+using clang::tooling::Replacement;
+using llvm::StringRef;
+
+static std::mutex clingReadyMutex;
+static std::condition_variable clingReadyCV;
+static bool isClingReady = false;
 
 /*
  * DispatchQueue: Based on
@@ -366,7 +521,18 @@ public:
         cling_args_storage.push_back("EmbedCling");
         cling_args_storage.push_back("-I.");
         cling_args_storage.push_back("-I../");
+        //cling_args_storage.push_back("std=c++17");
+        //cling_args_storage.push_back("-std=c++17");
+        cling_args_storage.push_back("--std=c++17");
+        cling_args_storage.push_back("-I../cling-build/build/lib/clang/5.0.0/include");
+        cling_args_storage.push_back("-I../cling-build/src/include/");
+        cling_args_storage.push_back("-I../cling-build/build/include/");
+        cling_args_storage.push_back("-I../cling-build/src/tools/clang/include/");
+        cling_args_storage.push_back("-I../cling-build/build/tools/clang/include/");
+
         //cling_args_storage.push_back("-I/usr/include/c++/8/");
+        //cling_args_storage.push_back("-I/usr/include/c++/7/");
+
         //cling_args_storage.push_back("-I/usr/include/x86_64-linux-gnu/");
 
         std::vector< const char* > interp_args;
@@ -380,6 +546,9 @@ public:
             interp_args.size(), &(interp_args[0]), LLVMDIR/*, {}, false*/);
         interpreter_->AddIncludePath(".");
         interpreter_->AddIncludePath("../");
+        //interpreter_->process("#include <iostream>\n");
+        //interpreter_->process("#include <string>\n");
+        //interpreter_->process("#include <optional>\n");
         interpreter_->enableDynamicLookup(true);
         metaProcessor_ = std::make_unique<cling::MetaProcessor>(*interpreter_, llvm::outs());
 
@@ -452,7 +621,14 @@ static std::map<std::string, std::unique_ptr<InterpreterModule>> interpMap;
 
 /// \note module loading order is important
 static std::map<std::string, std::vector<std::string>> moduleToSources {
+    /// \note module with app loop must be loaded last
     {
+        "main_module",
+        std::vector<std::string>{
+            "/home/avakimov_am/job/clingrewriter/src/app_loop.cpp"
+        }
+    }
+    /*{
         "http_callbacks_module",
         std::vector<std::string>{
             "/home/denis/workspace/cling-cmake/src/http_callbacks.cpp"
@@ -466,7 +642,7 @@ static std::map<std::string, std::vector<std::string>> moduleToSources {
             /// \note file with app loop must be loaded last
             "/home/denis/workspace/cling-cmake/src/app_loop.cpp"
         }
-    }
+    }*/
 };
 
 void removeClingModule(const std::string& module_id) {
@@ -619,7 +795,6 @@ void input_func()
                 //std::scoped_lock lock(interpMap["main_module"]->canRunMutex);
                 if(moduleToSources.find(command_param1) != moduleToSources.end()) {
                     //removeClingModule(command_param1);
-
                     receivedMessagesQueue_->dispatch([command_param1] {
                         std::cout << "dispatch reloadClingModule 1!... " << '\n';
                         reloadClingModule(command_param1,
@@ -700,6 +875,11 @@ void cling_func() {
     receivedMessagesQueue_->dispatch([] {
         std::cout << "dispatch reloadAllCling 1!... " << '\n';
         reloadAllCling();
+        {
+          std::unique_lock<std::mutex> lk(clingReadyMutex);
+          isClingReady = true;
+        }
+        clingReadyCV.notify_one();
     });
 
     while(true) {
@@ -729,12 +909,631 @@ void cling_func() {
     receivedMessagesQueue_->DispatchQueued();*/
 }
 
+void expandLocations(SourceLocation& startLoc,
+      SourceLocation& endLoc,
+      Rewriter& rewriter_) {
+          if( startLoc.isMacroID() ) {
+              // Get the start/end expansion locations
+              std::pair< SourceLocation, SourceLocation > expansionRange =
+                       rewriter_.getSourceMgr().getImmediateExpansionRange( startLoc );
+
+              // We're just interested in the start location
+              startLoc = expansionRange.first;
+              endLoc = expansionRange.second;
+          }
+}
+
+namespace UseOverride {
+class Checker : public clang::ast_matchers::MatchFinder::MatchCallback {
+public:
+  using MatchResult = clang::ast_matchers::MatchFinder::MatchResult;
+
+  Checker(/*bool RewriteOption, */clang::Rewriter &Rewriter)
+      : /*RewriteOption(RewriteOption),*/ rewriter_(Rewriter) {}
+
+  void run(const MatchResult &Result) {
+    //std::cout << "match1 = " << std::endl;
+
+    /*auto any_decl = Result.Nodes.getNodeAs<clang::NamedDecl>( "any_decl" );
+    if(any_decl && !any_decl->isInvalidDecl()
+       && any_decl->getIdentifier()) {
+      std::cout << "any_decl = " << any_decl->getName().str() << std::endl;
+    }
+    auto any_decl = Result.Nodes.getNodeAs<clang::Decl>( "any_decl" );
+    if(any_decl && !any_decl->isInvalidDecl()
+       && any_decl->getKind()) {
+      std::cout << "any_decl = " << any_decl->getDeclKindName()<< std::endl;
+    }*/
+
+    /*auto any_decl2 = Result.Nodes.getNodeAs<clang::PragmaCommentDecl>( "any_decl" );
+    if(any_decl2) {
+      std::cout << "any_decl2 = "
+        << any_decl2->getArg().str() << " " << any_decl2->getDeclKindName() << std::endl;
+    }*/
+
+    /*auto any_decl2 = Result.Nodes.getNodeAs<clang::OMPParallelForDirective>( "any_decl" );
+    if(any_decl2) {
+      std::cout << "any_decl2 = "
+        << any_decl2->getStmtClassName() << std::endl;
+    }*/
+
+
+
+    if ( const clang::Decl* decl = Result.Nodes.getNodeAs<clang::Decl>( "bind_gen" ) )
+    {
+      if ( decl && !decl->isInvalidDecl())
+      if (auto annotate = decl->getAttr<clang::AnnotateAttr>()) {
+        std::cout << "annotate->getAnnotation()"
+          << annotate->getAnnotation().str() << std::endl;
+        // {gen};{codegen};
+        const std::string gen_token = "{gen};";
+        const bool startsWithGen =
+          annotate->getAnnotation().str().rfind(gen_token, 0) == 0;
+        std:: string code =
+          annotate->getAnnotation().str();
+        code.erase(0, gen_token.size());
+
+        // eval
+        const std::string eval_token = "{eval};";
+        bool isEval = false;
+        const bool startsWithEval =
+          code.rfind(eval_token, 0) == 0;
+        if (startsWithEval) {
+          code.erase(0, eval_token.size());
+          isEval = true;
+        }
+
+        // export
+        const std::string export_token = "{export};";
+        bool isExport = false;
+        const bool startsWithExport =
+          code.rfind(export_token, 0) == 0;
+        if (startsWithExport) {
+          code.erase(0, export_token.size());
+          isExport = true;
+        }
+
+        // embed
+        const std::string embed_token = "{embed};";
+        bool isEmbed = false;
+        const bool startsWithEmbed =
+          code.rfind(embed_token, 0) == 0;
+        if (startsWithEmbed) {
+          code.erase(0, embed_token.size());
+          isEmbed = true;
+        }
+
+        // codegen
+        const std::string codegen_token = "{codegen};";
+        const bool startsWithCodegen =
+          code.rfind(codegen_token, 0) == 0;
+        bool isFuncCall = false;
+        std::vector<std::string> funcs_to_call;
+        if (startsWithGen && startsWithCodegen) {
+          code.erase(0, codegen_token.size());
+          isFuncCall = true;
+          funcs_to_call.push_back("call_codegen");
+        }
+
+        const std::string funccall_token = "{funccall};";
+        const bool startsWithFunccall =
+          code.rfind(funccall_token, 0) == 0;
+
+        if (startsWithGen && startsWithFunccall) {
+          code.erase(0, funccall_token.size());
+          isFuncCall = true;
+          std::string delimiter = ";";
+          size_t pos = 0;
+          std::string token;
+          while ((pos = code.find(delimiter)) != std::string::npos) {
+            token = code.substr(0, pos);
+            if(!token.empty()) {
+              funcs_to_call.push_back(token);
+            }
+            code.erase(0, pos + delimiter.length());
+          }
+          if(!code.empty()) {
+            funcs_to_call.push_back(code);
+          }
+        }
+
+        if(isEmbed) {
+          std::cout << "embed for code: "
+            << code << std::endl;
+          std::ostringstream sstr;
+          // scope begin
+          sstr << "[](){";
+          // vars begin
+          sstr << "const clang::ast_matchers::MatchFinder::MatchResult& clangMatchResult = ";
+          sstr << "*(const clang::ast_matchers::MatchFinder::MatchResult*)("
+            // Pass a pointer into cling as a string.
+            << std::hex << std::showbase
+            << reinterpret_cast<size_t>(&Result) << ");";
+          sstr << "clang::Rewriter& clangRewriter = ";
+          sstr << "*(clang::Rewriter*)("
+            // Pass a pointer into cling as a string.
+            << std::hex << std::showbase
+            << reinterpret_cast<size_t>(&rewriter_) << ");";
+          sstr << "const clang::Decl* clangDecl = ";
+          sstr << "(const clang::Decl*)("
+            // Pass a pointer into cling as a string.
+            << std::hex << std::showbase
+            << reinterpret_cast<size_t>(decl) << ");";
+          // vars end
+          sstr << "return ";
+          sstr << code << ";";
+          // scope end
+          sstr << "}();";
+          cling::Value result;
+          if(interpMap.find("main_module") != interpMap.end()) {
+              cling::Interpreter::CompilationResult compilationResult;
+              /*interpMap["main_module"]->metaProcessor_->process(
+                "#include <iostream>\n", compilationResult, nullptr, true);
+              interpMap["main_module"]->metaProcessor_->process(
+                "#include <string>\n", compilationResult, nullptr, true);
+              interpMap["main_module"]->metaProcessor_->process(
+                "#include <optional>\n", compilationResult, nullptr, true);*/
+              interpMap["main_module"]->metaProcessor_->process(
+                sstr.str(), compilationResult, &result, true);
+          }
+          SourceLocation startLoc = decl->getLocStart();
+          SourceLocation endLoc = decl->getLocEnd();
+
+          /*if( endLoc.isMacroID() ) {
+              // Get the start/end expansion locations
+              std::pair< SourceLocation, SourceLocation > expansionRange =
+                       rewriter_.getSourceMgr().getImmediateExpansionRange( endLoc );
+
+              // We're just interested in the start location
+              endLoc = expansionRange.first;
+          }*/
+
+          /*;
+          rewriter_.InsertText(startLoc, " startLoc ");
+          rewriter_.InsertText(endLoc, " endLoc ");*/
+
+          expandLocations(startLoc, endLoc, rewriter_);
+
+          void* resOptionVoid = result.getAs<void*>();
+          auto resOption = static_cast<llvm::Optional<std::string>*>(resOptionVoid);
+          if(resOption->hasValue()) {
+            rewriter_.ReplaceText(
+              SourceRange(startLoc, endLoc),
+              resOption->getValue());
+          }
+        } else if(isEval) {
+          std::cout << "eval for code: "
+            << code << std::endl;
+          std::ostringstream sstr;
+          sstr << code;
+          if(interpMap.find("main_module") != interpMap.end()) {
+              cling::Value result;
+              cling::Interpreter::CompilationResult compilationResult;
+              interpMap["main_module"]->metaProcessor_->process(
+                sstr.str(), compilationResult, nullptr, true);
+          }
+          SourceLocation startLoc = decl->getLocStart();
+          SourceLocation endLoc = decl->getLocEnd();
+
+          /*if( endLoc.isMacroID() ) {
+              // Get the start/end expansion locations
+              std::pair< SourceLocation, SourceLocation > expansionRange =
+                       rewriter_.getSourceMgr().getImmediateExpansionRange( endLoc );
+
+              // We're just interested in the start location
+              endLoc = expansionRange.first;
+          }*/
+
+
+          /*rewriter_.InsertText(startLoc, " 1startLoc ");
+          rewriter_.InsertText(endLoc, " 1endLoc ");*/
+
+          expandLocations(startLoc, endLoc, rewriter_);
+
+          /*rewriter_.InsertText(startLoc, " 2startLoc ");
+          rewriter_.InsertText(endLoc, " 2endLoc ");*/
+
+          rewriter_.ReplaceText(
+            SourceRange(startLoc, endLoc),
+            "");
+        } else if(isExport) {
+          std::cout << "export for code: "
+            << code << std::endl;
+          std::ostringstream sstr;
+          sstr << code;
+          if(interpMap.find("main_module") != interpMap.end()) {
+              cling::Value result;
+              cling::Interpreter::CompilationResult compilationResult;
+              interpMap["main_module"]->metaProcessor_->process(
+                sstr.str(), compilationResult, nullptr, true);
+          }
+          SourceLocation startLoc = decl->getLocStart();
+          SourceLocation endLoc = decl->getLocEnd();
+
+          /*if( endLoc.isMacroID() ) {
+              // Get the start/end expansion locations
+              std::pair< SourceLocation, SourceLocation > expansionRange =
+                       rewriter_.getSourceMgr().getImmediateExpansionRange( endLoc );
+
+              // We're just interested in the start location
+              endLoc = expansionRange.first;
+          }*/
+
+          /*rewriter_.InsertText(startLoc, " 1startLoc ");
+          rewriter_.InsertText(endLoc, " 1endLoc ");*/
+
+          expandLocations(startLoc, endLoc, rewriter_);
+
+          /*rewriter_.InsertText(startLoc, " 2startLoc ");
+          rewriter_.InsertText(endLoc, " 2endLoc ");*/
+
+          const std::string export_start_token = "$export";
+
+
+          ASTContext *Context = Result.Context;
+          // find '('
+          auto l_paren_loc = clang::Lexer::findLocationAfterToken(
+              startLoc.getLocWithOffset(export_start_token.length() - 1),
+              clang::tok::l_paren,
+              Context->getSourceManager(),
+              Context->getLangOpts(),
+              /*skipWhiteSpace=*/true);
+
+          rewriter_.ReplaceText(
+            SourceRange(
+              startLoc,
+              l_paren_loc
+            ),
+            "");
+          const std::string export_end_token = ")";
+          rewriter_.ReplaceText(
+            SourceRange(
+              endLoc,
+              endLoc.getLocWithOffset(export_end_token.length())
+            ),
+            "");
+          /*rewriter_.ReplaceText(
+            SourceRange(startLoc, endLoc),
+            code);*/
+        } else if(isFuncCall) {
+          // Generate bindings for a decl with pyspot annotation
+          //generate_bindings( *decl );
+          std::cout << "generator for code: "
+            << code << std::endl;
+
+          cling::Value result;
+
+          //receivedMessagesQueue_->dispatch([] {
+          for (const auto& func_to_call : funcs_to_call) {
+              std::cout << "main_module task " << func_to_call << "!... " << '\n';
+              std::ostringstream sstr;
+              // scope begin
+              sstr << "[](){";
+              sstr << "return ";
+              // func begin
+              sstr << func_to_call << "( ";
+              // func arguments
+              sstr << "*(const clang::ast_matchers::MatchFinder::MatchResult*)("
+                // Pass a pointer into cling as a string.
+                << std::hex << std::showbase
+                << reinterpret_cast<size_t>(&Result) << ')';
+              sstr << " , "; // next argument
+              sstr << "*(clang::Rewriter*)("
+                // Pass a pointer into cling as a string.
+                << std::hex << std::showbase
+                << reinterpret_cast<size_t>(&rewriter_) << ')';
+              sstr << " , "; // next argument
+              sstr << "(const clang::Decl*)("
+                // Pass a pointer into cling as a string.
+                << std::hex << std::showbase
+                << reinterpret_cast<size_t>(decl) << ')';
+              // func end
+              sstr << " );" << ";";
+              // scope end
+              sstr << "}();";
+              if(interpMap.find("main_module") != interpMap.end()) {
+                  cling::Interpreter::CompilationResult compilationResult;
+                  interpMap["main_module"]->metaProcessor_->process(
+                    sstr.str(), compilationResult, &result, true);
+              }
+          }
+          //});
+          /*rewriter_.ReplaceText(
+            decl->getSourceRange(),
+            result.getAs<const char*>());*/
+        }
+      }
+    }
+
+    //const auto *MethodDecl = Result.Nodes.getNodeAs<clang::CXXMethodDecl>("target");
+    //std::cout << "MethodDecl of " << MethodDecl->getName().str() << std::endl;
+
+#if 0
+    const auto *Call = Result.Nodes.getNodeAs<CallExpr>("call");
+    assert(Call != nullptr);
+
+    // https://github.com/hfinkel/llvm-project-cxxjit/blob/e534054d0112ea899a7d43dbf34ba8520d247fef/clang-tools-extra/clang-tidy/performance/TypePromotionInMathFnCheck.cpp#L159
+    StringRef OldFnName = Call->getDirectCallee()->getName();
+    std::cout << "OldFnName of " << OldFnName.str() << std::endl;
+
+    ASTContext *Context = Result.Context;
+    if (const CallExpr *callExpr =
+            Result.Nodes.getNodeAs<clang::CallExpr>("call")) {
+      const FunctionDecl *FD = callExpr->getDirectCallee();
+      FullSourceLoc FullLocationStart = Context->getFullLoc(callExpr->getLocStart());
+      //FullSourceLoc FullLocationEnd = Context->getFullLoc(callExpr->getLocEnd());
+      std::string fname = FD->getNameInfo().getAsString();
+      if (FullLocationStart.isValid()) {
+        llvm::outs() << "Found call at " << FullLocationStart.getSpellingLineNumber()
+                     << ":" << FullLocationStart.getSpellingColumnNumber() << "\n";
+        //rewriter_.ReplaceText(FullLocationStart, fname.length(), "add5");
+        rewriter_.ReplaceText(callExpr->getSourceRange(), "sdf sdf ; 1@");
+        for (size_t argIdx = 0; argIdx < callExpr->getNumArgs(); ++argIdx) {
+          const clang::Expr *expr = callExpr->getArg(argIdx);
+        }
+      }
+    }
+
+    const auto *Target = Result.Nodes.getNodeAs<clang::CXXMethodDecl>("target");
+
+    if (!needsOverride(*Target))
+      return;
+
+    auto &Diagnostics = Result.Context->getDiagnostics();
+    const auto ID =
+        Diagnostics.getCustomDiagID(clang::DiagnosticsEngine::Warning,
+                                    "method '%0' should be declared override");
+
+    clang::SourceLocation InsertionPoint =
+        findInsertionPoint(*Target, *Result.Context);
+
+    clang::DiagnosticBuilder Diagnostic =
+        Diagnostics.Report(InsertionPoint, ID);
+    Diagnostic.AddString(Target->getName());
+
+    //if (RewriteOption) {
+      rewriter_.InsertText(InsertionPoint, " override ");
+    /*} else {
+      const auto FixIt =
+          clang::FixItHint::CreateInsertion(InsertionPoint, "override");
+      Diagnostic.AddFixItHint(FixIt);
+    }*/
+#endif // 0
+  }
+
+private:
+  //bool RewriteOption;
+
+  clang::Rewriter &rewriter_;
+
+#if 0
+  bool needsOverride(const clang::CXXMethodDecl &MethodDecl) {
+    if (!MethodDecl.size_overridden_methods())
+      return false;
+    const AttrVec &Attrs = MethodDecl.getAttrs();
+    //std::cout << "MethodDecl of " << MethodDecl.getName().str() << std::endl;
+    return std::none_of(Attrs.begin(), Attrs.end(), [](const Attr *Attr) {
+      /*std::cout << "Attr->getSpelling() "
+        << Attr->getSpelling() << " is "
+        << (strcmp(Attr->getSpelling(), "override") == 0) << std::endl;
+      */
+      return (strcmp(Attr->getSpelling(), "override") == 0);
+    });
+  }
+
+  clang::SourceLocation
+  findInsertionPoint(const clang::CXXMethodDecl &MethodDecl,
+                     const clang::ASTContext &Context) {
+    clang::SourceLocation Location;
+
+    /// Find the end of the parameter list.
+    if (MethodDecl.param_empty()) {
+      const unsigned Offset = MethodDecl.getName().size();
+      Location = MethodDecl.getLocation().getLocWithOffset(Offset);
+    } else {
+      const clang::ParmVarDecl *Last = *std::prev(MethodDecl.param_end());
+      Location = Last->getLocEnd(); // getEndLoc
+    }
+
+    Location = clang::Lexer::findLocationAfterToken(
+        Location, clang::tok::r_paren, Context.getSourceManager(),
+        Context.getLangOpts(),
+        /*skipWhiteSpace=*/true);
+
+    return Location.getLocWithOffset(-1);
+  }
+#endif // 0
+};
+
+class Consumer : public clang::ASTConsumer {
+public:
+  explicit Consumer(clang::Rewriter &Rewriter)
+      : Checker_(Rewriter) {
+    using namespace clang::ast_matchers;
+    //const auto CXXMethodMatcher =
+    //    cxxMethodDecl(unless(isExpansionInSystemHeader())).bind("target");
+    //Finder_.addMatcher(CXXMethodMatcher, &Checker_);
+    //const auto CXXAnythingMatcher = anything();
+    /*Finder_.addMatcher(
+      callExpr(callee(functionDecl(hasName("doSomething")))),
+      &Checker_);*/
+    /*Finder_.addMatcher(
+      callExpr(callee(cxxMethodDecl(hasName("doSomething")))),
+      &Checker_);*/
+    /*Finder_.addMatcher(
+      callExpr(hasDeclaration(functionDecl(hasName("#gen"))))
+        .bind("call"),
+      &Checker_);*/
+    /*Finder_.addMatcher(
+      callExpr(hasDeclaration(functionDecl(hasName("#gen"))))
+        .bind("call"),
+      &Checker_);*/
+    /*Finder_.addMatcher(
+      cxxRecordDecl(hasName("#gen"))
+        .bind("call"),
+      &Checker_);*/
+    // https://stackoverflow.com/questions/38067137/is-there-any-way-to-restart-matching-with-libclang-matchers-after-already-havi
+    /*Finder_.addMatcher(
+      namedDecl(hasAttr(attr::Annotate))
+        .bind("call"),
+      &Checker_);*/
+    //Finder_.addMatcher(clang::ast_matchers::decl(anything()).bind( "any_decl" ), &Checker_);
+    /*const clang::ast_matchers::internal::VariadicDynCastAllOfMatcher<
+        clang::Stmt, clang::OMPParallelForDirective> // CapturedStmt
+        CapturedStmtDirective;
+    Finder_.addMatcher(CapturedStmtDirective().bind( "any_decl" ), &Checker_);
+    */
+
+/*typedef internal::Matcher<Decl> DeclarationMatcher;
+typedef internal::Matcher<Stmt> StatementMatcher;
+typedef internal::Matcher<QualType> TypeMatcher;
+typedef internal::Matcher<TypeLoc> TypeLocMatcher;
+typedef internal::Matcher<NestedNameSpecifier> NestedNameSpecifierMatcher;
+typedef internal::Matcher<NestedNameSpecifierLoc> NestedNameSpecifierLocMatcher;
+typedef internal::Matcher<CXXCtorInitializer> CXXCtorInitializerMatcher;*/
+    //Finder_.addMatcher(clang::ast_matchers::stmt(anything()), &Checker_);
+    //Finder_.addMatcher(clang::ast_matchers::decl(anything()), &Checker_);
+    //Finder_.addMatcher(clang::ast_matchers::type(anything()), &Checker_);
+    //Finder_.addMatcher(clang::ast_matchers::loc(anything()), &Checker_);
+    //Finder_.addMatcher(clang::ast_matchers::nestedNameSpecifier(anything()), &Checker_);
+    //Finder_.addMatcher(clang::ast_matchers::nestedNameSpecifierLoc(anything()), &Checker_);
+
+    // TODO enumConstantDecl
+
+    // https://github.com/Fahien/pywrap/blob/d753603bfd26c02382ebd9729f07b5d78f2d96a2/src/Consumer.cpp
+    auto hasAnnotate = clang::ast_matchers::hasAttr( clang::attr::Annotate );
+    auto finderMatcher = clang::ast_matchers::decl( hasAnnotate ).bind( "bind_gen" );
+    Finder_.addMatcher(finderMatcher, &Checker_);
+    //Finder_.addMatcher(asmStmt().bind("bind_gen"), &Checker_);
+    //Finder_.addMatcher(cxxConstructExpr().bind("bind_gen"), &Checker_);
+    //Finder_.addMatcher(predefinedExpr().bind("bind_gen"), &Checker_);
+  }
+
+  void HandleTranslationUnit(clang::ASTContext &Context) override {
+    Finder_.matchAST(Context);
+  }
+
+private:
+  clang::ast_matchers::MatchFinder Finder_;
+  Checker Checker_;
+};
+
+class Action : public clang::ASTFrontendAction {
+public:
+  using ASTConsumerPointer = std::unique_ptr<clang::ASTConsumer>;
+
+  explicit Action() {}
+
+  ASTConsumerPointer CreateASTConsumer(clang::CompilerInstance &Compiler,
+                                       llvm::StringRef Filename) override {
+    Rewriter.setSourceMgr(Compiler.getSourceManager(), Compiler.getLangOpts());
+    return std::make_unique<Consumer>(Rewriter);
+  }
+
+  bool BeginSourceFileAction(clang::CompilerInstance &Compiler) override {
+    llvm::errs() << "Processing " << getCurrentFile() << "\n\n";
+    return true;
+  }
+
+  void EndSourceFileAction() override {
+    ASTFrontendAction::EndSourceFileAction();
+
+    SourceManager &SM = Rewriter.getSourceMgr();
+    llvm::errs() << "** EndSourceFileAction for: "
+                 << SM.getFileEntryForID(SM.getMainFileID())->getName() << "\n";
+
+    const auto File = SM.getMainFileID();
+    Rewriter.getEditBuffer(File).write(llvm::outs());
+
+    std::string file_name = SM.getFileEntryForID(
+        SM.getMainFileID())->getName();
+    const std::string file_ext = file_name.substr(
+      file_name.find_last_of(".") + 1);
+    if(!file_name.empty() && !file_ext.empty()) {
+      const std::string full_file_ext = "." + file_ext;
+      std::cout << "full_file_ext = " << full_file_ext << std::endl;
+      file_name.erase(file_name.length() - full_file_ext.length(), full_file_ext.length());
+      std::error_code error_code;
+      llvm::raw_fd_ostream outFile(file_name + ".generated" + full_file_ext, error_code, llvm::sys::fs::F_None);
+      Rewriter.getEditBuffer(SM.getMainFileID()).write(outFile);
+      outFile.close();
+    }
+  }
+
+private:
+  clang::Rewriter Rewriter;
+};
+} // namespace UseOverride
+
+struct ToolFactory : public clang::tooling::FrontendActionFactory {
+  clang::FrontendAction *create() override {
+    return new UseOverride::Action();
+  }
+};
+
 int main(int argc, const char* const* argv) {
+    using namespace clang::tooling;
+
     std::cout << "input_func!... " << '\n';
     std::thread inp_thread(input_func);
     inp_thread.detach();
     std::thread cling_thread(cling_func);
     cling_thread.detach();
+
+    // Wait until main() sends data
+    {
+      std::unique_lock<std::mutex> lk(clingReadyMutex);
+      clingReadyCV.wait(lk, []{return isClingReady;});
+    }
+
+    std::cout << "clang... " << '\n';
+
+    /*OPTIONS:
+
+    Generic Options:
+
+      -help                      - Display available options (-help-hidden for more)
+      -help-list                 - Display list of available options (-help-list-hidden for more)
+      -version                   - Display the version of this program
+
+    Use override options:
+
+      -extra-arg=<string>        - Additional argument to append to the compiler command line
+      -extra-arg-before=<string> - Additional argument to prepend to the compiler command line
+      -p=<string>                - Build path*/
+    std::vector<std::string> args_storage;
+    args_storage.push_back("clang_app");
+    //args_storage.push_back("-extra-arg=-nostdinc");
+    //args_storage.push_back("-DCLANG_ENABLED=1");
+    args_storage.push_back("-extra-arg=-DCLANG_ENABLED=1");
+    args_storage.push_back("-extra-arg=-I../cling-build/build/lib/clang/5.0.0/include");
+    args_storage.push_back("-extra-arg=-I../cling-build/src/include/");
+    args_storage.push_back("-extra-arg=-I../cling-build/build/include/");
+    args_storage.push_back("-extra-arg=-I../cling-build/src/tools/clang/include/");
+    args_storage.push_back("-extra-arg=-I../cling-build/build/tools/clang/include/");
+    args_storage.push_back("-extra-arg=-std=c++17");
+    args_storage.push_back("test.cpp");
+    //args_storage.push_back("-help");
+
+    // https://stackoverflow.com/questions/53525502/compiling-c-on-the-fly-clang-libtooling-fails-to-set-triple-for-llvm-ir
+    // https://stackoverflow.com/questions/27092593/how-to-use-standard-library-with-clang-and-libtooling
+    std::vector< const char* > args_vec;
+    {
+        std::vector< std::string >::const_iterator iarg;
+        for( iarg = args_storage.begin() ; iarg != args_storage.end() ; ++iarg ) {
+            args_vec.push_back(iarg->c_str());
+        }
+    }
+    int args_arc = args_vec.size();
+    const char **args_argv = &(args_vec[0]);
+    llvm::cl::OptionCategory UseOverrideCategory("Use override options");
+    CommonOptionsParser op(args_arc, args_argv, UseOverrideCategory);
+    // TODO: https://github.com/mlomb/MetaCPP/blob/8eddde5e1bf4809ad70a68a385b9cbcc8e237370/MetaCPP-CLI/ScraperTool.cpp#L19
+    ClangTool Tool(op.getCompilations(), op.getSourcePathList());
+
+    Tool.run(new ToolFactory);
+
+    //return 0;
 
     //cling::Interpreter::CompilationResult compilationResult;
     while(true)

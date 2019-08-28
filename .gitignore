@@ -30,3 +30,5 @@
 build/
 
 cling-build/
+
+CMakeLists\.txt\.user

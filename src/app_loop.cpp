@@ -1,4 +1,4 @@
-﻿#include <boost/log/core/record.hpp>
+﻿/*#include <boost/log/core/record.hpp>
 #include <boost/log/sources/record_ostream.hpp>
 #include <boost/preprocessor/seq/enum.hpp>
 #include <boost/preprocessor/seq/size.hpp>
@@ -9,9 +9,9 @@
 #include <boost/asio/bind_executor.hpp>
 #include <boost/asio/strand.hpp>
 #include <boost/asio/ip/tcp.hpp>
-#include <boost/config.hpp>
+#include <boost/config.hpp>*/
 
-#include <cstdlib>
+/*#include <cstdlib>
 #include <iostream>
 #include <memory>
 #include <string>
@@ -28,7 +28,7 @@
 #include <string>
 #include <sstream>
 #include <fstream>
-#include <streambuf>
+#include <streambuf>*/
 
 /*#include <cling/Interpreter/Interpreter.h>
 #include <cling/Interpreter/Value.h>
@@ -45,9 +45,887 @@
 #include "cling/Interpreter/LookupHelper.h"
 #include "cling/Utils/AST.h"*/
 
-#include "mime_type.h"
+//#include "mime_type.h"
 //#include "http_callbacks.h"
 
+
+#include <cling/Interpreter/Interpreter.h>
+#include <cling/Interpreter/Value.h>
+#include "cling/Interpreter/CIFactory.h"
+#include "cling/Interpreter/Interpreter.h"
+#include "cling/Interpreter/InterpreterCallbacks.h"
+//#include "cling/Interpreter/IncrementalExecutor.h"
+//#include "cling/Interpreter/IncrementalParser.h"
+#include "cling/Interpreter/Transaction.h"
+#include "cling/Interpreter/Value.h"
+#include "cling/Interpreter/CValuePrinter.h"
+#include "cling/MetaProcessor/MetaProcessor.h"
+#include <cling/Utils/Casting.h>
+#include "cling/Interpreter/LookupHelper.h"
+#include "cling/Utils/AST.h"
+#include <cling/Interpreter/Interpreter.h>
+#include <cling/Interpreter/Value.h>
+#include "cling/Interpreter/CIFactory.h"
+#include "cling/Interpreter/Interpreter.h"
+#include "cling/Interpreter/InterpreterCallbacks.h"
+//#include "cling/Interpreter/IncrementalExecutor.h"
+//#include "cling/Interpreter/IncrementalParser.h"
+#include "cling/Interpreter/Transaction.h"
+#include "cling/Interpreter/Value.h"
+#include "cling/Interpreter/CValuePrinter.h"
+#include "cling/MetaProcessor/MetaProcessor.h"
+#include <cling/Utils/Casting.h>
+#include "cling/Interpreter/LookupHelper.h"
+#include "cling/Utils/AST.h"
+
+/*#include "clang/Basic/FileManager.h"
+#include "clang/Basic/LangOptions.h"
+#include "clang/Basic/SourceManager.h"
+#include "clang/Frontend/CompilerInstance.h"
+#include "clang/Lex/HeaderSearchOptions.h"
+#include "clang/Frontend/ASTUnit.h"
+#include "clang/Basic/DiagnosticCommonKinds.inc"*/
+#include "clang/Parse/Parser.h"
+#include "clang/AST/ASTContext.h"
+#include "clang/AST/Decl.h"
+#include "clang/AST/DeclBase.h"
+#include "clang/AST/DeclCXX.h"
+#include "clang/AST/PrettyPrinter.h"
+#include "clang/AST/Type.h"
+#include "clang/Frontend/CompilerInstance.h"
+#include "clang/Sema/Sema.h"
+/*#include "clang/Basic/FileManager.h"
+#include "clang/Basic/LangOptions.h"
+#include "clang/Basic/SourceManager.h"
+#include "clang/Frontend/CompilerInstance.h"
+#include "clang/Lex/HeaderSearchOptions.h"
+#include "clang/Frontend/ASTUnit.h"
+#include "clang/Basic/DiagnosticCommonKinds.inc"*/
+#include "clang/Parse/Parser.h"
+#include "clang/AST/ASTContext.h"
+#include "clang/AST/Decl.h"
+#include "clang/AST/DeclBase.h"
+#include "clang/AST/DeclCXX.h"
+#include "clang/AST/PrettyPrinter.h"
+#include "clang/AST/Type.h"
+#include "clang/Frontend/CompilerInstance.h"
+#include "clang/Sema/Sema.h"
+#include <clang/Lex/Lexer.h>
+#include <clang/Frontend/FrontendAction.h>
+#include <clang/Frontend/ASTConsumers.h>
+#include <clang/Frontend/CompilerInstance.h>
+#include <clang/Tooling/Tooling.h>
+#include <clang/Rewrite/Core/Rewriter.h>
+#include "clang/Driver/Options.h"
+#include "clang/AST/AST.h"
+#include "clang/AST/ASTContext.h"
+#include "clang/AST/ASTConsumer.h"
+#include "clang/AST/RecursiveASTVisitor.h"
+#include "clang/Frontend/ASTConsumers.h"
+#include "clang/Frontend/FrontendActions.h"
+#include "clang/Frontend/CompilerInstance.h"
+#include "clang/Tooling/CommonOptionsParser.h"
+#include "clang/Tooling/Tooling.h"
+#include "clang/Rewrite/Core/Rewriter.h"
+
+#include "clang/ASTMatchers/ASTMatchers.h"
+
+#include "clang/AST/ASTContext.h"
+#include "clang/ASTMatchers/ASTMatchFinder.h"
+#include "clang/ASTMatchers/ASTMatchers.h"
+#include "clang/ASTMatchers/ASTMatchersMacros.h"
+#include "clang/Basic/CharInfo.h"
+#include "clang/Basic/SourceManager.h"
+#include "clang/Frontend/CompilerInstance.h"
+#include "clang/Frontend/FrontendActions.h"
+#include "clang/Lex/Lexer.h"
+#include "clang/Lex/MacroArgs.h"
+#include "clang/Lex/PPCallbacks.h"
+#include "clang/Lex/Preprocessor.h"
+#include "clang/Tooling/CommonOptionsParser.h"
+#include "clang/Tooling/Refactoring.h"
+#include "clang/Tooling/Tooling.h"
+#include "clang/AST/AST.h"
+#include "clang/AST/ASTConsumer.h"
+#include "clang/AST/ASTContext.h"
+#include "clang/AST/AttrIterator.h"
+#include "clang/AST/Decl.h"
+#include "clang/AST/DeclCXX.h"
+#include "clang/AST/DeclarationName.h"
+#include "clang/AST/RecursiveASTVisitor.h"
+#include "clang/Basic/Diagnostic.h"
+#include "clang/Basic/SourceLocation.h"
+#include "clang/Basic/SourceManager.h"
+#include "clang/Basic/TokenKinds.h"
+#include "clang/Frontend/CompilerInstance.h"
+#include "clang/Frontend/FrontendAction.h"
+#include "clang/Lex/Lexer.h"
+#include "clang/Rewrite/Core/RewriteBuffer.h"
+#include "clang/Rewrite/Core/Rewriter.h"
+#include "clang/Tooling/CommonOptionsParser.h"
+#include "clang/Tooling/Tooling.h"
+
+#include "llvm/Support/CommandLine.h"
+#include "llvm/Support/ErrorOr.h"
+#include "llvm/Support/LineIterator.h"
+#include "llvm/Support/MemoryBuffer.h"
+#include "llvm/Support/Path.h"
+#include "llvm/Support/TargetSelect.h"
+
+#include "llvm/Config/llvm-config.h"
+#include "llvm/ADT/StringRef.h"
+#include "llvm/ExecutionEngine/ExecutionEngine.h"
+#include <llvm/Support/raw_os_ostream.h>
+
+#include "llvm/Config/llvm-config.h"
+#include "llvm/ADT/StringRef.h"
+#include "llvm/ExecutionEngine/ExecutionEngine.h"
+
+// LLVM includes
+#include "llvm//Support/Path.h"
+#include "llvm/ADT/ArrayRef.h"
+#include "llvm/ADT/StringRef.h"
+#include "llvm/ADT/Twine.h"
+#include "llvm/Support/Casting.h"
+#include "llvm/Support/CommandLine.h"
+#include "llvm/Support/raw_ostream.h"
+
+//#include "boost/unordered_map.hpp"
+//#include <boost/multi_index_container.hpp>
+//#include <boost/multi_index/member.hpp>
+//#include <boost/multi_index/ordered_index.hpp>
+//#include <boost/multi_index/hashed_index.hpp>
+//#include <boost/multi_index/sequenced_index.hpp>
+//#include <boost/multi_index/random_access_index.hpp>
+//#include <boost/multi_index/identity.hpp>
+
+
+#include <cling/Interpreter/Interpreter.h>
+#include <cling/Interpreter/Value.h>
+#include "cling/Interpreter/CIFactory.h"
+#include "cling/Interpreter/Interpreter.h"
+#include "cling/Interpreter/InterpreterCallbacks.h"
+//#include "cling/Interpreter/IncrementalExecutor.h"
+//#include "cling/Interpreter/IncrementalParser.h"
+#include "cling/Interpreter/Transaction.h"
+#include "cling/Interpreter/Value.h"
+#include "cling/Interpreter/CValuePrinter.h"
+#include "cling/MetaProcessor/MetaProcessor.h"
+#include <cling/Utils/Casting.h>
+#include "cling/Interpreter/LookupHelper.h"
+#include "cling/Utils/AST.h"
+#include <cling/Interpreter/Interpreter.h>
+#include <cling/Interpreter/Value.h>
+#include "cling/Interpreter/CIFactory.h"
+#include "cling/Interpreter/Interpreter.h"
+#include "cling/Interpreter/InterpreterCallbacks.h"
+//#include "cling/Interpreter/IncrementalExecutor.h"
+//#include "cling/Interpreter/IncrementalParser.h"
+#include "cling/Interpreter/Transaction.h"
+#include "cling/Interpreter/Value.h"
+#include "cling/Interpreter/CValuePrinter.h"
+#include "cling/MetaProcessor/MetaProcessor.h"
+#include <cling/Utils/Casting.h>
+#include "cling/Interpreter/LookupHelper.h"
+#include "cling/Utils/AST.h"
+
+/*#include "clang/Basic/FileManager.h"
+#include "clang/Basic/LangOptions.h"
+#include "clang/Basic/SourceManager.h"
+#include "clang/Frontend/CompilerInstance.h"
+#include "clang/Lex/HeaderSearchOptions.h"
+#include "clang/Frontend/ASTUnit.h"
+#include "clang/Basic/DiagnosticCommonKinds.inc"*/
+#include "clang/Parse/Parser.h"
+#include "clang/AST/ASTContext.h"
+#include "clang/AST/Decl.h"
+#include "clang/AST/DeclBase.h"
+#include "clang/AST/DeclCXX.h"
+#include "clang/AST/PrettyPrinter.h"
+#include "clang/AST/Type.h"
+#include "clang/Frontend/CompilerInstance.h"
+#include "clang/Sema/Sema.h"
+/*#include "clang/Basic/FileManager.h"
+#include "clang/Basic/LangOptions.h"
+#include "clang/Basic/SourceManager.h"
+#include "clang/Frontend/CompilerInstance.h"
+#include "clang/Lex/HeaderSearchOptions.h"
+#include "clang/Frontend/ASTUnit.h"
+#include "clang/Basic/DiagnosticCommonKinds.inc"*/
+#include "clang/Parse/Parser.h"
+#include "clang/AST/ASTContext.h"
+#include "clang/AST/Decl.h"
+#include "clang/AST/DeclBase.h"
+#include "clang/AST/DeclCXX.h"
+#include "clang/AST/PrettyPrinter.h"
+#include "clang/AST/Type.h"
+#include "clang/Frontend/CompilerInstance.h"
+#include "clang/Sema/Sema.h"
+#include <clang/Lex/Lexer.h>
+#include <clang/Frontend/FrontendAction.h>
+#include <clang/Frontend/ASTConsumers.h>
+#include <clang/Frontend/CompilerInstance.h>
+#include <clang/Tooling/Tooling.h>
+#include <clang/Rewrite/Core/Rewriter.h>
+#include "clang/Driver/Options.h"
+#include "clang/AST/AST.h"
+#include "clang/AST/ASTContext.h"
+#include "clang/AST/ASTConsumer.h"
+#include "clang/AST/RecursiveASTVisitor.h"
+#include "clang/Frontend/ASTConsumers.h"
+#include "clang/Frontend/FrontendActions.h"
+#include "clang/Frontend/CompilerInstance.h"
+#include "clang/Tooling/CommonOptionsParser.h"
+#include "clang/Tooling/Tooling.h"
+#include "clang/Rewrite/Core/Rewriter.h"
+
+#include "clang/ASTMatchers/ASTMatchers.h"
+
+#include "clang/AST/ASTContext.h"
+#include "clang/ASTMatchers/ASTMatchFinder.h"
+#include "clang/ASTMatchers/ASTMatchers.h"
+#include "clang/ASTMatchers/ASTMatchersMacros.h"
+#include "clang/Basic/CharInfo.h"
+#include "clang/Basic/SourceManager.h"
+#include "clang/Frontend/CompilerInstance.h"
+#include "clang/Frontend/FrontendActions.h"
+#include "clang/Lex/Lexer.h"
+#include "clang/Lex/MacroArgs.h"
+#include "clang/Lex/PPCallbacks.h"
+#include "clang/Lex/Preprocessor.h"
+#include "clang/Tooling/CommonOptionsParser.h"
+#include "clang/Tooling/Refactoring.h"
+#include "clang/Tooling/Tooling.h"
+#include "clang/AST/AST.h"
+#include "clang/AST/ASTConsumer.h"
+#include "clang/AST/ASTContext.h"
+#include "clang/AST/AttrIterator.h"
+#include "clang/AST/Decl.h"
+#include "clang/AST/DeclCXX.h"
+#include "clang/AST/DeclarationName.h"
+#include "clang/AST/RecursiveASTVisitor.h"
+#include "clang/Basic/Diagnostic.h"
+#include "clang/Basic/SourceLocation.h"
+#include "clang/Basic/SourceManager.h"
+#include "clang/Basic/TokenKinds.h"
+#include "clang/Frontend/CompilerInstance.h"
+#include "clang/Frontend/FrontendAction.h"
+#include "clang/Lex/Lexer.h"
+#include "clang/Rewrite/Core/RewriteBuffer.h"
+#include "clang/Rewrite/Core/Rewriter.h"
+#include "clang/Tooling/CommonOptionsParser.h"
+#include "clang/Tooling/Tooling.h"
+
+#include "llvm/Support/CommandLine.h"
+#include "llvm/Support/ErrorOr.h"
+#include "llvm/Support/LineIterator.h"
+#include "llvm/Support/MemoryBuffer.h"
+#include "llvm/Support/Path.h"
+#include "llvm/Support/TargetSelect.h"
+
+#include "llvm/Config/llvm-config.h"
+#include "llvm/ADT/StringRef.h"
+#include "llvm/ExecutionEngine/ExecutionEngine.h"
+#include <llvm/Support/raw_os_ostream.h>
+
+#include "llvm/Config/llvm-config.h"
+#include "llvm/ADT/StringRef.h"
+#include "llvm/ExecutionEngine/ExecutionEngine.h"
+
+// LLVM includes
+#include "llvm//Support/Path.h"
+#include "llvm/ADT/ArrayRef.h"
+#include "llvm/ADT/StringRef.h"
+#include "llvm/ADT/Twine.h"
+#include "llvm/Support/Casting.h"
+#include "llvm/Support/CommandLine.h"
+#include "llvm/Support/raw_ostream.h"
+
+//#include "boost/unordered_map.hpp"
+//#include <boost/multi_index_container.hpp>
+//#include <boost/multi_index/member.hpp>
+//#include <boost/multi_index/ordered_index.hpp>
+//#include <boost/multi_index/hashed_index.hpp>
+//#include <boost/multi_index/sequenced_index.hpp>
+//#include <boost/multi_index/random_access_index.hpp>
+//#include <boost/multi_index/identity.hpp>
+
+#include <iostream>
+#include <string>
+#include <sstream>
+#include <fstream>
+#include <streambuf>
+#include <thread>
+#include <mutex>
+#include <chrono>
+#include <vector>
+#include <functional>
+#include <unordered_map>
+#include <map>
+#include <condition_variable>
+#include <cstdio>
+#include <functional>
+#include <mutex>
+#include <queue>
+#include <string>
+#include <thread>
+#include <vector>
+//#include <filesystem>
+#include <memory>
+#include <numeric>
+#include <string_view>
+#include <condition_variable>
+// Standard includes
+#include <algorithm>
+#include <cassert>
+#include <cstddef>
+#include <functional>
+#include <iterator>
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
+#include <iostream>
+#include <string>
+#include <sstream>
+#include <fstream>
+#include <streambuf>
+#include <thread>
+#include <mutex>
+#include <chrono>
+#include <vector>
+#include <functional>
+#include <unordered_map>
+#include <map>
+#include <condition_variable>
+#include <cstdio>
+#include <functional>
+#include <mutex>
+#include <queue>
+#include <string>
+#include <thread>
+#include <vector>
+
+using namespace std;
+using namespace clang;
+using namespace clang::driver;
+using namespace clang::tooling;
+using namespace llvm;
+using namespace clang::ast_matchers;
+using clang::tooling::CommonOptionsParser;
+using clang::tooling::Replacement;
+using llvm::StringRef;
+
+class AppLoop
+{
+public:
+    AppLoop()
+    {
+    }
+
+    void run();
+
+    void stop();
+
+    // The acceptor receives incoming connections
+    //tcp::acceptor acceptor;
+
+    bool m_Running = true;
+
+    //std::vector<std::function<void(bool,int)>> callbacks_;
+    //std::function<void(void)> callback_;
+};
+
+AppLoop* appLoop = nullptr;
+
+void AppLoop::run() {
+        std::cout << "AppLoop::run(): " << std::endl;
+}
+
+void AppLoop::stop() {
+    m_Running = false;
+}
+
+#if defined(CLING_IS_ON)
+
+static void main_module_cling_prepare() {
+    printf("called app_loop_prepare\n");
+    //MyTest1();
+
+    try
+    {
+        appLoop = new AppLoop();
+    }
+    catch (const std::exception& e)
+    {
+        std::cerr << "Error: " << e.what() << std::endl;
+    }
+}
+
+/*static void main_module_cling_run_update() {
+    printf("called app_loop_run_update\n");
+}*/
+
+static void main_module_cling_run() {
+    printf("called app_loop_run\n");
+
+    appLoop->run();
+}
+
+static void main_module_cling_shutdown() {
+    printf("called app_loop_shutdown\n");
+    appLoop->stop();
+    delete appLoop;
+}
+
+/*#include <mutex>
+std::mutex lock_;*/
+
+void app_loop() {
+    printf("loaded app_loop with CLING\n");
+    /*std::scoped_lock<std::mutex> lock(lock_);
+    auto globVar =
+          ::std::optional<std::string>
+          {"asdasdcout123123"};*/
+}
+
+/*const char* call_codegen(
+    const clang::ast_matchers::MatchFinder::MatchResult& matchResult,
+    clang::Rewriter& rewriter,
+    const clang::Decl* decl) {
+  printf("call_codegen called...\n");
+  rewriter.ReplaceText(
+    decl->getSourceRange(),
+    "call_codegen result here!13#5#wq@dfe");
+  return "";
+}*/
+
+clang::SourceLocation
+findPureInsertionPoint(clang::CXXMethodDecl *MethodDecl,
+                   const clang::ASTContext &Context) {
+  clang::SourceLocation Location;
+
+  /// Find the end of the parameter list.
+  if (MethodDecl->param_empty()) {
+    const unsigned Offset = MethodDecl->getName().size();
+    Location = MethodDecl->getLocation().getLocWithOffset(Offset);
+  } else {
+    const clang::ParmVarDecl *Last = *std::prev(MethodDecl->param_end());
+    Location = Last->getLocEnd(); // getEndLoc
+  }
+
+  Location = clang::Lexer::findLocationAfterToken(
+      Location, clang::tok::r_paren, Context.getSourceManager(),
+      Context.getLangOpts(),
+      /*skipWhiteSpace=*/true);
+
+  return Location.getLocWithOffset(0);
+}
+
+clang::SourceRange
+findFuncBodyRange(clang::CXXMethodDecl *MethodDecl,
+                   const clang::ASTContext &Context) {
+#if 0
+  clang::SourceLocation LocationStart;
+  clang::SourceLocation LocationEnd;
+
+  /// Find the end of the parameter list.
+  if (MethodDecl->param_empty()) {
+    const unsigned Offset = MethodDecl->getName().size();
+    LocationStart = MethodDecl->getLocation().getLocWithOffset(Offset);
+  } else {
+    const clang::ParmVarDecl *Last = *std::prev(MethodDecl->param_end());
+    LocationStart = Last->getLocEnd(); // getEndLoc
+  }
+
+  LocationStart = LocationStart.getLocWithOffset(1);
+
+  LocationEnd = clang::Lexer::findLocationAfterToken(
+      LocationStart, clang::tok::r_brace, Context.getSourceManager(),
+      Context.getLangOpts(),
+      /*skipWhiteSpace=*/true);
+
+  return clang::SourceRange(
+    LocationStart,
+    LocationEnd);
+#endif
+  return MethodDecl->getBody()->getSourceRange();
+}
+
+clang::SourceLocation
+findVirtualInsertionPoint(clang::CXXMethodDecl *MethodDecl,
+                   const clang::ASTContext &Context) {
+  clang::SourceLocation Location;
+
+  Location = MethodDecl->getLocStart();
+
+  return Location.getLocWithOffset(0);
+}
+
+clang::SourceLocation
+findCXXRecordNameEndPoint(clang::CXXRecordDecl const *decl,
+                   const clang::ASTContext &Context) {
+  clang::SourceLocation Location;
+
+  /// Find the end of name.
+  const unsigned Offset = decl->getName().size();
+  Location = decl->getLocation().getLocWithOffset(Offset);
+
+  return Location.getLocWithOffset(0);
+}
+
+const bool isReflectable(DeclaratorDecl* decl) {
+  bool res = false;
+  if ( auto annotate = decl->getAttr<clang::AnnotateAttr>() )
+  {
+    //
+    const std::string gen_token = "{gen};{attr};";
+    std:: string code =
+      annotate->getAnnotation().str();
+    const bool startsWithGen =
+      code.rfind(gen_token, 0) == 0;
+    code.erase(0, gen_token.size());
+    if (startsWithGen) {
+      std::cout << "isReflectable code() " << code << std::endl;
+      std::string delimiter = ";";
+      size_t pos = 0;
+      std::string token;
+      while ((pos = code.find(delimiter)) != std::string::npos) {
+        token = code.substr(0, pos);
+        std::cout << "isReflectable token " << token << std::endl;
+        if(token == "reflectable") {
+          res = true;
+          break;
+        }
+        code.erase(0, pos + delimiter.length());
+      }
+      if(!code.empty()
+         && code == "reflectable") {
+        res = true;
+      }
+    }
+  }
+
+  std::cout << "isReflectable attr() "
+    << decl->getName().str()
+    << "is " << res << std::endl;
+
+
+#if 0
+  for (auto &attr : decl->attrs()) {
+      if (attr->getKind() == attr::Annotate) {
+        Attr a = *attr;
+        auto annotate = static_cast<clang::AnnotateAttr>(*attr);
+
+        std::cout << "isReflectable attr->getSpelling() " << attr->getSpelling() << std::endl;
+        //
+        const std::string gen_token = "{gen};{attr}";
+        std:: string code =
+          attr->getSpelling();
+        const bool startsWithGen =
+          code.rfind(gen_token, 0) == 0;
+        code.erase(0, gen_token.size());
+        if (startsWithGen) {
+          std::string delimiter = ";";
+          size_t pos = 0;
+          std::string token;
+          while ((pos = code.find(delimiter)) != std::string::npos) {
+            token = code.substr(0, pos);
+            std::cout << "isReflectable token " << token << std::endl;
+            if(token == "reflectable") {
+              res = true;
+            }
+            code.erase(0, pos + delimiter.length());
+          }
+        }
+      }
+  }
+#endif
+  return res;
+}
+
+const char* make_reflect(
+    const clang::ast_matchers::MatchFinder::MatchResult& matchResult,
+    clang::Rewriter& rewriter,
+    const clang::Decl* decl) {
+  printf("make_removefuncbody called...\n");
+
+  std::string indent = "  ";
+  std::string output{};
+  output.append("\n");
+  output.append(indent + "public:");
+  indent.append("  ");
+  output.append("\n");
+
+  std::map<std::string, std::string> fields;
+  std::map<std::string, std::string> methods;
+
+  clang::CXXRecordDecl const *record =
+      matchResult.Nodes.getNodeAs<clang::CXXRecordDecl>("bind_gen");
+  if (record) {
+    printf("reflect is record %s\n", record->getName().str().c_str());
+
+    // see https://github.com/Papierkorb/bindgen/blob/b55578e517a308778f5a510de02af499b353f15d/clang/src/record_match_handler.cpp
+    for (clang::Decl *decl : record->decls()) {
+      if (clang::CXXMethodDecl *method = llvm::dyn_cast<clang::CXXMethodDecl>(decl)) {
+        //runOnMethod(method, isSignal);
+        printf("reflect is CXXMethodDecl %s %s %s %s\n",
+          method->getNameInfo().getName().getAsString().c_str(),
+          method->getReturnType().getAsString().c_str(),
+          method->getType().getUnqualifiedType().getAsString().c_str(),
+          method->getName().str().c_str());
+        if(isReflectable(method)) {
+          methods[method->getNameInfo().getName().getAsString()] =
+            method->getReturnType().getAsString().c_str();
+        }
+      } else if (clang::AccessSpecDecl *spec = llvm::dyn_cast<clang::AccessSpecDecl>(decl)) {
+        //isSignal = AccessSpecDecl(spec);
+        //printf("is CXXMethodDecl %s\n", spec->getName().str().c_str());
+      } else if (clang::FieldDecl *field = llvm::dyn_cast<clang::FieldDecl>(decl)) {
+        //runOnField(field);
+        printf("reflect is FieldDecl %s %s\n",
+          field->getType().getUnqualifiedType().getAsString().c_str(),
+          field->getName().str().c_str());
+        if(isReflectable(field)) {
+          fields[field->getName().str()] =
+            field->getType().getUnqualifiedType().getAsString().c_str();
+        }
+      }
+    }
+
+    // TODO: use jinja / template
+
+    output.append(indent + "static std::map<std::string, std::string> fields");
+    output.append(" = {");
+    output.append("\n");
+    for(const auto& [key, value] : fields) {
+      output.append(indent + indent + "{ ");
+      output.append("\"" + key + "\"");
+      output.append(", ");
+      output.append("\"" + value + "\"");
+      output.append(" }");
+      output.append("\n");
+    }
+    output.append("\n");
+    output.append(indent + "};");
+    output.append("\n");
+    // methods
+    output.append("\n");
+    output.append(indent + "static std::map<std::string, std::string> methods");
+    output.append(" = {");
+    output.append("\n");
+    for(const auto& [key, value] : methods) {
+      output.append(indent + indent + "{ ");
+      output.append("\"" + key + "\"");
+      output.append(", ");
+      output.append("\"" + value + "\"");
+      output.append(" }");
+      output.append("\n");
+    }
+    output.append("\n");
+    output.append(indent + "};");
+    output.append("\n");
+    auto locEnd = record->getLocEnd();
+    rewriter.InsertTextBefore(locEnd, output);
+
+    /*for(auto fct = record->method_begin();
+      fct!= record->method_end(); ++fct)
+    {
+      if(fct->hasBody() && !fct->getName().str().empty()) {
+          printf("INFO: removed body from function %s in CXXRecordDecl %s\n",
+            fct->getName().str().c_str(),
+            record->getName().str().c_str());
+          rewriter.RemoveText(findFuncBodyRange(*fct, *matchResult.Context));
+        }
+    }*/
+  }
+  return "";
+}
+
+const char* make_removefuncbody(
+    const clang::ast_matchers::MatchFinder::MatchResult& matchResult,
+    clang::Rewriter& rewriter,
+    const clang::Decl* decl) {
+  printf("make_removefuncbody called...\n");
+
+  clang::CXXRecordDecl const *record =
+      matchResult.Nodes.getNodeAs<clang::CXXRecordDecl>("bind_gen");
+  if (record) {
+    printf("is record %s\n", record->getName().str().c_str());
+    for(auto fct = record->method_begin();
+      fct!= record->method_end(); ++fct)
+    {
+      if(fct->hasBody() && !fct->getName().str().empty()) {
+          printf("INFO: removed body from function %s in CXXRecordDecl %s\n",
+            fct->getName().str().c_str(),
+            record->getName().str().c_str());
+          rewriter.RemoveText(findFuncBodyRange(*fct, *matchResult.Context));
+        }
+    }
+  }
+  return "";
+}
+
+void expandLocations(SourceLocation& startLoc,
+      SourceLocation& endLoc,
+      Rewriter& rewriter_) {
+  if( startLoc.isMacroID() ) {
+      // Get the start/end expansion locations
+      std::pair< SourceLocation, SourceLocation > expansionRange =
+               rewriter_.getSourceMgr().getImmediateExpansionRange( startLoc );
+
+      // We're just interested in the start location
+      startLoc = expansionRange.first;
+      endLoc = expansionRange.second;
+  }
+}
+
+// see https://blog.jetbrains.com/clion/2017/11/towards-a-more-powerful-and-simpler-cpp-with-herb-sutter/
+// see https://herbsutter.com/2017/07/26/metaclasses-thoughts-on-generative-c/
+// see https://www.fluentcpp.com/2018/03/09/c-metaclasses-proposal-less-5-minutes/
+const char* make_interface(
+    const clang::ast_matchers::MatchFinder::MatchResult& matchResult,
+    clang::Rewriter& rewriter,
+    const clang::Decl* decl) {
+  printf("make_interface called...\n");
+
+  clang::CXXRecordDecl const *record =
+      matchResult.Nodes.getNodeAs<clang::CXXRecordDecl>("bind_gen");
+  if (record) {
+
+    /*SourceLocation startLoc = record->getLocStart();
+    SourceLocation endLoc = record->getLocEnd();
+    expandLocations(startLoc, endLoc, rewriter);
+    rewriter.InsertText(startLoc, " startLoc1 ");
+    rewriter.InsertText(endLoc, " endLoc2 ");*/
+
+    printf("is record %s\n", record->getName().str().c_str());
+#if 0
+    {
+        clang::SourceLocation ClassRenamePoint =
+            findCXXRecordNameEndPoint(record, *matchResult.Context);
+        /*rewriter.ReplaceText(ClassRenamePoint,
+          record->getName().size(), "asdsadads ");*/
+        rewriter.InsertText(record->getLocation(), "ClassRenamePoint ");
+    }
+#endif // 0
+
+    // TODO:
+    // see https://stackoverflow.com/questions/24706053/how-to-find-move-constructors-in-codebase-using-clang-ast-tools/32082812#32082812
+    // compiler.require(!f.is_copy() && !f.is_move(), "interfaces may not copy or move; consider a virtual clone() instead"); // 3.1
+
+    // see https://github.com/crdelozier/ironclad/blob/master/tools/refactoring-tool/Translator.hpp#L327
+    // see https://dl.khadas.com/test/github/external/v8/tools/clang/plugins/FindBadConstructsConsumer.cpp
+    // see https://github.com/crosswalk-project/chromium-crosswalk/blob/master/tools/clang/plugins/FindBadConstructsConsumer.cpp
+    // see https://github.com/csmith-project/creduce/blob/master/clang_delta/RemoveUnusedOuterClass.cpp#L68
+    if (!record->hasUserDeclaredDestructor()) {
+      printf("ERROR: found interface %s without virtual destructor\n",
+        record->getName().str().c_str());
+      //rewriter.InsertText(PureInsertionPoint,
+      //  "\nvirtual ~CLASSNAME_HERE() noexcept {}\n");
+    } else if (!record->getDestructor()->isVirtual()) {
+      printf("ERROR: found not-virtual destructor in interface %s\n",
+        record->getName().str().c_str());
+    }
+
+    for(auto fld = record->fields().begin();
+      fld!= record->fields().end(); ++fld)
+    {
+        printf("ERROR: found data %s in interface %s\n",
+          fld->getName().str().c_str(),
+          record->getName().str().c_str());
+    }
+
+
+    for(auto fct = record->method_begin();
+      fct!= record->method_end(); ++fct)
+    {
+      if(!fct->isInvalidDecl() && !fct->getName().str().empty()) {
+        // check
+        if(fct->isModulePrivate()) {
+          printf("ERROR: found private function %s in interface %s\n",
+            fct->getName().str().c_str(),
+            record->getName().str().c_str());
+        }
+
+        // check
+        if(fct->hasBody()) {
+          printf("ERROR: found function %s with body in interface %s\n",
+            fct->getName().str().c_str(),
+            record->getName().str().c_str());
+        }
+
+        // modify
+        if(!fct->isPure()) {
+          //fct->setPure(true);
+          printf("INFO: made pure function %s in interface %s\n",
+            fct->getName().str().c_str(),
+            record->getName().str().c_str());
+          //clang::CXXMethodDecl f =
+          //findInsertionPoint()
+
+          clang::SourceLocation PureInsertionPoint =
+              findPureInsertionPoint(*fct, *matchResult.Context);
+          rewriter.InsertText(PureInsertionPoint, " = 0");
+        }
+
+        // modify
+        if(!fct->isVirtual()) {
+          //fct->setPure(true);
+          printf("INFO: made virtual function %s in interface %s\n",
+            fct->getName().str().c_str(),
+            record->getName().str().c_str());
+          //clang::CXXMethodDecl f =
+          //findInsertionPoint()
+
+          clang::SourceLocation VirtualInsertionPoint =
+              findVirtualInsertionPoint(*fct, *matchResult.Context);
+          rewriter.InsertText(VirtualInsertionPoint, "virtual ");
+        }
+      }
+    }
+  }
+
+  clang::FieldDecl const *field =
+    matchResult.Nodes.getNodeAs<clang::FieldDecl>("bind_gen");
+  if (field) {
+    printf("is field\n");
+  }
+
+  clang::FunctionDecl const *function =
+      matchResult.Nodes.getNodeAs<clang::FunctionDecl>("bind_gen");
+  if (function) {
+    printf("is function\n");
+  }
+
+  /*rewriter.ReplaceText(
+    decl->getSourceRange(),
+    "make_interface result here!13#5#wq@dfe");*/
+  return "";
+}
+
+#else // CLING_IS_ON
+
+int main(int argc, const char* const* argv) {
+    printf("main started...\n");
+    try
+    {
+        appLoop = new AppLoop();
+    }
+    catch (const std::exception& e)
+    {
+        std::cerr << "Error: " << e.what() << std::endl;
+    }
+    appLoop->run();
+    appLoop->stop();
+    delete appLoop;
+    printf("main finished...\n");
+    return EXIT_SUCCESS;
+}
+
+#endif // CLING_IS_ON
+
+#if 0
 namespace beast = boost::beast;         // from <boost/beast.hpp>
 namespace http = beast::http;           // from <boost/beast/http.hpp>
 namespace net = boost::asio;            // from <boost/asio.hpp>
@@ -579,4 +1457,5 @@ int main(int argc, const char* const* argv) {
 }
 
 #endif // CLING_IS_ON
+#endif // 0
 

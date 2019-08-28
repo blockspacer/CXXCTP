@@ -42,10 +42,12 @@ cd build
 export CC=gcc
 export CXX=g++
 
+#TODO -Dcxx11=ON --with-cxx11
+
 # NOTE: on MAC set -stdlib=libstdc++
 # -DCMAKE_CXX_FLAGS="-stdlib=libc++" -DCMAKE_C_COMPILER=clang-7 -DCMAKE_CXX_COMPILER=clang++-7 -DCMAKE_EXE_LINKER_FLAGS="-stdlib=libc++ -lc++abi"
 #cmake -DCMAKE_INSTALL_PREFIX=../release -DCMAKE_BUILD_TYPE=Release ../src -DCMAKE_CXX_FLAGS="-stdlib=libc++" -DCMAKE_EXE_LINKER_FLAGS="-stdlib=libc++ -lc++abi"
-cmake -DCMAKE_INSTALL_PREFIX=../release -DCMAKE_BUILD_TYPE=Release ../src
+cmake -DCMAKE_CXX_STANDARD=14 -DCMAKE_INSTALL_PREFIX=../release -DCMAKE_BUILD_TYPE=Release ../src
 
 cmake --build . -- -j6
 
