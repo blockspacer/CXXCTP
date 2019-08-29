@@ -1,0 +1,3 @@
+[submodule "submodules/Jinja2Cpp"]
+	path = submodules/Jinja2Cpp
+	url = https://github.com/jinja2cpp/Jinja2Cpp.git
