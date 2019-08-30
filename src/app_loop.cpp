@@ -406,6 +406,12 @@
 #include <thread>
 #include <vector>
 
+#include "jinja2cpp/template.h"
+#include "jinja2cpp/filesystem_handler.h"
+#include "jinja2cpp/template_env.h"
+#include "jinja2cpp/reflected_value.h"
+
+//using namespace jinja2;
 using namespace std;
 using namespace clang;
 using namespace clang::driver;
@@ -644,6 +650,205 @@ const bool isReflectable(DeclaratorDecl* decl) {
   return res;
 }
 
+template<typename CharT>
+std::basic_string<CharT> ReadFile(jinja2::FileStreamPtr<CharT>& stream)
+{
+    std::basic_string<CharT> result;
+    constexpr size_t buffSize = 0x10000;
+    CharT buff[buffSize];
+
+    if (!stream)
+        return result;
+
+    while (stream->good() && !stream->eof())
+    {
+        stream->read(buff, buffSize);
+        auto readSize = stream->gcount();
+        result.append(buff, buff + readSize);
+        if (readSize < buffSize)
+            break;
+    }
+
+    return result;
+}
+
+const std::string
+getFileContent(const std::string& path)
+{
+  std::ifstream file(path);
+  if(!file.is_open()) {
+    printf("ERROR: can`t read file %s\n", path.c_str());
+    return "";
+  }
+  std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+
+  //printf("loaded %s from file %s\n", content.c_str(), path.c_str());
+  return content;
+}
+
+void writeToFile(const std::string& str, const std::string& path) {
+  //printf("saving %s to file %s\n", str.c_str(), path.c_str());
+  std::ofstream file(path);
+  if(!file.is_open()) {
+    printf("ERROR: can`t write to file %s\n", path.c_str());
+    return;
+  }
+  file << str;
+  file.close();
+}
+
+struct ReflectedEnumItems {
+  std::string name;
+  int64_t value;
+};
+
+/*namespace jinja2
+{
+template<>
+struct jinja2::TypeReflection<ReflectedEnumItems>
+  : TypeReflected<ReflectedEnumItems>
+{
+    static auto& GetAccessors()
+    {
+        static std::unordered_map<std::string, FieldAccessor> accessors = {
+            {"name", [](const ReflectedEnumItems& obj) {return obj.name;}},
+            {"value", [](const ReflectedEnumItems& obj) {return obj.value;}}
+        };
+
+        return accessors;
+    }
+};
+} // namespace jinja2*/
+
+const char* reflect_enum(
+    const clang::ast_matchers::MatchFinder::MatchResult& matchResult,
+    clang::Rewriter& rewriter,
+    const clang::Decl* decl) {
+  printf("reflect_enum called...\n");
+
+  clang::EnumDecl const *node =
+      matchResult.Nodes.getNodeAs<clang::EnumDecl>("bind_gen");
+
+  if (node) {
+    printf("reflect is record %s\n", node->getName().str().c_str());
+
+    /*jinja2::ValuesList GeneratedEnumNames;
+    GeneratedEnumNames.push_back("NONE");
+    jinja2::ValuesList GeneratedEnumValues;
+    GeneratedEnumValues.push_back(0);*/
+    jinja2::ValuesList GeneratedEnumItems;
+    GeneratedEnumItems.push_back(
+      jinja2::ValuesMap{
+        {"value", jinja2::Value(0)},
+        {"name", "NONE"}} );
+    //GeneratedEnumItems["NONE"] = 0;
+
+    LangOptions LO;
+    PrintingPolicy PrintPolicy(LO);
+    PrintPolicy.AnonymousTagLocations = false;
+    PrintPolicy.SuppressTagKeyword = true;
+
+    PresumedLoc pLoc = node->getASTContext().getSourceManager().getPresumedLoc(node->getLocation());
+
+    std::string nameString = node->getNameAsString();
+    if(nameString.empty()) {
+      printf("ERROR (reflect_enum): "
+             "can`t handle enum without name [%s:%d]\n",
+              pLoc.getFilename(), pLoc.getLine());
+    }
+    std::string typeString = "int";
+    const QualType QT = node->getIntegerType();
+    if(!QT.isNull()) {
+      typeString = QT.getAsString(); // getTypeClassName
+    }
+    printf("%s : %s [%s:%d]\n",
+      nameString.c_str(), typeString.c_str(),
+      pLoc.getFilename(), pLoc.getLine());
+
+    int64_t maxval = std::numeric_limits<int64_t>::min();
+    for (auto iter = node->enumerator_begin(); iter != node->enumerator_end(); iter++)
+    {
+        printf("    %s %ld\n", iter->getNameAsString().c_str(),
+          iter->getInitVal().getExtValue());
+        /*GeneratedEnumNames.push_back(iter->getNameAsString());
+        GeneratedEnumValues.push_back(iter->getInitVal().getExtValue());
+        GeneratedEnumItems[iter->getNameAsString()] = iter->getInitVal().getExtValue();*/
+        GeneratedEnumItems.push_back(
+          jinja2::ValuesMap{
+            {"value", jinja2::Value(iter->getInitVal().getExtValue())},
+            {"name", iter->getNameAsString()}} );
+        maxval = std::max(maxval, iter->getInitVal().getExtValue());
+    }
+    printf("\n");
+
+    /*GeneratedEnumNames.push_back("TOTAL");
+    GeneratedEnumValues.push_back(maxval + 1);
+    GeneratedEnumItems["TOTAL"] = maxval + 1;*/
+    GeneratedEnumItems.push_back(
+      jinja2::ValuesMap{
+        {"value", jinja2::Value(maxval + 1)},
+        {"name", "TOTAL"}} );
+
+      /*std::string enum2StringConvertor = R"(
+      inline const char* {{enumName}}ToString({{enumName}} e)
+      {
+          switch (e)
+          {
+      {% for item in items %}
+          case {{item}}:
+              return "{{item}}";
+      {% endfor %}
+          }
+          return "Unknown Item";
+      })";*/
+      //jinja2::RealFileSystem fs;
+      //auto test1Stream = fs.OpenStream("test_data/simple_template1.j2tpl");
+
+      jinja2::ValuesMap params = {
+          {"GeneratedEnumName", nameString},
+          {"GeneratedEnumType", typeString},
+          //{"GeneratedEnumNames", GeneratedEnumNames },
+          //{"GeneratedEnumValues", GeneratedEnumValues },
+          {"GeneratedEnumItems", GeneratedEnumItems }
+      };
+
+      //tpl.Load("{{'Hello World' }}!!!");
+      //tpl.LoadFromFile("simple_template1.j2tpl");
+      //std::cout << tpl.RenderAsString(params);
+
+    std::string gen_hpp_name = node->getNameAsString() + ".enum.generated.hpp";
+    {
+      std::string enum2StringConvertor =
+        getFileContent("enum_gen_cpp.j2tpl");
+      params["generator_path"] = "enum_gen_cpp.j2tpl";
+
+      params["includes"] = jinja2::ValuesList{ gen_hpp_name };
+      jinja2::Template tpl;
+      jinja2::ParseResult parseResult = tpl.Load(enum2StringConvertor);
+      if(!parseResult) {
+        printf("ERROR: can`t load jinja2 template from %s [%s]\n",
+          enum2StringConvertor.c_str(), parseResult.error().GetLocationDescr().c_str());
+      }
+      writeToFile(tpl.RenderAsString(params), node->getNameAsString() + ".enum.generated.cpp");
+    }
+
+    {
+      std::string enum2StringConvertor =
+        getFileContent("enum_gen_hpp.j2tpl");
+      params["generator_path"] = "enum_gen_hpp.j2tpl";
+      jinja2::Template tpl;
+      jinja2::ParseResult parseResult = tpl.Load(enum2StringConvertor);
+      if(!parseResult) {
+        printf("ERROR: can`t load jinja2 template from %s [%s]\n",
+          enum2StringConvertor.c_str(), parseResult.error().GetLocationDescr().c_str());
+      }
+      writeToFile(tpl.RenderAsString(params), gen_hpp_name);
+    }
+  }
+
+  return "";
+}
+
 const char* make_reflect(
     const clang::ast_matchers::MatchFinder::MatchResult& matchResult,
     clang::Rewriter& rewriter,
@@ -726,7 +931,14 @@ const char* make_reflect(
     output.append(indent + "};");
     output.append("\n");
     auto locEnd = record->getLocEnd();
-    rewriter.InsertTextBefore(locEnd, output);
+    rewriter.InsertText(locEnd, output,
+      /*InsertAfter=*/true, /*IndentNewLines*/ false);
+#if 0
+    rewriter.InsertText(locEnd.getLocWithOffset(-1), "\nsdfsdfsdff",
+      /*InsertAfter=*/true, /*IndentNewLines*/ true);
+    rewriter.InsertText(locEnd.getLocWithOffset(-1), "\nfgfgfgfgf",
+      /*InsertAfter=*/true, /*IndentNewLines*/ true);
+#endif
 
     /*for(auto fct = record->method_begin();
       fct!= record->method_end(); ++fct)

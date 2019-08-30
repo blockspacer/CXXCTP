@@ -36,6 +36,9 @@ set(CLING_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cling-build/" CACHE STRING "CLING DIR
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules)
+# TODO
+list(APPEND CMAKE_MODULE_PATH ${JINJA2CPP_INSTALL_DIR}/lib/jinja2cpp)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/submodules/Jinja2Cpp/cmake/public)
 
 # Keep symbols for JIT resolution
 set(LLVM_NO_DEAD_STRIP 1)
@@ -48,6 +51,10 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti")
 
 include( Dependencies.cmake )
 
+# TODO
+#find_package(jinja2cpp)
+find_package(Jinja2Cpp)
+
 # NOTE: disable CLING by default,
 # so you can see sources in IDE and use tab-complete
 set(ENABLE_CLING TRUE CACHE BOOL "ENABLE_CLING")
@@ -57,6 +64,8 @@ if(ENABLE_CLING)
   # The project has one binary:
   add_executable(CXXCTP
     src/main_cling.cpp
+    src/someEnum.hpp
+    src/someEnum.cpp
   )
 else(ENABLE_CLING)
   message(FATAL_ERROR "Only Cling interpreter is supported for now")
@@ -81,6 +90,20 @@ set( USED_SYSTEM_LIBS
   # Custom libs
   #stdc++fs # C++17 std::filesystem
   CACHE INTERNAL "USED_SYSTEM_LIBS" )
+
+set( USED_BOOST_LIBS
+  Boost::boost
+  Boost::atomic
+  Boost::chrono
+  Boost::date_time
+  Boost::filesystem
+  Boost::graph
+  Boost::log
+  Boost::program_options
+  Boost::regex
+  Boost::system
+  Boost::thread
+  CACHE INTERNAL "USED_BOOST_LIBS" )
 
 # ...which links against clingInterpreter (and its dependencies).
 target_link_libraries(CXXCTP
@@ -138,10 +161,20 @@ target_link_libraries(CXXCTP
   ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangARCMigrate.a
   # system libs
   ${USED_SYSTEM_LIBS}
+  # boost libs
+  ${USED_BOOST_LIBS}
+  #
+  #${JINJA2CPP_LIBRARY}
+  /usr/local/lib/static/libjinja2cpp.a
 )
 
 target_compile_definitions( CXXCTP PUBLIC
   ${CLING_DEFINITIONS}
+)
+
+target_include_directories( CXXCTP PUBLIC
+  ${JINJA2CPP_INCLUDE_DIR}
+  ${CMAKE_CURRENT_SOURCE_DIR}/submodules/Jinja2Cpp/thirdparty/nonstd/expected-light/include/
 )
 
 set_target_properties(CXXCTP

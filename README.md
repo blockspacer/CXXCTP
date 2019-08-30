@@ -5,12 +5,95 @@ CXXCTP don`t use predefined set of code transformations. Users can share C++ scr
 
 Suppose some big company shared to opensource community usefull scripts like `interface.cxx` and `enum_to_json.cxx`. Just place that scripts into `ctp_scripts` folder to use them in your project.
 
+Note: this project is provided as is, without any warranty (see License).
+
+## Features
++ C++ as compile-time scripting language (https://github.com/derofim/cling-cmake)
++ Jinja support (https://github.com/jinja2cpp/Jinja2Cpp)
++ Ability to modify source files (implement metaclasses, transpile from C++X to C++Y e.t.c.)
++ Ability to create new files (separate generated class to .hpp and .cpp, e.t.c.)
++ Ability to check source files (implement style checks, design patterns, e.t.c.)
+
+TODO:
++ DSL integration
++ Better JSON support
++ Better docs support
+
 ## Project status
-In development, see test.cpp fo usage examples
+In development, see test.cpp and app_loop.cpp fo usage examples
 
 Currently supports only linux.
 
 Note that you can run linux containers under windows/mac/e.t.c.
+
+## in-dev now
+JSON support
+Safer CPP support
+
+## ctp_scripts folder
+TODO
+
+## Run as commandline tool & compile_commands.json support / CMake integration
+TODO
+
+## Tutorials
+TODO
+
+## Generate docs website
+TODO
+
+## Integrate asan / e.t.c.
+TODO
+
+## Unit tests & CI/CD
+TODO
+
+## Benchmark (https://github.com/CathalT/Cerializer#parse--string---json-dom-object---c-struct-)
+TODO
+
+## Try it online (Jypiter/wandbox)
+
+## Provide header with common defines
+TODO
+
+## Docker / Vagrant
+TODO
+https://hub.docker.com/r/codible/clang_dev/
+
+## Better args parser & lines/spaces support ( make_interface(    outfile = filepath  ,   DISABLE   =   ${cling_var}) )
+TODO
+
+## Pass common reflected info to jinja for all decls (enum/class/e.t.c.)
+TODO
+
+## Refactor
+TODO
+
+## exception stack traces (backward-cpp, ...)
+TODO
+
+## Log & error reporting
+TODO
+
+## Change detection (watcher like https://github.com/Manu343726/siplasplas/tree/master/examples/fswatch ) & hot reload
+TODO
+
+## Articles in media (medium, twitter, reddit, ...)
+TODO
+
+## DEPENDENCIES
+```
+bash scripts/install_cmake.sh
+# than build https://jinja2cpp.dev/docs/build_and_install.html with variant_CONFIG_SELECT_VARIANT=variant_VARIANT_NONSTD
+```
+
+### Clone code
+```
+git submodule sync --recursive
+git submodule update --init --recursive --depth 50
+# or
+git submodule update --force --recursive --init --remote
+```
 
 ## How to build
 ```
@@ -37,6 +120,11 @@ cd build
 cmake -DENABLE_CLING=TRUE -DCMAKE_BUILD_TYPE=Debug ..
 cmake --build . -- -j6
 ./CXXCTP
+```
+
+OR under gdb:
+```
+rm -rf *generated* ; clear && clear ; gdb ./CXXCTP -ex "run" -ex "bt" -ex "q"
 ```
 
 ## Motivation
@@ -77,6 +165,8 @@ class SomeInterfaceName {
   virtual ~SomeInterfaceName() = 0;
 };
 
+// <== will be changed into ==>
+
 // Result
 class SomeInterfaceName {
   virtual int foo1() = 0;
@@ -87,7 +177,7 @@ class SomeInterfaceName {
 };
 ```
 
-We can use `funccall` action to run C++ scripts for source code transformation. Lets suppose that script names are `make_interface` and `make_removefuncbody`.
+We can use `funccall` action to run C++ scripts for source code transformation. Lets suppose that script names are `make_interface` and `make_removefuncbody` (name as you want).
 
 ```
 __attribute__((annotate("{gen};{funccall};make_interface;make_removefuncbody")))
@@ -95,13 +185,13 @@ __attribute__((annotate("{gen};{funccall};make_interface;make_removefuncbody")))
 
 `{gen};` - keyword used in every CXXCTP annotation.
 
-`{funccall};` - keyword used to tell CXXCTP what it must execute scripts.
+`{funccall};` - keyword used to tell CXXCTP what it must execute C++ scripts with cling.
 
 `make_interface;make_removefuncbody` - two scripts what CXXCTP will execute.
 
 Scripts will be executed from left (`make_interface`) to right (`make_removefuncbody`).
 
-Usually you don`t need to write long C++ annotations, just use C++ `#define`:
+Usually you don't need to write long C++ annotations, just use C++ `#define` (or include built-in header with common defines):
 
 ```
 #define $apply(...) \
@@ -141,6 +231,7 @@ Usefull links:
 + https://s3.amazonaws.com/connect.linaro.org/yvr18/presentations/yvr18-223.pdf
 + https://kevinaboos.wordpress.com/2013/07/30/clang-tips-and-tricks/
 + https://eli.thegreenplace.net/tag/llvm-clang
++ http://www.goldsborough.me/c++/clang/llvm/tools/2017/02/24/00-00-06-emitting_diagnostics_and_fixithints_in_clang_tools/
 
 ## About cling
 CXXCTP uses cling to execute C++ at compile-time.
@@ -299,6 +390,7 @@ std::string out_var2;
 })
 
 // adds pimpl and checks conditions
+// TODO https://github.com/flexferrum/autoprogrammer/wiki/pImpl-implementation-generator
 @gen(pimpl(), {
   class myclass5{
     // ...
@@ -356,6 +448,8 @@ OR
 int bar = className->@member(a);
 
 ## TODO
+no predefined set of code transformations, move exaples to separate repos
+
 https://stackoverflow.com/questions/24062989/clang-fails-replacing-a-statement-if-it-contains-a-macro
 
 codstyle rules https://github.com/gmarpons/Crisp/blob/master/prolog/Rules/SomeHICPPrules.pl
@@ -375,6 +469,86 @@ compile_commands.json
 https://github.com/Leandros/metareflect/blob/0208fdd4fc0ea1081ae2ff4c3bfce161305a7423/README.md#run-the-metareflect-tool
 
 ability to embed rules for speed (run without cling)
+
+add_func_by_jinja(jinja_arg1, jinja_arg2). NOTE: jinja_arg1 - may be cling var name
+
+C++ class state serialization (byte serialization)
+
+error reporting & unit tests
+
+recursive refletor / serializer
+
+Prefer comparison using epsilon for floating point types like: https://gist.github.com/derofim/df604f2bf65a506223464e3ffd96a78a#comparison-and-boolean-check
+
+enum classes as type-safe bitmasks https://gist.github.com/derofim/0188769131c62c8aff5e1da5740b3574
+
+enum parser https://github.com/goto40/rpp/blob/ec8a4c4a3ac32dccee8c4e8ba97be8c2ba1c8f88/src/parser/enum_parser.cpp
+
+.tmpl https://github.com/feed57005/librfl/blob/master/example/generator/example/templates/package_header.tmpl
+
+$_class(SomeVisitor, Visitor<bool, A, B, C>, Interface)
+{
+public:
+ void TestMethod1();
+ std::string TestMethod2(int param) const;
+};
+
+disable make_pure_virtual for some methods via annotation
+
+GUID generator for class/e.t.c.
+
+add_custom_command https://github.com/flexferrum/autoprogrammer/blob/1d246b809f916b0aa06388b985b17cc6f6b9e842/test/pimpl/CMakeLists.txt#L17
+
+getCommentForDecl https://github.com/mogemimi/negicco/blob/da829f8c76fff20692b4d5aa6004e12333fb7bdb/05-enum-classes/main.cpp#L106
+
+gen-only comments https://github.com/mogemimi/negicco/blob/da829f8c76fff20692b4d5aa6004e12333fb7bdb/03-comments/main.cpp
+
+protoc https://github.com/feed57005/librfl/blob/master/rfl/CMakeLists.txt#L18
+
+dynamically calling functions by name with the runtime library https://www.reddit.com/r/gamedev/comments/3lh0ba/using_clang_to_generate_c_reflection_data/
+
+separate hpp & cpp: move decl/impl to file/cling var/jinja
+
+editor support? #include generated files?
+
+NamedType https://github.com/joboccara/NamedType
+
+magic_get https://github.com/apolukhin/magic_get
+
+`has` for enum https://github.com/Manu343726/siplasplas/blob/master/examples/reflection/static/enum.cpp#L17
+
+Determine the layout of C and C++ types, including their size, and the size, offset, and padding of each field in the type. https://github.com/joshpeterson/layout
+
+Templates support
+
+Macro support
+
+Remove macro from generated src
+
+Reactive CPP (C++React / RxCpp) https://github.com/schlangster/cpp.react
+
+concurrency / loop vectorizin
+
+loop for recursion
+
+entt / ECS
+
+script / language binding
+
+https://github.com/iboB/dynamix
+
+generating from comments in the code.
+
+type from var https://github.com/pthom/cleantype
+
+script to C++ for speed
+
+in-code jinja with (optional) filename & args
+$jinja(filename = ..., arg1 = ..., arg2 = ...)
+
+fix args split, don`t separate based on args in quotes
+
+in-class jinja placeholder attrs & make_jinja_placeholders attr
 
 ## Misc
 https://medium.com/fluence-network/porting-redis-to-webassembly-with-clang-wasi-af99b264ca8

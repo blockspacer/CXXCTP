@@ -1,66 +1,24 @@
+/*#pragma comment(user, "user defined pragma comment")
+void foo() {
+#pragma omp parallel
+{
+  while(true){};
+}
+#pragma omp parallel for
+   for(;;){}
+}*/
+
 //#pragma annotate my {gen};{funccall};make_interface
+
+#include "test.hpp"
+#include "cling_common.hpp"
 
 #include <vector>
 #include <string>
+#include <iostream>
 
-#pragma comment(user, "user defined pragma comment")
+//#pragma comment(user, "user defined pragma comment")
 
-#define GEN_CAT(a, b) GEN_CAT_I(a, b)
-#define GEN_CAT_I(a, b) GEN_CAT_II(~, a ## b)
-#define GEN_CAT_II(p, res) res
-
-#define GEN_UNIQUE_NAME(base) GEN_CAT(base, __COUNTER__)
-
-#define $attr(...) \
-  __attribute__((annotate("{gen};{attr};" #__VA_ARGS__ )))
-
-// eval executes code
-// unlike exec, eval may use `#include` e.t.c.
-// no return value
-#define $eval(...) \
-  /* generate definition required to use __attribute__ */ \
-  __attribute__((annotate("{gen};{eval};" __VA_ARGS__))) \
-  int GEN_UNIQUE_NAME(__gen_tmp);
-
-// embed executes code and
-// returns (optional) source code modification
-#define $embed(...) \
-  /* generate definition required to use __attribute__ */ \
-  __attribute__((annotate("{gen};{embed};" #__VA_ARGS__))) \
-  int GEN_UNIQUE_NAME(__gen_tmp);
-
-// shortened embed syntax
-// param1 - returns (optional) source code modification
-#define $set_embed(RETVAL, ...) \
-  /* generate definition required to use __attribute__ */ \
-  __attribute__((annotate( \
-      "{gen};{embed};" \
-      "[&clangMatchResult, &clangRewriter, &clangDecl]() {" \
-        #__VA_ARGS__ \
-        "return new llvm::Optional<std::string>{" \
-          #RETVAL \
-          "};" \
-      "}();" \
-    ))) \
-  int GEN_UNIQUE_NAME(__gen_tmp);
-
-#ifdef CLANG_ENABLED
-// eval that
-// replaces itself with passed arguments
-#define $export(...) \
-  __VA_ARGS__ \
-  __attribute__((annotate("{gen};{export};" #__VA_ARGS__ ))) \
-  int GEN_UNIQUE_NAME(__gen_tmp);
-#else
-#define $export(...) __VA_ARGS__
-#endif
-
-// TODO
-/*#define $genonly(...) \
-  __VA_ARGS__ \
-  __attribute__((annotate("{gen};{export};" #__VA_ARGS__ ))) \
-  int GEN_UNIQUE_NAME(__gen_tmp);
-$genonly()*/
 
   $export (
 static int resultSomeInt = 2345;
@@ -74,26 +32,20 @@ $export(
 
 static int someInt = getSomeInt();
 
-// exec is similar to embed,
-// but returns empty source code modification
-#define $exec(...) \
-  /* generate definition required to use __attribute__ */ \
-  __attribute__((annotate( \
-      "{gen};{embed};" \
-      "[&clangMatchResult, &clangRewriter, &clangDecl]() {" \
-        #__VA_ARGS__ \
-        "return new llvm::Optional<std::string>{\"\"};" \
-      "}();" \
-    ))) \
-  int GEN_UNIQUE_NAME(__gen_tmp);
+$exec(
+  printf("getSomeInt() == resultSomeInt %i\n",
+    getSomeInt() == resultSomeInt);
+  //assert(getSomeInt() == resultSomeInt);
+  if(getSomeInt() != resultSomeInt) {
+    throw "throwed getSomeInt() != resultSomeInt";
+  }
+  printf("getSomeInt() != resultSomeInt %i\n",
+    getSomeInt() != resultSomeInt);
+)
 
 /*$exec(
   printf("getSomeInt = %i\n", getSomeInt());
 )*/
-
-//#define eval_code1 \
-//  printf("evalgfgbfbgbfgb\n"); \
-//  #include <cling/Interpreter/Interpreter.h>
 
 $eval("printf(\"asdasdasdasdasdds\\n\");printf(\"sggdfgdfg\\n\");")
 
@@ -171,22 +123,8 @@ void foozoo() {
 //#pragma clang attribute push(__attribute__((annotate("{gen};{eval};"))), apply_to=function)
 //#pragma clang attribute pop
 
-/*#define $interface \
-  __attribute__((annotate("{gen};{funccall};make_interface")))
-
-#define $removefuncbody \
-  __attribute__((annotate("{gen};{funccall};make_removefuncbody")))
-
-#define $combined \
-  __attribute__((annotate("{gen};{funccall};make_interface;make_removefuncbody")))
-*/
-
-#define $apply(...) \
-  __attribute__((annotate("{gen};{funccall};" #__VA_ARGS__)))
-
 class
-$apply(make_interface;
-  make_removefuncbody)
+$apply(make_interface;make_removefuncbody;make_reflect)
 SomeInterfaceName {
   virtual ~SomeInterfaceName() = 0;
   /*int    f   (   )   {     // {}
@@ -232,3 +170,47 @@ SomeStructName {
   const int m_bar2 = 2;
   $attr(reflectable) std::vector<std::string> m_VecStr2;
 };
+
+enum Color : uint16_t { RED = 2, BLUE = 4, GREEN = 8 };
+
+enum class ColorClass { RED = 2, BLUE = 4, GREEN = 8 };
+
+enum ShapeKindSimple {
+
+  // Convex shapes, see ConvexBegin and ConvexEnd below.
+  Box = 0,
+  Sphere = 1,
+
+  // Non-convex shapes.
+  Donut = 2,
+  Banana = 3,
+
+  COUNT = Banana + 1,
+
+  // Non-reflected aliases.
+  ConvexBegin = Box,
+  ConvexEnd = Sphere + 1,
+
+  // TODO: generate TOTAL
+};
+
+/*class EnumValue {
+public:
+  virtual const char* ToString() = 0;
+  virtual ~EnumValue() {}
+  virtual operator int() = 0;
+};*/
+
+// https://www.reddit.com/r/gamedev/comments/3lh0ba/using_clang_to_generate_c_reflection_data/
+/*class MetaProperty {
+public:
+  //virtual const char* ToString(EnumValue value) = 0;
+  virtual ~MetaProperty() {}
+
+  //static const char* const* _names() = 0;
+  //static const int* _values() = 0;
+  virtual const char* ToString() = 0;
+  virtual const MetaProperty& operator =(int dummy)  = 0;
+  //virtual operator int() = 0;
+  //virtual MetaProperty& operator =() = 0;
+};*/

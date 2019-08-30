@@ -209,6 +209,11 @@
 #include <thread>
 #include <vector>
 
+#include "someEnum.hpp"
+
+#include "jinja2cpp/template.h"
+
+//using namespace jinja2;
 using namespace std;
 using namespace clang;
 using namespace clang::driver;
@@ -521,6 +526,10 @@ public:
         cling_args_storage.push_back("EmbedCling");
         cling_args_storage.push_back("-I.");
         cling_args_storage.push_back("-I../");
+
+        //cling_args_storage.push_back("-nobuiltininc");
+        //cling_args_storage.push_back("-nostdinc");
+
         //cling_args_storage.push_back("std=c++17");
         //cling_args_storage.push_back("-std=c++17");
         cling_args_storage.push_back("--std=c++17");
@@ -529,6 +538,13 @@ public:
         cling_args_storage.push_back("-I../cling-build/build/include/");
         cling_args_storage.push_back("-I../cling-build/src/tools/clang/include/");
         cling_args_storage.push_back("-I../cling-build/build/tools/clang/include/");
+        cling_args_storage.push_back("-I../cling-build/src/tools/cling/include/");
+
+        cling_args_storage.push_back("-I../submodules/Jinja2Cpp/thirdparty/nonstd/expected-light/include/");
+
+        //cling_args_storage.push_back("-I/usr/local/tander/i586-pc-linux-gnu/usr/lib/gcc/i586-pc-linux-gnu/7.3.0/include/g++-v7/");
+        //cling_args_storage.push_back("-I/usr/local/tander/i586-pc-linux-gnu/usr/lib/gcc/i586-pc-linux-gnu/7.3.0/include/g++-v7/i586-pc-linux-gnu/");
+        //cling_args_storage.push_back("-I/usr/local/tander/i586-pc-linux-gnu/usr/include/");
 
         //cling_args_storage.push_back("-I/usr/include/c++/8/");
         //cling_args_storage.push_back("-I/usr/include/c++/7/");
@@ -956,8 +972,6 @@ public:
       std::cout << "any_decl2 = "
         << any_decl2->getStmtClassName() << std::endl;
     }*/
-
-
 
     if ( const clang::Decl* decl = Result.Nodes.getNodeAs<clang::Decl>( "bind_gen" ) )
     {
@@ -1466,13 +1480,397 @@ private:
 } // namespace UseOverride
 
 struct ToolFactory : public clang::tooling::FrontendActionFactory {
+  //ToolFactory(/*clang::FrontendAction* act, std::unique_ptr<clang::ASTConsumer> consumer*/)
+  //  /*: m_act(act), m_consumer(std::move(consumer))*/ {};
   clang::FrontendAction *create() override {
     return new UseOverride::Action();
   }
+  //clang::FrontendAction* m_act;
+  //std::unique_ptr<clang::ASTConsumer> m_consumer;
 };
+
+const std::string
+getFileContent(const std::string& path)
+{
+  std::ifstream file(path);
+  if(!file.is_open()) {
+    printf("ERROR: can`t read file %s\n", path.c_str());
+    return "";
+  }
+  std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+
+  return content;
+}
+
+void writeToFile(const std::string& str, const std::string& path) {
+  std::ofstream file(path);
+  if(!file.is_open()) {
+    printf("ERROR: can`t write to file %s\n", path.c_str());
+    return;
+  }
+  file << str;
+  file.close();
+}
+
+
+
+#include <unordered_map>
+
+using namespace cxxctp::generated;
+
+std::unordered_map<ShapeKind, int> u = {
+    {ShapeKind::Box, 1},
+    {ShapeKind::Sphere, 3},
+  };
+
+void EnumTest2(ShapeKind state) {
+  switch (state) {
+    case ShapeKind::Box: {
+        // ...
+        break;
+    }
+    case ShapeKind::Sphere: {
+        // ...
+        break;
+    }
+  }
+}
+
+void EnumTest1() {
+  ShapeKind total = ShapeKind::TOTAL;
+  std::cout << "total is " << total.ToNumber() << std::endl;
+
+  ShapeKind state1 = ShapeKind::Box;
+  const auto state1Str = state1.ToString();
+  if(state1Str) {
+    std::cout << state1Str << std::endl;
+  }
+  EnumTest2(state1);
+
+  ShapeKind state2 = ShapeKind::FromNumber(static_cast<ShapeKind::_enumerated_t>(3));
+  if(state2 != ShapeKind::TOTAL) {
+    const auto state2Str = state2.ToString();
+    if(state2Str) {
+      std::cout << state2Str << std::endl;
+    }
+  } else {
+    std::cout << "state2 is TOTAL" << std::endl;
+  }
+
+  EnumTest2(state2);
+
+  auto stateNum1 = ShapeKind::ToNumber(state1);
+  auto totalNum = ShapeKind::ToNumber(ShapeKind::TOTAL);
+  if(stateNum1 != totalNum) {
+    std::cout << stateNum1 << std::endl;
+  } else {
+    std::cout << "stateNum1 is TOTAL" << std::endl;
+  }
+
+  ShapeKind state3 = ShapeKind::FromString("Box");
+  if(state3 != ShapeKind::TOTAL) {
+    const auto state3Str = state3.ToString();
+    if(state3Str) {
+      std::cout << state3Str << std::endl;
+    }
+  } else {
+    std::cout << "state3 is TOTAL" << std::endl;
+  }
+
+  std::cout << "Box != TOTAL is " <<
+    (ShapeKind::FromString("Box") != ShapeKind::TOTAL) << std::endl;
+
+  std::cout << "Box is " << ShapeKind::FromString("Box") << std::endl;
+
+  ShapeKind inShapeKind;
+  //std::cin >> inShapeKind;
+
+  std::cout << "inShapeKind) is " << inShapeKind.ToString() << std::endl;
+  std::cout << "inShapeKind is " << inShapeKind << std::endl;
+
+  EnumTest2(state3);
+
+  ShapeKind inShapeKindToIter = ShapeKind::Box;
+  for(ShapeKind::const_value_iterator it = inShapeKindToIter.values_begin();
+      it != inShapeKindToIter.values_end(); ++it)
+    std::cout << "it1 is " << ShapeKind::FromNumber(*it) << std::endl;
+
+  inShapeKindToIter = ShapeKind::Box;
+  for(ShapeKind::const_name_iterator it = inShapeKindToIter.names_begin();
+      it != inShapeKindToIter.names_end(); ++it)
+    std::cout << "it names is " << ShapeKind::FromString(*it) << std::endl;
+
+  for(const auto& it : inShapeKindToIter.values_)
+    std::cout << "it2 is " << ShapeKind::FromNumber(it) << std::endl;
+
+  for(const auto& it : inShapeKindToIter.names_)
+    std::cout << "it3 is " << ShapeKind::FromString(it) << std::endl;
+
+  std::cout << "ShapeKind::Box > ShapeKind::Sphere"
+    << (ShapeKind::Box > ShapeKind::Sphere) << std::endl;
+
+  std::cout << "ShapeKind::TOTAL <= ShapeKind::Sphere"
+    << (ShapeKind::TOTAL <= ShapeKind::Sphere) << std::endl;
+}
+
+#include <algorithm>
+#include <iomanip>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <stdexcept>
+#include <string>
+#include <vector>
+#include <iostream>
+/*#include <boost/spirit/home/x3/core.hpp>
+#include <boost/spirit/home/x3/operator.hpp>
+#include <boost/spirit/home/x3/char.hpp>*/
+
+struct func_arg {
+  std::string name_;
+  std::string value_;
+};
+
+struct args {
+  std::vector<func_arg> as_vec_;
+  std::map<std::string, std::vector<std::string>> as_name_to_value_;
+};
+
+struct parsed_func {
+  std::string func_name_unprocessed_;
+  //std::string func_name_normalized_; // no need to remove ws, we ignored all ws
+  args args_;
+};
+
+struct parsed_funcs {
+  std::string func_with_args_as_string_;
+  parsed_func parsed_func_;
+};
+
+func_arg extract_func_arg(std::string const& inStr) {
+  std::string arg_value_ = inStr;
+  std::string arg_name_ = "";
+  auto delim_pos = inStr.find('=');
+  if(delim_pos != std::string::npos) {
+    arg_name_ = inStr.substr(0, delim_pos);
+    if(!arg_name_.empty()) {
+      assert(arg_name_.length() + 1 <= inStr.length());
+      arg_value_ = inStr.substr(arg_name_.length() + 1, inStr.length());
+    }
+  }
+  return {arg_name_, arg_value_};
+}
+
+std::vector<parsed_funcs> split_to_funcs(std::string const& inStr) {
+  std::vector<parsed_funcs> result;
+  std::stringstream ss;
+  ss << inStr;
+
+  std::string func_with_args_;
+  std::string func_name_unprocessed_;
+  std::string func_arg_as_str;
+  bool is_in_args = false;
+  std::vector<func_arg> func_args_vec_;
+  std::map<std::string, std::vector<std::string>> func_args_as_name_to_value_;
+  while (ss >> std::ws) {
+      if (ss.peek() == '"') { // TODO: inner "
+          std::string quoted;
+          ss >> std::quoted(quoted);
+          std::cout << "quoted " << quoted << "\n";
+          func_with_args_ += '"' + quoted + '"';
+          if(is_in_args) {
+            func_arg_as_str += '"' + quoted + '"';
+          }
+      }
+      else if (ss.peek() == '(') {
+          is_in_args = true;
+          func_name_unprocessed_ = func_with_args_;
+          char c;
+          ss >> c;
+          func_with_args_ += c;
+          func_arg_as_str.clear();
+      }
+      else if (ss.peek() == ')') {
+          is_in_args = false;
+
+          func_arg arg_parsed = extract_func_arg(func_arg_as_str);
+          func_args_vec_.push_back(arg_parsed);
+          if(!arg_parsed.name_.empty()) {
+            if(func_args_as_name_to_value_.find(arg_parsed.name_) != func_args_as_name_to_value_.end()) {
+              func_args_as_name_to_value_[arg_parsed.name_].push_back(arg_parsed.value_);
+            } else {
+              func_args_as_name_to_value_[arg_parsed.name_] = std::vector{arg_parsed.value_};
+            }
+          }
+
+          char c;
+          ss >> c;
+          func_with_args_ += c;
+          func_arg_as_str.clear();
+      }
+      else if (ss.peek() == ',') {
+          assert(is_in_args);
+
+          func_arg arg_parsed = extract_func_arg(func_arg_as_str);
+          func_args_vec_.push_back(arg_parsed);
+          if(!arg_parsed.name_.empty()) {
+            if(func_args_as_name_to_value_.find(arg_parsed.name_) != func_args_as_name_to_value_.end()) {
+              func_args_as_name_to_value_[arg_parsed.name_].push_back(arg_parsed.value_);
+            } else {
+              func_args_as_name_to_value_[arg_parsed.name_] = std::vector{arg_parsed.value_};
+            }
+          }
+
+          char c;
+          ss >> c;
+          func_with_args_ += c;
+          func_arg_as_str.clear();
+      }
+      else if (ss.peek() == ';') {
+          char c;
+          ss >> c;
+
+          if(func_with_args_.empty()) {
+            continue;
+          }
+
+          //std::string func_name_normalized_ = func_name_unprocessed_;
+          /// \note space, tabulator, newline, or the like will be removed
+          //std::remove_if(func_name_normalized_.begin(), func_name_normalized_.end(),
+          //  ::isspace);
+          if(func_name_unprocessed_.empty()) {
+            // func without args and without ()
+            func_name_unprocessed_ = func_with_args_;
+          }
+          result.push_back(
+            parsed_funcs{
+              func_with_args_,
+              {
+                func_name_unprocessed_,
+                //func_name_normalized_,
+                args{
+                  func_args_vec_,
+                  func_args_as_name_to_value_
+                },
+              }
+            });
+          func_with_args_.clear();
+          func_name_unprocessed_.clear();
+          func_args_vec_.clear();
+          func_arg_as_str.clear();
+          func_args_as_name_to_value_.clear();
+      } else {
+          char c;
+          ss >> c;
+          func_with_args_ += c;
+          if(is_in_args) {
+            func_arg_as_str += c;
+          }
+      }
+
+      //std::cout << func_with_args_ << "\n";
+  }
+  return result;
+}
+
+/*std::vector<std::string> csvish_split(std::string const& s)
+{
+    namespace x3 = boost::spirit::x3;
+
+    auto const quoted   = '"' >> *~x3::char_('"') >> '"';
+    auto const unquoted = *~x3::char_(',');
+    auto const segments = (quoted | unquoted) % ',';
+
+    std::vector<std::string> ret;
+    if (!x3::parse(cbegin(s), cend(s), segments, ret))
+        throw std::runtime_error("failed to parse: " + s);
+    return ret;
+}*/
+
+/*std::vector<std::string> split_args_to_funcs2(std::string const& inStr) {
+  std::vector<std::string> result;
+  std::istringstream iss(inStr);
+  std::string s;
+  while (iss >> std::quoted(s)) {
+      result.push_back(s);
+  }
+  return result;
+}*/
+
+void test_split_to_funcs() {
+  const std::string code_input = R"raw(
+    make_nobody;
+    make_reflect
+    ("as  \"; ddddghj ;
+      ; dddgj  ; dd");    make_interface('c'
+    + 'b',     argname1      =     "argass  \"; argdfgdfg
+      ; ardfggfgdfg  ; afggfgdfg"    ,   argname2      =  45
+        ,
+           argname1      =  " #\"1 \"2 \" 23" );
+    make_checks; make_3
+    (12345, "32  ; 5454 ;
+      ; ffhfh  ; ass", "bb  ; sss ;
+      ; hfhfh  ; sss",
+       54321);
+  make_jinja  (    1 + 2 + 3    ,    "saw3"    ,   48    );  ;)raw";
+  //const std::string code_input = R"raw("asddddddddd" ; kllklk ; "dfggg"   "bcbccbb")raw";
+
+  for (auto const& seg : split_to_funcs(code_input)) {
+      std::cout << "segment: " << seg.func_with_args_as_string_ << "\n";
+      std::cout << "  func_name_: " << seg.parsed_func_.func_name_unprocessed_ << "\n";
+      for (auto const& arg : seg.parsed_func_.args_.as_vec_) {
+        std::cout << "    arg name: " << arg.name_ << "\n";
+        std::cout << "    arg value: " << arg.value_ << "\n";
+      }
+      for (auto const& [key, values] : seg.parsed_func_.args_.as_name_to_value_) {
+        std::cout << "    arg key: " << key << "\n";
+        std::cout << "    arg values (" << values.size() <<"): " << "\n";
+        for (auto const& val : values) {
+          std::cout << "        " << val << "\n";
+        }
+      }
+      std::cout << "\n";
+  }
+  /*for (auto const& seg : csvish_split(code_input))
+      std::cout << seg << '\n';*/
+}
 
 int main(int argc, const char* const* argv) {
     using namespace clang::tooling;
+
+    //std::cout << "seg\n";
+
+    test_split_to_funcs();
+
+    EnumTest1();
+
+    // FIXME: cling linkage hack:
+    // must use jinja before usage in cling
+    {
+      std::string enum2StringConvertor = R"(
+      inline const char* {{enumName}}ToString({{enumName}} e)
+      {
+          HELLO
+      })";
+      //jinja2::RealFileSystem fs;
+      //std::string enum2StringConvertor =
+      //  getFileContent("simple_template1.j2tpl");
+      //auto test1Stream = fs.OpenStream("test_data/simple_template1.j2tpl");
+      jinja2::ValuesMap params = {
+          {"enumName", "Animals"},
+          {"items", jinja2::ValuesList{"Dog", "Cat", "Monkey", "Elephant"} }
+      };
+      jinja2::Template tpl;
+      jinja2::ParseResult parseResult = tpl.Load(enum2StringConvertor);
+      if(!parseResult) {
+        printf("ERROR: can`t load jinja2 template from %s [%s]\n",
+          enum2StringConvertor.c_str(), parseResult.error().GetLocationDescr().c_str());
+      }
+      //tpl.Load("{{'Hello World' }}!!!");
+      //tpl.LoadFromFile("simple_template1.j2tpl");
+      //std::cout << tpl.RenderAsString(params);
+      writeToFile(tpl.RenderAsString(params), "tmp.enum.generated.hpp");
+    }
 
     std::cout << "input_func!... " << '\n';
     std::thread inp_thread(input_func);
@@ -1511,7 +1909,16 @@ int main(int argc, const char* const* argv) {
     args_storage.push_back("-extra-arg=-I../cling-build/build/include/");
     args_storage.push_back("-extra-arg=-I../cling-build/src/tools/clang/include/");
     args_storage.push_back("-extra-arg=-I../cling-build/build/tools/clang/include/");
+    args_storage.push_back("-extra-arg=-I../cling-build/src/tools/cling/include/");
+
+    args_storage.push_back("-extra-arg=-I../submodules/Jinja2Cpp/thirdparty/nonstd/expected-light/include/");
+
     args_storage.push_back("-extra-arg=-std=c++17");
+
+    //args_storage.push_back("-extra-arg=-I/usr/local/tander/i586-pc-linux-gnu/usr/include/");
+
+    // TODO: crash when changed order, may be thread race
+    args_storage.push_back("ReflShapeKind.hpp");
     args_storage.push_back("test.cpp");
     //args_storage.push_back("-help");
 
@@ -1531,7 +1938,7 @@ int main(int argc, const char* const* argv) {
     // TODO: https://github.com/mlomb/MetaCPP/blob/8eddde5e1bf4809ad70a68a385b9cbcc8e237370/MetaCPP-CLI/ScraperTool.cpp#L19
     ClangTool Tool(op.getCompilations(), op.getSourcePathList());
 
-    Tool.run(new ToolFactory);
+    Tool.run(new ToolFactory(/*new UseOverride::Action()*/));
 
     //return 0;
 
