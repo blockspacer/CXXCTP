@@ -208,9 +208,11 @@
 #include <string>
 #include <thread>
 #include <vector>
+#include <filesystem>
 
 #include "someEnum.hpp"
 
+#include "jinja2cpp/value.h"
 #include "jinja2cpp/template.h"
 
 //using namespace jinja2;
@@ -378,7 +380,7 @@ void DispatchQueue::DispatchQueued(void) {
 /// Definitions of declarations injected also into cling.
 /// NOTE: this could also stay in a header #included here and into cling, but
 /// for the sake of simplicity we just redeclare them here.
-int aGlobal = 42;
+static int aGlobal = 42;
 static float anotherGlobal = 3.141;
 float getAnotherGlobal() { return anotherGlobal; }
 void setAnotherGlobal(float val) { anotherGlobal = val; }
@@ -533,6 +535,9 @@ public:
         //cling_args_storage.push_back("std=c++17");
         //cling_args_storage.push_back("-std=c++17");
         cling_args_storage.push_back("--std=c++17");
+        //cling_args_storage.push_back("--std=c++2a");
+        //cling_args_storage.push_back("-fmodules-ts");
+
         cling_args_storage.push_back("-I../cling-build/build/lib/clang/5.0.0/include");
         cling_args_storage.push_back("-I../cling-build/src/include/");
         cling_args_storage.push_back("-I../cling-build/build/include/");
@@ -541,6 +546,14 @@ public:
         cling_args_storage.push_back("-I../cling-build/src/tools/cling/include/");
 
         cling_args_storage.push_back("-I../submodules/Jinja2Cpp/thirdparty/nonstd/expected-light/include/");
+
+        cling_args_storage.push_back("-I../resources");
+
+        // https://stackoverflow.com/a/30877725
+        cling_args_storage.push_back("-DBOOST_SYSTEM_NO_DEPRECATED");
+        cling_args_storage.push_back("-DBOOST_ERROR_CODE_HEADER_ONLY");
+        // https://jinja2cpp.dev/docs/build_and_install.html#dependency-management-modes
+        cling_args_storage.push_back("-Dvariant_CONFIG_SELECT_VARIANT=variant_VARIANT_NONSTD");
 
         //cling_args_storage.push_back("-I/usr/local/tander/i586-pc-linux-gnu/usr/lib/gcc/i586-pc-linux-gnu/7.3.0/include/g++-v7/");
         //cling_args_storage.push_back("-I/usr/local/tander/i586-pc-linux-gnu/usr/lib/gcc/i586-pc-linux-gnu/7.3.0/include/g++-v7/i586-pc-linux-gnu/");
@@ -641,7 +654,7 @@ static std::map<std::string, std::vector<std::string>> moduleToSources {
     {
         "main_module",
         std::vector<std::string>{
-            "/home/avakimov_am/job/clingrewriter/src/app_loop.cpp"
+            "../src/app_loop.cpp"
         }
     }
     /*{
@@ -685,8 +698,8 @@ void reloadClingModule(const std::string& module_id, const std::vector<std::stri
 
 // NOTE: run under mutex
 void reloadAllCling() {
-    cling::Interpreter::CompilationResult compilationResult1;
-    /*if(interpMap.find("main_module") != interpMap.end() &&
+    /*cling::Interpreter::CompilationResult compilationResult1;
+    if(interpMap.find("main_module") != interpMap.end() &&
         interpMap["main_module"]->metaProcessor_) {
         printf("app_loop_shutdown for main_module\n");
         interpMap["main_module"]->metaProcessor_->process("app_loop_shutdown();", compilationResult1, nullptr, true);
@@ -745,10 +758,10 @@ void reloadAllCling() {
     /*cling::MetaProcessor* m_metaProcessor2 = new cling::MetaProcessor(interp2, llvm::outs());*/
     /*cling::MetaProcessor* m_metaProcessor2 = new cling::MetaProcessor(interp2, llvm::outs());*/
 
-    cling::Interpreter::CompilationResult compilationResult2;
+    /*cling::Interpreter::CompilationResult compilationResult2;
 
     //m_metaProcessor2->process("#include <iostream>", compilationResult2, nullptr);
-    /*m_metaProcessor2->process("using std::cout;", compilationResult2, nullptr);
+    m_metaProcessor2->process("using std::cout;", compilationResult2, nullptr);
     m_metaProcessor2->process("using std::endl;", compilationResult2, nullptr);*/
     ///m_metaProcessor2->process("std::cout << \"cout2 called\" << std::endl;", compilationResult2, nullptr);
     //m_metaProcessor1->process("std::cout << \"cout2 called\" << std::endl;", compilationResult1, nullptr);
@@ -771,7 +784,7 @@ void reloadAllCling() {
 //static bool runFlag = true;
 //static std::mutex m_runFlagMutex;
 
-void input_func()
+[[ noreturn ]] void input_func()
 {
     std::cout << "main cling input thread... " << '\n';
     std::string command;
@@ -884,7 +897,7 @@ void input_func()
     std::terminate();
 }
 
-void cling_func() {
+[[ noreturn ]] void cling_func() {
     receivedMessagesQueue_ =
         std::make_shared<DispatchQueue>(std::string{"Cling Dispatch Queue"}, 0);
 
@@ -1439,12 +1452,12 @@ public:
   explicit Action() {}
 
   ASTConsumerPointer CreateASTConsumer(clang::CompilerInstance &Compiler,
-                                       llvm::StringRef Filename) override {
+                                       llvm::StringRef /*Filename*/) override {
     Rewriter.setSourceMgr(Compiler.getSourceManager(), Compiler.getLangOpts());
     return std::make_unique<Consumer>(Rewriter);
   }
 
-  bool BeginSourceFileAction(clang::CompilerInstance &Compiler) override {
+  bool BeginSourceFileAction(clang::CompilerInstance &/*Compiler*/) override {
     llvm::errs() << "Processing " << getCurrentFile() << "\n\n";
     return true;
   }
@@ -1453,24 +1466,52 @@ public:
     ASTFrontendAction::EndSourceFileAction();
 
     SourceManager &SM = Rewriter.getSourceMgr();
-    llvm::errs() << "** EndSourceFileAction for: "
-                 << SM.getFileEntryForID(SM.getMainFileID())->getName() << "\n";
 
-    const auto File = SM.getMainFileID();
-    Rewriter.getEditBuffer(File).write(llvm::outs());
+    const auto fileID = SM.getMainFileID();
+    const auto fileEntry = SM.getFileEntryForID(SM.getMainFileID());
+    std::string full_file_path = fileEntry->getName();
+    llvm::outs() << "full_file_path is " << full_file_path << "\n";
+    const std::string filename = std::filesystem::path(full_file_path).filename();
+    llvm::outs() << "filename is " << filename << "\n";
 
-    std::string file_name = SM.getFileEntryForID(
-        SM.getMainFileID())->getName();
-    const std::string file_ext = file_name.substr(
-      file_name.find_last_of(".") + 1);
-    if(!file_name.empty() && !file_ext.empty()) {
-      const std::string full_file_ext = "." + file_ext;
-      std::cout << "full_file_ext = " << full_file_ext << std::endl;
-      file_name.erase(file_name.length() - full_file_ext.length(), full_file_ext.length());
-      std::error_code error_code;
-      llvm::raw_fd_ostream outFile(file_name + ".generated" + full_file_ext, error_code, llvm::sys::fs::F_None);
-      Rewriter.getEditBuffer(SM.getMainFileID()).write(outFile);
-      outFile.close();
+    llvm::outs() << "** EndSourceFileAction for: "
+                 << fileEntry->getName().str() << "\n";
+    const std::string full_file_ext = std::filesystem::path(full_file_path).extension();
+    const std::string out_path = filename + ".generated" + full_file_ext;
+
+    bool shouldFlush = true;
+#if 0
+    if (shouldFlush) {
+        std::error_code OutErrInfo;
+        std::error_code ok;
+
+        llvm::raw_fd_ostream outputFile(llvm::StringRef(full_file_path),
+                                                OutErrInfo, llvm::sys::fs::F_None);
+
+        if (OutErrInfo == ok) {
+            const clang::RewriteBuffer RewriteBuf = Rewriter.getEditBuffer(fileID);
+            if(RewriteBuf.size()) {
+                std::string content = std::string(RewriteBuf.begin(), RewriteBuf.end());
+                outputFile << content;
+                outputFile.close();
+            }
+        }
+    }
+#endif
+
+    //Rewriter.getEditBuffer(File).write(llvm::outs());
+
+    if (shouldFlush) {
+        /*const std::string file_ext = full_file_path.substr(
+            filename.find_last_of(".") + 1);*/
+        if(!full_file_path.empty() && !full_file_ext.empty()) {
+          llvm::outs() << "full_file_ext = " << full_file_ext << "\n";
+          //full_file_path.erase(full_file_path.length() - full_file_ext.length(), full_file_ext.length());
+          std::error_code error_code;
+          llvm::raw_fd_ostream outFile(out_path, error_code, llvm::sys::fs::F_None);
+          Rewriter.getEditBuffer(fileID).write(outFile);
+          outFile.close();
+        }
     }
   }
 
@@ -1518,7 +1559,7 @@ void writeToFile(const std::string& str, const std::string& path) {
 
 using namespace cxxctp::generated;
 
-std::unordered_map<ShapeKind, int> u = {
+static std::unordered_map<ShapeKind, int> u = {
     {ShapeKind::Box, 1},
     {ShapeKind::Sphere, 3},
   };
@@ -1530,6 +1571,10 @@ void EnumTest2(ShapeKind state) {
         break;
     }
     case ShapeKind::Sphere: {
+        // ...
+        break;
+    }
+    default: {
         // ...
         break;
     }
@@ -1835,7 +1880,7 @@ void test_split_to_funcs() {
       std::cout << seg << '\n';*/
 }
 
-int main(int argc, const char* const* argv) {
+int main(int /*argc*/, const char* const* /*argv*/) {
     using namespace clang::tooling;
 
     //std::cout << "seg\n";
@@ -1861,7 +1906,7 @@ int main(int argc, const char* const* argv) {
           {"items", jinja2::ValuesList{"Dog", "Cat", "Monkey", "Elephant"} }
       };
       jinja2::Template tpl;
-      jinja2::ParseResult parseResult = tpl.Load(enum2StringConvertor);
+      auto parseResult = tpl.Load(enum2StringConvertor);
       if(!parseResult) {
         printf("ERROR: can`t load jinja2 template from %s [%s]\n",
           enum2StringConvertor.c_str(), parseResult.error().GetLocationDescr().c_str());
@@ -1869,7 +1914,7 @@ int main(int argc, const char* const* argv) {
       //tpl.Load("{{'Hello World' }}!!!");
       //tpl.LoadFromFile("simple_template1.j2tpl");
       //std::cout << tpl.RenderAsString(params);
-      writeToFile(tpl.RenderAsString(params), "tmp.enum.generated.hpp");
+      writeToFile(tpl.RenderAsString(params).value(), "tmp.enum.generated.hpp");
     }
 
     std::cout << "input_func!... " << '\n';
@@ -1902,8 +1947,16 @@ int main(int argc, const char* const* argv) {
     std::vector<std::string> args_storage;
     args_storage.push_back("clang_app");
     //args_storage.push_back("-extra-arg=-nostdinc");
+
     //args_storage.push_back("-DCLANG_ENABLED=1");
     args_storage.push_back("-extra-arg=-DCLANG_ENABLED=1");
+
+    // https://stackoverflow.com/a/30877725
+    args_storage.push_back("-extra-arg=-DBOOST_SYSTEM_NO_DEPRECATED");
+    args_storage.push_back("-extra-arg=-DBOOST_ERROR_CODE_HEADER_ONLY");
+    // https://jinja2cpp.dev/docs/build_and_install.html#dependency-management-modes
+    args_storage.push_back("-extra-arg=-Dvariant_CONFIG_SELECT_VARIANT=variant_VARIANT_NONSTD");
+
     args_storage.push_back("-extra-arg=-I../cling-build/build/lib/clang/5.0.0/include");
     args_storage.push_back("-extra-arg=-I../cling-build/src/include/");
     args_storage.push_back("-extra-arg=-I../cling-build/build/include/");
@@ -1913,13 +1966,19 @@ int main(int argc, const char* const* argv) {
 
     args_storage.push_back("-extra-arg=-I../submodules/Jinja2Cpp/thirdparty/nonstd/expected-light/include/");
 
+    args_storage.push_back("-extra-arg=-I../resources");
+
     args_storage.push_back("-extra-arg=-std=c++17");
+    //args_storage.push_back("-extra-arg=--std=c++2a");
+    //args_storage.push_back("-extra-arg=-fmodules-ts");
 
     //args_storage.push_back("-extra-arg=-I/usr/local/tander/i586-pc-linux-gnu/usr/include/");
 
+    args_storage.push_back("-p=\".\""); // Build path
+
     // TODO: crash when changed order, may be thread race
-    args_storage.push_back("ReflShapeKind.hpp");
-    args_storage.push_back("test.cpp");
+    args_storage.push_back("../resources/ReflShapeKind.hpp");
+    args_storage.push_back("../resources/test.cpp");
     //args_storage.push_back("-help");
 
     // https://stackoverflow.com/questions/53525502/compiling-c-on-the-fly-clang-libtooling-fails-to-set-triple-for-llvm-ir
@@ -1943,7 +2002,8 @@ int main(int argc, const char* const* argv) {
     //return 0;
 
     //cling::Interpreter::CompilationResult compilationResult;
-    while(true)
+    bool quit = false;
+    while(!quit)
     {
         /*{
             //std::scoped_lock lock(interpMap["main_module"]->canRunMutex);

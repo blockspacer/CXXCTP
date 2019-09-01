@@ -1,7 +1,7 @@
-// This is generated file. Do not modify directly.
+﻿// This is generated file. Do not modify directly.
 // Path to the code generator: {{generator_path}}.
 
-{% for fileName in includes | sort %}
+{% for fileName in generator_includes | sort %}
  #include "{{fileName}}"
 {% endfor %}
 

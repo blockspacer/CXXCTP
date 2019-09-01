@@ -44,6 +44,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/submodules/Jinja2Cpp/c
 set(LLVM_NO_DEAD_STRIP 1)
 
 set(CMAKE_CXX_STANDARD 17)
+#set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -frtti")
@@ -88,7 +89,7 @@ set( USED_SYSTEM_LIBS
   #EXPAT::EXPAT # https://cmake.org/cmake/help/v3.13/module/FindEXPAT.html
   #ZLIB::ZLIB # https://cmake.org/cmake/help/v3.13/module/FindZLIB.html
   # Custom libs
-  #stdc++fs # C++17 std::filesystem
+  stdc++fs # C++17 std::filesystem
   CACHE INTERNAL "USED_SYSTEM_LIBS" )
 
 set( USED_BOOST_LIBS
@@ -170,6 +171,11 @@ target_link_libraries(CXXCTP
 
 target_compile_definitions( CXXCTP PUBLIC
   ${CLING_DEFINITIONS}
+  # https://stackoverflow.com/a/30877725
+  BOOST_SYSTEM_NO_DEPRECATED
+  BOOST_ERROR_CODE_HEADER_ONLY
+  # https://jinja2cpp.dev/docs/build_and_install.html#dependency-management-modes
+  variant_CONFIG_SELECT_VARIANT=variant_VARIANT_NONSTD
 )
 
 target_include_directories( CXXCTP PUBLIC

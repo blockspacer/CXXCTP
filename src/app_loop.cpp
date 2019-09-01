@@ -406,6 +406,7 @@
 #include <thread>
 #include <vector>
 
+#include "jinja2cpp/value.h"
 #include "jinja2cpp/template.h"
 #include "jinja2cpp/filesystem_handler.h"
 #include "jinja2cpp/template_env.h"
@@ -737,10 +738,28 @@ const char* reflect_enum(
     jinja2::ValuesList GeneratedEnumValues;
     GeneratedEnumValues.push_back(0);*/
     jinja2::ValuesList GeneratedEnumItems;
+
+    {
+    jinja2::ValuesMap GeneratedEnumItemsVMap;
+    GeneratedEnumItemsVMap.emplace("name",
+                                   jinja2::Value{"NONE"});
+    GeneratedEnumItemsVMap.emplace("value",
+                                   jinja2::Value(0));
     GeneratedEnumItems.push_back(
+        jinja2::Value{GeneratedEnumItemsVMap});
+    /*GeneratedEnumItems.push_back(
+        jinja2::Value{
+            jinja2::ValuesMap{
+                {"value", jinja2::Value(0)},
+                {"name", "NONE"}
+            }
+        });*/
+    }
+
+   /* GeneratedEnumItems.push_back(
       jinja2::ValuesMap{
         {"value", jinja2::Value(0)},
-        {"name", "NONE"}} );
+        {"name", "NONE"}} );*/
     //GeneratedEnumItems["NONE"] = 0;
 
     LangOptions LO;
@@ -748,7 +767,9 @@ const char* reflect_enum(
     PrintPolicy.AnonymousTagLocations = false;
     PrintPolicy.SuppressTagKeyword = true;
 
-    PresumedLoc pLoc = node->getASTContext().getSourceManager().getPresumedLoc(node->getLocation());
+    PresumedLoc pLoc = node->getASTContext()
+                           .getSourceManager()
+                           .getPresumedLoc(node->getLocation());
 
     std::string nameString = node->getNameAsString();
     if(nameString.empty()) {
@@ -766,28 +787,39 @@ const char* reflect_enum(
       pLoc.getFilename(), pLoc.getLine());
 
     int64_t maxval = std::numeric_limits<int64_t>::min();
-    for (auto iter = node->enumerator_begin(); iter != node->enumerator_end(); iter++)
+    for (auto iter = node->enumerator_begin();
+         iter != node->enumerator_end(); iter++)
     {
         printf("    %s %ld\n", iter->getNameAsString().c_str(),
           iter->getInitVal().getExtValue());
         /*GeneratedEnumNames.push_back(iter->getNameAsString());
         GeneratedEnumValues.push_back(iter->getInitVal().getExtValue());
         GeneratedEnumItems[iter->getNameAsString()] = iter->getInitVal().getExtValue();*/
+        jinja2::ValuesMap GeneratedEnumItemsVMap;
+        GeneratedEnumItemsVMap.emplace("value",
+                                       jinja2::Value{
+                                           iter->getInitVal().getExtValue()});
+        GeneratedEnumItemsVMap.emplace("name",
+                                       jinja2::Value{
+                                           iter->getNameAsString()});
         GeneratedEnumItems.push_back(
-          jinja2::ValuesMap{
-            {"value", jinja2::Value(iter->getInitVal().getExtValue())},
-            {"name", iter->getNameAsString()}} );
+          jinja2::Value{GeneratedEnumItemsVMap});
         maxval = std::max(maxval, iter->getInitVal().getExtValue());
     }
     printf("\n");
 
-    /*GeneratedEnumNames.push_back("TOTAL");
-    GeneratedEnumValues.push_back(maxval + 1);
-    GeneratedEnumItems["TOTAL"] = maxval + 1;*/
-    GeneratedEnumItems.push_back(
-      jinja2::ValuesMap{
-        {"value", jinja2::Value(maxval + 1)},
-        {"name", "TOTAL"}} );
+    {
+        /*GeneratedEnumNames.push_back("TOTAL");
+        GeneratedEnumValues.push_back(maxval + 1);
+        GeneratedEnumItems["TOTAL"] = maxval + 1;*/
+        jinja2::ValuesMap GeneratedEnumItemsVMap;
+        GeneratedEnumItemsVMap.emplace("value",
+                                       jinja2::Value(maxval + 1));
+        GeneratedEnumItemsVMap.emplace("name",
+                                       jinja2::Value{"TOTAL"});
+        GeneratedEnumItems.push_back(
+          jinja2::Value{GeneratedEnumItemsVMap});
+    }
 
       /*std::string enum2StringConvertor = R"(
       inline const char* {{enumName}}ToString({{enumName}} e)
@@ -804,45 +836,51 @@ const char* reflect_enum(
       //jinja2::RealFileSystem fs;
       //auto test1Stream = fs.OpenStream("test_data/simple_template1.j2tpl");
 
-      jinja2::ValuesMap params = {
-          {"GeneratedEnumName", nameString},
-          {"GeneratedEnumType", typeString},
-          //{"GeneratedEnumNames", GeneratedEnumNames },
-          //{"GeneratedEnumValues", GeneratedEnumValues },
-          {"GeneratedEnumItems", GeneratedEnumItems }
-      };
+      jinja2::ValuesMap params;
+      params.emplace("GeneratedEnumName",
+                     jinja2::Value{nameString});
+      params.emplace("GeneratedEnumType",
+                     jinja2::Value{typeString});
+      params.emplace("GeneratedEnumItems",
+                     jinja2::Value{GeneratedEnumItems});
 
       //tpl.Load("{{'Hello World' }}!!!");
       //tpl.LoadFromFile("simple_template1.j2tpl");
       //std::cout << tpl.RenderAsString(params);
 
-    std::string gen_hpp_name = node->getNameAsString() + ".enum.generated.hpp";
+    std::string gen_hpp_name
+          = node->getNameAsString() + ".enum.generated.hpp";
     {
       std::string enum2StringConvertor =
-        getFileContent("enum_gen_cpp.j2tpl");
-      params["generator_path"] = "enum_gen_cpp.j2tpl";
-
-      params["includes"] = jinja2::ValuesList{ gen_hpp_name };
+        getFileContent("../resources/enum_gen_cpp.j2tpl");
+      params.emplace("generator_path",
+                     jinja2::Value{"enum_gen_cpp.j2tpl"});
+      params.emplace("generator_includes",
+                     jinja2::Value{
+                         jinja2::ValuesList{gen_hpp_name}});
       jinja2::Template tpl;
-      jinja2::ParseResult parseResult = tpl.Load(enum2StringConvertor);
+      auto parseResult = tpl.Load(enum2StringConvertor);
       if(!parseResult) {
         printf("ERROR: can`t load jinja2 template from %s [%s]\n",
           enum2StringConvertor.c_str(), parseResult.error().GetLocationDescr().c_str());
       }
-      writeToFile(tpl.RenderAsString(params), node->getNameAsString() + ".enum.generated.cpp");
+      writeToFile(tpl.RenderAsString(params).value(),
+                    node->getNameAsString() + ".enum.generated.cpp");
     }
 
     {
       std::string enum2StringConvertor =
-        getFileContent("enum_gen_hpp.j2tpl");
-      params["generator_path"] = "enum_gen_hpp.j2tpl";
+        getFileContent("../resources/enum_gen_hpp.j2tpl");
+      params.emplace("generator_path",
+                     jinja2::Value{"enum_gen_hpp.j2tpl"});
       jinja2::Template tpl;
-      jinja2::ParseResult parseResult = tpl.Load(enum2StringConvertor);
+      auto parseResult = tpl.Load(enum2StringConvertor);
       if(!parseResult) {
         printf("ERROR: can`t load jinja2 template from %s [%s]\n",
-          enum2StringConvertor.c_str(), parseResult.error().GetLocationDescr().c_str());
+          enum2StringConvertor.c_str(),
+          parseResult.error().GetLocationDescr().c_str());
       }
-      writeToFile(tpl.RenderAsString(params), gen_hpp_name);
+      writeToFile(tpl.RenderAsString(params).value(), gen_hpp_name);
     }
   }
 
@@ -858,7 +896,8 @@ const char* make_reflect(
   std::string indent = "  ";
   std::string output{};
   output.append("\n");
-  output.append(indent + "public:");
+  output.append(indent
+                  + "public:");
   indent.append("  ");
   output.append("\n");
 
@@ -868,11 +907,12 @@ const char* make_reflect(
   clang::CXXRecordDecl const *record =
       matchResult.Nodes.getNodeAs<clang::CXXRecordDecl>("bind_gen");
   if (record) {
-    printf("reflect is record %s\n", record->getName().str().c_str());
+    //printf("reflect is record %s\n", record->getName().str().c_str());
 
     // see https://github.com/Papierkorb/bindgen/blob/b55578e517a308778f5a510de02af499b353f15d/clang/src/record_match_handler.cpp
     for (clang::Decl *decl : record->decls()) {
-      if (clang::CXXMethodDecl *method = llvm::dyn_cast<clang::CXXMethodDecl>(decl)) {
+      if (clang::CXXMethodDecl *method
+            = llvm::dyn_cast<clang::CXXMethodDecl>(decl)) {
         //runOnMethod(method, isSignal);
         printf("reflect is CXXMethodDecl %s %s %s %s\n",
           method->getNameInfo().getName().getAsString().c_str(),
@@ -883,10 +923,12 @@ const char* make_reflect(
           methods[method->getNameInfo().getName().getAsString()] =
             method->getReturnType().getAsString().c_str();
         }
-      } else if (clang::AccessSpecDecl *spec = llvm::dyn_cast<clang::AccessSpecDecl>(decl)) {
+      } else if (clang::AccessSpecDecl *spec
+                    = llvm::dyn_cast<clang::AccessSpecDecl>(decl)) {
         //isSignal = AccessSpecDecl(spec);
         //printf("is CXXMethodDecl %s\n", spec->getName().str().c_str());
-      } else if (clang::FieldDecl *field = llvm::dyn_cast<clang::FieldDecl>(decl)) {
+      } else if (clang::FieldDecl *field
+                    = llvm::dyn_cast<clang::FieldDecl>(decl)) {
         //runOnField(field);
         printf("reflect is FieldDecl %s %s\n",
           field->getType().getUnqualifiedType().getAsString().c_str(),
@@ -900,11 +942,13 @@ const char* make_reflect(
 
     // TODO: use jinja / template
 
-    output.append(indent + "static std::map<std::string, std::string> fields");
+    output.append(indent
+                    + "static std::map<std::string, std::string> fields");
     output.append(" = {");
     output.append("\n");
     for(const auto& [key, value] : fields) {
-      output.append(indent + indent + "{ ");
+      output.append(indent
+                      + indent + "{ ");
       output.append("\"" + key + "\"");
       output.append(", ");
       output.append("\"" + value + "\"");
@@ -912,15 +956,18 @@ const char* make_reflect(
       output.append("\n");
     }
     output.append("\n");
-    output.append(indent + "};");
+    output.append(indent
+                  + "};");
     output.append("\n");
     // methods
     output.append("\n");
-    output.append(indent + "static std::map<std::string, std::string> methods");
+    output.append(indent
+                    + "static std::map<std::string, std::string> methods");
     output.append(" = {");
     output.append("\n");
     for(const auto& [key, value] : methods) {
-      output.append(indent + indent + "{ ");
+      output.append(indent + indent
+                      + "{ ");
       output.append("\"" + key + "\"");
       output.append(", ");
       output.append("\"" + value + "\"");
@@ -928,7 +975,8 @@ const char* make_reflect(
       output.append("\n");
     }
     output.append("\n");
-    output.append(indent + "};");
+    output.append(indent +
+                    "};");
     output.append("\n");
     auto locEnd = record->getLocEnd();
     rewriter.InsertText(locEnd, output,

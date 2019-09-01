@@ -5,6 +5,8 @@ CXXCTP don`t use predefined set of code transformations. Users can share C++ scr
 
 Suppose some big company shared to opensource community usefull scripts like `interface.cxx` and `enum_to_json.cxx`. Just place that scripts into `ctp_scripts` folder to use them in your project.
 
+Metaprogramming is an “art” of writing programs to treats other programs as their data. This means that a program could generate, read, analyse, and transform code or even itself to achieve a certain solution.
+
 Note: this project is provided as is, without any warranty (see License).
 
 ## Features
@@ -81,18 +83,48 @@ TODO
 ## Articles in media (medium, twitter, reddit, ...)
 TODO
 
-## DEPENDENCIES
-```
-bash scripts/install_cmake.sh
-# than build https://jinja2cpp.dev/docs/build_and_install.html with variant_CONFIG_SELECT_VARIANT=variant_VARIANT_NONSTD
-```
-
 ### Clone code
 ```
-git submodule sync --recursive
-git submodule update --init --recursive --depth 50
+sudo git submodule sync --recursive
+sudo git submodule update --init --recursive --depth 50
 # or
-git submodule update --force --recursive --init --remote
+sudo git submodule update --force --recursive --init --remote
+```
+
+## DEPENDENCIES
+```
+# Boost
+sudo add-apt-repository ppa:boost-latest/ppa
+sudo apt-get update && sudo apt-get upgrade
+aptitude search boost
+sudo apt-get install libboost-dev
+
+# MPI
+sudo apt-get install openmpi-bin openmpi-common libopenmpi-dev
+
+# CMake
+bash scripts/install_cmake.sh
+
+# Jinja
+# see https://jinja2cpp.dev/docs/build_and_install.html
+cd submodules/Jinja2Cpp
+#sudo git checkout 0bd14188165769565d53f2bfb5c2e41a2b3a6c9c
+sudo git checkout release_1_0_prep
+sudo git submodule sync --recursive
+sudo git submodule update --init --recursive --depth 50
+rm -rf thirdparty/nonstd/expected-light/
+git clone https://github.com/martinmoene/expected-lite.git thirdparty/nonstd/expected-light/
+rm -rf .build
+mkdir .build
+cd .build
+#     target_link_libraries(jinja2cpp_tests gtest gtest_main nlohmann_json ${LIB_TARGET_NAME} ${EXTRA_TEST_LIBS} boost_system )
+#BOOST_ERROR_CODE_HEADER_ONLY
+# target_compile_definitions(${LIB_TARGET_NAME} PUBLIC variant_CONFIG_SELECT_VARIANT=variant_VARIANT_NONSTD BOOST_SYSTEM_NO_DEPRECATED )
+# -DJINJA2CPP_DEPS_MODE=external-boost -DJINJA2CPP_BUILD_TESTS=OFF -Dvariant_CONFIG_SELECT_VARIANT=variant_VARIANT_NONSTD
+# BOOST_SYSTEM_NO_DEPRECATED likely makes it unnecessary to link with boost_system at all
+cmake .. -DJINJA2CPP_DEPS_MODE=external-boost -DJINJA2CPP_EXTRA_LIBS=boost_system
+cmake --build . --target all
+sudo cmake --build . --target install
 ```
 
 ## How to build
@@ -108,7 +140,8 @@ export CXX=clang++
 ```
 
 ```
-bash scripts/setup.sh
+cd scripts
+bash setup.sh
 ```
 
 ```
@@ -232,6 +265,7 @@ Usefull links:
 + https://kevinaboos.wordpress.com/2013/07/30/clang-tips-and-tricks/
 + https://eli.thegreenplace.net/tag/llvm-clang
 + http://www.goldsborough.me/c++/clang/llvm/tools/2017/02/24/00-00-06-emitting_diagnostics_and_fixithints_in_clang_tools/
++ https://www.amazon.com/Getting-Started-LLVM-Core-Libraries/dp/1782166920
 
 ## About cling
 CXXCTP uses cling to execute C++ at compile-time.
@@ -239,8 +273,9 @@ CXXCTP uses cling to execute C++ at compile-time.
 You can use cling for hot code reload / REPL / Fast C++ prototyping / Scripting engine / JIT / e.t.c.
 
 Usefull links:
-+ https://github.com/derofim/cling-cmake
-+ https://github.com/root-project/cling/tree/master/www/docs/talks
+ + https://github.com/derofim/cling-cmake
+ + https://github.com/root-project/cling/tree/master/www/docs/talks
+ + https://github.com/caiorss/C-Cpp-Notes/blob/master/Root-cern-repl.org
 
 ## Similar projects
 
@@ -252,7 +287,21 @@ circle https://github.com/seanbaxter/circle/blob/master/examples/README.md
 
 SugarCpp https://github.com/curimit/SugarCpp
 
-ExtendedCpp & modules https://github.com/reneeichhorn/extended-cpp
+ExtendedCpp https://github.com/reneeichhorn/extended-cpp
+
+modules
+ + https://github.com/reneeichhorn/extended-cpp
+ + https://www.modernescpp.com/index.php/c-20-modules
+ + https://github.com/boostcon/cppnow_presentations_2019/blob/master/05-10-2019_friday/The_Rough_Road_Towards_Upgrading_to_Cpp_Modules__Rich%C3%A1rd_Szalay__cppnow_05102019.pdf
+
+c++ modules backwards compatible
+ + https://github.com/build2/build2/blob/master/doc/manual.cli#L6362
+ + #ifndef __cpp_modules https://build2.org/doc/modules-cppcon2017.pdf
+ + https://github.com/fdwr/TextLayoutSampler/blob/be81e6dbc95151f51acb1ae5ea30c7863f237387/Common.h#L8
+ + https://github.com/ned14/kerneltest/blob/07491646b1c1f875d22512e0630902c142eeae5b/include/kerneltest/v1.0/kerneltest.hpp#L37
+ + https://stackoverflow.com/questions/34652029/how-should-i-write-my-c-to-be-prepared-for-c-modules
+ + https://build2.org/article/cxx-modules-misconceptions.xhtml
+ + https://build2.org/doc/modules-cppcon2017.pdf
 
 C/C++ subset resyntaxed like Rust,+ tagged-union/Pattern-Matching, UFCS,inference; LLVM https://github.com/dobkeratops/compiler
 
@@ -262,7 +311,9 @@ enum_class with values auto incrementation http://www.open-std.org/jtc1/sc22/wg2
 
 enum flags https://github.com/seanbaxter/circle/blob/master/gems/flag_enum.cxx
 
-design patterns https://gist.github.com/blockspacer/44fb6528d801e3149716d59bac041b45
+design patterns
+ + https://gist.github.com/blockspacer/44fb6528d801e3149716d59bac041b45
+ + https://github.com/caiorss/C-Cpp-Notes/blob/master/cpp-design-patterns.org
 
 pimpl_generator.cpp https://github.com/flexferrum/autoprogrammer/blob/8c9867d357450b99202dac81730851ffc8faa891/src/generators/pimpl_generator.cpp
 
@@ -470,11 +521,26 @@ https://github.com/Leandros/metareflect/blob/0208fdd4fc0ea1081ae2ff4c3bfce161305
 
 ability to embed rules for speed (run without cling)
 
+base64 Embed Resources Into Executables
+ + https://github.com/caiorss/C-Cpp-Notes/blob/master/resources-executable.org#base-64-implementations
+
 add_func_by_jinja(jinja_arg1, jinja_arg2). NOTE: jinja_arg1 - may be cling var name
 
 C++ class state serialization (byte serialization)
-
+ + http://ithare.com/ultra-fast-serialization-of-c-objects/
+ + https://rubentorresbonet.wordpress.com/2014/08/25/an-overview-of-data-serialization-techniques-in-c/
+ + https://accu.org/index.php/journals/2317
+ + https://arxiv.org/pdf/1811.04556.pdf
+ + https://stackoverflow.com/questions/46625279/is-it-safe-to-serialize-pod-data-by-casting-directly-to-char-array
+ + Modern C++ Programming Cookbook https://books.google.ru/books?id=rHc5DwAAQBAJ&pg=PA301&lpg=PA301&dq=reinterpret_cast+const+char+serialize+C%2B%2B+POD&source=bl&ots=9DUR3KDM16&sig=ACfU3U3BoCEa14SjsJEdsQYymyqnY25kbQ&hl=ru&sa=X&ved=2ahUKEwiNpdGCkrDkAhWjs4sKHYk7BRgQ6AEwAnoECAkQAQ#v=onepage&q=reinterpret_cast%20const%20char%20serialize%20C%2B%2B%20POD&f=false
 error reporting & unit tests
+ + https://probablydance.com/2015/12/19/quickly-loading-things-from-disk/
+ + https://github.com/voidah/archive/blob/master/archive.h
+ + https://www.reddit.com/r/cpp/comments/8dpcjh/singleheader_c14_binary_serialization/
+
+RPC
+ + http://www.crazygaze.com/blog/2016/06/06/modern-c-lightweight-binary-rpc-framework-without-code-generation/
+ + https://www.youtube.com/watch?v=nb1fO4H9Q8w
 
 recursive refletor / serializer
 
@@ -515,6 +581,19 @@ NamedType https://github.com/joboccara/NamedType
 
 magic_get https://github.com/apolukhin/magic_get
 
+getset
+ + https://habr.com/ru/post/459212/
+ + https://habr.com/ru/post/121799/
+ + https://github.com/tower120/cpp_property
+
+Property (state, descr, man/max/allowed/getset/serialize/onbeforechange/onafterchange/addobserver, hierarchy/PropertyBrowser) & SetPropertyByName()
+ + https://github.com/qtinuum/QtnProperty#overview
+ + https://woboq.com/blog/reflection-in-cpp-and-qt-moc.html
+ + https://github.com/robertknight/Qt-Inspector
+ + https://stackoverflow.com/a/49230152
+
+notifier
+
 `has` for enum https://github.com/Manu343726/siplasplas/blob/master/examples/reflection/static/enum.cpp#L17
 
 Determine the layout of C and C++ types, including their size, and the size, offset, and padding of each field in the type. https://github.com/joshpeterson/layout
@@ -531,11 +610,11 @@ concurrency / loop vectorizin
 
 loop for recursion
 
-entt / ECS
+entt / DynaMix / ECS
+ + https://habr.com/ru/company/pixonic/blog/413729/
+ + https://ibob.github.io/dynamix/appendix.html
 
 script / language binding
-
-https://github.com/iboB/dynamix
 
 generating from comments in the code.
 
@@ -549,6 +628,83 @@ $jinja(filename = ..., arg1 = ..., arg2 = ...)
 fix args split, don`t separate based on args in quotes
 
 in-class jinja placeholder attrs & make_jinja_placeholders attr
+
+http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p0707r3.pdf
+
+Defer and Finally
+ + https://github.com/curimit/SugarCpp#defer-and-finally
+ + https://oded.blog/2017/10/05/go-defer-in-cpp/
+ + https://www.gingerbill.org/article/2015/08/19/defer-in-cpp/
+
+ERROR HANDLING
+ + https://blog.panicsoftware.com/error-handling-now-and-tomorrow/
+
+operator_in
+ + https://habr.com/ru/post/419579/
+
+Class Types
+ + https://wiki.hsr.ch/PeterSommerlad/files/NDC2018_sane_class_types.pdf
+
+Dependency_Injection
+ + https://github.com/boostcon/cppnow_presentations_2019/blob/master/05-06-2019_monday/Dependency_Injection_a_25-dollar_Term_for_a_5-cent_Concept__Kris_Jusiak__cppnow_05062019.pdf
+
+Allocator-Aware (AA) Software
+ + https://github.com/boostcon/cppnow_presentations_2019/blob/master/05-06-2019_monday/Value_Proposition_Allocator-Aware_(AA)_Software__John_Lakos__cppnow_05062019.pdf
+
+std::unique_resource
+ + https://github.com/okdshin/unique_resource
+ + https://habr.com/ru/company/pt/blog/255487/
+ + https://www.reddit.com/r/cpp/comments/3upl42/dive_into_c14_3_generic_unique_resource_wrapper/
+ + https://stackoverflow.com/questions/24611215/one-liner-for-raii-on-non-pointer
+ + https://stackoverflow.com/a/24759558
+
+State_Machines
+ + https://github.com/boostcon/cppnow_presentations_2019/blob/master/05-07-2019_tuesday/Rise_of_the_State_Machines__Kris_Jusiak__cppnow_05072019.pdf
+
+Type Erasure
+ + https://github.com/seanbaxter/circle/blob/master/erasure/type_erasure.cxx
+ + https://twitter.com/TartanLlama/status/1159445548417634324
+ + https://www.youtube.com/watch?v=OtU51Ytfe04
+ + https://github.com/italiancpp/meetup-milano-2014/blob/300013def6f2182c0b0bce7b3d511613581a437f/cpp_typeclass/presentation/Types%2C%20classes%20and%20concepts%20(updated).pdf
+ + http://www.goldsborough.me/cpp/2018/05/22/00-32-43-type_erasure_for_unopinionated_interfaces_in_c++/
+ + https://quuxplusone.github.io/blog/2019/03/18/what-is-type-erasure/
+ + https://www.codeproject.com/Articles/1208983/Generic-Algorithms-on-Runtime-Types-in-Cplusplus-T
+ + https://www.modernescpp.com/index.php/c-core-guidelines-type-erasure-with-templates
+ + https://github.com/TartanLlama/typeclasses
+ + https://github.com/nicuveo/CppTypeclasses
+ + https://github.com/arbrk1/typeclasses_cpp
+ + http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2019/p1717r0.pdf
+ + https://channel9.msdn.com/Events/GoingNative/2013/Inheritance-Is-The-Base-Class-of-Evil
+ + https://www.modernescpp.com/index.php/concepts-lite
+ + https://cdn2-ecros.pl/event/codedive/files/presentations/2017/code%20dive%202017%20-%20Michal%20Dominiak%20-%20Customization%20points%20that%20suck%20less.pdf
+ + https://github.com/italiancpp/meetup-milano-2014/blob/300013def6f2182c0b0bce7b3d511613581a437f/cpp_typeclass/cpp11/typeclass-example.cpp#L37
+ + https://functionalcpp.wordpress.com/2013/08/16/type-classes/
+
+Monoids
+ + https://www.youtube.com/watch?v=INnattuluiM
+ + https://github.com/boostcon/cppnow_presentations_2019/blob/master/05-09-2019_thursday/Identifying_Monoids_Exploiting_Compositional_Structure_in_Code__Ben_Deane_cppnow_05092019.pdf
+ + https://deque.blog/2017/09/13/monoids-what-they-are-why-they-are-useful-and-what-they-teach-us-about-software/
+ + https://habr.com/ru/post/205026/
+ + http://stepanovpapers.com/notes.pdf
+ + https://bartoszmilewski.com/2014/04/21/getting-lazy-with-c/
+
+recursion
+ + https://deque.blog/2016/11/30/open-recursion-c/
+
+open multi-methods
+ + https://www.youtube.com/watch?v=xkxo0lah51s
+ + https://github.com/jll63/yomm2/blob/master/examples/synopsis.cpp
+
+DSL
+ + https://deque.blog/2017/01/30/catamorph-your-dsl-c-port/ & https://deque.blog/2017/03/31/paramorph-you-dsl-c/
+
+How supporting reflection, being able to manipulate the AST of the language inside the language, and perform any computation at compile time can greatly improve and simplify your code. LISP META-PROGRAMMING FOR C++ DEVELOPERS SERIES https://deque.blog/posts/
+
+A Revisited Command Pattern https://www.oreilly.com/library/view/practical-c-metaprogramming/9781492042778/#toc-start
+
+strong types
+ + https://www.youtube.com/watch?v=BtA92KmcECQ
+ + https://github.com/boostcon/cppnow_presentations_2019/blob/master/05-06-2019_monday/How_I_Learned_to_Stop_worrying_and_Love_the_Cpp_Type_System__Peter_Sommerlad__cppnow_05062019.pdf
 
 ## Misc
 https://medium.com/fluence-network/porting-redis-to-webassembly-with-clang-wasi-af99b264ca8

@@ -1,4 +1,4 @@
-// This is generated file. Do not modify directly.
+﻿// This is generated file. Do not modify directly.
 // Path to the code generator: {{generator_path}}.
 
 {% if headerGuard is defined %}
@@ -7,6 +7,10 @@
 {% else %}
  #pragma once
 {% endif %}
+
+{% for fileName in generator_includes | sort %}
+ #include "{{fileName}}"
+{% endfor %}
 
  #include <array>
  #include <functional>
@@ -36,7 +40,7 @@ struct {{GeneratedEnumName}}
 
   _enumerated value_;
 
-  static constexpr size_t _count = 3;
+  static constexpr size_t _count = {{GeneratedEnumItems|length}};
 
   using value_container =
     std::array<_enumerated_t, _count>;
