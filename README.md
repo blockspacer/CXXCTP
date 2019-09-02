@@ -114,6 +114,8 @@ sudo git submodule sync --recursive
 sudo git submodule update --init --recursive --depth 50
 rm -rf thirdparty/nonstd/expected-light/
 git clone https://github.com/martinmoene/expected-lite.git thirdparty/nonstd/expected-light/
+rm -rf thirdparty/fmtlib/
+git clone https://github.com/fmtlib/fmt.git thirdparty/fmtlib/
 rm -rf .build
 mkdir .build
 cd .build
@@ -281,18 +283,67 @@ Usefull links:
 
 Compile-time EXecution of C++ code https://github.com/MaliusArth/cex/blob/6f6e700a253b06c7ae6801e1a3c1f3d842931d77/tool/src/MatchCallbacks/AnnotatedFunctionCallback.cpp
 
-SaferCPlusPlus https://github.com/duneroadrunner/SaferCPlusPlus
+SaferCPlusPlus
+ + https://duneroadrunner.github.io/SaferCPlusPlus/
+ + https://github.com/duneroadrunner/SaferCPlusPlus
+ + https://www.codeproject.com/Articles/duneroadrunner#Article
+ + https://github.com/bloodstalker/mutator/blob/dccbcf0295105f2ec1631443bb01a6d31d2b0dfb/test/testFuncs1scpp.h
+ + https://github.com/duneroadrunner/SaferCPlusPlus/blob/master/msetl_example2.cpp
+ + https://github.com/duneroadrunner/SaferCPlusPlus-BenchmarksGame
+ + https://github.com/duneroadrunner/SaferCPlusPlus-AutoTranslation
+
+type_safe
+ + https://www.youtube.com/watch?v=iihlo9A2Ezw
+ + https://www.youtube.com/watch?v=kYiEvVEh6Tw
+ + https://github.com/foonathan/type_safe/
+ + https://embeddedartistry.com/blog/2018/5/24/improve-type-safety-in-your-c-program-with-the-typesafe-library
+ + https://foonathan.net/blog/2016/10/11/type-safe.html
+ + https://foonathan.net/blog/2016/10/19/strong-typedefs.html
+
+Opaque Typedefs aka phantom types (strong types)
+ + https://nullptr.nl/2018/02/phantom-types/
+
+translations / i18n
+ + https://www.gnu.org/software/gettext/
+
+Ironclad C++
+ + https://github.com/crdelozier/ironclad
+ + http://acg.cis.upenn.edu/papers/ironclad-oopsla.pdf
+
+Checked C
+ + https://duneroadrunner.github.io/SaferCPlusPlus/#safercplusplus-versus-checked-c
+
+debug_new
+ + http://nvwa.sourceforge.net/article/debug_new.htm
+ + https://github.com/adah1972/nvwa
+
+Guidelines Support Library
+ + https://github.com/microsoft/GSL
+ + https://www.reddit.com/r/cpp/comments/acspkq/guideline_support_library_what_a_mess/
 
 circle https://github.com/seanbaxter/circle/blob/master/examples/README.md
 
 SugarCpp https://github.com/curimit/SugarCpp
 
+fixed_mem_pool
+ + https://github.com/adah1972/nvwa
+
 ExtendedCpp https://github.com/reneeichhorn/extended-cpp
+
+extra libs
+ + https://getstudypoint.blogspot.com/2017/07/how-to-work-in-c-from-basic-to-advance.html
 
 modules
  + https://github.com/reneeichhorn/extended-cpp
  + https://www.modernescpp.com/index.php/c-20-modules
  + https://github.com/boostcon/cppnow_presentations_2019/blob/master/05-10-2019_friday/The_Rough_Road_Towards_Upgrading_to_Cpp_Modules__Rich%C3%A1rd_Szalay__cppnow_05102019.pdf
+
+backports various facilities from more recent C++ Standards
+ + http://ryan.gulix.cl/fossil.cgi/cxxomfort/index
+
+Actors
+ + https://github.com/italiancpp/meetup-milano-2014/tree/300013def6f2182c0b0bce7b3d511613581a437f/cpp_actor_model
+ + https://github.com/actor-framework/actor-framework
 
 c++ modules backwards compatible
  + https://github.com/build2/build2/blob/master/doc/manual.cli#L6362
@@ -314,6 +365,7 @@ enum flags https://github.com/seanbaxter/circle/blob/master/gems/flag_enum.cxx
 design patterns
  + https://gist.github.com/blockspacer/44fb6528d801e3149716d59bac041b45
  + https://github.com/caiorss/C-Cpp-Notes/blob/master/cpp-design-patterns.org
+ + https://caiorss.github.io/C-Cpp-Notes/cpp-design-patterns.html
 
 pimpl_generator.cpp https://github.com/flexferrum/autoprogrammer/blob/8c9867d357450b99202dac81730851ffc8faa891/src/generators/pimpl_generator.cpp
 
@@ -546,7 +598,11 @@ recursive refletor / serializer
 
 Prefer comparison using epsilon for floating point types like: https://gist.github.com/derofim/df604f2bf65a506223464e3ffd96a78a#comparison-and-boolean-check
 
-enum classes as type-safe bitmasks https://gist.github.com/derofim/0188769131c62c8aff5e1da5740b3574
+enum classes as type-safe bitmasks
+ + https://gist.github.com/derofim/0188769131c62c8aff5e1da5740b3574
+
+flag_set: Type-safe, hard to misuse bitmask
+ + https://foonathan.net/blog/2017/03/16/implementation-challenge-bitmask.html
 
 enum parser https://github.com/goto40/rpp/blob/ec8a4c4a3ac32dccee8c4e8ba97be8c2ba1c8f88/src/parser/enum_parser.cpp
 
@@ -604,7 +660,9 @@ Macro support
 
 Remove macro from generated src
 
-Reactive CPP (C++React / RxCpp) https://github.com/schlangster/cpp.react
+Reactive CPP (C++React / RxCpp)
+ + http://reactivex.io/intro.html
+ + https://github.com/schlangster/cpp.react
 
 concurrency / loop vectorizin
 
@@ -661,10 +719,35 @@ std::unique_resource
 State_Machines
  + https://github.com/boostcon/cppnow_presentations_2019/blob/master/05-07-2019_tuesday/Rise_of_the_State_Machines__Kris_Jusiak__cppnow_05072019.pdf
 
+shared pointer that uses a copy-on-write strategy, meaning that you can make an infinite number of copies without copying the actual data
+ + https://dragly.org/2018/04/21/value-container-with-copy-by-value-semantics/
+
+[
+With inheritance in C++, it is easy to introduce new types,
+but hard to extend with new functionality
+(all existing types will need to implement any new functions).
+Further, it is hard to add functionality after-the-fact.
+If a library has defined length() as a function of Vector3,
+but you need lengthSquared() for performance reasons,
+there is no easy way to add this to the Vector3 class.
+You will typically have to make lengthSquared(Vector3 v)
+a free function, which makes it awkward,
+because you are now calling v.length() for the length,
+but lengthSquared(v) for the length squared.
+https://dragly.org/2018/04/21/rust-like-traits-in-cpp/
+]
 Type Erasure
+ + https://github.com/seanbaxter/circle/blob/master/erasure/type_erasure.md
+ + https://www.reddit.com/r/cpp/comments/8a8iu7/c20conceptsexperiment_using_typeerasure_interface/
+ + 2.7 Type Erasure Pattern https://caiorss.github.io/C-Cpp-Notes/cpp-design-patterns.html
+ + https://www.reddit.com/r/cpp/comments/5nod8r/will_concepts_replace_polymorphism/
+ + https://github.com/andyprowl/virtual-concepts/blob/master/draft/Dynamic%20Generic%20Programming%20with%20Virtual%20Concepts.pdf
+ + https://dragly.org/2018/04/21/rust-like-traits-in-cpp/
  + https://github.com/seanbaxter/circle/blob/master/erasure/type_erasure.cxx
  + https://twitter.com/TartanLlama/status/1159445548417634324
  + https://www.youtube.com/watch?v=OtU51Ytfe04
+ + https://www.youtube.com/watch?v=QGcVXgEVMJg
+ + http://ldionne.com/accu-2017-rust-traits-in-cpp/#/
  + https://github.com/italiancpp/meetup-milano-2014/blob/300013def6f2182c0b0bce7b3d511613581a437f/cpp_typeclass/presentation/Types%2C%20classes%20and%20concepts%20(updated).pdf
  + http://www.goldsborough.me/cpp/2018/05/22/00-32-43-type_erasure_for_unopinionated_interfaces_in_c++/
  + https://quuxplusone.github.io/blog/2019/03/18/what-is-type-erasure/
@@ -679,6 +762,24 @@ Type Erasure
  + https://cdn2-ecros.pl/event/codedive/files/presentations/2017/code%20dive%202017%20-%20Michal%20Dominiak%20-%20Customization%20points%20that%20suck%20less.pdf
  + https://github.com/italiancpp/meetup-milano-2014/blob/300013def6f2182c0b0bce7b3d511613581a437f/cpp_typeclass/cpp11/typeclass-example.cpp#L37
  + https://functionalcpp.wordpress.com/2013/08/16/type-classes/
+ + https://www.reddit.com/r/cpp/comments/6sl1hl/customization_point_idea/
+ + http://missingfaktor.blogspot.com/2014/02/so-how-much-of-inheritance-criticism.html
+[
+Possible problems:
+ + b = (cast b to super-type A) then cast back to sub-type https://users.rust-lang.org/t/how-to-do-c-like-inheritance/20545
+ + Rust prefers composition over inheritance, so instead of saying a Rectangle is-a Drawable object, you might say it has-a thing which is Drawable https://users.rust-lang.org/t/how-to-do-c-like-inheritance/20545/4
+ + 2.2.2. Reference sematics https://github.com/andyprowl/virtual-concepts/blob/master/draft/Dynamic%20Generic%20Programming%20with%20Virtual%20Concepts.pdf
+]
+[
+TODO
+ + http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p0957r0.pdf & https://github.com/wmx16835/my-stl/tree/master/src/main/p0957
+]
+
+Data-oriented ECS
+ + http://bitsquid.blogspot.se/2014/08/building-data-oriented-entity-system.html
+
+Uniform call syntax in C++ today
+ + https://dragly.org/2017/03/31/uniform-call-syntax/
 
 Monoids
  + https://www.youtube.com/watch?v=INnattuluiM
@@ -705,6 +806,9 @@ A Revisited Command Pattern https://www.oreilly.com/library/view/practical-c-met
 strong types
  + https://www.youtube.com/watch?v=BtA92KmcECQ
  + https://github.com/boostcon/cppnow_presentations_2019/blob/master/05-06-2019_monday/How_I_Learned_to_Stop_worrying_and_Love_the_Cpp_Type_System__Peter_Sommerlad__cppnow_05062019.pdf
+
+FileID != SourceManager.getMainFileID()
+ + https://xinhuang.github.io/posts/2014-10-19-clang-tutorial-finding-declarations.html
 
 ## Misc
 https://medium.com/fluence-network/porting-redis-to-webassembly-with-clang-wasi-af99b264ca8

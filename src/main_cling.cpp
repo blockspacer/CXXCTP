@@ -208,7 +208,12 @@
 #include <string>
 #include <thread>
 #include <vector>
-#include <filesystem>
+
+#include <experimental/filesystem>
+
+namespace fs = std::experimental::filesystem;
+
+#include "type_erasure2.cpp"
 
 #include "someEnum.hpp"
 
@@ -1471,12 +1476,12 @@ public:
     const auto fileEntry = SM.getFileEntryForID(SM.getMainFileID());
     std::string full_file_path = fileEntry->getName();
     llvm::outs() << "full_file_path is " << full_file_path << "\n";
-    const std::string filename = std::filesystem::path(full_file_path).filename();
+    const std::string filename = fs::path(full_file_path).filename();
     llvm::outs() << "filename is " << filename << "\n";
 
     llvm::outs() << "** EndSourceFileAction for: "
                  << fileEntry->getName().str() << "\n";
-    const std::string full_file_ext = std::filesystem::path(full_file_path).extension();
+    const std::string full_file_ext = fs::path(full_file_path).extension();
     const std::string out_path = filename + ".generated" + full_file_ext;
 
     bool shouldFlush = true;
@@ -1882,6 +1887,64 @@ void test_split_to_funcs() {
 
 int main(int /*argc*/, const char* const* /*argv*/) {
     using namespace clang::tooling;
+
+    obj_t o{allcaps_t{}};
+    o.print_interface_data();
+    o.set_interface_data("O1 interface data");
+    o.print_interface_data();
+    o.print_data();
+    o.print("Hello o");
+    o.set_data("O1 data");
+    o.print_data();
+
+    obj_t a = obj_t::construct<allcaps_t>();
+    a.print_data();
+    a.print("Hello a");
+    a.set_data("A1 data");
+    a.print_data();
+
+    // Copy-construct a to get b.
+    obj_t b = a;
+    b.print("Hello b");
+
+    if(b.has_save())
+      b.save("my.save", "w");
+
+    // Copy-assign a to get c.
+    obj_t c;
+    c = b;
+    c.print("Hello c");
+
+    // Create a forward object.
+    obj_t d = obj_t::construct<forward_t>();
+    d.print_data();
+    d.print("Hello d");
+    d.save("foo.save", "w");
+    d.set_data("D1 data");
+    d.print_data();
+    d.print_interface_data();
+    d.set_interface_data("D1 interface data");
+    d.print_interface_data();
+
+    // Create a reverse object.
+    obj_t e = obj_t::construct<reverse_t>();
+    e.print("Hello e");
+
+    if(e.has_save())
+      e.save("bar.save", "w");
+
+    obj_t f = reverse_t{};
+    f.print("Hello f");
+
+    o.print("Hello o");
+    a.print("Hello a");
+    b.print("Hello b");
+    c.print("Hello c");
+    d.print("Hello d");
+    e.print("Hello e");
+    f.print("Hello f");
+
+    return 0;
 
     //std::cout << "seg\n";
 
