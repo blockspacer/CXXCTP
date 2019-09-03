@@ -211,9 +211,12 @@
 
 #include <experimental/filesystem>
 
-namespace fs = std::experimental::filesystem;
+#include "types_for_erasure.hpp"
+#include "type_erasure_my_interface.hpp"
+#include "type_erasure_my_interface2.hpp"
+#include "type_erasure_my_interface_my_interface2.hpp"
 
-#include "type_erasure2.hpp"
+namespace fs = std::experimental::filesystem;
 
 #include "someEnum.hpp"
 
@@ -1904,13 +1907,126 @@ namespace generated {
    (const reverse_t&, const char* surface) {
     std::cout << "Drawing reverse_t on " << surface << std::endl;
   }
-} // namespace __my_interface
-} // namespace __my_interface
+} // namespace generated
+} // namespace cxxctp
+
+#if 0
+namespace cxxctp {
+namespace generated {
+  template<>
+  void draw<my_interface2/*obj_t::typeclass_t*/>
+   (const allcaps_t&, const char* surface) {
+    std::cout << "Drawing allcaps_t on " << surface << std::endl;
+  }
+
+  template<>
+  void draw<my_interface2/*obj_t::typeclass_t*/>
+   (const forward_t&, const char* surface) {
+    std::cout << "Drawing forward_t on " << surface << std::endl;
+  }
+
+  template<>
+  void draw<my_interface2/*obj_t::typeclass_t*/>
+   (const reverse_t&, const char* surface) {
+    std::cout << "Drawing reverse_t on " << surface << std::endl;
+  }
+} // namespace generated
+} // namespace cxxctp
+#endif // 0
+
+void do_small_smth(const my_interface_obj_t& small_obj) {
+  if(!small_obj) {
+    printf("INVALID SMALL_OBJ!\n");
+    return;
+  }
+  if(!small_obj.has_print()) {
+    printf("SMALL_OBJ without print!\n");
+    return;
+  }
+  if(small_obj.has_print()) {
+    small_obj.print("Hello from do_small_smth");
+  }
+  printf("SMALL_OBJ print_interface_data!\n");
+  small_obj.print_interface_data();
+}
+
+void do_big_smth(const my_interface_my_interface2_obj_t& big_obj) {
+  if(!big_obj) {
+    printf("INVALID big_OBJ.has_my_interface_model!\n");
+    return;
+  }
+  if(!big_obj.has_print()) {
+    printf("big_OBJ without print!\n");
+    return;
+  }
+  if(big_obj.has_print()) {
+    big_obj.print("Hello from do_big_smth");
+  }
+  printf("big_OBJ print_interface_data!\n");
+  big_obj.print_interface_data();
+}
 
 int main(int /*argc*/, const char* const* /*argv*/) {
     using namespace clang::tooling;
 
-    obj_t o{allcaps_t{}};
+    //one_obj_t one1 = reverse_t{};
+    //obj_t one2 = one_obj_t::construct<reverse_t>();
+    //one_obj_t one3 = one2;
+
+    do_small_smth(forward_t{});
+    do_small_smth(my_interface_obj_t{});
+    //do_small_smth(my_interface2_obj_t{});
+    //do_small_smth(my_interface_my_interface2_obj_t{});
+
+    do_big_smth(forward_t{});
+    //do_big_smth(my_interface_obj_t{});
+    //do_big_smth(my_interface2_obj_t{});
+    do_big_smth(my_interface_my_interface2_obj_t{});
+
+    my_interface_my_interface2_obj_t com1;
+    com1.create_my_interface_model(forward_t{});
+    com1.create_my_interface2_model(allcaps_t{});
+    if(com1.has_do_job())
+      com1.do_job("com1.save", "w");
+    com1.print_interface_data();
+    com1.set_interface_data("com1 interface data");
+
+    do_big_smth(com1);
+
+    my_interface_obj_t shared_my_interface_obj_t;
+    shared_my_interface_obj_t.replace_my_interface_model(
+      com1.ref_my_interface_model());
+    shared_my_interface_obj_t.set_interface_data("set_interface_data1");
+    do_small_smth(shared_my_interface_obj_t);
+
+    /*my_interface_my_interface2_obj_t comMov
+      = shared_my_interface_obj_t.ref_my_interface_model();
+    shared_my_interface_obj_t.set_interface_data("set_interface_data1");
+    do_small_smth(shared_my_interface_obj_t);*/
+
+    my_interface_my_interface2_obj_t com2 = reverse_t{};
+    com2 = shared_my_interface_obj_t;
+    com2 = com1;
+    com2.set_common_model(reverse_t{});
+    com2.replace_my_interface_model(
+      com1.ref_my_interface_model());
+
+    com1.print_interface_data();
+    com2.print_interface_data();
+
+    do_big_smth(com2);
+
+    if(com2.has_do_job())
+      com2.do_job("com2.save", "w");
+    com2.print_interface_data();
+    com2.set_interface_data("com2 interface data");
+    com2.print_interface_data();
+
+    my_interface2_obj_t o2{forward_t{}};
+    if(o2.has_do_job())
+      o2.do_job("o2.save", "w");
+
+    my_interface_obj_t o{allcaps_t{}};
     o.draw("canvas");
     o.print_interface_data();
     o.set_interface_data("O1 interface data");
@@ -1920,7 +2036,9 @@ int main(int /*argc*/, const char* const* /*argv*/) {
     o.set_data("O1 data");
     o.print_data();
 
-    obj_t a = obj_t::construct<allcaps_t>();
+    do_small_smth(o);
+
+    my_interface_obj_t a = my_interface_obj_t::construct<allcaps_t>();
     a.draw("water");
     a.print_data();
     a.print("Hello a");
@@ -1928,7 +2046,7 @@ int main(int /*argc*/, const char* const* /*argv*/) {
     a.print_data();
 
     // Copy-construct a to get b.
-    obj_t b = a;
+    my_interface_obj_t b = a;
     b.draw("sand");
     b.print("Hello b");
 
@@ -1936,12 +2054,12 @@ int main(int /*argc*/, const char* const* /*argv*/) {
       b.save("my.save", "w");
 
     // Copy-assign a to get c.
-    obj_t c;
+    my_interface_obj_t c;
     c = b;
     c.print("Hello c");
 
     // Create a forward object.
-    obj_t d = obj_t::construct<forward_t>();
+    my_interface_obj_t d = my_interface_obj_t::construct<forward_t>();
     d.draw("wind");
     d.print_data();
     d.print("Hello d");
@@ -1953,14 +2071,14 @@ int main(int /*argc*/, const char* const* /*argv*/) {
     d.print_interface_data();
 
     // Create a reverse object.
-    obj_t e = obj_t::construct<reverse_t>();
+    my_interface_obj_t e = my_interface_obj_t::construct<reverse_t>();
     e.draw("text");
     e.print("Hello e");
 
     if(e.has_save())
       e.save("bar.save", "w");
 
-    obj_t f = reverse_t{};
+    my_interface_obj_t f = reverse_t{};
     f.draw("console");
     f.print("Hello f");
 

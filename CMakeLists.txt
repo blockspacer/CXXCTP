@@ -67,7 +67,9 @@ if(ENABLE_CLING)
     ${CMAKE_CURRENT_SOURCE_DIR}/src/main_cling.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/someEnum.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/someEnum.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/type_erasure2.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/type_erasure_my_interface.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/type_erasure_my_interface2.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/types_for_erasure.cpp
   )
 else(ENABLE_CLING)
   message(FATAL_ERROR "Only Cling interpreter is supported for now")

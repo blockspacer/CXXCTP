@@ -13,189 +13,18 @@
 #include <functional>
 #include <string>
 
-/*struct my_interface;
-struct forward_t;
-struct reverse_t;
-struct allcaps_t;*/
-
-// TODO: inherit from multiple typeclass?
-
-struct my_interface2 {
-  virtual void print_2(const char* text) = 0;
-
-  // @gen(extern)
-  //virtual void draw_2(const char* surface) const = 0;
-};
-
-struct my_interface {
-  // @gen(extern)
-  virtual void draw(const char* surface) const = 0;
-
-  // @gen(required)
-  virtual void print(const char* text) = 0;
-
-  // @gen(required)
-  virtual void print_data() = 0;
-
-  virtual void save(const char* filename, const char* access) = 0;
-
-  virtual void set_data(const char* text) = 0;
-
-  // TODO: pseudo inheritance by code injection
-  // @gen(inject)
-  void set_interface_data(const char* text);/* {
-    interface_data = text;
-  }*/
-  // @gen(inject)
-  void print_interface_data();/* {
-    puts(interface_data.c_str());
-  }*/
-  // @gen(inject)
-  std::string interface_data = "interface_data";
-};
-
-// Print the text in forward order.
-// @gen(typeclass_instance(my_interface, my_interface2))
-struct forward_t {
-  void print_2(const char* text) {
-    puts("print2: ");
-    puts(text);
-  }
-
-  void print(const char* text) {
-    puts(text);
-  }
-
-  void save(const char* filename, const char* access);/* {
-    puts("forward_t::save called");
-  }*/
-
-  void set_data(const char* text);/* {
-    forward_t_data = text;
-  }*/
-
-  void print_data();/* {
-    puts(forward_t_data.c_str());
-  }*/
-
-  std::string forward_t_data = "forward_t_data";
-};
-
-// Print the text in reverse order.
-// @gen(typeclass_instance(my_interface, my_interface2))
-struct reverse_t {
-  void print_2(const char* text) {
-    puts("print2: ");
-    puts(text);
-  }
-
-  void print(const char* text);/* {
-    int len = strlen(text);
-    for(int i = 0; i < len; ++i)
-      putchar(text[len - 1 - i]);
-    putchar('\n');
-  }*/
-
-  void set_data(const char* text);/* {
-    reverse_t_data = text;
-  }*/
-
-  void print_data();/* {
-    puts(reverse_t_data.c_str());
-  }*/
-
-  std::string reverse_t_data = "reverse_t_data";
-};
-
-// Print the text with caps.
-// @gen(typeclass_instance(my_interface, my_interface2))
-struct allcaps_t {
-  void print_2(const char* text) {
-    puts("print2: ");
-    puts(text);
-  }
-
-  void print(const char* text);/* {
-    while(char c = *text++)
-      putchar(toupper(c));
-    putchar('\n');
-  }*/
-
-  void set_data(const char* text);/* {
-    allcaps_t_data = text;
-  }*/
-
-  void print_data();/* {
-    puts(allcaps_t_data.c_str());
-  }*/
-
-  std::string allcaps_t_data = "allcaps_t_data";
-};
+#include "types_for_erasure.hpp"
+#include "type_erasure_common.hpp"
 
 namespace cxxctp {
 namespace generated {
 
-#if 0
-// @gen(typeclass)
-struct __my_interface_my_interface2 {
-  virtual void print_2(const char* text) = 0;
-
-  // @gen(extern)
-  //virtual void draw_2(const char* surface) const = 0;
-
-  // @gen(extern)
-  virtual void draw(const char* surface) const = 0;
-
-  // @gen(required)
-  virtual void print(const char* text) = 0;
-
-  // @gen(required)
-  virtual void print_data() = 0;
-
-  virtual void save(const char* filename, const char* access) = 0;
-
-  virtual void set_data(const char* text) = 0;
-
-  // TODO: pseudo inheritance by code injection
-  // @gen(inject)
-  void set_interface_data(const char* text);/* {
-    interface_data = text;
-  }*/
-  // @gen(inject)
-  void print_interface_data();/* {
-    puts(interface_data.c_str());
-  }*/
-  // @gen(inject)
-  std::string interface_data = "interface_data";
-};
-#endif // 0
-
-// model_t is the base class for impl_t. impl_t has the storage for the
-// object of type_t. model_t has a virtual dtor to trigger impl_t's dtor.
-// model_t has a virtual clone function to copy-construct an instance of
-// impl_t into heap memory, which is returned via unique_ptr. model_t has
-// a pure virtual function for each method in the interface class typeclass.
-template<typename... typeclass>
-struct model_t {
-  virtual ~model_t() { }
-
-  virtual std::unique_ptr<model_t> clone() = 0;
-
-  // Loop over each member function on the interface.
-  /*@meta for(int i = 0; i < @method_count(typeclass); ++i) {
-
-    @meta std::string func_name = @method_name(typeclass, i);
-
-    // Declare a "has_" function.
-    virtual bool @(format("has_%s", func_name.c_str()))() const = 0;
-
-    // Declare a pure virtual function for each interface method.
-    virtual @func_decl(@method_type(typeclass, i), func_name, args) = 0;
-  }*/
-};
+/*struct common_model_t {
+  virtual ~common_model_t() { }
+};*/
 
 template<>
-struct model_t<my_interface, my_interface2> {
+struct model_t<my_interface> {
   virtual ~model_t() { }
 
   // TODO std::function
@@ -220,17 +49,17 @@ struct model_t<my_interface, my_interface2> {
   virtual void __save(const char* filename, const char* access) = 0;
 
   virtual bool __has_print_2() const = 0;
-  virtual void __print_2(const char* text) = 0;
+  virtual void __print_2(const char* text) const = 0;
 
   virtual bool __has_print() const = 0;
 
   //template <typename ...Params>
   //virtual void print(Params&&... args) = 0;
-  virtual void __print(const char* text) = 0;
+  virtual void __print(const char* text) const = 0;
 
   virtual void __set_data(const char* text) = 0;
 
-  virtual void __print_data() = 0;
+  virtual void __print_data() const = 0;
 
   virtual void __draw(const char* surface) const = 0;
 
@@ -238,7 +67,7 @@ struct model_t<my_interface, my_interface2> {
   void set_interface_data(const char* text);/* {
     interface_data = text;
   }*/
-  void print_interface_data();/* {
+  void print_interface_data() const;/* {
     auto out = std::string("interface_data: ") + interface_data;
     puts(out.c_str());
   }*/
@@ -249,59 +78,10 @@ struct model_t<my_interface, my_interface2> {
   //std::map<std::string, void(*)()> runtime_dispatch_table_;
 };
 
-template<typename type_t, typename... typeclass>
-struct impl_t : public model_t<typeclass...> {
-
-  // Construct the embedded concrete type.
-  /*template<typename... args_t>
-  impl_t(args_t&&... args) : concrete(std::forward<args_t>(args)...) { }
-
-  std::unique_ptr<model_t<typeclass> > clone() override {
-    // Copy-construct a new instance of impl_t on the heap.
-    return std::make_unique<impl_t>(concrete);
-  }*/
-
-  // Loop over each member function on the interface.
-  /*@meta for(int i = 0; i < @method_count(typeclass); ++i) {
-
-    @meta std::string func_name = @method_name(typeclass, i);
-
-    @meta bool is_valid = @sfinae(
-      std::declval<type_t>().@(func_name)(
-        std::declval<@method_params(typeclass, i)>()...
-      )
-    );
-
-    // Implement the has_XXX function.
-    bool @(format("has_%s", func_name.c_str()))() const override {
-      return is_valid;
-    }
-
-    // Declare an override function with the same signature as the pure virtual
-    // function in model_t.
-    @func_decl(@method_type(typeclass, i), func_name, args) override {
-
-      @meta if(is_valid || @sfinae(typeclass::required::@(__func__))) {
-        // Forward to the correspondingly-named member function in type_t.
-        return concrete.@(__func__)(std::forward<decltype(args)>(args)...);
-
-      } else {
-
-        // We could also call __cxa_pure_virtual or std::terminate here.
-        throw std::runtime_error(@string(format("%s::%s not implemented",
-          @type_name(type_t), __func__
-        )));
-      }
-    }
-  }*/
-
-  // Our actual data.
-  //type_t concrete;
-};
-
 template<>
-struct impl_t<allcaps_t, my_interface, my_interface2>
-  : public model_t<my_interface, my_interface2> {
+struct impl_t<allcaps_t, my_interface>
+    : public model_t<my_interface> {
+  typedef allcaps_t val_type_t;
   //friend void draw(const allcaps_t&);
 
   // Construct the embedded concrete type.
@@ -311,7 +91,7 @@ struct impl_t<allcaps_t, my_interface, my_interface2>
   explicit impl_t(const allcaps_t& concrete_arg);
 
   std::unique_ptr<
-    model_t<my_interface, my_interface2>>
+    model_t<my_interface>>
       clone() override;
 
   bool __has_save() const override;
@@ -326,17 +106,17 @@ struct impl_t<allcaps_t, my_interface, my_interface2>
   bool __has_print_2() const override {
     return true;
   }
-  void __print_2(const char* text) override {
+  void __print_2(const char* text) const override {
     return concrete.print_2(std::forward<decltype(text)>(text));
   }
 
   bool __has_print() const override;
 
-  void __print(const char* text) override;
+  void __print(const char* text) const override;
 
   void __set_data(const char* text) override;
 
-  void __print_data() override;
+  void __print_data() const override;
 
   void __draw(const char* surface) const override;
 
@@ -392,8 +172,9 @@ struct impl_t<allcaps_t, my_interface, my_interface2>
 };
 
 template<>
-struct impl_t<forward_t, my_interface, my_interface2>
-  : public model_t<my_interface, my_interface2> {
+struct impl_t<forward_t, my_interface>
+  : public model_t<my_interface> {
+  typedef forward_t val_type_t;
 
   // Construct the embedded concrete type.
   template<typename... args_t>
@@ -404,7 +185,7 @@ struct impl_t<forward_t, my_interface, my_interface2>
     : concrete(concrete_arg) {}
 
   std::unique_ptr<
-    model_t<my_interface, my_interface2>>
+    model_t<my_interface>>
       clone() override {
     // Copy-construct a new instance of impl_t on the heap.
     return std::make_unique<impl_t>(concrete);
@@ -427,7 +208,7 @@ struct impl_t<forward_t, my_interface, my_interface2>
   bool __has_print_2() const override {
     return true;
   }
-  void __print_2(const char* text) override {
+  void __print_2(const char* text) const override {
     return concrete.print_2(std::forward<decltype(text)>(text));
   }
 
@@ -435,7 +216,7 @@ struct impl_t<forward_t, my_interface, my_interface2>
     return true;
   }
 
-  void __print(const char* text) override {
+  void __print(const char* text) const override {
     return concrete.print(std::forward<decltype(text)>(text));
   }
 
@@ -443,7 +224,7 @@ struct impl_t<forward_t, my_interface, my_interface2>
     return concrete.set_data(std::forward<decltype(text)>(text));
   }
 
-  void __print_data() override {
+  void __print_data() const override {
     return concrete.print_data();
   }
 
@@ -502,8 +283,9 @@ struct impl_t<forward_t, my_interface, my_interface2>
 
 
 template<>
-struct impl_t<reverse_t, my_interface, my_interface2>
-  : public model_t<my_interface, my_interface2> {
+struct impl_t<reverse_t, my_interface>
+    : public model_t<my_interface> {
+  typedef reverse_t val_type_t;
 
   // Construct the embedded concrete type.
   template<typename... args_t>
@@ -514,7 +296,7 @@ struct impl_t<reverse_t, my_interface, my_interface2>
     : concrete(concrete_arg) {}
 
   std::unique_ptr<
-    model_t<my_interface, my_interface2>>
+    model_t<my_interface>>
       clone() override {
     // Copy-construct a new instance of impl_t on the heap.
     return std::make_unique<impl_t>(concrete);
@@ -537,7 +319,7 @@ struct impl_t<reverse_t, my_interface, my_interface2>
   bool __has_print_2() const override {
     return true;
   }
-  void __print_2(const char* text) override {
+  void __print_2(const char* text) const override {
     return concrete.print_2(std::forward<decltype(text)>(text));
   }
 
@@ -545,7 +327,7 @@ struct impl_t<reverse_t, my_interface, my_interface2>
     return true;
   }
 
-  void __print(const char* text) override {
+  void __print(const char* text) const override {
     return concrete.print(std::forward<decltype(text)>(text));
   }
 
@@ -553,7 +335,7 @@ struct impl_t<reverse_t, my_interface, my_interface2>
     return concrete.set_data(std::forward<decltype(text)>(text));
   }
 
-  void __print_data() override {
+  void __print_data() const override {
     return concrete.print_data();
   }
 
@@ -611,78 +393,9 @@ struct impl_t<reverse_t, my_interface, my_interface2>
 };
 
 ////////////////////////////////////////////////////////////////////////////////
-// var_t is an 8-byte type that serves as the common wrapper for the
-// type-erasure model_t. It implements move
-
-template<typename... typeclass>
-struct var_t {
-  //typedef typeclass typeclass_t;
-
-  // Default initializer creates an empty var_t.
-  //var_t() = default;
-
-  /*// Allow initialization from a unique_ptr.
-  var_t(std::unique_ptr<model_t<typeclass> >&& model) :
-    model(std::move(model)) { }
-
-  // Move ctor/assign by default.
-  var_t(var_t&&) = default;
-  var_t& operator=(var_t&&) = default;
-
-  // Call clone for copy ctor/assign.
-  var_t(const var_t& rhs) {
-    if(rhs)
-      model = rhs.model->clone();
-  }
-
-  var_t& operator=(const var_t& rhs) {
-    model.reset();
-    if(rhs)
-      model = rhs.model->clone();
-    return *this;
-  }*/
-
-  // A virtual dtor triggers the dtor in the impl.
-  //virtual ~var_t() { }
-
-  /*// The preferred initializer for a var_t. This constructs an impl_t of
-  // type_t on the heap, and stores the pointer in a new var_t.
-  template<typename type_t, typename... args_t>
-  static var_t construct(args_t&&... args) {
-    return var_t(std::make_unique<impl_t<typeclass, type_t> >(
-      std::forward<args_t>(args)...
-    ));
-  }
-
-  // Loop over each member function on the interface.
-  @meta for(int i = 0; i < @method_count(typeclass); ++i) {
-
-    // Define a has_XXX member function.
-    bool @(format("has_%s", @method_name(typeclass, i)))() const {
-      @meta if(@sfinae(typeclass::required::@(@method_name(typeclass, i))))
-        return true;
-      else
-        return model->@(__func__)();
-    }
-
-    // Declare a non-virtual forwarding function for each interface method.
-    @func_decl(@method_type(typeclass, i), @method_name(typeclass, i), args) {
-      // Forward to the model's virtual function.
-      return model->@(__func__)(std::forward<decltype(args)>(args)...);
-    }
-  }
-
-  explicit operator bool() const {
-    return (bool)model;
-  }
-
-  // This is actually a unique_ptr to an impl type. We store a pointer to
-  // the base type and rely on model_t's virtual dtor to free the object.
-  std::unique_ptr<model_t<typeclass> > model;*/
-};
-
+#if 0
 template<>
-struct var_t<my_interface, my_interface2> {
+struct var_t<my_interface> {
   //typedef my_interface, my_interface2 typeclass_t;
 
   // Default initializer creates an empty var_t.
@@ -698,7 +411,7 @@ struct var_t<my_interface, my_interface2> {
   var_t(const T&& u) :
       model(
         std::make_unique<
-          impl_t<T, my_interface, my_interface2>>
+          impl_t<T, my_interface>>
         (std::forward<const std::decay_t<T>>(u))) {
     puts("var_t{T} called");
   }
@@ -727,7 +440,7 @@ struct var_t<my_interface, my_interface2> {
   // type_t on the heap, and stores the pointer in a new var_t.
   template<typename type_t, typename... args_t>
   static var_t construct(args_t&&... args) {
-    return var_t(std::make_unique<impl_t<type_t, my_interface, my_interface2> >(
+    return var_t(std::make_unique<impl_t<type_t, my_interface> >(
       std::forward<args_t>(args)...
     ));
   }
@@ -782,6 +495,14 @@ struct var_t<my_interface, my_interface2> {
     return model->print(std::forward<decltype(text)>(text));
   }*/
 
+  /*friend void draw(const var_t<my_interface>& d) {
+    d.model->do_draw();
+  }*/
+
+  void draw(const char* surface) {
+    model->__draw(surface);
+  }
+
   /*// Loop over each member function on the interface.
   @meta for(int i = 0; i < @method_count(my_interface); ++i) {
 
@@ -808,13 +529,211 @@ struct var_t<my_interface, my_interface2> {
     return (bool)model;
   }*/
 
+  // TODO: https://stackoverflow.com/a/38367549
+  /*void f1(int) {  }
+
+  std::map<std::string, void( var_t<my_interface>::* )(int)>
+    funcs_to_names = {
+      { "draw", &var_t<my_interface>::f1 }, };*/
+
+  // This is actually a unique_ptr to an impl type. We store a pointer to
+  // the base type and rely on model_t's virtual dtor to free the object.
+  std::unique_ptr<model_t<my_interface>> model;
+};
+#endif // 0
+
+template<>
+struct combined_t<my_interface> {
+  //typedef my_interface, my_interface2 typeclass_t;
+
+  // Default initializer creates an empty combined_t.
+  combined_t() = default;
+
+  /// \note moves passed argument
+  template <class T>
+  combined_t(std::shared_ptr<T>&& u) :
+    my_interface_model(std::move(u)) {
+    puts("combined_t{my_interface} called, moves passed argument");
+  }
+
+  template <class T>
+  combined_t(const T&& u) :
+      my_interface_model(
+        std::make_shared<
+          impl_t<T, my_interface>>
+        (std::forward<const std::decay_t<T>>(u))) {
+    puts("combined_t{T} called");
+  }
+
+  // Move ctor/assign by default.
+  combined_t(combined_t&&) = default;
+  combined_t& operator=(combined_t&&) = default;
+
+  // Call clone for copy ctor/assign.
+  combined_t(const combined_t& rhs) {
+    if(rhs)
+      my_interface_model = rhs.my_interface_model->clone();
+  }
+
+  combined_t& operator=(const combined_t& rhs) {
+    my_interface_model.reset();
+    if(rhs)
+      my_interface_model = rhs.my_interface_model->clone();
+    return *this;
+  }
+
+  void reset() {
+    my_interface_model.reset();
+  }
+
+  // A virtual dtor triggers the dtor in the impl.
+  virtual ~combined_t() { }
+
+  // The preferred initializer for a combined_t. This constructs an impl_t of
+  // type_t on the heap, and stores the pointer in a new combined_t.
+  template<typename type_t, typename... args_t>
+  static combined_t construct(args_t&&... args) {
+    return combined_t(std::make_shared<impl_t<type_t, my_interface> >(
+      std::forward<args_t>(args)...
+    ));
+  }
+
+  bool has_save() const {
+    if(!my_interface_model) {
+      throw std::runtime_error("my_interface_model not set");
+    }
+    return my_interface_model->__has_save(); // force to true if required
+  }
+
+  template <typename ...Params>
+  void save(Params&&... args) {
+    if(!my_interface_model) {
+      throw std::runtime_error("my_interface_model not set");
+    }
+    return my_interface_model->__save(std::forward<decltype(args)>(args)...);
+  }
+
+  bool has_print_2() const {
+    if(!my_interface_model) {
+      throw std::runtime_error("my_interface_model not set");
+    }
+    return my_interface_model->__has_print_2(); // force to true if required
+  }
+  template <typename ...Params>
+  void print_2(Params&&... args) const {
+    if(!my_interface_model) {
+      throw std::runtime_error("my_interface_model not set");
+    }
+    return my_interface_model->__print_2(std::forward<decltype(args)>(args)...);
+  }
+
+  bool has_print() const {
+    if(!my_interface_model) {
+      throw std::runtime_error("my_interface_model not set");
+    }
+    return my_interface_model->__has_print(); // force to true if required
+  }
+
+  template <typename ...Params>
+  void print(Params&&... args) const {
+    if(!my_interface_model) {
+      throw std::runtime_error("my_interface_model not set");
+    }
+    return my_interface_model->__print(std::forward<decltype(args)>(args)...);
+  }
+
+  template <typename ...Params>
+  void set_data(Params&&... args) {
+    if(!my_interface_model) {
+      throw std::runtime_error("my_interface_model not set");
+    }
+    return my_interface_model->__set_data(std::forward<decltype(args)>(args)...);
+  }
+
+  template <typename ...Params>
+  void print_data(Params&&... args) const {
+    if(!my_interface_model) {
+      throw std::runtime_error("my_interface_model not set");
+    }
+    return my_interface_model->__print_data(std::forward<decltype(args)>(args)...);
+  }
+
+  template <typename ...Params>
+  void set_interface_data(Params&&... args) {
+    if(!my_interface_model) {
+      throw std::runtime_error("my_interface_model not set");
+    }
+    return my_interface_model->set_interface_data(std::forward<decltype(args)>(args)...);
+  }
+
+  template <typename ...Params>
+  void print_interface_data(Params&&... args) const {
+    if(!my_interface_model) {
+      throw std::runtime_error("my_interface_model not set");
+    }
+    return my_interface_model->print_interface_data(std::forward<decltype(args)>(args)...);
+  }
+
+  /*void print(const char* text) {
+    return model->print(std::forward<decltype(text)>(text));
+  }*/
+
   /*friend void draw(const var_t<my_interface>& d) {
     d.model->do_draw();
   }*/
 
   void draw(const char* surface) {
-    model->__draw(surface);
+    if(!my_interface_model) {
+      throw std::runtime_error("my_interface_model not set");
+    }
+    my_interface_model->__draw(surface);
   }
+
+  /*// Loop over each member function on the interface.
+  @meta for(int i = 0; i < @method_count(my_interface); ++i) {
+
+    // Define a has_XXX member function.
+    bool @(format("has_%s", @method_name(my_interface, i)))() const {
+      @meta if(@sfinae(my_interface::required::@(@method_name(my_interface, i))))
+        return true;
+      else
+        return model->@(__func__)();
+    }
+
+    // Declare a non-virtual forwarding function for each interface method.
+    @func_decl(@method_type(my_interface, i), @method_name(my_interface, i), args) {
+      // Forward to the model's virtual function.
+      return model->@(__func__)(std::forward<decltype(args)>(args)...);
+    }
+  }*/
+
+  explicit operator bool() const {
+    return (bool)my_interface_model;
+  }
+
+  std::shared_ptr<model_t<my_interface>> ref_my_interface_model() const {
+    return my_interface_model;
+  }
+
+  std::unique_ptr<model_t<my_interface>> clone_my_interface_model() const {
+    if(!my_interface_model) {
+      throw std::runtime_error("my_interface_model not set");
+    }
+    return my_interface_model->clone();
+  }
+
+  const model_t<my_interface>* raw_my_interface_model() const {
+    return my_interface_model.get();
+  }
+
+  void replace_my_interface_model(
+    const std::shared_ptr<model_t<my_interface>> rhs) {
+    my_interface_model = rhs;
+  }
+
+  /*bool is_valid() const {
+    return (bool)model;
+  }*/
 
   // TODO: https://stackoverflow.com/a/38367549
   /*void f1(int) {  }
@@ -825,7 +744,7 @@ struct var_t<my_interface, my_interface2> {
 
   // This is actually a unique_ptr to an impl type. We store a pointer to
   // the base type and rely on model_t's virtual dtor to free the object.
-  std::unique_ptr<model_t<my_interface, my_interface2>> model;
+  std::shared_ptr<model_t<my_interface>> my_interface_model;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -835,7 +754,7 @@ struct var_t<my_interface, my_interface2> {
 
 // The typedef helps emphasize that we have a single type that encompasses
 // multiple impl types that aren't related by inheritance.
-typedef var_t<my_interface, my_interface2> obj_t;
+typedef combined_t<my_interface> my_interface_obj_t;
 
 /*template<typename T> int freeGet() = delete;
 

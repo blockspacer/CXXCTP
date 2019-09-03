@@ -2,7 +2,7 @@
 // https://github.com/TartanLlama/typeclasses/blob/master/typeclass.hpp
 
 //#include "../gems/util.hxx"
-#include "type_erasure2.hpp"
+#include "type_erasure_my_interface.hpp"
 
 void my_interface::set_interface_data(const char* text) {
     interface_data = text;

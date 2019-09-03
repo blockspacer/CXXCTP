@@ -813,6 +813,7 @@ Monoids
 
 Double dispatch
  + https://gieseanw.wordpress.com/2018/12/29/stop-reimplementing-the-virtual-table-and-start-using-double-dispatch/
+ + https://gieseanw.wordpress.com/2018/12/29/reuse-double-dispatch/
 
 recursion
  + https://deque.blog/2016/11/30/open-recursion-c/
@@ -827,6 +828,9 @@ DSL
 How supporting reflection, being able to manipulate the AST of the language inside the language, and perform any computation at compile time can greatly improve and simplify your code. LISP META-PROGRAMMING FOR C++ DEVELOPERS SERIES https://deque.blog/posts/
 
 A Revisited Command Pattern https://www.oreilly.com/library/view/practical-c-metaprogramming/9781492042778/#toc-start
+
+TODO: Rust++
+ + http://mainisusuallyafunction.blogspot.com/2017/06/a-rust-view-on-effective-modern-c.html
 
 strong types
  + https://www.youtube.com/watch?v=BtA92KmcECQ
