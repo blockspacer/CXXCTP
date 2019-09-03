@@ -213,7 +213,7 @@
 
 namespace fs = std::experimental::filesystem;
 
-#include "type_erasure2.cpp"
+#include "type_erasure2.hpp"
 
 #include "someEnum.hpp"
 
@@ -1885,10 +1885,33 @@ void test_split_to_funcs() {
       std::cout << seg << '\n';*/
 }
 
+namespace cxxctp {
+namespace generated {
+  template<>
+  void draw<my_interface/*obj_t::typeclass_t*/>
+   (const allcaps_t&, const char* surface) {
+    std::cout << "Drawing allcaps_t on " << surface << std::endl;
+  }
+
+  template<>
+  void draw<my_interface/*obj_t::typeclass_t*/>
+   (const forward_t&, const char* surface) {
+    std::cout << "Drawing forward_t on " << surface << std::endl;
+  }
+
+  template<>
+  void draw<my_interface/*obj_t::typeclass_t*/>
+   (const reverse_t&, const char* surface) {
+    std::cout << "Drawing reverse_t on " << surface << std::endl;
+  }
+} // namespace __my_interface
+} // namespace __my_interface
+
 int main(int /*argc*/, const char* const* /*argv*/) {
     using namespace clang::tooling;
 
     obj_t o{allcaps_t{}};
+    o.draw("canvas");
     o.print_interface_data();
     o.set_interface_data("O1 interface data");
     o.print_interface_data();
@@ -1898,6 +1921,7 @@ int main(int /*argc*/, const char* const* /*argv*/) {
     o.print_data();
 
     obj_t a = obj_t::construct<allcaps_t>();
+    a.draw("water");
     a.print_data();
     a.print("Hello a");
     a.set_data("A1 data");
@@ -1905,6 +1929,7 @@ int main(int /*argc*/, const char* const* /*argv*/) {
 
     // Copy-construct a to get b.
     obj_t b = a;
+    b.draw("sand");
     b.print("Hello b");
 
     if(b.has_save())
@@ -1917,6 +1942,7 @@ int main(int /*argc*/, const char* const* /*argv*/) {
 
     // Create a forward object.
     obj_t d = obj_t::construct<forward_t>();
+    d.draw("wind");
     d.print_data();
     d.print("Hello d");
     d.save("foo.save", "w");
@@ -1928,12 +1954,14 @@ int main(int /*argc*/, const char* const* /*argv*/) {
 
     // Create a reverse object.
     obj_t e = obj_t::construct<reverse_t>();
+    e.draw("text");
     e.print("Hello e");
 
     if(e.has_save())
       e.save("bar.save", "w");
 
     obj_t f = reverse_t{};
+    f.draw("console");
     f.print("Hello f");
 
     o.print("Hello o");

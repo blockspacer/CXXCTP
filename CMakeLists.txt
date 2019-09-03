@@ -64,9 +64,10 @@ if(ENABLE_CLING)
   list(APPEND CLING_DEFINITIONS CLING_IS_ON=1)
   # The project has one binary:
   add_executable(CXXCTP
-    src/main_cling.cpp
-    src/someEnum.hpp
-    src/someEnum.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/main_cling.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/someEnum.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/someEnum.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/type_erasure2.cpp
   )
 else(ENABLE_CLING)
   message(FATAL_ERROR "Only Cling interpreter is supported for now")

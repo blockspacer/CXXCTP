@@ -363,6 +363,7 @@ enum_class with values auto incrementation http://www.open-std.org/jtc1/sc22/wg2
 enum flags https://github.com/seanbaxter/circle/blob/master/gems/flag_enum.cxx
 
 design patterns
+ + Hands-On Design Patterns with C++
  + https://gist.github.com/blockspacer/44fb6528d801e3149716d59bac041b45
  + https://github.com/caiorss/C-Cpp-Notes/blob/master/cpp-design-patterns.org
  + https://caiorss.github.io/C-Cpp-Notes/cpp-design-patterns.html
@@ -668,9 +669,26 @@ concurrency / loop vectorizin
 
 loop for recursion
 
+[
+  I have been reading articles on data oriented design
+  and noticed they often mention how object oriented program is bad
+  because of inheritance, virtual calls and cache misses.
+  Cache misses seem to occur frequently
+  from pointer hopping, virtual calls, and large data structures.
+  https://www.reddit.com/r/gamedev/comments/apct0b/looking_for_tips_on_the_entity_component_system/
+]
 entt / DynaMix / ECS
+ + https://www.reddit.com/r/gamedev/comments/3nv8uz/implementation_of_a_componentbased_entity_system/
  + https://habr.com/ru/company/pixonic/blog/413729/
  + https://ibob.github.io/dynamix/appendix.html
+[
+TODO:
+Data-oriented ECS
+ + http://bitsquid.blogspot.se/2014/08/building-data-oriented-entity-system.html
+]
+
+DOD
+ + https://meetingcpp.com/mcpp/slides/2018/Data-oriented%20design%20in%20practice_Nikolov_MeetingCpp18.pdf
 
 script / language binding
 
@@ -736,7 +754,12 @@ because you are now calling v.length() for the length,
 but lengthSquared(v) for the length squared.
 https://dragly.org/2018/04/21/rust-like-traits-in-cpp/
 ]
+[
+cache miss?
+https://stackoverflow.com/questions/43609682/runtime-overhead-of-shared-ptr-for-subclass-destruction-compared-to-virtual-dest/43610886#43610886
+]
 Type Erasure
+ + When to use type erasure, and when to avoid it. Hands-On Design Patterns with C++
  + https://github.com/seanbaxter/circle/blob/master/erasure/type_erasure.md
  + https://www.reddit.com/r/cpp/comments/8a8iu7/c20conceptsexperiment_using_typeerasure_interface/
  + 2.7 Type Erasure Pattern https://caiorss.github.io/C-Cpp-Notes/cpp-design-patterns.html
@@ -764,6 +787,8 @@ Type Erasure
  + https://functionalcpp.wordpress.com/2013/08/16/type-classes/
  + https://www.reddit.com/r/cpp/comments/6sl1hl/customization_point_idea/
  + http://missingfaktor.blogspot.com/2014/02/so-how-much-of-inheritance-criticism.html
+ + https://gieseanw.wordpress.com/2018/12/29/stop-reimplementing-the-virtual-table-and-start-using-double-dispatch/
+ + https://mropert.github.io/2017/11/30/polymorphic_ducks/
 [
 Possible problems:
  + b = (cast b to super-type A) then cast back to sub-type https://users.rust-lang.org/t/how-to-do-c-like-inheritance/20545
@@ -773,11 +798,8 @@ Possible problems:
 [
 TODO
  + http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p0957r0.pdf & https://github.com/wmx16835/my-stl/tree/master/src/main/p0957
+ + When to use type erasure, and when to avoid it. Hands-On Design Patterns with C++
 ]
-
-Data-oriented ECS
- + http://bitsquid.blogspot.se/2014/08/building-data-oriented-entity-system.html
-
 Uniform call syntax in C++ today
  + https://dragly.org/2017/03/31/uniform-call-syntax/
 
@@ -788,6 +810,9 @@ Monoids
  + https://habr.com/ru/post/205026/
  + http://stepanovpapers.com/notes.pdf
  + https://bartoszmilewski.com/2014/04/21/getting-lazy-with-c/
+
+Double dispatch
+ + https://gieseanw.wordpress.com/2018/12/29/stop-reimplementing-the-virtual-table-and-start-using-double-dispatch/
 
 recursion
  + https://deque.blog/2016/11/30/open-recursion-c/
