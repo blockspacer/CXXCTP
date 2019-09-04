@@ -22,77 +22,95 @@ namespace cxxctp {
 namespace generated {
 
 template<>
-struct combined_t<my_interface, my_interface2> {
+struct _tc_combined_t<template_interface<int, const std::string&>, my_interface2> {
   //typedef my_interface, my_interface2 typeclass_t;
 
-  // Default initializer creates an empty combined_t.
-  combined_t() = default;
+  // Default initializer creates an empty _tc_combined_t.
+  _tc_combined_t() = default;
 
   /// \note moves passed argument
   /*template <class T>
-  combined_t(std::shared_ptr<model_t<my_interface>>&& u) :
+  _tc_combined_t(std::shared_ptr<_tc_model_t<my_interface>>&& u) :
     my_interface_model(std::move(u)) {
-    puts("combined_t{my_interface, my_interface2}(my_interface2) "
+    puts("_tc_combined_t{my_interface, my_interface2}(my_interface2) "
          "called, moves passed argument");
   }
 
   /// \note moves passed argument
   template <class T>
-  combined_t(std::shared_ptr<model_t<my_interface2>>&& u) :
+  _tc_combined_t(std::shared_ptr<_tc_model_t<my_interface2>>&& u) :
     my_interface2_model(std::move(u)) {
-    puts("combined_t{my_interface, my_interface2}(my_interface2) "
+    puts("_tc_combined_t{my_interface, my_interface2}(my_interface2) "
          "called, moves passed argument");
   }*/
 
 #if 0
   template <class T>
-  combined_t(std::shared_ptr<T>&& u) :
+  _tc_combined_t(std::shared_ptr<T>&& u) :
     my_interface2_model(/*std::move*/(u)) {
-    puts("combined_t{unique_ptr} called");
+    puts("_tc_combined_t{unique_ptr} called");
   }
 #endif // 0
 
   template <class T>
-  combined_t(const T&& u) :
+  _tc_combined_t(const T&& u) :
       my_interface2_model(
         std::make_shared<
-          impl_t<T, my_interface2>>
+          _tc_impl_t<T, my_interface2>>
         (std::forward<const std::decay_t<T>>(u))),
       my_interface_model(
         std::make_shared<
-          impl_t<T, my_interface>>
+          _tc_impl_t<T, template_interface<int, const std::string&>>>
         (std::forward<const std::decay_t<T>>(u))) {
-    puts("combined_t{T} called");
+    puts("_tc_combined_t{T} called");
   }
 
   /*template <class T>
-  combined_t(std::unique_ptr<T>&& u) :
+  _tc_combined_t(std::unique_ptr<T>&& u) :
     my_interface2_model(std::move(u)) {
-    puts("combined_t{unique_ptr} called");
+    puts("_tc_combined_t{unique_ptr} called");
   }
 
   template <class T>
-  combined_t(const T&& u) :
+  _tc_combined_t(const T&& u) :
       my_interface2_model(
         std::make_unique<
-          impl_t<T, my_interface2>>
+          _tc_impl_t<T, my_interface2>>
         (std::forward<const std::decay_t<T>>(u))) {
-    puts("combined_t{T} called");
+    puts("_tc_combined_t{T} called");
   }*/
 
   // Move ctor/assign by default.
-  combined_t(combined_t&&) = default;
-  combined_t& operator=(combined_t&&) = default;
+  /*_tc_combined_t(_tc_combined_t&&) = default;
+  _tc_combined_t& operator=(_tc_combined_t&&) = default;*/
+
+  // Call move_clone for move ctor/assign.
+  _tc_combined_t(_tc_combined_t&& rhs) {
+    if(rhs) {
+      my_interface_model = rhs.my_interface_model->move_clone();
+      my_interface2_model = rhs.my_interface2_model->move_clone();
+    }
+  }
+
+  _tc_combined_t& operator=(_tc_combined_t&& rhs) {
+    my_interface_model.reset();
+    my_interface2_model.reset();
+    if(rhs) {
+      my_interface_model = rhs.my_interface_model->move_clone();
+      my_interface2_model = rhs.my_interface2_model->move_clone();
+    }
+    return *this;
+  }
 
   // Call clone for copy ctor/assign.
-  combined_t(const combined_t& rhs) {
+  _tc_combined_t(const _tc_combined_t& rhs) {
     if(rhs) {
       my_interface_model = rhs.my_interface_model->clone();
       my_interface2_model = rhs.my_interface2_model->clone();
     }
   }
 
-  combined_t& operator=(const combined_t& rhs) {
+  _tc_combined_t& operator=(const _tc_combined_t& rhs) {
     my_interface_model.reset();
     my_interface2_model.reset();
     if(rhs) {
@@ -102,7 +120,7 @@ struct combined_t<my_interface, my_interface2> {
     return *this;
   }
 
-  combined_t& operator=(const combined_t<my_interface>& rhs) {
+  _tc_combined_t& operator=(const _tc_combined_t<template_interface<int, const std::string&>>& rhs) {
     my_interface_model.reset();
     if(rhs) {
       my_interface_model = rhs.my_interface_model->clone();
@@ -110,7 +128,7 @@ struct combined_t<my_interface, my_interface2> {
     return *this;
   }
 
-  combined_t& operator=(const combined_t<my_interface2>& rhs) {
+  _tc_combined_t& operator=(const _tc_combined_t<my_interface2>& rhs) {
     my_interface2_model.reset();
     if(rhs) {
       my_interface2_model = rhs.my_interface2_model->clone();
@@ -119,28 +137,28 @@ struct combined_t<my_interface, my_interface2> {
   }
 
   // A virtual dtor triggers the dtor in the impl.
-  virtual ~combined_t() { }
+  virtual ~_tc_combined_t() { }
 
-  // The preferred initializer for a combined_t. This constructs an impl_t of
-  // type_t on the heap, and stores the pointer in a new combined_t.
+  // The preferred initializer for a _tc_combined_t. This constructs an _tc_impl_t of
+  // type_t on the heap, and stores the pointer in a new _tc_combined_t.
   /*template<typename T, typename type_t, typename... args_t>
-  static combined_t construct(args_t&&... args) {
-    return combined_t(std::make_unique<impl_t<type_t, T> >(
+  static _tc_combined_t construct(args_t&&... args) {
+    return _tc_combined_t(std::make_unique<_tc_impl_t<type_t, T> >(
       std::forward<args_t>(args)...
     ));
   }*/
 
   /*template<typename type_t, typename... args_t>
-  static combined_t set_my_interface_model(args_t&&... args) {
-    my_interface_model = (std::make_unique<impl_t<type_t, my_interface_model> >(
+  static _tc_combined_t set_my_interface_model(args_t&&... args) {
+    my_interface_model = (std::make_unique<_tc_impl_t<type_t, my_interface_model> >(
       std::forward<args_t>(args)...
     ));
   }*/
 
   /*template <class T>
-  void set_my_interface2_model(std::unique_ptr<impl_t<T, my_interface2>>&& u) :
+  void set_my_interface2_model(std::unique_ptr<_tc_impl_t<T, my_interface2>>&& u) :
     my_interface2_model(std::move(u)) {
-    puts("combined_t{unique_ptr} called");
+    puts("_tc_combined_t{unique_ptr} called");
   }*/
 
   void reset() {
@@ -161,6 +179,76 @@ struct combined_t<my_interface, my_interface2> {
       throw std::runtime_error("my_interface_model2 not set");
     }
     return my_interface2_model->__do_job(std::forward<decltype(args)>(args)...);
+  }
+
+  template <typename ...Params>
+  std::string get_bar(Params&&... args) {
+    if(!my_interface2_model) {
+      throw std::runtime_error("my_interface_model2 not set");
+    }
+    return my_interface2_model->__get_bar(std::forward<decltype(args)>(args)...);
+  }
+
+  /*template <typename ...Params>
+  void set_get_bar(Params&&... args) {
+    if(!my_interface2_model) {
+      throw std::runtime_error("my_interface_model2 not set");
+    }
+    return my_interface2_model->__set_get_bar(std::forward<decltype(args)>(args)...);
+  }*/
+
+  template <typename T>
+  void set_get_bar(std::function<std::string(T&)> arg);
+
+  template <typename ...Params>
+  void set_bar(Params&&... args) {
+    if(!my_interface2_model) {
+      throw std::runtime_error("my_interface_model2 not set");
+    }
+    return my_interface2_model->__set_bar(std::forward<decltype(args)>(args)...);
+  }
+
+  /*template <typename ...Params>
+  void set_set_bar(Params&&... args) {
+    if(!my_interface2_model) {
+      throw std::runtime_error("my_interface_model2 not set");
+    }
+    return my_interface2_model->__set_set_bar(std::forward<decltype(args)>(args)...);
+  }*/
+
+  template <typename T>
+  void set_set_bar(std::function<void(T&, const std::string&)> arg);
+
+  template <typename T, typename C>
+  T& ref_concrete();
+
+  template <typename ...Params>
+  std::string test_zoo(Params&&... args) {
+    return my_interface2_model->__test_zoo(std::forward<decltype(args)>(args)...);
+  }
+
+  template<
+  typename T,
+  typename C,
+  typename std::enable_if<std::is_same<my_interface2, T>::value>::type* = nullptr
+  >
+  T& ref_concrete() {
+    if(!my_interface2_model) {
+      throw std::runtime_error("my_interface_model2 not set");
+    }
+    return my_interface2_model->ref_concrete<C>();
+  }
+
+  template<
+  typename T,
+  typename C,
+  typename std::enable_if<std::is_same<template_interface<int, const std::string&>, T>::value>::type* = nullptr
+  >
+  T& ref_concrete() {
+    if(!my_interface_model) {
+      throw std::runtime_error("my_interface_model2 not set");
+    }
+    return my_interface_model->ref_concrete<C>();
   }
 
   bool has_save() const {
@@ -302,7 +390,7 @@ struct combined_t<my_interface, my_interface2> {
   template <class T>
   void create_my_interface2_model(const T&& u) {
     my_interface2_model = std::make_shared<
-      impl_t<T, my_interface2>>
+      _tc_impl_t<T, my_interface2>>
         (std::forward<const std::decay_t<T>>(u));
     puts("create_my_interface2_model{T} called");
   }
@@ -310,7 +398,7 @@ struct combined_t<my_interface, my_interface2> {
   template <class T>
   void create_my_interface_model(const T&& u) {
     my_interface_model = std::make_shared<
-      impl_t<T, my_interface>>
+      _tc_impl_t<T, template_interface<int, const std::string&>>>
         (std::forward<const std::decay_t<T>>(u));
     puts("create_my_interface_model{T} called");
   }
@@ -330,63 +418,54 @@ struct combined_t<my_interface, my_interface2> {
     return (bool)my_interface2_model;
   }
 
-  std::shared_ptr<model_t<my_interface>> ref_my_interface_model() const {
+  std::shared_ptr<_tc_model_t<template_interface<int, const std::string&>>> ref_my_interface_model() const {
     return my_interface_model;
   }
 
-  std::shared_ptr<model_t<my_interface2>> ref_my_interface2_model() const {
+  std::shared_ptr<_tc_model_t<my_interface2>> ref_my_interface2_model() const {
     return my_interface2_model;
   }
 
-  std::unique_ptr<model_t<my_interface>> clone_my_interface_model() const {
+  std::unique_ptr<_tc_model_t<template_interface<int, const std::string&>>> clone_my_interface_model() const {
     if(!my_interface_model) {
       throw std::runtime_error("my_interface_model not set");
     }
     return my_interface_model->clone();
   }
 
-  std::unique_ptr<model_t<my_interface2>> clone_my_interface2_model() const {
+  std::unique_ptr<_tc_model_t<my_interface2>> clone_my_interface2_model() const {
     if(!my_interface2_model) {
       throw std::runtime_error("my_interface_model2 not set");
     }
     return my_interface2_model->clone();
   }
 
-  const model_t<my_interface>* raw_my_interface_model() const {
+  const _tc_model_t<template_interface<int, const std::string&>>* raw_my_interface_model() const {
     return my_interface_model.get();
   }
 
-  const model_t<my_interface2>* raw_my_interface2_model() const {
+  const _tc_model_t<my_interface2>* raw_my_interface2_model() const {
     return my_interface2_model.get();
   }
 
   void replace_my_interface_model(
-    const std::shared_ptr<model_t<my_interface>> rhs) {
+    const std::shared_ptr<_tc_model_t<template_interface<int, const std::string&>>> rhs) {
     my_interface_model = rhs;
   }
 
   void replace_my_interface2_model(
-    const std::shared_ptr<model_t<my_interface2>> rhs) {
+    const std::shared_ptr<_tc_model_t<my_interface2>> rhs) {
     my_interface2_model = rhs;
   }
 
   // TODO: a.castTo(base) calls base.castFrom<a>
 
   // This is actually a unique_ptr to an impl type. We store a pointer to
-  // the base type and rely on model_t's virtual dtor to free the object.
-  std::shared_ptr<model_t<my_interface>> my_interface_model;
-  std::shared_ptr<model_t<my_interface2>> my_interface2_model;
+  // the base type and rely on _tc_model_t's virtual dtor to free the object.
+  std::shared_ptr<_tc_model_t<template_interface<int, const std::string&>>> my_interface_model;
+  std::shared_ptr<_tc_model_t<my_interface2>> my_interface2_model;
   /// ... TODO: change to std::array and add typeclass_by_string?
 };
-
-////////////////////////////////////////////////////////////////////////////////
-// The var_t class template is specialized to include all member functions in
-// my_interface. It makes forwarding calls from these to the virtual
-// functions in model_t.
-
-// The typedef helps emphasize that we have a single type that encompasses
-// multiple impl types that aren't related by inheritance.
-typedef combined_t<my_interface, my_interface2> my_interface_my_interface2_obj_t;
 
 } // namespace cxxctp
 } // namespace generated

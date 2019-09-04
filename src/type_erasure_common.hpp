@@ -7,16 +7,18 @@
 namespace cxxctp {
 namespace generated {
 
-// model_t is the base class for impl_t. impl_t has the storage for the
-// object of type_t. model_t has a virtual dtor to trigger impl_t's dtor.
-// model_t has a virtual clone function to copy-construct an instance of
-// impl_t into heap memory, which is returned via unique_ptr. model_t has
+// _tc_model_t is the base class for _tc_impl_t. _tc_impl_t has the storage for the
+// object of type_t. _tc_model_t has a virtual dtor to trigger _tc_impl_t's dtor.
+// _tc_model_t has a virtual clone function to copy-construct an instance of
+// _tc_impl_t into heap memory, which is returned via unique_ptr. _tc_model_t has
 // a pure virtual function for each method in the interface class typeclass.
+//#if 0
 template<typename... typeclass>
-struct model_t /*: public common_model_t*/ {
-  virtual ~model_t() { }
+struct _tc_model_t /*: public common__tc_model_t*/ {
+  //typedef typeclass... typeclass_type_t;
+  virtual ~_tc_model_t() { }
 
-  virtual std::unique_ptr<model_t> clone() = 0;
+  virtual std::unique_ptr<_tc_model_t> clone() = 0;
 
   // Loop over each member function on the interface.
   /*@meta for(int i = 0; i < @method_count(typeclass); ++i) {
@@ -30,18 +32,19 @@ struct model_t /*: public common_model_t*/ {
     virtual @func_decl(@method_type(typeclass, i), func_name, args) = 0;
   }*/
 };
+//#endif // 0
 
 template<typename type_t, typename... typeclass>
-struct impl_t : public model_t<typeclass...> {
+struct _tc_impl_t : public _tc_model_t<typeclass...> {
   typedef type_t val_type_t;
 
   // Construct the embedded concrete type.
   /*template<typename... args_t>
-  impl_t(args_t&&... args) : concrete(std::forward<args_t>(args)...) { }
+  _tc_impl_t(args_t&&... args) : concrete(std::forward<args_t>(args)...) { }
 
-  std::unique_ptr<model_t<typeclass> > clone() override {
-    // Copy-construct a new instance of impl_t on the heap.
-    return std::make_unique<impl_t>(concrete);
+  std::unique_ptr<_tc_model_t<typeclass> > clone() override {
+    // Copy-construct a new instance of _tc_impl_t on the heap.
+    return std::make_unique<_tc_impl_t>(concrete);
   }*/
 
   // Loop over each member function on the interface.
@@ -61,7 +64,7 @@ struct impl_t : public model_t<typeclass...> {
     }
 
     // Declare an override function with the same signature as the pure virtual
-    // function in model_t.
+    // function in _tc_model_t.
     @func_decl(@method_type(typeclass, i), func_name, args) override {
 
       @meta if(is_valid || @sfinae(typeclass::required::@(__func__))) {
@@ -84,7 +87,7 @@ struct impl_t : public model_t<typeclass...> {
 
 #if 0
 // var_t is an 8-byte type that serves as the common wrapper for the
-// type-erasure model_t. It implements move
+// type-erasure _tc_model_t. It implements move
 template<typename... typeclass>
 struct var_t {
   //typedef typeclass typeclass_t;
@@ -93,7 +96,7 @@ struct var_t {
   //var_t() = default;
 
   /*// Allow initialization from a unique_ptr.
-  var_t(std::unique_ptr<model_t<typeclass> >&& model) :
+  var_t(std::unique_ptr<_tc_model_t<typeclass> >&& model) :
     model(std::move(model)) { }
 
   // Move ctor/assign by default.
@@ -116,11 +119,11 @@ struct var_t {
   // A virtual dtor triggers the dtor in the impl.
   //virtual ~var_t() { }
 
-  /*// The preferred initializer for a var_t. This constructs an impl_t of
+  /*// The preferred initializer for a var_t. This constructs an _tc_impl_t of
   // type_t on the heap, and stores the pointer in a new var_t.
   template<typename type_t, typename... args_t>
   static var_t construct(args_t&&... args) {
-    return var_t(std::make_unique<impl_t<typeclass, type_t> >(
+    return var_t(std::make_unique<_tc_impl_t<typeclass, type_t> >(
       std::forward<args_t>(args)...
     ));
   }
@@ -148,13 +151,13 @@ struct var_t {
   }
 
   // This is actually a unique_ptr to an impl type. We store a pointer to
-  // the base type and rely on model_t's virtual dtor to free the object.
-  std::unique_ptr<model_t<typeclass> > model;*/
+  // the base type and rely on _tc_model_t's virtual dtor to free the object.
+  std::unique_ptr<_tc_model_t<typeclass> > model;*/
 };
 #endif // 0
 
 template<typename... typeclass>
-struct combined_t {
+struct _tc_combined_t {
 };
 
 } // namespace cxxctp

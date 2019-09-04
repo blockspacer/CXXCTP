@@ -174,10 +174,10 @@ struct __my_interface_my_interface2 {
   virtual ~common_model_t() { }
 };*/
 
-// model_t is the base class for impl_t. impl_t has the storage for the
-// object of type_t. model_t has a virtual dtor to trigger impl_t's dtor.
+// model_t is the base class for _tc_impl_t. _tc_impl_t has the storage for the
+// object of type_t. model_t has a virtual dtor to trigger _tc_impl_t's dtor.
 // model_t has a virtual clone function to copy-construct an instance of
-// impl_t into heap memory, which is returned via unique_ptr. model_t has
+// _tc_impl_t into heap memory, which is returned via unique_ptr. model_t has
 // a pure virtual function for each method in the interface class typeclass.
 template<typename... typeclass>
 struct model_t /*: public common_model_t*/ {
@@ -254,15 +254,15 @@ struct model_t<my_interface, my_interface2> {
 };
 
 template<typename type_t, typename... typeclass>
-struct impl_t : public model_t<typeclass...> {
+struct _tc_impl_t : public model_t<typeclass...> {
 
   // Construct the embedded concrete type.
   /*template<typename... args_t>
-  impl_t(args_t&&... args) : concrete(std::forward<args_t>(args)...) { }
+  _tc_impl_t(args_t&&... args) : concrete(std::forward<args_t>(args)...) { }
 
   std::unique_ptr<model_t<typeclass> > clone() override {
-    // Copy-construct a new instance of impl_t on the heap.
-    return std::make_unique<impl_t>(concrete);
+    // Copy-construct a new instance of _tc_impl_t on the heap.
+    return std::make_unique<_tc_impl_t>(concrete);
   }*/
 
   // Loop over each member function on the interface.
@@ -304,15 +304,15 @@ struct impl_t : public model_t<typeclass...> {
 };
 
 template<>
-struct impl_t<allcaps_t, my_interface, my_interface2>
+struct _tc_impl_t<allcaps_t, my_interface, my_interface2>
   : public model_t<my_interface, my_interface2> {
   //friend void draw(const allcaps_t&);
 
   // Construct the embedded concrete type.
   template<typename... args_t>
-  impl_t(args_t&&... args) : concrete(std::forward<args_t>(args)...) { }
+  _tc_impl_t(args_t&&... args) : concrete(std::forward<args_t>(args)...) { }
 
-  explicit impl_t(const allcaps_t& concrete_arg);
+  explicit _tc_impl_t(const allcaps_t& concrete_arg);
 
   std::unique_ptr<
     model_t<my_interface, my_interface2>>
@@ -396,22 +396,22 @@ struct impl_t<allcaps_t, my_interface, my_interface2>
 };
 
 template<>
-struct impl_t<forward_t, my_interface, my_interface2>
+struct _tc_impl_t<forward_t, my_interface, my_interface2>
   : public model_t<my_interface, my_interface2> {
 
   // Construct the embedded concrete type.
   template<typename... args_t>
-  impl_t(args_t&&... args)
+  _tc_impl_t(args_t&&... args)
     : concrete(std::forward<args_t>(args)...) { }
 
-  explicit impl_t(const forward_t& concrete_arg)
+  explicit _tc_impl_t(const forward_t& concrete_arg)
     : concrete(concrete_arg) {}
 
   std::unique_ptr<
     model_t<my_interface, my_interface2>>
       clone() override {
-    // Copy-construct a new instance of impl_t on the heap.
-    return std::make_unique<impl_t>(concrete);
+    // Copy-construct a new instance of _tc_impl_t on the heap.
+    return std::make_unique<_tc_impl_t>(concrete);
   }
 
   bool __has_save() const override {
@@ -506,22 +506,22 @@ struct impl_t<forward_t, my_interface, my_interface2>
 
 
 template<>
-struct impl_t<reverse_t, my_interface, my_interface2>
+struct _tc_impl_t<reverse_t, my_interface, my_interface2>
   : public model_t<my_interface, my_interface2> {
 
   // Construct the embedded concrete type.
   template<typename... args_t>
-  impl_t(args_t&&... args)
+  _tc_impl_t(args_t&&... args)
     : concrete(std::forward<args_t>(args)...) { }
 
-  explicit impl_t(const reverse_t& concrete_arg)
+  explicit _tc_impl_t(const reverse_t& concrete_arg)
     : concrete(concrete_arg) {}
 
   std::unique_ptr<
     model_t<my_interface, my_interface2>>
       clone() override {
-    // Copy-construct a new instance of impl_t on the heap.
-    return std::make_unique<impl_t>(concrete);
+    // Copy-construct a new instance of _tc_impl_t on the heap.
+    return std::make_unique<_tc_impl_t>(concrete);
   }
 
   bool __has_save() const override {
@@ -615,22 +615,22 @@ struct impl_t<reverse_t, my_interface, my_interface2>
 };
 
 template<>
-struct impl_t<reverse_t, my_interface>
+struct _tc_impl_t<reverse_t, my_interface>
   : public model_t<my_interface> {
 
   // Construct the embedded concrete type.
   template<typename... args_t>
-  impl_t(args_t&&... args)
+  _tc_impl_t(args_t&&... args)
     : concrete(std::forward<args_t>(args)...) { }
 
-  explicit impl_t(const reverse_t& concrete_arg)
+  explicit _tc_impl_t(const reverse_t& concrete_arg)
     : concrete(concrete_arg) {}
 
   std::unique_ptr<
     model_t<my_interface>>
       clone() override {
-    // Copy-construct a new instance of impl_t on the heap.
-    return std::make_unique<impl_t>(concrete);
+    // Copy-construct a new instance of _tc_impl_t on the heap.
+    return std::make_unique<_tc_impl_t>(concrete);
   }
 
 #if 0
@@ -757,11 +757,11 @@ struct var_t {
   // A virtual dtor triggers the dtor in the impl.
   //virtual ~var_t() { }
 
-  /*// The preferred initializer for a var_t. This constructs an impl_t of
+  /*// The preferred initializer for a var_t. This constructs an _tc_impl_t of
   // type_t on the heap, and stores the pointer in a new var_t.
   template<typename type_t, typename... args_t>
   static var_t construct(args_t&&... args) {
-    return var_t(std::make_unique<impl_t<typeclass, type_t> >(
+    return var_t(std::make_unique<_tc_impl_t<typeclass, type_t> >(
       std::forward<args_t>(args)...
     ));
   }
@@ -810,7 +810,7 @@ struct var_t<my_interface> {
   var_t(const T&& u) :
       model(
         std::make_unique<
-          impl_t<T, my_interface>>
+          _tc_impl_t<T, my_interface>>
         (std::forward<const std::decay_t<T>>(u))) {
     puts("var_t{T} called");
   }
@@ -835,11 +835,11 @@ struct var_t<my_interface> {
   // A virtual dtor triggers the dtor in the impl.
   virtual ~var_t() { }
 
-  // The preferred initializer for a var_t. This constructs an impl_t of
+  // The preferred initializer for a var_t. This constructs an _tc_impl_t of
   // type_t on the heap, and stores the pointer in a new var_t.
   template<typename type_t, typename... args_t>
   static var_t construct(args_t&&... args) {
-    return var_t(std::make_unique<impl_t<type_t, my_interface> >(
+    return var_t(std::make_unique<_tc_impl_t<type_t, my_interface> >(
       std::forward<args_t>(args)...
     ));
   }
@@ -959,7 +959,7 @@ struct var_t<my_interface, my_interface2> {
   var_t(const T&& u) :
       model(
         std::make_unique<
-          impl_t<T, my_interface, my_interface2>>
+          _tc_impl_t<T, my_interface, my_interface2>>
         (std::forward<const std::decay_t<T>>(u))) {
     puts("var_t{T} called");
   }
@@ -984,11 +984,11 @@ struct var_t<my_interface, my_interface2> {
   // A virtual dtor triggers the dtor in the impl.
   virtual ~var_t() { }
 
-  // The preferred initializer for a var_t. This constructs an impl_t of
+  // The preferred initializer for a var_t. This constructs an _tc_impl_t of
   // type_t on the heap, and stores the pointer in a new var_t.
   template<typename type_t, typename... args_t>
   static var_t construct(args_t&&... args) {
-    return var_t(std::make_unique<impl_t<type_t, my_interface, my_interface2> >(
+    return var_t(std::make_unique<_tc_impl_t<type_t, my_interface, my_interface2> >(
       std::forward<args_t>(args)...
     ));
   }
@@ -1106,7 +1106,7 @@ struct combined_t<my_interface, my_interface2> {
   combined_t(const T&& u) :
       my_interface_model(
         std::make_unique<
-          impl_t<T, my_interface, my_interface2>>
+          _tc_impl_t<T, my_interface, my_interface2>>
         (std::forward<const std::decay_t<T>>(u))) {
     puts("combined_t{T} called");
   }
@@ -1131,11 +1131,11 @@ struct combined_t<my_interface, my_interface2> {
   // A virtual dtor triggers the dtor in the impl.
   virtual ~combined_t() { }
 
-  // The preferred initializer for a combined_t. This constructs an impl_t of
+  // The preferred initializer for a combined_t. This constructs an _tc_impl_t of
   // type_t on the heap, and stores the pointer in a new combined_t.
   template<typename type_t, typename... args_t>
   static combined_t construct(args_t&&... args) {
-    return combined_t(std::make_unique<impl_t<type_t, my_interface, my_interface2> >(
+    return combined_t(std::make_unique<_tc_impl_t<type_t, my_interface, my_interface2> >(
       std::forward<args_t>(args)...
     ));
   }

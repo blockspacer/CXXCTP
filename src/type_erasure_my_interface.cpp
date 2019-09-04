@@ -3,10 +3,30 @@
 
 //#include "../gems/util.hxx"
 #include "type_erasure_my_interface.hpp"
+#include "type_erasure_my_interface_externs.hpp"
 
 namespace cxxctp {
 namespace generated {
 
+template <>
+allcaps_t& _tc_model_t<template_interface<int, const std::string&>>::ref_concrete<allcaps_t>() {
+  return static_cast<_tc_impl_t<allcaps_t, template_interface<int, const std::string&>>*>(this)
+    ->concrete;
+}
+
+template <>
+reverse_t& _tc_model_t<template_interface<int, const std::string&>>::ref_concrete<reverse_t>() {
+  return static_cast<_tc_impl_t<reverse_t, template_interface<int, const std::string&>>*>(this)
+    ->concrete;
+}
+
+template <>
+forward_t& _tc_model_t<template_interface<int, const std::string&>>::ref_concrete<forward_t>() {
+  return static_cast<_tc_impl_t<forward_t, template_interface<int, const std::string&>>*>(this)
+    ->concrete;
+}
+
+#if 0
 extern template
  /*explicit*/ void draw<my_interface>
   (const allcaps_t&, const char* surface);
@@ -18,30 +38,31 @@ extern template
 extern template
  /*explicit*/ void draw<my_interface>
   (const reverse_t&, const char* surface);
+#endif // 0
 
-void model_t<my_interface>::set_interface_data(const char* text) {
+void _tc_model_t<template_interface<int, const std::string&>>::set_interface_data(const char* text) {
   interface_data = text;
 }
 
-void model_t<my_interface>::print_interface_data() const {
+void _tc_model_t<template_interface<int, const std::string&>>::print_interface_data() const {
   auto out = std::string("interface_data: ") + interface_data;
   puts(out.c_str());
 }
 
-impl_t<allcaps_t, my_interface>::impl_t(const allcaps_t& concrete_arg)
+_tc_impl_t<allcaps_t, template_interface<int, const std::string&>>::_tc_impl_t(const allcaps_t& concrete_arg)
   : concrete(concrete_arg) {}
 
-std::unique_ptr<model_t<my_interface>>
- impl_t<allcaps_t, my_interface>::clone() {
-  // Copy-construct a new instance of impl_t on the heap.
-  return std::make_unique<impl_t>(concrete);
+std::unique_ptr<_tc_model_t<template_interface<int, const std::string&>>>
+ _tc_impl_t<allcaps_t, template_interface<int, const std::string&>>::clone() {
+  // Copy-construct a new instance of _tc_impl_t on the heap.
+  return std::make_unique<_tc_impl_t>(concrete);
 }
 
-bool impl_t<allcaps_t, my_interface>::__has_save() const {
+bool _tc_impl_t<allcaps_t, template_interface<int, const std::string&>>::__has_save() const {
   return false;
 }
 
-void impl_t<allcaps_t, my_interface>::__save(const char* filename, const char* access) {
+void _tc_impl_t<allcaps_t, template_interface<int, const std::string&>>::__save(const char* filename, const char* access) {
   // TODO: noexcept
   throw std::runtime_error("allcaps_t::save not implemented");
 }
@@ -51,36 +72,36 @@ void print(Params&&... args) override {
   return concrete.print(std::forward<decltype(args)>(args)...);
 }*/
 
-bool impl_t<allcaps_t, my_interface>::__has_print() const {
+bool _tc_impl_t<allcaps_t, template_interface<int, const std::string&>>::__has_print() const {
   return true;
 }
 
-void impl_t<allcaps_t, my_interface>::__print(const char* text) const {
+void _tc_impl_t<allcaps_t, template_interface<int, const std::string&>>::__print(const char* text) const {
   return concrete.print(std::forward<decltype(text)>(text));
 }
 
-void impl_t<allcaps_t, my_interface>::__set_data(const char* text) {
+void _tc_impl_t<allcaps_t, template_interface<int, const std::string&>>::__set_data(const char* text) {
   return concrete.set_data(std::forward<decltype(text)>(text));
 }
 
-void impl_t<allcaps_t, my_interface>::__print_data() const {
+void _tc_impl_t<allcaps_t, template_interface<int, const std::string&>>::__print_data() const {
   return concrete.print_data();
 }
 
-void impl_t<allcaps_t, my_interface>::__draw(const char* surface) const {
-  return draw<my_interface>(concrete, surface);
+void _tc_impl_t<allcaps_t, template_interface<int, const std::string&>>::__draw(const char* surface) const {
+  return draw<template_interface<int, const std::string&>>(concrete, surface);
 }
 
 // ====
 
-void impl_t<forward_t, my_interface>::__draw(const char* surface) const {
-  return draw<my_interface>(concrete, surface);
+void _tc_impl_t<forward_t, template_interface<int, const std::string&>>::__draw(const char* surface) const {
+  return draw<template_interface<int, const std::string&>>(concrete, surface);
 }
 
 // ====
 
-void impl_t<reverse_t, my_interface>::__draw(const char* surface) const {
-  return draw<my_interface>(concrete, surface);
+void _tc_impl_t<reverse_t, template_interface<int, const std::string&>>::__draw(const char* surface) const {
+  return draw<template_interface<int, const std::string&>>(concrete, surface);
 }
 
 // ====
@@ -123,7 +144,7 @@ int main() {
 #endif // 0
 
 /*template<>
-void impl_t<allcaps_t, my_interface>::draw(const allcaps_t &)
+void _tc_impl_t<allcaps_t, my_interface>::draw(const allcaps_t &)
 {
 
 }*/

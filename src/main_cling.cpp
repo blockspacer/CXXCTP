@@ -213,8 +213,11 @@
 
 #include "types_for_erasure.hpp"
 #include "type_erasure_my_interface.hpp"
+#include "type_erasure_my_interface_externs.hpp"
 #include "type_erasure_my_interface2.hpp"
+#include "type_erasure_my_interface2_externs.hpp"
 #include "type_erasure_my_interface_my_interface2.hpp"
+#include "type_erasure_my_interface_my_interface2_externs.hpp"
 
 namespace fs = std::experimental::filesystem;
 
@@ -1565,7 +1568,8 @@ void writeToFile(const std::string& str, const std::string& path) {
 
 #include <unordered_map>
 
-using namespace cxxctp::generated;
+//using namespace cxxctp::generated;
+using cxxctp::generated::ShapeKind;
 
 static std::unordered_map<ShapeKind, int> u = {
     {ShapeKind::Box, 1},
@@ -1891,22 +1895,43 @@ void test_split_to_funcs() {
 namespace cxxctp {
 namespace generated {
   template<>
-  void draw<my_interface/*obj_t::typeclass_t*/>
+  void draw<template_interface<int, const std::string&>/*obj_t::typeclass_t*/>
    (const allcaps_t&, const char* surface) {
     std::cout << "Drawing allcaps_t on " << surface << std::endl;
   }
 
   template<>
-  void draw<my_interface/*obj_t::typeclass_t*/>
+  void draw<template_interface<int, const std::string&>/*obj_t::typeclass_t*/>
    (const forward_t&, const char* surface) {
     std::cout << "Drawing forward_t on " << surface << std::endl;
   }
 
   template<>
-  void draw<my_interface/*obj_t::typeclass_t*/>
+  void draw<template_interface<int, const std::string&>/*obj_t::typeclass_t*/>
    (const reverse_t&, const char* surface) {
     std::cout << "Drawing reverse_t on " << surface << std::endl;
   }
+
+  // ==============
+
+  template <>
+  std::string my_interface2_model_t::test_zoo<allcaps_t>(const std::string& arg) {
+    auto& data = ref_concrete<allcaps_t>();
+    return arg + " test_zoo for allcaps_t " + data.allcaps_t_data;
+  }
+
+  template <>
+  std::string my_interface2_model_t::test_zoo<reverse_t>(const std::string& arg) {
+    auto& data = ref_concrete<reverse_t>();
+    return arg + " test_zoo for reverse_t " + data.reverse_t_data;
+  }
+
+  template <>
+  std::string my_interface2_model_t::test_zoo<forward_t>(const std::string& arg) {
+    auto& data = ref_concrete<forward_t>();
+    return arg + " test_zoo for forward_t " + data.forward_t_data;
+  }
+
 } // namespace generated
 } // namespace cxxctp
 
@@ -1933,6 +1958,24 @@ namespace generated {
 } // namespace generated
 } // namespace cxxctp
 #endif // 0
+
+using cxxctp::generated::my_interface_obj_t;
+using cxxctp::generated::my_interface_impl_t;
+using cxxctp::generated::my_interface2_obj_t;
+using cxxctp::generated::my_interface2_impl_t;
+using cxxctp::generated::my_interface_my_interface2_obj_t;
+using cxxctp::generated::_tc_impl_t;
+using cxxctp::generated::_tc_model_t;
+using cxxctp::generated::_tc_combined_t;
+
+/*template<typename B, typename C>
+const auto show = cxxctp::generated::show<my_interface2, B, C>;*/
+
+/*template <typename B, typename C>
+constexpr void(*show)(const B& arg1, const C& arg2)
+  = &cxxctp::generated::show<my_interface2, B, C>;*/
+//using cxxctp::generated::foo1;
+//using cxxctp::generated::show<my_interface2>;
 
 void do_small_smth(const my_interface_obj_t& small_obj) {
   if(!small_obj) {
@@ -1969,9 +2012,8 @@ void do_big_smth(const my_interface_my_interface2_obj_t& big_obj) {
 int main(int /*argc*/, const char* const* /*argv*/) {
     using namespace clang::tooling;
 
-    //one_obj_t one1 = reverse_t{};
-    //obj_t one2 = one_obj_t::construct<reverse_t>();
-    //one_obj_t one3 = one2;
+    my_interface2_obj_t tz{forward_t{}};
+    std::cout << "test_zoo: " << tz.test_zoo("tz") << std::endl;
 
     do_small_smth(forward_t{});
     do_small_smth(my_interface_obj_t{});
@@ -1990,6 +2032,22 @@ int main(int /*argc*/, const char* const* /*argv*/) {
       com1.do_job("com1.save", "w");
     com1.print_interface_data();
     com1.set_interface_data("com1 interface data");
+
+    /*forward_t ba;
+    ba.forward_t_bar = "data";*/
+    std::function<void(allcaps_t&, const std::string&)> fu1 = [](allcaps_t& concrete, const std::string& data){
+      concrete.allcaps_t_bar = data;
+    };
+    com1.set_set_bar(fu1);
+
+    std::function<std::string(allcaps_t&)> fu2 = [](allcaps_t& concrete){
+      return concrete.allcaps_t_bar;
+    };
+    com1.set_get_bar(fu2);
+
+    std::cout << "com1.get_bar(): " << com1.get_bar() << std::endl;
+    com1.set_bar("dfgfgg");
+    std::cout << "com1.get_bar(): " << com1.get_bar() << std::endl;
 
     do_big_smth(com1);
 
@@ -2089,6 +2147,42 @@ int main(int /*argc*/, const char* const* /*argv*/) {
     d.print("Hello d");
     e.print("Hello e");
     f.print("Hello f");
+
+    forward_t fwdt{};
+
+    my_interface2_impl_t<forward_t>::show(fwdt, "fwdt_tz _0");
+    my_interface2_impl_t<decltype(fwdt)>::show(fwdt, "fwdt_tz __0");
+    //my_interface2_impl_t<allcaps_t>::show(fwdt, "fwdt_tz ___0"); // can`t compile
+
+    my_interface2_obj_t fwdt_tz{std::move(fwdt)};
+
+    //my_interface2_obj_t::show<forward_t>(fwdt, "fwdt_tz 1");
+
+    //my_interface2_obj_t::show<forward_t>(fwdt, "fwdt_tz 1");
+
+    fwdt_tz.show(forward_t{}, "fwdt_tz 2");
+
+    //fwdt_tz.__show("fwdt_tz 2");
+
+    fwdt_tz = allcaps_t{};
+
+    using cxxctp::generated::show;
+
+    //foo1(2);
+    show<my_interface2>(fwdt, "fwdt_tz ___0");
+
+    //fwdt_tz.show<allcaps_t>(fwdt_tz.ref_concrete<allcaps_t>(), "fwdt_tz 3");
+
+    /*allcaps_t ac{};
+    fwdt_tz.show<allcaps_t>(ac, "fwdt_tz 3");*/
+
+    //fwdt_tz.show<forward_t>(fwdt_tz.ref_concrete<forward_t>(), "fwdt_tz 3");
+
+    //fwdt_tz.__show("fwdt_tz 3");
+
+    //one_obj_t one1 = reverse_t{};
+    //obj_t one2 = one_obj_t::construct<reverse_t>();
+    //one_obj_t one3 = one2;
 
     return 0;
 

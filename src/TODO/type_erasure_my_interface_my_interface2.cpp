@@ -90,20 +90,20 @@ void model_t<my_interface, my_interface2>::print_interface_data() {
   puts(out.c_str());
 }
 
-impl_t<allcaps_t, my_interface, my_interface2>::impl_t(const allcaps_t& concrete_arg)
+_tc_impl_t<allcaps_t, my_interface, my_interface2>::_tc_impl_t(const allcaps_t& concrete_arg)
   : concrete(concrete_arg) {}
 
 std::unique_ptr<model_t<my_interface, my_interface2>>
- impl_t<allcaps_t, my_interface, my_interface2>::clone() {
-  // Copy-construct a new instance of impl_t on the heap.
-  return std::make_unique<impl_t>(concrete);
+ _tc_impl_t<allcaps_t, my_interface, my_interface2>::clone() {
+  // Copy-construct a new instance of _tc_impl_t on the heap.
+  return std::make_unique<_tc_impl_t>(concrete);
 }
 
-bool impl_t<allcaps_t, my_interface, my_interface2>::__has_save() const {
+bool _tc_impl_t<allcaps_t, my_interface, my_interface2>::__has_save() const {
   return false;
 }
 
-void impl_t<allcaps_t, my_interface, my_interface2>::__save(const char* filename, const char* access) {
+void _tc_impl_t<allcaps_t, my_interface, my_interface2>::__save(const char* filename, const char* access) {
   // TODO: noexcept
   throw std::runtime_error("allcaps_t::save not implemented");
 }
@@ -113,35 +113,35 @@ void print(Params&&... args) override {
   return concrete.print(std::forward<decltype(args)>(args)...);
 }*/
 
-bool impl_t<allcaps_t, my_interface, my_interface2>::__has_print() const {
+bool _tc_impl_t<allcaps_t, my_interface, my_interface2>::__has_print() const {
   return true;
 }
 
-void impl_t<allcaps_t, my_interface, my_interface2>::__print(const char* text) {
+void _tc_impl_t<allcaps_t, my_interface, my_interface2>::__print(const char* text) {
   return concrete.print(std::forward<decltype(text)>(text));
 }
 
-void impl_t<allcaps_t, my_interface, my_interface2>::__set_data(const char* text) {
+void _tc_impl_t<allcaps_t, my_interface, my_interface2>::__set_data(const char* text) {
   return concrete.set_data(std::forward<decltype(text)>(text));
 }
 
-void impl_t<allcaps_t, my_interface, my_interface2>::__print_data() {
+void _tc_impl_t<allcaps_t, my_interface, my_interface2>::__print_data() {
   return concrete.print_data();
 }
 
-void impl_t<allcaps_t, my_interface, my_interface2>::__draw(const char* surface) const {
+void _tc_impl_t<allcaps_t, my_interface, my_interface2>::__draw(const char* surface) const {
   return draw<my_interface>(concrete, surface);
 }
 
 // ====
 
-void impl_t<forward_t, my_interface, my_interface2>::__draw(const char* surface) const {
+void _tc_impl_t<forward_t, my_interface, my_interface2>::__draw(const char* surface) const {
   return draw<my_interface>(concrete, surface);
 }
 
 // ====
 
-void impl_t<reverse_t, my_interface, my_interface2>::__draw(const char* surface) const {
+void _tc_impl_t<reverse_t, my_interface, my_interface2>::__draw(const char* surface) const {
   return draw<my_interface>(concrete, surface);
 }
 
@@ -185,7 +185,7 @@ int main() {
 #endif // 0
 
 /*template<>
-void impl_t<allcaps_t, my_interface>::draw(const allcaps_t &)
+void _tc_impl_t<allcaps_t, my_interface>::draw(const allcaps_t &)
 {
 
 }*/

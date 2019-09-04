@@ -4,11 +4,13 @@
 //#include "../gems/util.hxx"
 #include "types_for_erasure.hpp"
 
-void my_interface::set_interface_data(const char* text) {
+template<>
+void template_interface<int, const std::string&>::set_interface_data(const char* text) {
     interface_data = text;
 }
 
-void my_interface::print_interface_data() const {
+template<>
+void template_interface<int, const std::string&>::print_interface_data() const {
   puts(interface_data.c_str());
 }
 
