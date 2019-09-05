@@ -12,10 +12,12 @@
 #include <type_traits>
 #include <functional>
 #include <string>
+#include <any>
 #include <iostream>
 
 #include "types_for_erasure.hpp"
 #include "type_erasure_common.hpp"
+#include "type_erasure_my_interface_externs.hpp"
 
 namespace cxxctp {
 namespace generated {
@@ -50,6 +52,8 @@ struct _tc_model_t<template_interface<int, const std::string&>> {
 
   virtual std::unique_ptr<_tc_model_t> clone() noexcept = 0;
   virtual std::unique_ptr<_tc_model_t> move_clone() noexcept = 0;
+
+  virtual const size_t getModelTypeIndex() const noexcept = 0;
 
   virtual bool __has_save() const noexcept = 0;
 
@@ -108,11 +112,18 @@ struct _tc_impl_t<allcaps_t, template_interface<int, const std::string&>>
   typedef allcaps_t val_type_t;
   //friend void draw(const allcaps_t&);
 
+  //static size_t constexpr type_hash = Hash("reverse_t");
+
   // Construct the embedded concrete type.
   template<typename... args_t>
   _tc_impl_t(args_t&&... args) noexcept : concrete(std::forward<args_t>(args)...) { }
 
   explicit _tc_impl_t(const allcaps_t& concrete_arg) noexcept;
+
+  const size_t getModelTypeIndex() const noexcept override final {
+    return _tc_registry<template_interface<int, const std::string&>>::
+      getTypeIndex<allcaps_t>();
+  }
 
   std::unique_ptr<
     _tc_model_t<template_interface<int, const std::string&>>>
@@ -213,6 +224,8 @@ struct _tc_impl_t<std::reference_wrapper<allcaps_t>, template_interface<int, con
   typedef std::reference_wrapper<allcaps_t> val_type_t;
   //friend void draw(const allcaps_t&);
 
+  //static size_t constexpr type_hash = Hash("_tc_impl_t");
+
   // Construct the embedded concrete type.
   template<typename... args_t>
   _tc_impl_t(args_t&&... args) noexcept : concrete(std::forward<args_t>(args)...) { }
@@ -230,6 +243,11 @@ struct _tc_impl_t<std::reference_wrapper<allcaps_t>, template_interface<int, con
       (std::move(cloned));
     /*return std::make_unique<_tc_impl_t<allcaps_t, _tc_model_t<template_interface<int, const std::string&>>>
       (std::move(cloned));*/
+  }
+
+  const size_t getModelTypeIndex() const noexcept override final {
+    return _tc_registry<template_interface<int, const std::string&>>::
+      getTypeIndex<allcaps_t>();
   }
 
   std::unique_ptr<
@@ -330,6 +348,8 @@ struct _tc_impl_t<forward_t, template_interface<int, const std::string&>>
   : public _tc_model_t<template_interface<int, const std::string&>> {
   typedef forward_t val_type_t;
 
+  //static size_t constexpr type_hash = Hash("forward_t");
+
   // Construct the embedded concrete type.
   template<typename... args_t>
   _tc_impl_t(args_t&&... args) noexcept
@@ -343,6 +363,11 @@ struct _tc_impl_t<forward_t, template_interface<int, const std::string&>>
       clone() noexcept override final {
     // Copy-construct a new instance of _tc_impl_t on the heap.
     return std::make_unique<_tc_impl_t>(concrete);
+  }
+
+  const size_t getModelTypeIndex() const noexcept override final {
+    return _tc_registry<template_interface<int, const std::string&>>::
+      getTypeIndex<forward_t>();
   }
 
   std::unique_ptr<
@@ -449,6 +474,8 @@ struct _tc_impl_t<reverse_t, template_interface<int, const std::string&>>
     : public _tc_model_t<template_interface<int, const std::string&>> {
   typedef reverse_t val_type_t;
 
+  //static size_t constexpr type_hash = Hash("reverse_t");
+
   // Construct the embedded concrete type.
   template<typename... args_t>
   _tc_impl_t(args_t&&... args) noexcept
@@ -456,6 +483,11 @@ struct _tc_impl_t<reverse_t, template_interface<int, const std::string&>>
 
   explicit _tc_impl_t(const reverse_t& concrete_arg) noexcept
     : concrete(concrete_arg) {}
+
+  const size_t getModelTypeIndex() const noexcept override final {
+    return _tc_registry<template_interface<int, const std::string&>>::
+      getTypeIndex<reverse_t>();
+  }
 
   std::unique_ptr<
     _tc_model_t<template_interface<int, const std::string&>>>
@@ -732,6 +764,11 @@ struct _tc_combined_t<template_interface<int, const std::string&>> {
   >
   _tc_combined_t(std::shared_ptr<T>&& u) noexcept :
       my_interface_model(std::move(u)) {
+   static_assert(!std::is_const<typename std::remove_reference<T>::type>::value,
+      "You've attempted a cast to a const rvalue reference. "
+      "Make sure you're not trying to move a const object, "
+      "as this would likely result in a copy not a move. "
+      "If you need it for real, call std::move(...) instead.");
     puts("_tc_combined_t{my_interface} called, moves passed argument");
   }
 
@@ -971,8 +1008,25 @@ struct _tc_combined_t<template_interface<int, const std::string&>> {
     my_interface_model = rhs;
   }
 
+  const size_t getModelTypeIndex() {
+    if(!my_interface_model) {
+      std::terminate();
+    }
+    return my_interface_model->getModelTypeIndex();
+  }
+
+  template <typename T>
+  static const size_t getGlobalTypeIndex() {
+    return _tc_registry<template_interface<int, const std::string&>>
+      ::getTypeIndex<T>();
+  }
+
   template <typename T>
   T& ref_concrete() noexcept {
+    if(!my_interface_model || my_interface_model->getModelTypeIndex()
+        != getGlobalTypeIndex<T>()) {
+      std::terminate();
+    }
     return my_interface_model->ref_concrete<T>();
   }
 

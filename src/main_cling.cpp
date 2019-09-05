@@ -2081,6 +2081,16 @@ int main(int /*argc*/, const char* const* /*argv*/) {
     do_small_smth(shared_my_interface_obj_t);*/
 
     my_interface_my_interface2_obj_t com2 = reverse_t{};
+
+    auto tidx1 = com2.getModelTypeIndex
+            <template_interface<int, const std::string&>>();
+    std::cout << "tidx1 = " << tidx1 << std::endl;
+    if(my_interface_my_interface2_obj_t::getGlobalTypeIndex
+        <template_interface<int, const std::string&>, reverse_t>()
+          != tidx1) {
+        throw std::runtime_error("getGlobalTypeIndex invalid for reverse_t");
+    }
+
     com2 = shared_my_interface_obj_t;
     com2 = com1;
     com2.set_common_model(reverse_t{});
@@ -2088,6 +2098,18 @@ int main(int /*argc*/, const char* const* /*argv*/) {
       com1.ref_my_interface_model());
 
     com1.print_interface_data();
+
+    com1.set_common_model(forward_t{});
+
+    auto tidx2 = com2.getModelTypeIndex
+            <template_interface<int, const std::string&>>();
+    std::cout << "tidx2 = " << tidx2 << std::endl;
+    if(my_interface_my_interface2_obj_t::getGlobalTypeIndex
+        <template_interface<int, const std::string&>, forward_t>()
+          != tidx2) {
+        throw std::runtime_error("getGlobalTypeIndex invalid for forward_t");
+    }
+
     com2.print_interface_data();
 
     do_big_smth(com2);
@@ -2164,6 +2186,13 @@ int main(int /*argc*/, const char* const* /*argv*/) {
       e.save("bar.save", "w");
 
     my_interface_obj_t f = reverse_t{};
+
+    auto tidx3 = f.getModelTypeIndex();
+    std::cout << "tidx3 = " << tidx3 << std::endl;
+    if(tidx3 != my_interface_obj_t::getGlobalTypeIndex<reverse_t>()) {
+        throw std::runtime_error("f getGlobalTypeIndex invalid for reverse_t");
+    }
+
     f.draw("console");
     f.print("Hello f");
 

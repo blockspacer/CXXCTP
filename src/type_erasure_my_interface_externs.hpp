@@ -64,5 +64,25 @@ template<
 >
 void draw(const reverse_t&, const char* surface);*/
 
+template<>
+struct _tc_registry<template_interface<int, const std::string&>> {
+  static constexpr size_t size = 3;
+
+  template<typename concrete>
+  static size_t getTypeIndex() noexcept;
+};
+
+template<>
+size_t _tc_registry<template_interface<int, const std::string&>>::
+    getTypeIndex<allcaps_t>() noexcept;
+
+template<>
+size_t _tc_registry<template_interface<int, const std::string&>>::
+    getTypeIndex<reverse_t>() noexcept;
+
+template<>
+size_t _tc_registry<template_interface<int, const std::string&>>::
+    getTypeIndex<forward_t>() noexcept;
+
 } // namespace cxxctp
 } // namespace generated

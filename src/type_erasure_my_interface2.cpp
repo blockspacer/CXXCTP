@@ -192,5 +192,35 @@ void _tc_impl_t<reverse_t, my_interface2>::__draw(const char* surface) const {
 // ====
 */
 
+template<>
+size_t _tc_registry<my_interface2>::
+    getTypeIndex<allcaps_t>() noexcept {
+ constexpr size_t ret = 0;
+ static_assert(ret < std::numeric_limits<size_t>::max(),
+    "Registered too many types in"
+    " _tc_registry<my_interface2>");
+  return ret;
+}
+
+template<>
+size_t _tc_registry<my_interface2>::
+    getTypeIndex<reverse_t>() noexcept {
+ constexpr size_t ret = 1;
+ static_assert(ret < std::numeric_limits<size_t>::max(),
+    "Registered too many types in"
+    " _tc_registry<my_interface2>");
+  return ret;
+}
+
+template<>
+size_t _tc_registry<my_interface2>::
+    getTypeIndex<forward_t>() noexcept {
+ constexpr size_t ret = 2;
+ static_assert(ret < std::numeric_limits<size_t>::max(),
+    "Registered too many types in"
+    " _tc_registry<my_interface2>");
+  return ret;
+}
+
 } // namespace cxxctp
 } // namespace generated

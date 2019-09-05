@@ -164,5 +164,30 @@ struct _tc_combined_t {
 template<typename T>
 using IsNotReference = typename std::enable_if<!std::is_reference<T>::value, void>::type;
 
+/*int constexpr strlength(const char* str)
+{
+    return *str ? 1 + strlength(str + 1) : 0;
+}
+
+size_t constexpr Hash(const char *first)
+{   // FNV-1a hash function
+    const size_t FNVoffsetBasis = 14695981039346656037ULL;
+    const size_t FNVprime = 1099511628211ULL;
+    const size_t count = strlength(first);
+    size_t val = FNVoffsetBasis;
+    for (size_t next = 0; next < count; ++next)
+    {
+        val ^= (size_t)first[next];
+        val *= FNVprime;
+    }
+    return val;
+}*/
+
+template<typename typeclass>
+struct _tc_registry {
+  /*template<typename concrete>
+  static size_t getTypeIndex() noexcept = delete;*/
+};
+
 } // namespace cxxctp
 } // namespace generated

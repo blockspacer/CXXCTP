@@ -61,5 +61,25 @@ std::string show(const B& arg1, C const & arg2) {
   return my_interface2_impl_t<B>::show(arg1, arg2);
 }
 
+template<>
+struct _tc_registry<my_interface2> {
+  static constexpr size_t size = 3;
+
+  template<typename concrete>
+  static size_t getTypeIndex() noexcept;
+};
+
+template<>
+size_t _tc_registry<my_interface2>::
+    getTypeIndex<allcaps_t>() noexcept;
+
+template<>
+size_t _tc_registry<my_interface2>::
+    getTypeIndex<reverse_t>() noexcept;
+
+template<>
+size_t _tc_registry<my_interface2>::
+    getTypeIndex<forward_t>() noexcept;
+
 } // namespace cxxctp
 } // namespace generated

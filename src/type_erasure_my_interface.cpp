@@ -223,5 +223,35 @@ void _tc_impl_t<allcaps_t, my_interface>::draw(const allcaps_t &)
 
 }*/
 
+template<>
+size_t _tc_registry<template_interface<int, const std::string&>>::
+    getTypeIndex<allcaps_t>() noexcept {
+ constexpr size_t ret = 0;
+ static_assert(ret < std::numeric_limits<size_t>::max(),
+    "Registered too many types in"
+    " _tc_registry<template_interface<int, const std::string&>>");
+  return ret;
+}
+
+template<>
+size_t _tc_registry<template_interface<int, const std::string&>>::
+    getTypeIndex<reverse_t>() noexcept {
+ constexpr size_t ret = 1;
+ static_assert(ret < std::numeric_limits<size_t>::max(),
+    "Registered too many types in"
+    " _tc_registry<template_interface<int, const std::string&>>");
+  return ret;
+}
+
+template<>
+size_t _tc_registry<template_interface<int, const std::string&>>::
+    getTypeIndex<forward_t>() noexcept {
+ constexpr size_t ret = 2;
+ static_assert(ret < std::numeric_limits<size_t>::max(),
+    "Registered too many types in"
+    " _tc_registry<template_interface<int, const std::string&>>");
+  return ret;
+}
+
 } // namespace cxxctp
 } // namespace generated

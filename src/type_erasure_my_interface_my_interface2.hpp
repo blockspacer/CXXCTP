@@ -524,6 +524,35 @@ struct _tc_combined_t<template_interface<int, const std::string&>, my_interface2
           { my_interface_model/*->clone()*/ };
   }
 
+  template <typename R, typename T>
+  static const size_t getGlobalTypeIndex() {
+    return _tc_registry<R>::template getTypeIndex<T>();
+  }
+
+  template<
+  typename T,
+  typename std::enable_if<std::is_same<template_interface<int, const std::string&>, T>::value>::type* = nullptr
+  >
+  const size_t getModelTypeIndex() {
+    if(!my_interface_model) {
+      //throw std::runtime_error("my_interface_model not set");
+      std::terminate();
+    }
+    return my_interface_model->getModelTypeIndex();
+  }
+
+  template<
+  typename T,
+  typename std::enable_if<std::is_same<my_interface2, T>::value>::type* = nullptr
+  >
+  const size_t getModelTypeIndex() {
+    if(!my_interface2_model) {
+      //throw std::runtime_error("my_interface2_model not set");
+      std::terminate();
+    }
+    return my_interface2_model->getModelTypeIndex();
+  }
+
   /*operator _tc_combined_t<my_interface2>&&() const {
       return _tc_combined_t<
         my_interface2>{ my_interface2_model->move_clone() };

@@ -321,6 +321,10 @@ Guidelines Support Library
  + https://github.com/microsoft/GSL
  + https://www.reddit.com/r/cpp/comments/acspkq/guideline_support_library_what_a_mess/
 
+not_null
+ + https://www.bfilipek.com/2017/10/notnull.html
+ + https://github.com/Microsoft/GSL/issues/89#issuecomment-280104052
+
 circle https://github.com/seanbaxter/circle/blob/master/examples/README.md
 
 SugarCpp https://github.com/curimit/SugarCpp
@@ -604,6 +608,13 @@ enum classes as type-safe bitmasks
 
 flag_set: Type-safe, hard to misuse bitmask
  + https://foonathan.net/blog/2017/03/16/implementation-challenge-bitmask.html
+ + operator- Remove an element https://dxr.mozilla.org/mozilla-central/source/mfbt/EnumSet.h
+
+DISALLOW_COPY_AND_ASSIGN + check that we should delete the methods in the public: section.
+ + https://chromium.googlesource.com/chromium/src/base/+/master/macros.h#23
+ + https://github.com/chromium/chromium/blob/b9982d8b12286491af4dd8eef12e77b3af9a61d7/ui/views/examples/scroll_view_example.cc#L69
+ + https://stackoverflow.com/a/20026657
+ + https://github.com/google/styleguide/issues/255
 
 enum parser https://github.com/goto40/rpp/blob/ec8a4c4a3ac32dccee8c4e8ba97be8c2ba1c8f88/src/parser/enum_parser.cpp
 
