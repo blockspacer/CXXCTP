@@ -12,6 +12,7 @@
 #include <type_traits>
 #include <functional>
 #include <string>
+#include <iostream>
 
 #include "types_for_erasure.hpp"
 #include "type_erasure_common.hpp"
@@ -25,7 +26,7 @@ namespace generated {
 
 template<>
 struct _tc_model_t<template_interface<int, const std::string&>> {
-  virtual ~_tc_model_t() { }
+  virtual ~_tc_model_t() noexcept { }
 
   // from template S drawTo(A);
   //template <typename T>
@@ -47,44 +48,44 @@ struct _tc_model_t<template_interface<int, const std::string&>> {
   // https://github.com/tompollok/paco/blob/master/main.cpp#L94
   // https://gn.googlesource.com/gn/+/refs/heads/master/base/bind_internal.h#630
 
-  virtual std::unique_ptr<_tc_model_t> clone() = 0;
-  virtual std::unique_ptr<_tc_model_t> move_clone() = 0;
+  virtual std::unique_ptr<_tc_model_t> clone() noexcept = 0;
+  virtual std::unique_ptr<_tc_model_t> move_clone() noexcept = 0;
 
-  virtual bool __has_save() const = 0;
+  virtual bool __has_save() const noexcept = 0;
 
   //template <typename ...Params>
   //virtual void save(Params&&... args) = 0;
   //virtual void __save(const char* filename, const char* access) = 0;
-  virtual void __save(const char* filename, const char* access) {
+  virtual void __save(const char* filename, const char* access) noexcept {
     printf("default (unimplemented) save called for %s %s\n", filename, access);
   }
 
-  virtual bool __has_print_2() const = 0;
-  virtual void __print_2(const char* text) const = 0;
+  virtual bool __has_print_2() const noexcept = 0;
+  virtual void __print_2(const char* text) const noexcept = 0;
 
-  virtual bool __has_print() const = 0;
+  virtual bool __has_print() const noexcept = 0;
 
   //template <typename ...Params>
   //virtual void print(Params&&... args) = 0;
-  virtual void __print(const char* text) const = 0;
+  virtual void __print(const char* text) const noexcept = 0;
 
-  virtual void __set_data(const char* text) = 0;
+  virtual void __set_data(const char* text) noexcept = 0;
 
-  virtual void __print_data() const = 0;
+  virtual void __print_data() const noexcept = 0;
 
-  virtual void __draw(const char* surface) const = 0;
+  virtual void __draw(const char* surface) const noexcept = 0;
 
   template <typename T>
-  T& ref_concrete();
+  T& ref_concrete() noexcept;
 
   // TODO: pseudo inheritance by code injection
   /// \note same for all types
-  void set_interface_data(const char* text);/* {
+  void set_interface_data(const char* text) noexcept;/* {
     interface_data = text;
   }*/
 
   /// \note same for all types
-  void print_interface_data() const;/* {
+  void print_interface_data() const noexcept;/* {
     auto out = std::string("interface_data: ") + interface_data;
     puts(out.c_str());
   }*/
@@ -96,8 +97,10 @@ struct _tc_model_t<template_interface<int, const std::string&>> {
   //std::map<std::string, void(*)()> runtime_dispatch_table_;
 };
 
+// ==================
+
 template <>
-allcaps_t& _tc_model_t<template_interface<int, const std::string&>>::ref_concrete<allcaps_t>();
+allcaps_t& _tc_model_t<template_interface<int, const std::string&>>::ref_concrete<allcaps_t>() noexcept;
 
 template<>
 struct _tc_impl_t<allcaps_t, template_interface<int, const std::string&>>
@@ -107,45 +110,166 @@ struct _tc_impl_t<allcaps_t, template_interface<int, const std::string&>>
 
   // Construct the embedded concrete type.
   template<typename... args_t>
-  _tc_impl_t(args_t&&... args) : concrete(std::forward<args_t>(args)...) { }
+  _tc_impl_t(args_t&&... args) noexcept : concrete(std::forward<args_t>(args)...) { }
 
-  explicit _tc_impl_t(const allcaps_t& concrete_arg);
-
-  std::unique_ptr<
-    _tc_model_t<template_interface<int, const std::string&>>>
-      clone() override;
+  explicit _tc_impl_t(const allcaps_t& concrete_arg) noexcept;
 
   std::unique_ptr<
     _tc_model_t<template_interface<int, const std::string&>>>
-      move_clone() override {
+      clone() noexcept override final;
+
+  std::unique_ptr<
+    _tc_model_t<template_interface<int, const std::string&>>>
+      move_clone() noexcept override final {
     return std::make_unique<_tc_impl_t>(std::move(concrete));
   }
 
-  bool __has_save() const override;
+  bool __has_save() const noexcept override final;
 
-  void __save(const char* filename, const char* access) override;
+  void __save(const char* filename, const char* access) noexcept override final;
 
   /*template <typename ...Params>
-  void print(Params&&... args) override {
+  void print(Params&&... args) override final {
     return concrete.print(std::forward<decltype(args)>(args)...);
   }*/
 
-  bool __has_print_2() const override {
+  bool __has_print_2() const noexcept override final {
     return true;
   }
-  void __print_2(const char* text) const override {
+  void __print_2(const char* text) const noexcept override final {
     return concrete.print_2(std::forward<decltype(text)>(text));
   }
 
-  bool __has_print() const override;
+  bool __has_print() const noexcept override final;
 
-  void __print(const char* text) const override;
+  void __print(const char* text) const noexcept override final;
 
-  void __set_data(const char* text) override;
+  void __set_data(const char* text) noexcept override final;
 
-  void __print_data() const override;
+  void __print_data() const noexcept override final;
 
-  void __draw(const char* surface) const override;
+  void __draw(const char* surface) const noexcept override final;
+
+  /*void set_interface_data(const char* text) {
+    return set_interface_data(std::forward<decltype(text)>(text));
+  }
+
+  void print_interface_data() {
+    return print_interface_data();
+  }*/
+
+  /*template <typename ...Params>
+  void save(Params&&... args) override final {
+    throw std::runtime_error("allcaps_t::save not implemented");
+  }*/
+
+  // Loop over each member function on the interface.
+  /*@meta for(int i = 0; i < @method_count(typeclass); ++i) {
+
+    @meta std::string func_name = @method_name(typeclass, i);
+
+    @meta bool is_valid = @sfinae(
+      std::declval<type_t>().@(func_name)(
+        std::declval<@method_params(typeclass, i)>()...
+      )
+    );
+
+    // Implement the has_XXX function.
+    bool @(format("has_%s", func_name.c_str()))() const override final {
+      return is_valid;
+    }
+
+    // Declare an override function with the same signature as the pure virtual
+    // function in _tc_model_t.
+    @func_decl(@method_type(typeclass, i), func_name, args) override final {
+
+      @meta if(is_valid || @sfinae(typeclass::required::@(__func__))) {
+        // Forward to the correspondingly-named member function in type_t.
+        return concrete.@(__func__)(std::forward<decltype(args)>(args)...);
+
+      } else {
+
+        // We could also call __cxa_pure_virtual or std::terminate here.
+        throw std::runtime_error(@string(format("%s::%s not implemented",
+          @type_name(type_t), __func__
+        )));
+      }
+    }
+  }*/
+
+  // Our actual data.
+  allcaps_t concrete;
+};
+
+
+// ==================
+
+template <>
+std::reference_wrapper<allcaps_t>& _tc_model_t<template_interface<int, const std::string&>>::ref_concrete<std::reference_wrapper<allcaps_t>>() noexcept;
+
+template<>
+struct _tc_impl_t<std::reference_wrapper<allcaps_t>, template_interface<int, const std::string&>>
+    : public _tc_model_t<template_interface<int, const std::string&>> {
+  typedef std::reference_wrapper<allcaps_t> val_type_t;
+  //friend void draw(const allcaps_t&);
+
+  // Construct the embedded concrete type.
+  template<typename... args_t>
+  _tc_impl_t(args_t&&... args) noexcept : concrete(std::forward<args_t>(args)...) { }
+
+  explicit _tc_impl_t(const std::reference_wrapper<allcaps_t>& concrete_arg) noexcept;
+
+  std::unique_ptr<
+    _tc_model_t<template_interface<int, const std::string&>>>
+      clone() noexcept override final {
+    std::cout << "called clone "
+                 "for ref template_interface allcaps_t" << std::endl;
+    // Copy-construct a new instance of _tc_impl_t on the heap.
+    allcaps_t cloned = concrete;
+    return std::make_unique<_tc_impl_t<allcaps_t, template_interface<int, const std::string&>>>
+      (std::move(cloned));
+    /*return std::make_unique<_tc_impl_t<allcaps_t, _tc_model_t<template_interface<int, const std::string&>>>
+      (std::move(cloned));*/
+  }
+
+  std::unique_ptr<
+    _tc_model_t<template_interface<int, const std::string&>>>
+      move_clone() noexcept override final {
+    std::cout << "called move_clone "
+                 "for ref template_interface allcaps_t" << std::endl;
+    /// \note moves data, not ref
+    return std::make_unique<_tc_impl_t<allcaps_t, template_interface<int, const std::string&>>>
+      (std::move(concrete.get()));
+    /*return std::make_unique<_tc_impl_t<allcaps_t, _tc_model_t<template_interface<int, const std::string&>>>(
+      std::move(concrete.get()));*/
+  }
+
+  bool __has_save() const noexcept override final;
+
+  void __save(const char* filename, const char* access) noexcept override final;
+
+  /*template <typename ...Params>
+  void print(Params&&... args) override final {
+    return concrete.print(std::forward<decltype(args)>(args)...);
+  }*/
+
+  bool __has_print_2() const noexcept override final {
+    return true;
+  }
+  void __print_2(const char* text) const noexcept override final {
+    /// \note passes data, not ref
+    return concrete.get().print_2(std::forward<decltype(text)>(text));
+  }
+
+  bool __has_print() const noexcept override final;
+
+  void __print(const char* text) const noexcept override final;
+
+  void __set_data(const char* text) noexcept override final;
+
+  void __print_data() const noexcept override final;
+
+  void __draw(const char* surface) const noexcept override final;
 
   /*void set_interface_data(const char* text) {
     return set_interface_data(std::forward<decltype(text)>(text));
@@ -195,11 +319,11 @@ struct _tc_impl_t<allcaps_t, template_interface<int, const std::string&>>
   }*/
 
   // Our actual data.
-  allcaps_t concrete;
+  std::reference_wrapper<allcaps_t> concrete;
 };
 
 template <>
-forward_t& _tc_model_t<template_interface<int, const std::string&>>::ref_concrete<forward_t>();
+forward_t& _tc_model_t<template_interface<int, const std::string&>>::ref_concrete<forward_t>() noexcept;
 
 template<>
 struct _tc_impl_t<forward_t, template_interface<int, const std::string&>>
@@ -208,63 +332,63 @@ struct _tc_impl_t<forward_t, template_interface<int, const std::string&>>
 
   // Construct the embedded concrete type.
   template<typename... args_t>
-  _tc_impl_t(args_t&&... args)
+  _tc_impl_t(args_t&&... args) noexcept
     : concrete(std::forward<args_t>(args)...) { }
 
-  explicit _tc_impl_t(const forward_t& concrete_arg)
+  explicit _tc_impl_t(const forward_t& concrete_arg) noexcept
     : concrete(concrete_arg) {}
 
   std::unique_ptr<
     _tc_model_t<template_interface<int, const std::string&>>>
-      clone() override {
+      clone() noexcept override final {
     // Copy-construct a new instance of _tc_impl_t on the heap.
     return std::make_unique<_tc_impl_t>(concrete);
   }
 
   std::unique_ptr<
     _tc_model_t<template_interface<int, const std::string&>>>
-      move_clone() override {
+      move_clone() noexcept override final {
     return std::make_unique<_tc_impl_t>(std::move(concrete));
   }
 
-  bool __has_save() const override {
+  bool __has_save() const noexcept override final {
     return true;
   }
 
-  void __save(const char* filename, const char* access) override {
+  void __save(const char* filename, const char* access) noexcept override final {
     return concrete.save(std::forward<decltype(filename)>(filename),
       std::forward<decltype(access)>(access));
   }
 
   /*template <typename ...Params>
-  void save(Params&&... args) override {
+  void save(Params&&... args) override final {
     return concrete.save(std::forward<decltype(args)>(args)...);
   }*/
 
-  bool __has_print_2() const override {
+  bool __has_print_2() const noexcept override final {
     return true;
   }
-  void __print_2(const char* text) const override {
+  void __print_2(const char* text) const noexcept override final {
     return concrete.print_2(std::forward<decltype(text)>(text));
   }
 
-  bool __has_print() const override {
+  bool __has_print() const noexcept override final {
     return true;
   }
 
-  void __print(const char* text) const override {
+  void __print(const char* text) const noexcept override final {
     return concrete.print(std::forward<decltype(text)>(text));
   }
 
-  void __set_data(const char* text) override {
+  void __set_data(const char* text) noexcept override final {
     return concrete.set_data(std::forward<decltype(text)>(text));
   }
 
-  void __print_data() const override {
+  void __print_data() const noexcept override final {
     return concrete.print_data();
   }
 
-  void __draw(const char* surface) const override;
+  void __draw(const char* surface) const noexcept override final;
 
   /*void set_interface_data(const char* text) {
     return set_interface_data(std::forward<decltype(text)>(text));
@@ -318,7 +442,7 @@ struct _tc_impl_t<forward_t, template_interface<int, const std::string&>>
 };
 
 template <>
-reverse_t& _tc_model_t<template_interface<int, const std::string&>>::ref_concrete<reverse_t>();
+reverse_t& _tc_model_t<template_interface<int, const std::string&>>::ref_concrete<reverse_t>() noexcept;
 
 template<>
 struct _tc_impl_t<reverse_t, template_interface<int, const std::string&>>
@@ -327,32 +451,33 @@ struct _tc_impl_t<reverse_t, template_interface<int, const std::string&>>
 
   // Construct the embedded concrete type.
   template<typename... args_t>
-  _tc_impl_t(args_t&&... args)
+  _tc_impl_t(args_t&&... args) noexcept
     : concrete(std::forward<args_t>(args)...) { }
 
-  explicit _tc_impl_t(const reverse_t& concrete_arg)
+  explicit _tc_impl_t(const reverse_t& concrete_arg) noexcept
     : concrete(concrete_arg) {}
 
   std::unique_ptr<
     _tc_model_t<template_interface<int, const std::string&>>>
-      clone() override {
+      clone() noexcept override final {
     // Copy-construct a new instance of _tc_impl_t on the heap.
     return std::make_unique<_tc_impl_t>(std::move(concrete));
   }
 
   std::unique_ptr<
     _tc_model_t<template_interface<int, const std::string&>>>
-      move_clone() override {
+      move_clone() noexcept override final {
     return std::make_unique<_tc_impl_t>(std::move(concrete));
   }
 
-  bool __has_save() const override {
+  bool __has_save() const noexcept override final {
     return false;
   }
 
-  void __save(const char* filename, const char* access) override {
+  void __save(const char* filename, const char* access) noexcept override final {
     // TODO: noexcept
-    throw std::runtime_error("reverse_t::save not implemented");
+    //throw std::runtime_error("reverse_t::save not implemented");
+    std::terminate();
   }
 
   /*template <typename ...Params>
@@ -360,30 +485,30 @@ struct _tc_impl_t<reverse_t, template_interface<int, const std::string&>>
     return concrete.save(std::forward<decltype(args)>(args)...);
   }*/
 
-  bool __has_print_2() const override {
+  bool __has_print_2() const noexcept override final {
     return true;
   }
-  void __print_2(const char* text) const override {
+  void __print_2(const char* text) const noexcept override final {
     return concrete.print_2(std::forward<decltype(text)>(text));
   }
 
-  bool __has_print() const override {
+  bool __has_print() const noexcept override final {
     return true;
   }
 
-  void __print(const char* text) const override {
+  void __print(const char* text) const noexcept override final {
     return concrete.print(std::forward<decltype(text)>(text));
   }
 
-  void __set_data(const char* text) override {
+  void __set_data(const char* text) noexcept override final {
     return concrete.set_data(std::forward<decltype(text)>(text));
   }
 
-  void __print_data() const override {
+  void __print_data() const noexcept override final {
     return concrete.print_data();
   }
 
-  void __draw(const char* surface) const override;
+  void __draw(const char* surface) const noexcept override final;
 
   /*void set_interface_data(const char* text) {
     return set_interface_data(std::forward<decltype(text)>(text));
@@ -588,20 +713,56 @@ struct var_t<my_interface> {
 
 template<>
 struct _tc_combined_t<template_interface<int, const std::string&>> {
-  //typedef my_interface, my_interface2 typeclass_t;
+  //typedef my_interface typeclass_t;
 
   // Default initializer creates an empty _tc_combined_t.
   _tc_combined_t() = default;
 
+  _tc_combined_t(std::reference_wrapper<_tc_combined_t<template_interface<int, const std::string&>>>&& rhs) noexcept {
+    puts("_tc_combined_t{my_interface} ref copy ctor");
+    if(rhs.get())
+      my_interface_model = rhs.get().my_interface_model;
+  }
+
   /// \note moves passed argument
-  template <class T>
-  _tc_combined_t(std::shared_ptr<T>&& u) :
-    my_interface_model(std::move(u)) {
+  template <
+  class T,
+  typename = IsNotReference<T>,
+  typename std::enable_if<!std::is_same<_tc_combined_t, T>::value>::type* = nullptr
+  >
+  _tc_combined_t(std::shared_ptr<T>&& u) noexcept :
+      my_interface_model(std::move(u)) {
     puts("_tc_combined_t{my_interface} called, moves passed argument");
   }
 
-  template <class T>
-  _tc_combined_t(const T&& u) :
+  template <
+  class T,
+  typename = IsNotReference<T>,
+  typename std::enable_if<!std::is_same<_tc_combined_t, T>::value>::type* = nullptr
+  >
+  _tc_combined_t(const std::shared_ptr<T>& u) noexcept :
+      my_interface_model(u) {
+    puts("_tc_combined_t{my_interface} called, shares passed argument");
+  }
+
+  template <
+  class T,
+  typename std::enable_if<!std::is_same<_tc_combined_t, T>::value>::type* = nullptr
+  >
+  _tc_combined_t(const std::reference_wrapper<T>& u) noexcept :
+      my_interface_model(
+        std::make_shared<
+          _tc_impl_t<std::reference_wrapper<T>, template_interface<int, const std::string&>>>
+        (std::forward<const std::reference_wrapper<std::decay_t<T>>>(u))) {
+    puts("_tc_combined_t{T} reference_wrapper called");
+  }
+
+  template<
+  typename T,
+  typename = IsNotReference<T>,
+  typename std::enable_if<!std::is_same<_tc_combined_t, T>::value>::type* = nullptr
+  >
+  _tc_combined_t(const T&& u) noexcept :
       my_interface_model(
         std::make_shared<
           _tc_impl_t<T, template_interface<int, const std::string&>>>
@@ -609,108 +770,121 @@ struct _tc_combined_t<template_interface<int, const std::string&>> {
     puts("_tc_combined_t{T} called");
   }
 
+  // Call clone for copy ctor/assign.
+  explicit _tc_combined_t(const _tc_combined_t& rhs) noexcept {
+    puts("_tc_combined_t{my_interface} copy ctor");
+    if(rhs)
+      my_interface_model = rhs.my_interface_model->clone();
+  }
+
   // Move ctor/assign by default.
   /*_tc_combined_t(_tc_combined_t&&) = default;
   _tc_combined_t& operator=(_tc_combined_t&&) = default;*/
 
   // Call move_clone for move ctor/assign.
-  _tc_combined_t(_tc_combined_t&& rhs) {
+  explicit _tc_combined_t(_tc_combined_t&& rhs) noexcept {
     if(rhs)
       my_interface_model = rhs.my_interface_model->move_clone();
   }
-
-  _tc_combined_t& operator=(_tc_combined_t&& rhs) {
-    my_interface_model.reset();
-    if(rhs)
-      my_interface_model = rhs.my_interface_model->move_clone();
-    return *this;
-  }
-
-  // Call clone for copy ctor/assign.
-  _tc_combined_t(const _tc_combined_t& rhs) {
-    if(rhs)
-      my_interface_model = rhs.my_interface_model->clone();
-  }
-
-  _tc_combined_t& operator=(const _tc_combined_t& rhs) {
-    my_interface_model.reset();
-    if(rhs)
-      my_interface_model = rhs.my_interface_model->clone();
-    return *this;
-  }
-
-  void reset() {
-    my_interface_model.reset();
-  }
-
-  // A virtual dtor triggers the dtor in the impl.
-  virtual ~_tc_combined_t() { }
 
   // The preferred initializer for a _tc_combined_t. This constructs an _tc_impl_t of
   // type_t on the heap, and stores the pointer in a new _tc_combined_t.
-  template<typename type_t, typename... args_t>
-  static _tc_combined_t construct(args_t&&... args) {
+  template<
+    typename type_t,
+    typename... args_t,
+    typename = IsNotReference<type_t>
+  >
+  static _tc_combined_t construct(args_t&&... args) noexcept {
     return _tc_combined_t(std::make_shared<_tc_impl_t<type_t, template_interface<int, const std::string&>> >(
       std::forward<args_t>(args)...
     ));
   }
 
-  bool has_save() const {
+  _tc_combined_t& operator=(_tc_combined_t&& rhs) noexcept {
+    my_interface_model.reset();
+    if(rhs)
+      my_interface_model = rhs.my_interface_model->move_clone();
+    return *this;
+  }
+
+  _tc_combined_t& operator=(const _tc_combined_t& rhs) noexcept {
+    my_interface_model.reset();
+    if(rhs)
+      my_interface_model = rhs.my_interface_model->clone();
+    return *this;
+  }
+
+  void reset() noexcept {
+    my_interface_model.reset();
+  }
+
+  // A virtual dtor triggers the dtor in the impl.
+  virtual ~_tc_combined_t() noexcept { }
+
+  bool has_save() const noexcept {
     if(!my_interface_model) {
-      throw std::runtime_error("my_interface_model not set");
+      //throw std::runtime_error("my_interface_model not set");
+      std::terminate();
     }
     return my_interface_model->__has_save(); // force to true if required
   }
 
   template <typename ...Params>
-  void save(Params&&... args) {
+  void save(Params&&... args) noexcept {
     if(!my_interface_model) {
-      throw std::runtime_error("my_interface_model not set");
+      //throw std::runtime_error("my_interface_model not set");
+      std::terminate();
     }
     return my_interface_model->__save(std::forward<decltype(args)>(args)...);
   }
 
-  bool has_print_2() const {
+  bool has_print_2() const noexcept {
     if(!my_interface_model) {
-      throw std::runtime_error("my_interface_model not set");
+      //throw std::runtime_error("my_interface_model not set");
+      std::terminate();
     }
     return my_interface_model->__has_print_2(); // force to true if required
   }
   template <typename ...Params>
-  void print_2(Params&&... args) const {
+  void print_2(Params&&... args) const noexcept {
     if(!my_interface_model) {
-      throw std::runtime_error("my_interface_model not set");
+      //throw std::runtime_error("my_interface_model not set");
+      std::terminate();
     }
     return my_interface_model->__print_2(std::forward<decltype(args)>(args)...);
   }
 
-  bool has_print() const {
+  bool has_print() const noexcept {
     if(!my_interface_model) {
-      throw std::runtime_error("my_interface_model not set");
+      //throw std::runtime_error("my_interface_model not set");
+      std::terminate();
     }
     return my_interface_model->__has_print(); // force to true if required
   }
 
   template <typename ...Params>
-  void print(Params&&... args) const {
+  void print(Params&&... args) const noexcept {
     if(!my_interface_model) {
-      throw std::runtime_error("my_interface_model not set");
+      //throw std::runtime_error("my_interface_model not set");
+      std::terminate();
     }
     return my_interface_model->__print(std::forward<decltype(args)>(args)...);
   }
 
   template <typename ...Params>
-  void set_data(Params&&... args) {
+  void set_data(Params&&... args) noexcept {
     if(!my_interface_model) {
-      throw std::runtime_error("my_interface_model not set");
+      //throw std::runtime_error("my_interface_model not set");
+      std::terminate();
     }
     return my_interface_model->__set_data(std::forward<decltype(args)>(args)...);
   }
 
   template <typename ...Params>
-  void print_data(Params&&... args) const {
+  void print_data(Params&&... args) const noexcept {
     if(!my_interface_model) {
-      throw std::runtime_error("my_interface_model not set");
+      //throw std::runtime_error("my_interface_model not set");
+      std::terminate();
     }
     return my_interface_model->__print_data(std::forward<decltype(args)>(args)...);
   }
@@ -721,17 +895,19 @@ struct _tc_combined_t<template_interface<int, const std::string&>> {
   }*/
 
   template <typename ...Params>
-  void set_interface_data(Params&&... args) {
+  void set_interface_data(Params&&... args) noexcept {
     if(!my_interface_model) {
-      throw std::runtime_error("my_interface_model not set");
+      //throw std::runtime_error("my_interface_model not set");
+      std::terminate();
     }
     return my_interface_model->set_interface_data(std::forward<decltype(args)>(args)...);
   }
 
   template <typename ...Params>
-  void print_interface_data(Params&&... args) const {
+  void print_interface_data(Params&&... args) const noexcept {
     if(!my_interface_model) {
-      throw std::runtime_error("my_interface_model not set");
+      //throw std::runtime_error("my_interface_model not set");
+      std::terminate();
     }
     return my_interface_model->print_interface_data(std::forward<decltype(args)>(args)...);
   }
@@ -744,9 +920,10 @@ struct _tc_combined_t<template_interface<int, const std::string&>> {
     d.model->do_draw();
   }*/
 
-  void draw(const char* surface) {
+  void draw(const char* surface) noexcept {
     if(!my_interface_model) {
-      throw std::runtime_error("my_interface_model not set");
+      //throw std::runtime_error("my_interface_model not set");
+      std::terminate();
     }
     my_interface_model->__draw(surface);
   }
@@ -769,32 +946,33 @@ struct _tc_combined_t<template_interface<int, const std::string&>> {
     }
   }*/
 
-  explicit operator bool() const {
+  explicit operator bool() const noexcept {
     return (bool)my_interface_model;
   }
 
-  std::shared_ptr<_tc_model_t<template_interface<int, const std::string&>>> ref_my_interface_model() const {
+  std::shared_ptr<_tc_model_t<template_interface<int, const std::string&>>> ref_my_interface_model() const noexcept {
     return my_interface_model;
   }
 
-  std::unique_ptr<_tc_model_t<template_interface<int, const std::string&>>> clone_my_interface_model() const {
+  std::unique_ptr<_tc_model_t<template_interface<int, const std::string&>>> clone_my_interface_model() const noexcept {
     if(!my_interface_model) {
-      throw std::runtime_error("my_interface_model not set");
+      //throw std::runtime_error("my_interface_model not set");
+      std::terminate();
     }
     return my_interface_model->clone();
   }
 
-  const _tc_model_t<template_interface<int, const std::string&>>* raw_my_interface_model() const {
+  const _tc_model_t<template_interface<int, const std::string&>>* raw_my_interface_model() const noexcept {
     return my_interface_model.get();
   }
 
   void replace_my_interface_model(
-    const std::shared_ptr<_tc_model_t<template_interface<int, const std::string&>>> rhs) {
+    const std::shared_ptr<_tc_model_t<template_interface<int, const std::string&>>> rhs) noexcept {
     my_interface_model = rhs;
   }
 
   template <typename T>
-  T& ref_concrete() {
+  T& ref_concrete() noexcept {
     return my_interface_model->ref_concrete<T>();
   }
 

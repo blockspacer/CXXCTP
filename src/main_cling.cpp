@@ -1896,39 +1896,57 @@ namespace cxxctp {
 namespace generated {
   template<>
   void draw<template_interface<int, const std::string&>/*obj_t::typeclass_t*/>
-   (const allcaps_t&, const char* surface) {
-    std::cout << "Drawing allcaps_t on " << surface << std::endl;
+      (const allcaps_t& data, const char* surface) noexcept {
+    /// \note don`t use get_concrete<type> here, it may be get_concrete<ref_type>
+    std::cout << "Drawing allcaps_t on " << surface
+      << " with data " << data.allcaps_t_data << std::endl;
   }
 
   template<>
   void draw<template_interface<int, const std::string&>/*obj_t::typeclass_t*/>
-   (const forward_t&, const char* surface) {
-    std::cout << "Drawing forward_t on " << surface << std::endl;
+      (const forward_t& data, const char* surface) noexcept {
+    /// \note don`t use get_concrete<type> here, it may be get_concrete<ref_type>
+    std::cout << "Drawing forward_t on " << surface
+      << " with data " << data.forward_t_data << std::endl;
   }
 
   template<>
   void draw<template_interface<int, const std::string&>/*obj_t::typeclass_t*/>
-   (const reverse_t&, const char* surface) {
-    std::cout << "Drawing reverse_t on " << surface << std::endl;
+      (const reverse_t& data, const char* surface) noexcept {
+    /// \note don`t use get_concrete<type> here, it may be get_concrete<ref_type>
+    std::cout << "Drawing reverse_t on " << surface
+      << " with data " << data.reverse_t_data << std::endl;
   }
 
   // ==============
 
   template <>
-  std::string my_interface2_model_t::test_zoo<allcaps_t>(const std::string& arg) {
-    auto& data = ref_concrete<allcaps_t>();
+  std::string my_interface2_model_t::test_zoo<allcaps_t>(const std::string& arg) noexcept {
+    /// \note use get_concrete<type> here, it is different from get_concrete<ref_type>
+    allcaps_t& data = ref_concrete<allcaps_t>();
     return arg + " test_zoo for allcaps_t " + data.allcaps_t_data;
   }
 
   template <>
-  std::string my_interface2_model_t::test_zoo<reverse_t>(const std::string& arg) {
-    auto& data = ref_concrete<reverse_t>();
+  std::string my_interface2_model_t::test_zoo<std::reference_wrapper<allcaps_t>>(const std::string& arg) noexcept {
+    /// \note passes ref, not data!
+    /// otherwize we won`t be able to call get_concrete<ref_type>
+    /// \note get_concrete<type> differs from get_concrete<ref_type>!
+    std::reference_wrapper<allcaps_t>& data = ref_concrete<std::reference_wrapper<allcaps_t>>();
+    return arg + " test_zoo for allcaps_t " + data.get().allcaps_t_data;
+  }
+
+  template <>
+  std::string my_interface2_model_t::test_zoo<reverse_t>(const std::string& arg) noexcept {
+    /// \note use get_concrete<type> here, it is different from get_concrete<ref_type>
+    reverse_t& data = ref_concrete<reverse_t>();
     return arg + " test_zoo for reverse_t " + data.reverse_t_data;
   }
 
   template <>
-  std::string my_interface2_model_t::test_zoo<forward_t>(const std::string& arg) {
-    auto& data = ref_concrete<forward_t>();
+  std::string my_interface2_model_t::test_zoo<forward_t>(const std::string& arg) noexcept {
+    /// \note use get_concrete<type> here, it is different from get_concrete<ref_type>
+    forward_t& data = ref_concrete<forward_t>();
     return arg + " test_zoo for forward_t " + data.forward_t_data;
   }
 
@@ -2080,6 +2098,15 @@ int main(int /*argc*/, const char* const* /*argv*/) {
     com2.set_interface_data("com2 interface data");
     com2.print_interface_data();
 
+    {
+      std::cout << "casted_t1 before " << std::endl;
+      my_interface2_obj_t casted_t1{com2};
+      std::cout << "casted_t1 after " << std::endl;
+      /*std::cout << "move casted_t1 before " << std::endl;
+      my_interface2_obj_t casted_t1{std::move(com2)};
+      std::cout << "move casted_t1 after " << std::endl;*/
+    }
+
     my_interface2_obj_t o2{forward_t{}};
     if(o2.has_do_job())
       o2.do_job("o2.save", "w");
@@ -2153,6 +2180,90 @@ int main(int /*argc*/, const char* const* /*argv*/) {
     my_interface2_impl_t<forward_t>::show(fwdt, "fwdt_tz _0");
     my_interface2_impl_t<decltype(fwdt)>::show(fwdt, "fwdt_tz __0");
     //my_interface2_impl_t<allcaps_t>::show(fwdt, "fwdt_tz ___0"); // can`t compile
+
+    allcaps_t fwdtrf{}; // allcaps_t forward_t
+
+    {
+      fwdtrf.allcaps_t_data = "allcaps_t_data1";
+      my_interface2_obj_t fwdtrf_tz{std::ref(fwdtrf)};
+      std::cout << "test_zoo ref: " << fwdtrf_tz.test_zoo("fwdtrf_tz") << std::endl;
+      fwdtrf_tz.do_job("fwdtrf_tz.save", "w");
+    }
+
+    {
+      my_interface_obj_t my_fwdtrf_tz{std::ref(fwdtrf)};
+      my_fwdtrf_tz.draw("my_fwdtrf_tz console");
+      my_fwdtrf_tz.print("my_fwdtrf_tz Hello f");
+    }
+
+    std::cout << "fwdtrf data: " << fwdtrf.allcaps_t_data << std::endl;
+
+    {
+      fwdtrf.allcaps_t_data = "allcaps_t_data2";
+      /// made ref, not copy
+      my_interface2_obj_t fwdtrf_tz{std::ref(fwdtrf)};
+      std::cout << "test_zoo2 ref: " << fwdtrf_tz.test_zoo("fwdtrf_tz2") << std::endl;
+      fwdtrf_tz.do_job("fwdtrf_tz.save", "w");
+
+      /// made ref, not copy (of typeclass model)
+      my_interface2_obj_t refed_tz{std::ref(fwdtrf_tz)};
+      std::cout << "test_zoo3 ref: " << refed_tz.test_zoo("refed_tz") << std::endl;
+      refed_tz.do_job("refed_tz.save", "w");
+
+      {
+        fwdtrf.allcaps_t_data = "allcaps_t_data3";
+
+        std::cout << "test_zoo_1 ref: " << fwdtrf_tz.test_zoo("fwdtrf_tz2") << std::endl;
+        fwdtrf_tz.do_job("fwdtrf_tz.save 2", "w");
+
+        std::cout << "test_zoo_2 ref: " << refed_tz.test_zoo("refed_tz") << std::endl;
+        refed_tz.do_job("refed_tz.save 2", "w");
+      }
+
+      my_interface2_obj_t cloned(fwdtrf_tz);
+      std::cout << "cloned1 ref: " << cloned.test_zoo("cloned1") << std::endl;
+      cloned.do_job("cloned1.save", "w");
+
+      my_interface2_obj_t movdCopy{std::move(cloned)};
+      std::cout << "movdCopy1 ref: " << movdCopy.test_zoo("movdCopy1") << std::endl;
+      movdCopy.do_job("movdCopy1.save", "w");
+
+      /// \note invalid (moved) data here!
+      std::cout << "cloned2 ref: " << cloned.test_zoo("cloned2") << std::endl;
+      cloned.do_job("cloned2.save", "w");
+
+      /// \note moved data must exist here
+      my_interface2_obj_t movdRef{std::move(fwdtrf_tz)};
+      std::cout << "movdRef ref: " << movdRef.test_zoo("movdRef") << std::endl;
+      movdRef.do_job("movdRef.save", "w");
+
+      /// \note copied data must exist here
+      std::cout << "movdCopy2 ref: " << movdCopy.test_zoo("movdCopy2") << std::endl;
+      movdCopy.do_job("movdCopy2.save", "w");
+    }
+
+    // can create only from move or ref or temporary
+    /*{
+      my_interface_obj_t my_fwdtrf_tz2 = fwdtrf;
+      my_fwdtrf_tz2.draw("my_fwdtrf_tz2 console");
+      my_fwdtrf_tz2.print("my_fwdtrf_tz2 Hello f");
+    }*/
+
+    {
+      my_interface_obj_t my_fwdtrf_tz3{std::ref(fwdtrf)};
+      /// \note invalid (moved) data here!
+      my_fwdtrf_tz3.draw("my_fwdtrf_tz3 console");
+      my_fwdtrf_tz3.print("my_fwdtrf_tz3 Hello f");
+    }
+
+    std::cout << "fwdtrf data: " << fwdtrf.allcaps_t_data << std::endl;
+
+    /*{
+      allcaps_t fwdtrf2{}; // allcaps_t forward_t
+      const auto ref1 = &fwdtrf2;
+      my_interface2_obj_t fwdtrf_tz2{ref1};
+      std::cout << "test_zoo ref2: " << fwdtrf_tz2.test_zoo("fwdtrf2") << std::endl;
+    }*/
 
     my_interface2_obj_t fwdt_tz{std::move(fwdt)};
 

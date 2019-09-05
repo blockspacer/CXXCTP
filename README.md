@@ -839,5 +839,9 @@ strong types
 FileID != SourceManager.getMainFileID()
  + https://xinhuang.github.io/posts/2014-10-19-clang-tutorial-finding-declarations.html
 
+TODO: mutable/ref/box traits as in
+ + https://habr.com/ru/post/322208/
+ + https://github.com/jamboree/polytail
+
 ## Misc
 https://medium.com/fluence-network/porting-redis-to-webassembly-with-clang-wasi-af99b264ca8

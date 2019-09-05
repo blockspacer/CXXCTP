@@ -35,16 +35,16 @@ template<
   typename V,
   typename std::enable_if<std::is_same<template_interface<int, const std::string&>, T>::value>::type* = nullptr
 >
-void draw(const V&, const char* surface);
+void draw(const V&, const char* surface) noexcept;
 
 template<>
-void draw<template_interface<int, const std::string&>, allcaps_t>(const allcaps_t&, const char* surface);
+void draw<template_interface<int, const std::string&>, allcaps_t>(const allcaps_t&, const char* surface) noexcept;
 
 template<>
-void draw<template_interface<int, const std::string&>, forward_t>(const forward_t&, const char* surface);
+void draw<template_interface<int, const std::string&>, forward_t>(const forward_t&, const char* surface) noexcept;
 
 template<>
-void draw<template_interface<int, const std::string&>, reverse_t>(const reverse_t&, const char* surface);
+void draw<template_interface<int, const std::string&>, reverse_t>(const reverse_t&, const char* surface) noexcept;
 
 /*template<
   typename T,

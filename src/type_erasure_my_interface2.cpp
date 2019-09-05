@@ -9,19 +9,26 @@ namespace cxxctp {
 namespace generated {
 
 template <>
-allcaps_t& _tc_model_t<my_interface2>::ref_concrete<allcaps_t>() {
+allcaps_t& _tc_model_t<my_interface2>::ref_concrete<allcaps_t>() noexcept {
   return static_cast<_tc_impl_t<allcaps_t, my_interface2>*>(this)
     ->concrete;
 }
 
 template <>
-reverse_t& _tc_model_t<my_interface2>::ref_concrete<reverse_t>() {
+std::reference_wrapper<allcaps_t>& _tc_model_t<my_interface2>::ref_concrete<std::reference_wrapper<allcaps_t>>() noexcept {
+  /// \note passes ref, not data!
+  return static_cast<_tc_impl_t<std::reference_wrapper<allcaps_t>, my_interface2>*>(this)
+    ->concrete;
+}
+
+template <>
+reverse_t& _tc_model_t<my_interface2>::ref_concrete<reverse_t>() noexcept {
   return static_cast<_tc_impl_t<reverse_t, my_interface2>*>(this)
     ->concrete;
 }
 
 template <>
-forward_t& _tc_model_t<my_interface2>::ref_concrete<forward_t>() {
+forward_t& _tc_model_t<my_interface2>::ref_concrete<forward_t>() noexcept {
   return static_cast<_tc_impl_t<forward_t, my_interface2>*>(this)
     ->concrete;
 }
@@ -49,86 +56,103 @@ void _tc_model_t<my_interface2>::print_interface_data() {
   puts(out.c_str());
 }*/
 
-_tc_impl_t<allcaps_t, my_interface2>::_tc_impl_t(const allcaps_t& concrete_arg)
+_tc_impl_t<allcaps_t, my_interface2>::_tc_impl_t(const allcaps_t& concrete_arg) noexcept
   : concrete(concrete_arg) {}
 
 std::unique_ptr<_tc_model_t<my_interface2>>
- _tc_impl_t<allcaps_t, my_interface2>::clone() {
+ _tc_impl_t<allcaps_t, my_interface2>::clone() noexcept {
   // Copy-construct a new instance of _tc_impl_t on the heap.
   return std::make_unique<_tc_impl_t>(concrete);
 }
 
-bool _tc_impl_t<allcaps_t, my_interface2>::__has_do_job() const {
+bool _tc_impl_t<allcaps_t, my_interface2>::__has_do_job() const noexcept {
   return false;
 }
 
 void _tc_impl_t<allcaps_t, my_interface2>::__do_job
-  (const char* filename, const char* access) {
+  (const char* filename, const char* access) noexcept {
+    std::cout << "called __do_job for "
+                 "allcaps_t "
+                 "with allcaps_t_data = "
+                  << concrete.allcaps_t_data << std::endl;
+
     // TODO: noexcept
-    throw std::runtime_error("allcaps_t::do_job not implemented");
+    //throw std::runtime_error("allcaps_t::do_job not implemented");
 }
 
 template <>
-void _tc_combined_t<my_interface2>::set_set_bar<allcaps_t>(std::function<void(allcaps_t&, const std::string&)> arg) {
+void _tc_combined_t<my_interface2>::set_set_bar<allcaps_t>
+    (std::function<void(allcaps_t&, const std::string&)> arg) noexcept {
   if(!my_interface2_model) {
-    throw std::runtime_error("my_interface2_model not set");
+    //throw std::runtime_error("my_interface2_model not set");
+    std::terminate();
   }
   return static_cast<_tc_impl_t<allcaps_t, my_interface2>*>(my_interface2_model.get())
     ->__set_set_bar(std::forward<decltype(arg)>(arg));
 }
 
 template <>
-void _tc_combined_t<my_interface2>::set_set_bar<reverse_t>(std::function<void(reverse_t&, const std::string&)> arg) {
+void _tc_combined_t<my_interface2>::set_set_bar<reverse_t>
+    (std::function<void(reverse_t&, const std::string&)> arg) noexcept {
   if(!my_interface2_model) {
-    throw std::runtime_error("my_interface2_model not set");
+    //throw std::runtime_error("my_interface2_model not set");
+    std::terminate();
   }
   return static_cast<_tc_impl_t<reverse_t, my_interface2>*>(my_interface2_model.get())
     ->__set_set_bar(std::forward<decltype(arg)>(arg));
 }
 
 template <>
-void _tc_combined_t<my_interface2>::set_set_bar<forward_t>(std::function<void(forward_t&, const std::string&)> arg) {
+void _tc_combined_t<my_interface2>::set_set_bar<forward_t>
+    (std::function<void(forward_t&, const std::string&)> arg) noexcept {
   if(!my_interface2_model) {
-    throw std::runtime_error("my_interface2_model not set");
+    //throw std::runtime_error("my_interface2_model not set");
+    std::terminate();
   }
   return static_cast<_tc_impl_t<forward_t, my_interface2>*>(my_interface2_model.get())
     ->__set_set_bar(std::forward<decltype(arg)>(arg));
 }
 
 template <>
-void _tc_combined_t<my_interface2>::set_get_bar<allcaps_t>(std::function<std::string(allcaps_t&)> arg) {
+void _tc_combined_t<my_interface2>::set_get_bar<allcaps_t>
+    (std::function<std::string(allcaps_t&)> arg) noexcept {
   if(!my_interface2_model) {
-    throw std::runtime_error("my_interface2_model not set");
+    //throw std::runtime_error("my_interface2_model not set");
+    std::terminate();
   }
   return static_cast<_tc_impl_t<allcaps_t, my_interface2>*>(my_interface2_model.get())
     ->__set_get_bar(std::forward<decltype(arg)>(arg));
 }
 
 template <>
-void _tc_combined_t<my_interface2>::set_get_bar<reverse_t>(std::function<std::string(reverse_t&)> arg) {
+void _tc_combined_t<my_interface2>::set_get_bar<reverse_t>
+    (std::function<std::string(reverse_t&)> arg) noexcept {
   if(!my_interface2_model) {
-    throw std::runtime_error("my_interface2_model not set");
+    //throw std::runtime_error("my_interface2_model not set");
+    std::terminate();
   }
   return static_cast<_tc_impl_t<reverse_t, my_interface2>*>(my_interface2_model.get())
     ->__set_get_bar(std::forward<decltype(arg)>(arg));
 }
 
 template <>
-void _tc_combined_t<my_interface2>::set_get_bar<forward_t>(std::function<std::string(forward_t&)> arg) {
+void _tc_combined_t<my_interface2>::set_get_bar<forward_t>
+    (std::function<std::string(forward_t&)> arg) noexcept {
   if(!my_interface2_model) {
-    throw std::runtime_error("my_interface2_model not set");
+    //throw std::runtime_error("my_interface2_model not set");
+    std::terminate();
   }
   return static_cast<_tc_impl_t<forward_t, my_interface2>*>(my_interface2_model.get())
     ->__set_get_bar(std::forward<decltype(arg)>(arg));
 }
 
-std::string _tc_combined_t<my_interface2>::test_zoo(const std::string &arg) {
+std::string _tc_combined_t<my_interface2>::test_zoo(const std::string &arg) noexcept {
   //return my_interface2_model->test_zoo<reverse_t>(arg);
   return my_interface2_model->__test_zoo(arg);
 }
 
 /*template <typename ...Params>
-void print(Params&&... args) override {
+void print(Params&&... args) override final {
   return concrete.print(std::forward<decltype(args)>(args)...);
 }*/
 

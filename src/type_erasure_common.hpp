@@ -16,9 +16,9 @@ namespace generated {
 template<typename... typeclass>
 struct _tc_model_t /*: public common__tc_model_t*/ {
   //typedef typeclass... typeclass_type_t;
-  virtual ~_tc_model_t() { }
+  virtual ~_tc_model_t() noexcept { }
 
-  virtual std::unique_ptr<_tc_model_t> clone() = 0;
+  virtual std::unique_ptr<_tc_model_t> clone() noexcept = 0;
 
   // Loop over each member function on the interface.
   /*@meta for(int i = 0; i < @method_count(typeclass); ++i) {
@@ -159,6 +159,10 @@ struct var_t {
 template<typename... typeclass>
 struct _tc_combined_t {
 };
+
+// see https://github.com/joboccara/NamedType/blob/093e597e4d1d51614bc729fe2382c2db8925de75/named_type_impl.hpp#L18
+template<typename T>
+using IsNotReference = typename std::enable_if<!std::is_reference<T>::value, void>::type;
 
 } // namespace cxxctp
 } // namespace generated

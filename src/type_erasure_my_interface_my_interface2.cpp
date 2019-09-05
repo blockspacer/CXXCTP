@@ -7,54 +7,60 @@
 namespace cxxctp {
 namespace generated {
   template <>
-  void _tc_combined_t<template_interface<int, const std::string&>, my_interface2>::set_set_bar<allcaps_t>(std::function<void(allcaps_t&, const std::string&)> arg) {
+  void _tc_combined_t<template_interface<int, const std::string&>, my_interface2>::set_set_bar<allcaps_t>(std::function<void(allcaps_t&, const std::string&)> arg) noexcept {
     if(!my_interface2_model) {
-      throw std::runtime_error("my_interface_model2 not set");
+      //throw std::runtime_error("my_interface_model2 not set");
+      std::terminate();
     }
     return static_cast<_tc_impl_t<allcaps_t, my_interface2>*>(my_interface2_model.get())
       ->__set_set_bar(std::forward<decltype(arg)>(arg));
   }
 
   template <>
-  void _tc_combined_t<template_interface<int, const std::string&>, my_interface2>::set_set_bar<reverse_t>(std::function<void(reverse_t&, const std::string&)> arg) {
+  void _tc_combined_t<template_interface<int, const std::string&>, my_interface2>::set_set_bar<reverse_t>(std::function<void(reverse_t&, const std::string&)> arg) noexcept {
     if(!my_interface2_model) {
-      throw std::runtime_error("my_interface_model2 not set");
+      //throw std::runtime_error("my_interface_model2 not set");
+      std::terminate();
     }
     return static_cast<_tc_impl_t<reverse_t, my_interface2>*>(my_interface2_model.get())
       ->__set_set_bar(std::forward<decltype(arg)>(arg));
   }
 
   template <>
-  void _tc_combined_t<template_interface<int, const std::string&>, my_interface2>::set_set_bar<forward_t>(std::function<void(forward_t&, const std::string&)> arg) {
+  void _tc_combined_t<template_interface<int, const std::string&>, my_interface2>::set_set_bar<forward_t>(std::function<void(forward_t&, const std::string&)> arg) noexcept {
     if(!my_interface2_model) {
-      throw std::runtime_error("my_interface_model2 not set");
+      //throw std::runtime_error("my_interface_model2 not set");
+      std::terminate();
     }
     return static_cast<_tc_impl_t<forward_t, my_interface2>*>(my_interface2_model.get())
       ->__set_set_bar(std::forward<decltype(arg)>(arg));
   }
 
   template <>
-  void _tc_combined_t<template_interface<int, const std::string&>, my_interface2>::set_get_bar<allcaps_t>(std::function<std::string(allcaps_t&)> arg) {
+  void _tc_combined_t<template_interface<int, const std::string&>, my_interface2>::set_get_bar<allcaps_t>(std::function<std::string(allcaps_t&)> arg) noexcept {
     if(!my_interface2_model) {
-      throw std::runtime_error("my_interface_model2 not set");
+      //throw std::runtime_error("my_interface_model2 not set");
+      std::terminate();
     }
     return static_cast<_tc_impl_t<allcaps_t, my_interface2>*>(my_interface2_model.get())
       ->__set_get_bar(std::forward<decltype(arg)>(arg));
   }
 
   template <>
-  void _tc_combined_t<template_interface<int, const std::string&>, my_interface2>::set_get_bar<reverse_t>(std::function<std::string(reverse_t&)> arg) {
+  void _tc_combined_t<template_interface<int, const std::string&>, my_interface2>::set_get_bar<reverse_t>(std::function<std::string(reverse_t&)> arg) noexcept {
     if(!my_interface2_model) {
-      throw std::runtime_error("my_interface_model2 not set");
+      //throw std::runtime_error("my_interface_model2 not set");
+      std::terminate();
     }
     return static_cast<_tc_impl_t<reverse_t, my_interface2>*>(my_interface2_model.get())
       ->__set_get_bar(std::forward<decltype(arg)>(arg));
   }
 
   template <>
-  void _tc_combined_t<template_interface<int, const std::string&>, my_interface2>::set_get_bar<forward_t>(std::function<std::string(forward_t&)> arg) {
+  void _tc_combined_t<template_interface<int, const std::string&>, my_interface2>::set_get_bar<forward_t>(std::function<std::string(forward_t&)> arg) noexcept {
     if(!my_interface2_model) {
-      throw std::runtime_error("my_interface_model2 not set");
+      //throw std::runtime_error("my_interface_model2 not set");
+      std::terminate();
     }
     return static_cast<_tc_impl_t<forward_t, my_interface2>*>(my_interface2_model.get())
       ->__set_get_bar(std::forward<decltype(arg)>(arg));

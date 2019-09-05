@@ -9,19 +9,25 @@ namespace cxxctp {
 namespace generated {
 
 template <>
-allcaps_t& _tc_model_t<template_interface<int, const std::string&>>::ref_concrete<allcaps_t>() {
+std::reference_wrapper<allcaps_t>& _tc_model_t<template_interface<int, const std::string&>>::ref_concrete<std::reference_wrapper<allcaps_t>>() noexcept {
+  return static_cast<_tc_impl_t<std::reference_wrapper<allcaps_t>, template_interface<int, const std::string&>>*>(this)
+    ->concrete;
+}
+
+template <>
+allcaps_t& _tc_model_t<template_interface<int, const std::string&>>::ref_concrete<allcaps_t>() noexcept {
   return static_cast<_tc_impl_t<allcaps_t, template_interface<int, const std::string&>>*>(this)
     ->concrete;
 }
 
 template <>
-reverse_t& _tc_model_t<template_interface<int, const std::string&>>::ref_concrete<reverse_t>() {
+reverse_t& _tc_model_t<template_interface<int, const std::string&>>::ref_concrete<reverse_t>() noexcept {
   return static_cast<_tc_impl_t<reverse_t, template_interface<int, const std::string&>>*>(this)
     ->concrete;
 }
 
 template <>
-forward_t& _tc_model_t<template_interface<int, const std::string&>>::ref_concrete<forward_t>() {
+forward_t& _tc_model_t<template_interface<int, const std::string&>>::ref_concrete<forward_t>() noexcept {
   return static_cast<_tc_impl_t<forward_t, template_interface<int, const std::string&>>*>(this)
     ->concrete;
 }
@@ -40,67 +46,135 @@ extern template
   (const reverse_t&, const char* surface);
 #endif // 0
 
-void _tc_model_t<template_interface<int, const std::string&>>::set_interface_data(const char* text) {
+void _tc_model_t<template_interface<int, const std::string&>>::
+    set_interface_data(const char* text) noexcept {
   interface_data = text;
 }
 
-void _tc_model_t<template_interface<int, const std::string&>>::print_interface_data() const {
+void _tc_model_t<template_interface<int, const std::string&>>::
+    print_interface_data() const noexcept {
   auto out = std::string("interface_data: ") + interface_data;
   puts(out.c_str());
 }
 
-_tc_impl_t<allcaps_t, template_interface<int, const std::string&>>::_tc_impl_t(const allcaps_t& concrete_arg)
+// ====
+
+_tc_impl_t<allcaps_t, template_interface<int, const std::string&>>::
+    _tc_impl_t(const allcaps_t& concrete_arg) noexcept
   : concrete(concrete_arg) {}
 
 std::unique_ptr<_tc_model_t<template_interface<int, const std::string&>>>
- _tc_impl_t<allcaps_t, template_interface<int, const std::string&>>::clone() {
+ _tc_impl_t<allcaps_t, template_interface<int, const std::string&>>::clone() noexcept {
   // Copy-construct a new instance of _tc_impl_t on the heap.
   return std::make_unique<_tc_impl_t>(concrete);
 }
 
-bool _tc_impl_t<allcaps_t, template_interface<int, const std::string&>>::__has_save() const {
+bool _tc_impl_t<allcaps_t, template_interface<int, const std::string&>>
+    ::__has_save() const noexcept {
   return false;
 }
 
-void _tc_impl_t<allcaps_t, template_interface<int, const std::string&>>::__save(const char* filename, const char* access) {
+void _tc_impl_t<allcaps_t, template_interface<int, const std::string&>>
+    ::__save(const char* filename, const char* access) noexcept {
   // TODO: noexcept
-  throw std::runtime_error("allcaps_t::save not implemented");
+  //throw std::runtime_error("allcaps_t::save not implemented");
+  std::terminate();
 }
 
 /*template <typename ...Params>
-void print(Params&&... args) override {
+void print(Params&&... args) override final {
   return concrete.print(std::forward<decltype(args)>(args)...);
 }*/
 
-bool _tc_impl_t<allcaps_t, template_interface<int, const std::string&>>::__has_print() const {
+bool _tc_impl_t<allcaps_t, template_interface<int, const std::string&>>
+    ::__has_print() const noexcept {
   return true;
 }
 
-void _tc_impl_t<allcaps_t, template_interface<int, const std::string&>>::__print(const char* text) const {
+void _tc_impl_t<allcaps_t, template_interface<int, const std::string&>>
+    ::__print(const char* text) const noexcept {
   return concrete.print(std::forward<decltype(text)>(text));
 }
 
-void _tc_impl_t<allcaps_t, template_interface<int, const std::string&>>::__set_data(const char* text) {
+void _tc_impl_t<allcaps_t, template_interface<int, const std::string&>>
+    ::__set_data(const char* text) noexcept {
   return concrete.set_data(std::forward<decltype(text)>(text));
 }
 
-void _tc_impl_t<allcaps_t, template_interface<int, const std::string&>>::__print_data() const {
+void _tc_impl_t<allcaps_t, template_interface<int, const std::string&>>
+    ::__print_data() const noexcept {
   return concrete.print_data();
 }
 
-void _tc_impl_t<allcaps_t, template_interface<int, const std::string&>>::__draw(const char* surface) const {
+void _tc_impl_t<allcaps_t, template_interface<int, const std::string&>>
+    ::__draw(const char* surface) const noexcept {
+  return draw<template_interface<int, const std::string&>>(concrete, surface);
+}
+
+
+// ====
+
+_tc_impl_t<std::reference_wrapper<allcaps_t>, template_interface<int, const std::string&>>::
+    _tc_impl_t(const std::reference_wrapper<allcaps_t>& concrete_arg) noexcept
+  : concrete(concrete_arg) {}
+
+#if 0
+std::unique_ptr<_tc_model_t<template_interface<int, const std::string&>>>
+ _tc_impl_t<std::reference_wrapper<allcaps_t>, template_interface<int, const std::string&>>::clone() {
+  // Copy-construct a new instance of _tc_impl_t on the heap.
+  /// \note clones data, not ref
+  return std::make_unique<_tc_impl_t>(concrete/*.get()*/);
+}
+#endif // 0
+
+bool _tc_impl_t<std::reference_wrapper<allcaps_t>, template_interface<int, const std::string&>>::__has_save() const noexcept {
+  return false;
+}
+
+void _tc_impl_t<std::reference_wrapper<allcaps_t>, template_interface<int, const std::string&>>::__save(const char* filename, const char* access) noexcept {
+  // TODO: noexcept
+  //throw std::runtime_error("allcaps_t::save not implemented");
+  std::terminate();
+}
+
+/*template <typename ...Params>
+void print(Params&&... args) override final {
+  return concrete.print(std::forward<decltype(args)>(args)...);
+}*/
+
+bool _tc_impl_t<std::reference_wrapper<allcaps_t>, template_interface<int, const std::string&>>::__has_print() const noexcept {
+  return true;
+}
+
+void _tc_impl_t<std::reference_wrapper<allcaps_t>, template_interface<int, const std::string&>>::__print(const char* text) const noexcept {
+  /// \note passes data, not ref
+  return concrete.get().print(std::forward<decltype(text)>(text));
+}
+
+void _tc_impl_t<std::reference_wrapper<allcaps_t>, template_interface<int, const std::string&>>::__set_data(const char* text) noexcept {
+  /// \note passes data, not ref
+  return concrete.get().set_data(std::forward<decltype(text)>(text));
+}
+
+void _tc_impl_t<std::reference_wrapper<allcaps_t>, template_interface<int, const std::string&>>::__print_data() const noexcept {
+  /// \note passes data, not ref
+  return concrete.get().print_data();
+}
+
+void _tc_impl_t<std::reference_wrapper<allcaps_t>, template_interface<int, const std::string&>>::__draw(const char* surface) const noexcept {
+  /// \note passes data, not ref
+  return draw<template_interface<int, const std::string&>>(concrete.get(), surface);
+}
+
+// ====
+
+void _tc_impl_t<forward_t, template_interface<int, const std::string&>>::__draw(const char* surface) const noexcept {
   return draw<template_interface<int, const std::string&>>(concrete, surface);
 }
 
 // ====
 
-void _tc_impl_t<forward_t, template_interface<int, const std::string&>>::__draw(const char* surface) const {
-  return draw<template_interface<int, const std::string&>>(concrete, surface);
-}
-
-// ====
-
-void _tc_impl_t<reverse_t, template_interface<int, const std::string&>>::__draw(const char* surface) const {
+void _tc_impl_t<reverse_t, template_interface<int, const std::string&>>::__draw(const char* surface) const noexcept {
   return draw<template_interface<int, const std::string&>>(concrete, surface);
 }
 
