@@ -260,6 +260,10 @@ struct _tc_combined_t<template_interface<int, const std::string&>, my_interface2
 
   template <typename ...Params>
   std::string test_zoo(Params&&... args) noexcept {
+    if(!my_interface_model) {
+      //throw std::runtime_error("my_interface_model2 not set");
+      std::terminate();
+    }
     return my_interface2_model->__test_zoo(std::forward<decltype(args)>(args)...);
   }
 
@@ -524,6 +528,12 @@ struct _tc_combined_t<template_interface<int, const std::string&>, my_interface2
           { my_interface_model/*->clone()*/ };
   }
 
+  template <typename U>
+  bool can_convert() const
+  {
+    return false;
+  }
+
   template <typename R, typename T>
   static const size_t getGlobalTypeIndex() {
     return _tc_registry<R>::template getTypeIndex<T>();
@@ -572,6 +582,40 @@ struct _tc_combined_t<template_interface<int, const std::string&>, my_interface2
   std::shared_ptr<_tc_model_t<my_interface2>> my_interface2_model;
   /// ... TODO: change to std::array and add typeclass_by_string?
 };
+
+// fixes warnings if func is explicitly instantiated in another translation unit
+template <>
+void _tc_combined_t<template_interface<int, const std::string&>, my_interface2>::set_set_bar<allcaps_t>(std::function<void(allcaps_t&, const std::string&)> arg) noexcept;
+
+// fixes warnings if func is explicitly instantiated in another translation unit
+template <>
+void _tc_combined_t<template_interface<int, const std::string&>, my_interface2>::set_set_bar<reverse_t>(std::function<void(reverse_t&, const std::string&)> arg) noexcept;
+
+// fixes warnings if func is explicitly instantiated in another translation unit
+template <>
+void _tc_combined_t<template_interface<int, const std::string&>, my_interface2>::set_set_bar<forward_t>(std::function<void(forward_t&, const std::string&)> arg) noexcept;
+
+// fixes warnings if func is explicitly instantiated in another translation unit
+template <>
+void _tc_combined_t<template_interface<int, const std::string&>, my_interface2>::set_get_bar<allcaps_t>(std::function<std::string(allcaps_t&)> arg) noexcept;
+
+// fixes warnings if func is explicitly instantiated in another translation unit
+template <>
+void _tc_combined_t<template_interface<int, const std::string&>, my_interface2>::set_get_bar<reverse_t>(std::function<std::string(reverse_t&)> arg) noexcept;
+
+// fixes warnings if func is explicitly instantiated in another translation unit
+template <>
+void _tc_combined_t<template_interface<int, const std::string&>, my_interface2>::set_get_bar<forward_t>(std::function<std::string(forward_t&)> arg) noexcept;
+
+////////////////////////////////////////////////////////////////////////////////
+
+template <>
+bool _tc_combined_t<template_interface<int, const std::string&>, my_interface2>::
+  can_convert<template_interface<int, const std::string&>>() const;
+
+template <>
+bool _tc_combined_t<template_interface<int, const std::string&>, my_interface2>::
+  can_convert<my_interface2>() const;
 
 } // namespace cxxctp
 } // namespace generated

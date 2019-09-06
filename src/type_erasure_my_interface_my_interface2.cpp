@@ -7,6 +7,20 @@
 namespace cxxctp {
 namespace generated {
   template <>
+  bool _tc_combined_t<template_interface<int, const std::string&>, my_interface2>::
+    can_convert<template_interface<int, const std::string&>>() const
+  {
+    return true;
+  }
+
+  template <>
+  bool _tc_combined_t<template_interface<int, const std::string&>, my_interface2>::
+    can_convert<my_interface2>() const
+  {
+    return true;
+  }
+
+  template <>
   void _tc_combined_t<template_interface<int, const std::string&>, my_interface2>::set_set_bar<allcaps_t>(std::function<void(allcaps_t&, const std::string&)> arg) noexcept {
     if(!my_interface2_model) {
       //throw std::runtime_error("my_interface_model2 not set");

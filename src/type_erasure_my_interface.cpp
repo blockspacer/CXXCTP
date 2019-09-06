@@ -9,28 +9,109 @@ namespace cxxctp {
 namespace generated {
 
 template <>
+bool _tc_combined_t<template_interface<int, const std::string&>>::
+  can_convert<template_interface<int, const std::string&>>() const
+{
+  return true;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+template <>
+_tc_impl_t<std::reference_wrapper<allcaps_t>, template_interface<int, const std::string&>>*
+  _tc_model_t<template_interface<int, const std::string&>>::
+    as<std::reference_wrapper<allcaps_t>>() noexcept {
+  if(getModelTypeIndex()
+      != _tc_combined_t<template_interface<int, const std::string&>>
+        ::getGlobalTypeIndex<std::reference_wrapper<allcaps_t>>()) {
+    return nullptr;
+  }
+  return static_cast<
+    _tc_impl_t<std::reference_wrapper<allcaps_t>, template_interface<int, const std::string&>>*>(this);
+}
+
+template <>
+_tc_impl_t<allcaps_t, template_interface<int, const std::string&>>*
+  _tc_model_t<template_interface<int, const std::string&>>
+    ::as<allcaps_t>() noexcept {
+  if(getModelTypeIndex()
+      != _tc_combined_t<template_interface<int, const std::string&>>
+        ::getGlobalTypeIndex<allcaps_t>()) {
+    return nullptr;
+  }
+  return static_cast<
+    _tc_impl_t<allcaps_t, template_interface<int, const std::string&>>*>(this);
+}
+
+template <>
+_tc_impl_t<reverse_t, template_interface<int, const std::string&>>*
+  _tc_model_t<template_interface<int, const std::string&>>
+    ::as<reverse_t>() noexcept {
+  if(getModelTypeIndex()
+      != _tc_combined_t<template_interface<int, const std::string&>>
+        ::getGlobalTypeIndex<reverse_t>()) {
+    return nullptr;
+  }
+  return static_cast<
+    _tc_impl_t<reverse_t, template_interface<int, const std::string&>>*>(this);
+}
+
+template <>
+_tc_impl_t<forward_t, template_interface<int, const std::string&>>*
+  _tc_model_t<template_interface<int, const std::string&>>
+    ::as<forward_t>() noexcept {
+  if(getModelTypeIndex()
+      != _tc_combined_t<template_interface<int, const std::string&>>
+        ::getGlobalTypeIndex<forward_t>()) {
+    return nullptr;
+  }
+  return static_cast<
+    _tc_impl_t<forward_t, template_interface<int, const std::string&>>*>(this);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+template <>
 std::reference_wrapper<allcaps_t>& _tc_model_t<template_interface<int, const std::string&>>::ref_concrete<std::reference_wrapper<allcaps_t>>() noexcept {
-  return static_cast<_tc_impl_t<std::reference_wrapper<allcaps_t>, template_interface<int, const std::string&>>*>(this)
+  const auto casted = as<std::reference_wrapper<allcaps_t>>();
+  if(!casted) {
+    std::terminate();
+  }
+  return casted
     ->concrete;
 }
 
 template <>
 allcaps_t& _tc_model_t<template_interface<int, const std::string&>>::ref_concrete<allcaps_t>() noexcept {
-  return static_cast<_tc_impl_t<allcaps_t, template_interface<int, const std::string&>>*>(this)
+  const auto casted = as<allcaps_t>();
+  if(!casted) {
+    std::terminate();
+  }
+  return casted
     ->concrete;
 }
 
 template <>
 reverse_t& _tc_model_t<template_interface<int, const std::string&>>::ref_concrete<reverse_t>() noexcept {
-  return static_cast<_tc_impl_t<reverse_t, template_interface<int, const std::string&>>*>(this)
+  const auto casted = as<reverse_t>();
+  if(!casted) {
+    std::terminate();
+  }
+  return casted
     ->concrete;
 }
 
 template <>
 forward_t& _tc_model_t<template_interface<int, const std::string&>>::ref_concrete<forward_t>() noexcept {
-  return static_cast<_tc_impl_t<forward_t, template_interface<int, const std::string&>>*>(this)
+  const auto casted = as<forward_t>();
+  if(!casted) {
+    std::terminate();
+  }
+  return casted
     ->concrete;
 }
+
+///////////////////////////////////////////////////////////////////////////////
 
 #if 0
 extern template
@@ -225,7 +306,7 @@ void _tc_impl_t<allcaps_t, my_interface>::draw(const allcaps_t &)
 
 template<>
 size_t _tc_registry<template_interface<int, const std::string&>>::
-    getTypeIndex<allcaps_t>() noexcept {
+    getTypeIndex<std::reference_wrapper<allcaps_t>>() noexcept {
  constexpr size_t ret = 0;
  static_assert(ret < std::numeric_limits<size_t>::max(),
     "Registered too many types in"
@@ -235,7 +316,7 @@ size_t _tc_registry<template_interface<int, const std::string&>>::
 
 template<>
 size_t _tc_registry<template_interface<int, const std::string&>>::
-    getTypeIndex<reverse_t>() noexcept {
+    getTypeIndex<allcaps_t>() noexcept {
  constexpr size_t ret = 1;
  static_assert(ret < std::numeric_limits<size_t>::max(),
     "Registered too many types in"
@@ -245,8 +326,18 @@ size_t _tc_registry<template_interface<int, const std::string&>>::
 
 template<>
 size_t _tc_registry<template_interface<int, const std::string&>>::
-    getTypeIndex<forward_t>() noexcept {
+    getTypeIndex<reverse_t>() noexcept {
  constexpr size_t ret = 2;
+ static_assert(ret < std::numeric_limits<size_t>::max(),
+    "Registered too many types in"
+    " _tc_registry<template_interface<int, const std::string&>>");
+  return ret;
+}
+
+template<>
+size_t _tc_registry<template_interface<int, const std::string&>>::
+    getTypeIndex<forward_t>() noexcept {
+ constexpr size_t ret = 3;
  static_assert(ret < std::numeric_limits<size_t>::max(),
     "Registered too many types in"
     " _tc_registry<template_interface<int, const std::string&>>");

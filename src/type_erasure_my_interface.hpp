@@ -88,6 +88,12 @@ struct _tc_model_t<template_interface<int, const std::string&>> {
     interface_data = text;
   }*/
 
+  template <typename U>
+  _tc_impl_t<U, template_interface<int, const std::string&>>* as() noexcept
+  {
+    return nullptr;
+  }
+
   /// \note same for all types
   void print_interface_data() const noexcept;/* {
     auto out = std::string("interface_data: ") + interface_data;
@@ -208,6 +214,10 @@ struct _tc_impl_t<allcaps_t, template_interface<int, const std::string&>>
     }
   }*/
 
+  allcaps_t* operator->() {
+      return &concrete;
+  }
+
   // Our actual data.
   allcaps_t concrete;
 };
@@ -247,7 +257,7 @@ struct _tc_impl_t<std::reference_wrapper<allcaps_t>, template_interface<int, con
 
   const size_t getModelTypeIndex() const noexcept override final {
     return _tc_registry<template_interface<int, const std::string&>>::
-      getTypeIndex<allcaps_t>();
+      getTypeIndex<std::reference_wrapper<allcaps_t>>();
   }
 
   std::unique_ptr<
@@ -335,6 +345,10 @@ struct _tc_impl_t<std::reference_wrapper<allcaps_t>, template_interface<int, con
       }
     }
   }*/
+
+  allcaps_t* operator->() {
+      return &concrete.get();
+  }
 
   // Our actual data.
   std::reference_wrapper<allcaps_t> concrete;
@@ -462,6 +476,10 @@ struct _tc_impl_t<forward_t, template_interface<int, const std::string&>>
     }
   }*/
 
+  forward_t* operator->() {
+      return &concrete;
+  }
+
   // Our actual data.
   forward_t concrete;
 };
@@ -588,6 +606,10 @@ struct _tc_impl_t<reverse_t, template_interface<int, const std::string&>>
       }
     }
   }*/
+
+  reverse_t* operator->() {
+      return &concrete;
+  }
 
   // Our actual data.
   reverse_t concrete;
@@ -1030,6 +1052,12 @@ struct _tc_combined_t<template_interface<int, const std::string&>> {
     return my_interface_model->ref_concrete<T>();
   }
 
+  template <typename U>
+  bool can_convert() const
+  {
+    return false;
+  }
+
   /*bool is_valid() const {
     return (bool)model;
   }*/
@@ -1122,6 +1150,34 @@ int main() {
   return 0;
 }
 #endif // 0
+
+////////////////////////////////////////////////////////////////////////////////
+
+template <>
+bool _tc_combined_t<template_interface<int, const std::string&>>::
+  can_convert<template_interface<int, const std::string&>>() const;
+
+///////////////////////////////////////////////////////////////////////////////
+
+template <>
+_tc_impl_t<std::reference_wrapper<allcaps_t>, template_interface<int, const std::string&>>*
+  _tc_model_t<template_interface<int, const std::string&>>::
+    as<std::reference_wrapper<allcaps_t>>() noexcept;
+
+template <>
+_tc_impl_t<allcaps_t, template_interface<int, const std::string&>>*
+  _tc_model_t<template_interface<int, const std::string&>>
+    ::as<allcaps_t>() noexcept;
+
+template <>
+_tc_impl_t<reverse_t, template_interface<int, const std::string&>>*
+  _tc_model_t<template_interface<int, const std::string&>>
+    ::as<reverse_t>() noexcept;
+
+template <>
+_tc_impl_t<forward_t, template_interface<int, const std::string&>>*
+  _tc_model_t<template_interface<int, const std::string&>>
+    ::as<forward_t>() noexcept;
 
 } // namespace cxxctp
 } // namespace generated

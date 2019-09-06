@@ -15,6 +15,7 @@
 
 #include "types_for_erasure.hpp"
 #include "type_erasure_common.hpp"
+//#include "type_erasure_my_interface.hpp"
 
 namespace cxxctp {
 namespace generated {
@@ -66,11 +67,15 @@ void draw(const reverse_t&, const char* surface);*/
 
 template<>
 struct _tc_registry<template_interface<int, const std::string&>> {
-  static constexpr size_t size = 3;
+  static constexpr size_t size = 4;
 
   template<typename concrete>
   static size_t getTypeIndex() noexcept;
 };
+
+template<>
+size_t _tc_registry<template_interface<int, const std::string&>>::
+    getTypeIndex<std::reference_wrapper<allcaps_t>>() noexcept;
 
 template<>
 size_t _tc_registry<template_interface<int, const std::string&>>::

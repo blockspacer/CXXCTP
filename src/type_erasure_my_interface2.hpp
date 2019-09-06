@@ -55,6 +55,12 @@ struct _tc_model_t<my_interface2> {
   template <typename T>
   T& ref_concrete() noexcept;
 
+  template <typename U>
+  _tc_impl_t<U, my_interface2>* as() noexcept
+  {
+    return nullptr;
+  }
+
 #if 0
   //template<typename T>
   virtual void __set_get_bar(const std::any& func) = 0;/* {
@@ -174,6 +180,10 @@ struct _tc_impl_t<allcaps_t, my_interface2>
     }
   }
 
+  allcaps_t* operator->() {
+      return &concrete;
+  }
+
   // Our actual data.
   allcaps_t concrete;
 };
@@ -223,7 +233,8 @@ struct _tc_impl_t<std::reference_wrapper<allcaps_t>, my_interface2>
   }
 
   const size_t getModelTypeIndex() const noexcept override final {
-    return _tc_registry<my_interface2>::getTypeIndex<allcaps_t>();
+    return _tc_registry<my_interface2>::
+      getTypeIndex<std::reference_wrapper<allcaps_t>>();
   }
 
   std::unique_ptr<
@@ -295,6 +306,10 @@ struct _tc_impl_t<std::reference_wrapper<allcaps_t>, my_interface2>
     }
   }
 
+  allcaps_t* operator->() {
+      return &concrete.get();
+  }
+
   // Our actual data.
   std::reference_wrapper<allcaps_t> concrete;
 };
@@ -330,7 +345,8 @@ struct _tc_impl_t<forward_t, my_interface2>
   }
 
   const size_t getModelTypeIndex() const noexcept override final {
-    return _tc_registry<my_interface2>::getTypeIndex<forward_t>();
+    return _tc_registry<my_interface2>::
+      getTypeIndex<forward_t>();
   }
 
   std::unique_ptr<
@@ -437,6 +453,10 @@ struct _tc_impl_t<forward_t, my_interface2>
     }
   }
 
+  forward_t* operator->() {
+      return &concrete;
+  }
+
   // Our actual data.
   forward_t concrete;
 };
@@ -473,7 +493,8 @@ struct _tc_impl_t<reverse_t, my_interface2>
   }
 
   const size_t getModelTypeIndex() const noexcept override final {
-    return _tc_registry<my_interface2>::getTypeIndex<reverse_t>();
+    return _tc_registry<my_interface2>::
+      getTypeIndex<reverse_t>();
   }
 
   std::unique_ptr<
@@ -576,6 +597,10 @@ struct _tc_impl_t<reverse_t, my_interface2>
     } else {
       std::cout << "Wrong func in __set_set_bar\n";
     }
+  }
+
+  reverse_t* operator->() {
+      return &concrete;
   }
 
   // Our actual data.
@@ -969,6 +994,12 @@ struct _tc_combined_t<my_interface2> {
     return my_interface2_model->__test_zoo(std::forward<decltype(args)>(args)...);
   }*/
 
+  template <typename U>
+  bool can_convert() const
+  {
+    return false;
+  }
+
   std::string test_zoo(const std::string& arg) noexcept;
 
   // This is actually a unique_ptr to an impl type. We store a pointer to
@@ -1072,6 +1103,34 @@ forward_t& _tc_combined_t<my_interface2>::ref_concrete<forward_t>() {
     ->concrete;
 }*/
 #endif // 0
+
+////////////////////////////////////////////////////////////////////////////////
+
+template <>
+bool _tc_combined_t<my_interface2>::
+  can_convert<my_interface2>() const;
+
+///////////////////////////////////////////////////////////////////////////////
+
+template <>
+_tc_impl_t<std::reference_wrapper<allcaps_t>, my_interface2>*
+  _tc_model_t<my_interface2>::
+    as<std::reference_wrapper<allcaps_t>>() noexcept;
+
+template <>
+_tc_impl_t<allcaps_t, my_interface2>*
+  _tc_model_t<my_interface2>
+    ::as<allcaps_t>() noexcept;
+
+template <>
+_tc_impl_t<reverse_t, my_interface2>*
+  _tc_model_t<my_interface2>
+    ::as<reverse_t>() noexcept;
+
+template <>
+_tc_impl_t<forward_t, my_interface2>*
+  _tc_model_t<my_interface2>
+    ::as<forward_t>() noexcept;
 
 } // namespace cxxctp
 } // namespace generated

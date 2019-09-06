@@ -9,29 +9,109 @@ namespace cxxctp {
 namespace generated {
 
 template <>
-allcaps_t& _tc_model_t<my_interface2>::ref_concrete<allcaps_t>() noexcept {
-  return static_cast<_tc_impl_t<allcaps_t, my_interface2>*>(this)
+bool _tc_combined_t<my_interface2>::
+  can_convert<my_interface2>() const
+{
+  return true;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+template <>
+_tc_impl_t<std::reference_wrapper<allcaps_t>, my_interface2>*
+  _tc_model_t<my_interface2>::
+    as<std::reference_wrapper<allcaps_t>>() noexcept {
+  if(getModelTypeIndex()
+      != _tc_combined_t<my_interface2>
+        ::getGlobalTypeIndex<std::reference_wrapper<allcaps_t>>()) {
+    return nullptr;
+  }
+  return static_cast<
+    _tc_impl_t<std::reference_wrapper<allcaps_t>, my_interface2>*>(this);
+}
+
+template <>
+_tc_impl_t<allcaps_t, my_interface2>*
+  _tc_model_t<my_interface2>
+    ::as<allcaps_t>() noexcept {
+  if(getModelTypeIndex()
+      != _tc_combined_t<my_interface2>
+        ::getGlobalTypeIndex<allcaps_t>()) {
+    return nullptr;
+  }
+  return static_cast<
+    _tc_impl_t<allcaps_t, my_interface2>*>(this);
+}
+
+template <>
+_tc_impl_t<reverse_t, my_interface2>*
+  _tc_model_t<my_interface2>
+    ::as<reverse_t>() noexcept {
+  if(getModelTypeIndex()
+      != _tc_combined_t<my_interface2>
+        ::getGlobalTypeIndex<reverse_t>()) {
+    return nullptr;
+  }
+  return static_cast<
+    _tc_impl_t<reverse_t, my_interface2>*>(this);
+}
+
+template <>
+_tc_impl_t<forward_t, my_interface2>*
+  _tc_model_t<my_interface2>
+    ::as<forward_t>() noexcept {
+  if(getModelTypeIndex()
+      != _tc_combined_t<my_interface2>
+        ::getGlobalTypeIndex<forward_t>()) {
+    return nullptr;
+  }
+  return static_cast<
+    _tc_impl_t<forward_t, my_interface2>*>(this);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+template <>
+std::reference_wrapper<allcaps_t>& _tc_model_t<my_interface2>::ref_concrete<std::reference_wrapper<allcaps_t>>() noexcept {
+  const auto casted = as<std::reference_wrapper<allcaps_t>>();
+  if(!casted) {
+    std::terminate();
+  }
+  return casted
     ->concrete;
 }
 
 template <>
-std::reference_wrapper<allcaps_t>& _tc_model_t<my_interface2>::ref_concrete<std::reference_wrapper<allcaps_t>>() noexcept {
-  /// \note passes ref, not data!
-  return static_cast<_tc_impl_t<std::reference_wrapper<allcaps_t>, my_interface2>*>(this)
+allcaps_t& _tc_model_t<my_interface2>::ref_concrete<allcaps_t>() noexcept {
+  const auto casted = as<allcaps_t>();
+  if(!casted) {
+    std::terminate();
+  }
+  return casted
     ->concrete;
 }
 
 template <>
 reverse_t& _tc_model_t<my_interface2>::ref_concrete<reverse_t>() noexcept {
-  return static_cast<_tc_impl_t<reverse_t, my_interface2>*>(this)
+  const auto casted = as<reverse_t>();
+  if(!casted) {
+    std::terminate();
+  }
+  return casted
     ->concrete;
 }
 
 template <>
 forward_t& _tc_model_t<my_interface2>::ref_concrete<forward_t>() noexcept {
-  return static_cast<_tc_impl_t<forward_t, my_interface2>*>(this)
+  const auto casted = as<forward_t>();
+  if(!casted) {
+    std::terminate();
+  }
+  return casted
     ->concrete;
 }
+
+///////////////////////////////////////////////////////////////////////////////
 
 #if 0
 extern template
@@ -87,7 +167,11 @@ void _tc_combined_t<my_interface2>::set_set_bar<allcaps_t>
     //throw std::runtime_error("my_interface2_model not set");
     std::terminate();
   }
-  return static_cast<_tc_impl_t<allcaps_t, my_interface2>*>(my_interface2_model.get())
+  const auto casted = my_interface2_model->as<allcaps_t>();
+  if(!casted) {
+    std::terminate();
+  }
+  return casted
     ->__set_set_bar(std::forward<decltype(arg)>(arg));
 }
 
@@ -98,7 +182,11 @@ void _tc_combined_t<my_interface2>::set_set_bar<reverse_t>
     //throw std::runtime_error("my_interface2_model not set");
     std::terminate();
   }
-  return static_cast<_tc_impl_t<reverse_t, my_interface2>*>(my_interface2_model.get())
+  const auto casted = my_interface2_model->as<reverse_t>();
+  if(!casted) {
+    std::terminate();
+  }
+  return casted
     ->__set_set_bar(std::forward<decltype(arg)>(arg));
 }
 
@@ -109,7 +197,11 @@ void _tc_combined_t<my_interface2>::set_set_bar<forward_t>
     //throw std::runtime_error("my_interface2_model not set");
     std::terminate();
   }
-  return static_cast<_tc_impl_t<forward_t, my_interface2>*>(my_interface2_model.get())
+  const auto casted = my_interface2_model->as<forward_t>();
+  if(!casted) {
+    std::terminate();
+  }
+  return casted
     ->__set_set_bar(std::forward<decltype(arg)>(arg));
 }
 
@@ -120,7 +212,11 @@ void _tc_combined_t<my_interface2>::set_get_bar<allcaps_t>
     //throw std::runtime_error("my_interface2_model not set");
     std::terminate();
   }
-  return static_cast<_tc_impl_t<allcaps_t, my_interface2>*>(my_interface2_model.get())
+  const auto casted = my_interface2_model->as<allcaps_t>();
+  if(!casted) {
+    std::terminate();
+  }
+  return casted
     ->__set_get_bar(std::forward<decltype(arg)>(arg));
 }
 
@@ -131,7 +227,11 @@ void _tc_combined_t<my_interface2>::set_get_bar<reverse_t>
     //throw std::runtime_error("my_interface2_model not set");
     std::terminate();
   }
-  return static_cast<_tc_impl_t<reverse_t, my_interface2>*>(my_interface2_model.get())
+  const auto casted = my_interface2_model->as<reverse_t>();
+  if(!casted) {
+    std::terminate();
+  }
+  return casted
     ->__set_get_bar(std::forward<decltype(arg)>(arg));
 }
 
@@ -142,12 +242,20 @@ void _tc_combined_t<my_interface2>::set_get_bar<forward_t>
     //throw std::runtime_error("my_interface2_model not set");
     std::terminate();
   }
-  return static_cast<_tc_impl_t<forward_t, my_interface2>*>(my_interface2_model.get())
+  const auto casted = my_interface2_model->as<forward_t>();
+  if(!casted) {
+    std::terminate();
+  }
+  return casted
     ->__set_get_bar(std::forward<decltype(arg)>(arg));
 }
 
 std::string _tc_combined_t<my_interface2>::test_zoo(const std::string &arg) noexcept {
   //return my_interface2_model->test_zoo<reverse_t>(arg);
+  if(!my_interface2_model) {
+    //throw std::runtime_error("my_interface_model2 not set");
+    std::terminate();
+  }
   return my_interface2_model->__test_zoo(arg);
 }
 
@@ -194,7 +302,7 @@ void _tc_impl_t<reverse_t, my_interface2>::__draw(const char* surface) const {
 
 template<>
 size_t _tc_registry<my_interface2>::
-    getTypeIndex<allcaps_t>() noexcept {
+    getTypeIndex<std::reference_wrapper<allcaps_t>>() noexcept {
  constexpr size_t ret = 0;
  static_assert(ret < std::numeric_limits<size_t>::max(),
     "Registered too many types in"
@@ -204,7 +312,7 @@ size_t _tc_registry<my_interface2>::
 
 template<>
 size_t _tc_registry<my_interface2>::
-    getTypeIndex<reverse_t>() noexcept {
+    getTypeIndex<allcaps_t>() noexcept {
  constexpr size_t ret = 1;
  static_assert(ret < std::numeric_limits<size_t>::max(),
     "Registered too many types in"
@@ -214,8 +322,18 @@ size_t _tc_registry<my_interface2>::
 
 template<>
 size_t _tc_registry<my_interface2>::
-    getTypeIndex<forward_t>() noexcept {
+    getTypeIndex<reverse_t>() noexcept {
  constexpr size_t ret = 2;
+ static_assert(ret < std::numeric_limits<size_t>::max(),
+    "Registered too many types in"
+    " _tc_registry<my_interface2>");
+  return ret;
+}
+
+template<>
+size_t _tc_registry<my_interface2>::
+    getTypeIndex<forward_t>() noexcept {
+ constexpr size_t ret = 3;
  static_assert(ret < std::numeric_limits<size_t>::max(),
     "Registered too many types in"
     " _tc_registry<my_interface2>");

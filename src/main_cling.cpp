@@ -1932,6 +1932,7 @@ namespace generated {
     /// \note passes ref, not data!
     /// otherwize we won`t be able to call get_concrete<ref_type>
     /// \note get_concrete<type> differs from get_concrete<ref_type>!
+    std::cout << "test_zoo ref_concrete<std::reference_wrapper<allcaps_t>>()" << std::endl;
     std::reference_wrapper<allcaps_t>& data = ref_concrete<std::reference_wrapper<allcaps_t>>();
     return arg + " test_zoo for allcaps_t " + data.get().allcaps_t_data;
   }
@@ -2033,6 +2034,21 @@ int main(int /*argc*/, const char* const* /*argv*/) {
     my_interface2_obj_t tz{forward_t{}};
     std::cout << "test_zoo: " << tz.test_zoo("tz") << std::endl;
 
+    std::cout << "my_interface2_obj_t can_convert1 "
+      << std::to_string(
+        tz.can_convert<template_interface<int, const std::string&>>())
+      << std::endl;
+
+    std::cout << "my_interface2_obj_t can_convert2 "
+      << std::to_string(
+        tz.can_convert<my_interface2>())
+      << std::endl;
+
+    std::cout << "my_interface2_obj_t can_convert3 "
+      << std::to_string(
+        tz.can_convert<int>())
+      << std::endl;
+
     do_small_smth(forward_t{});
     do_small_smth(my_interface_obj_t{});
     //do_small_smth(my_interface2_obj_t{});
@@ -2098,6 +2114,21 @@ int main(int /*argc*/, const char* const* /*argv*/) {
       com1.ref_my_interface_model());
 
     com1.print_interface_data();
+
+    std::cout << "can_convert1 "
+      << std::to_string(
+        com1.can_convert<template_interface<int, const std::string&>>())
+      << std::endl;
+
+    std::cout << "can_convert2 "
+      << std::to_string(
+        com1.can_convert<my_interface2>())
+      << std::endl;
+
+    std::cout << "can_convert3 "
+      << std::to_string(
+        com1.can_convert<int>())
+      << std::endl;
 
     com1.set_common_model(forward_t{});
 
