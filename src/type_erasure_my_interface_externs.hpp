@@ -89,5 +89,14 @@ template<>
 size_t _tc_registry<template_interface<int, const std::string&>>::
     getTypeIndex<forward_t>() noexcept;
 
+/// \note just for test
+/*template<typename A,
+typename B,
+typename C,
+typename std::enable_if<std::is_same<template_interface<int, const std::string&>, A>::value>::type* = nullptr>
+std::string show(const B& arg1, C const & arg2) {
+  return "my_interface_impl_t<B>::show(arg1, arg2)";
+}*/
+
 } // namespace cxxctp
 } // namespace generated

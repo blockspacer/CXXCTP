@@ -61,10 +61,17 @@ find_package(Jinja2Cpp)
 set(ENABLE_CLING TRUE CACHE BOOL "ENABLE_CLING")
 
 if(ENABLE_CLING)
+  add_library(simple_lib SHARED #STATIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/simplelib.cpp
+  )
+
   list(APPEND CLING_DEFINITIONS CLING_IS_ON=1)
   # The project has one binary:
   add_executable(CXXCTP
     ${CMAKE_CURRENT_SOURCE_DIR}/src/main_cling.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/clangUtils.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/funcParser.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/funcParser.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/someEnum.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/someEnum.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/type_erasure_my_interface.cpp
@@ -112,6 +119,7 @@ set( USED_BOOST_LIBS
 
 # ...which links against clingInterpreter (and its dependencies).
 target_link_libraries(CXXCTP
+  simple_lib
   # TODO: use FindClang.cmake
   ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangARCMigrate.a
   ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangAnalysis.a

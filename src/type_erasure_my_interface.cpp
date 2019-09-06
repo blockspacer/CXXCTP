@@ -183,17 +183,17 @@ bool _tc_impl_t<allcaps_t, template_interface<int, const std::string&>>
 
 void _tc_impl_t<allcaps_t, template_interface<int, const std::string&>>
     ::__print(const char* text) const noexcept {
-  return concrete.print(std::forward<decltype(text)>(text));
+  return concrete.print(concrete, std::forward<decltype(text)>(text));
 }
 
 void _tc_impl_t<allcaps_t, template_interface<int, const std::string&>>
     ::__set_data(const char* text) noexcept {
-  return concrete.set_data(std::forward<decltype(text)>(text));
+  return concrete.set_data(concrete, std::forward<decltype(text)>(text));
 }
 
 void _tc_impl_t<allcaps_t, template_interface<int, const std::string&>>
     ::__print_data() const noexcept {
-  return concrete.print_data();
+  return concrete.print_data(concrete);
 }
 
 void _tc_impl_t<allcaps_t, template_interface<int, const std::string&>>
@@ -238,17 +238,17 @@ bool _tc_impl_t<std::reference_wrapper<allcaps_t>, template_interface<int, const
 
 void _tc_impl_t<std::reference_wrapper<allcaps_t>, template_interface<int, const std::string&>>::__print(const char* text) const noexcept {
   /// \note passes data, not ref
-  return concrete.get().print(std::forward<decltype(text)>(text));
+  return concrete.get().print(concrete, std::forward<decltype(text)>(text));
 }
 
 void _tc_impl_t<std::reference_wrapper<allcaps_t>, template_interface<int, const std::string&>>::__set_data(const char* text) noexcept {
   /// \note passes data, not ref
-  return concrete.get().set_data(std::forward<decltype(text)>(text));
+  return concrete.get().set_data(concrete, std::forward<decltype(text)>(text));
 }
 
 void _tc_impl_t<std::reference_wrapper<allcaps_t>, template_interface<int, const std::string&>>::__print_data() const noexcept {
   /// \note passes data, not ref
-  return concrete.get().print_data();
+  return concrete.get().print_data(concrete);
 }
 
 void _tc_impl_t<std::reference_wrapper<allcaps_t>, template_interface<int, const std::string&>>::__draw(const char* surface) const noexcept {

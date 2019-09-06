@@ -63,6 +63,14 @@ struct my_interface2 {
   template <typename T>
   static std::string show(T const &) noexcept = delete;
 
+  /// \note may be used to proxy calls to static show
+  std::string show(std::string const &) noexcept;/* {
+    return show(concrete, arg2);
+  }*/
+
+  /// \note may be used to proxy calls to static show
+  std::string show(const char*) noexcept;
+
   // TODO:
   //template <typename T, typename A, typename B>
   //static std::string templated_args_show(T const &, A const &, B const &) = delete;
@@ -84,28 +92,38 @@ struct my_interface2 {
 // Print the text in forward order.
 // @gen(typeclass_instance(my_interface, my_interface2))
 struct forward_t {
-  void print_2(const char* text) const noexcept {
+  void print_2(const forward_t& concrete, const char* text) const noexcept {
     puts("print2: ");
     puts(text);
   }
+  // TODO: inject_to_all + static combo
+  /// \note expands to accept extra typename
+  // @gen(static)
+  template <typename T>
+  static std::string show(forward_t& concrete, T const &) noexcept = delete;
 
-  void print(const char* text) const noexcept {
+  /// \note may be used to proxy calls to static show
+  std::string show(forward_t& concrete, std::string const & arg2) noexcept {
+    return show(concrete, arg2);
+  }
+
+  void print(const forward_t& concrete, const char* text) const noexcept {
     puts(text);
   }
 
-  void save(const char* filename, const char* access) noexcept;/* {
+  void save(forward_t& concrete, const char* filename, const char* access) noexcept;/* {
     puts("forward_t::save called");
   }*/
 
-  void set_data(const char* text) noexcept;/* {
+  void set_data(forward_t& concrete, const char* text) noexcept;/* {
     forward_t_data = text;
   }*/
 
-  void print_data() const noexcept;/* {
+  void print_data(const forward_t& concrete) const noexcept;/* {
     puts(forward_t_data.c_str());
   }*/
 
-  void do_job(const char* filename, const char* access) noexcept {
+  void do_job(forward_t& concrete, const char* filename, const char* access) noexcept {
     printf("do_job %s %s \n", filename, access);
   }
 
@@ -117,23 +135,23 @@ struct forward_t {
 // Print the text in reverse order.
 // @gen(typeclass_instance(my_interface<int, std::string>, my_interface2))
 struct reverse_t {
-  void print_2(const char* text) const noexcept {
+  void print_2(const reverse_t& concrete, const char* text) const noexcept {
     puts("print2: ");
     puts(text);
   }
 
-  void print(const char* text) const noexcept;/* {
+  void print(const reverse_t& concrete, const char* text) const noexcept;/* {
     int len = strlen(text);
     for(int i = 0; i < len; ++i)
       putchar(text[len - 1 - i]);
     putchar('\n');
   }*/
 
-  void set_data(const char* text) noexcept;/* {
+  void set_data(reverse_t& concrete,const char* text) noexcept;/* {
     reverse_t_data = text;
   }*/
 
-  void print_data() const noexcept;/* {
+  void print_data(const reverse_t& concrete) const noexcept;/* {
     puts(reverse_t_data.c_str());
   }*/
 
@@ -149,22 +167,22 @@ struct reverse_t {
 // Print the text with caps.
 // @gen(typeclass_instance(my_interface<std::string, std::string>, my_interface2))
 struct allcaps_t {
-  void print_2(const char* text) const noexcept {
+  void print_2(const allcaps_t& concrete, const char* text) const noexcept {
     puts("print2: ");
     puts(text);
   }
 
-  void print(const char* text) const noexcept;/* {
+  void print(const allcaps_t& concrete, const char* text) const noexcept;/* {
     while(char c = *text++)
       putchar(toupper(c));
     putchar('\n');
   }*/
 
-  void set_data(const char* text) noexcept;/* {
+  void set_data(allcaps_t& concrete, const char* text) noexcept;/* {
     allcaps_t_data = text;
   }*/
 
-  void print_data() const noexcept;/* {
+  void print_data(const allcaps_t& concrete) const noexcept;/* {
     puts(allcaps_t_data.c_str());
   }*/
 

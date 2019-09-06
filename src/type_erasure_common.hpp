@@ -189,5 +189,11 @@ struct _tc_registry {
   static size_t getTypeIndex() noexcept = delete;*/
 };
 
+/*#ifdef COMPILE_DLL
+#define CXXCTP_EXPORT __declspec( dllexport )
+#else
+#define CXXCTP_EXPORT __declspec( dllimport )
+#endif*/
+
 } // namespace cxxctp
 } // namespace generated

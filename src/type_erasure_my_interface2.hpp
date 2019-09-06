@@ -50,6 +50,10 @@ struct _tc_model_t<my_interface2> {
   template <typename T, typename A>
   static std::string show(T const &, A const &) noexcept = delete;
 
+  virtual std::string __show(std::string const &) noexcept = 0;
+
+  virtual std::string __show(const char*) noexcept = 0;
+
   //virtual void __show() = 0;
 
   template <typename T>
@@ -119,7 +123,21 @@ struct _tc_impl_t<allcaps_t, my_interface2>
   static std::string show(allcaps_t const &, A const & arg2) noexcept {
     std::cout << "show for allcaps_t " << arg2 << std::endl;
     return "show for allcaps_t";
-  };
+  }
+
+  std::string __show(std::string const & arg2) noexcept override final {
+    return show(concrete, arg2);
+  }
+
+  std::string __show(const char* arg2) noexcept override final {
+    return show(concrete, arg2);
+  }
+
+  /*template<typename A>
+  static std::string show(allcaps_t const &, A const & arg2) noexcept {
+    std::cout << "show for allcaps_t " << arg2 << std::endl;
+    return "show for allcaps_t";
+  };*/
 
   const size_t getModelTypeIndex() const noexcept override final {
     return _tc_registry<my_interface2>::
@@ -214,11 +232,32 @@ struct _tc_impl_t<std::reference_wrapper<allcaps_t>, my_interface2>
   explicit _tc_impl_t(const std::reference_wrapper<allcaps_t>& concrete_arg) noexcept
     : concrete(concrete_arg) {}
 
+  /*template<typename A>
+  static std::string show(allcaps_t const &, A const & arg2) noexcept;*/
+
   template<typename A>
   static std::string show(allcaps_t const &, A const & arg2) noexcept {
     std::cout << "show for allcaps_t " << arg2 << std::endl;
     return "show for allcaps_t";
-  };
+  }
+
+  /*template<typename A>
+  static std::string show(std::reference_wrapper<allcaps_t> const &, A const & arg2) noexcept {
+    std::cout << "show for allcaps_t " << arg2 << std::endl;
+    return "show for allcaps_t";
+  }*/
+
+  std::string __show(std::string const & arg2) noexcept override final {
+    // /// \note call version without reference_wrapper
+    return /*_tc_impl_t<allcaps_t, my_interface2>::*/
+      show(concrete.get(), arg2);
+  }
+
+  std::string __show(const char* arg2) noexcept override final {
+    // /// \note call version without reference_wrapper
+    return /*_tc_impl_t<allcaps_t, my_interface2>::*/
+      show(concrete.get(), arg2);
+  }
 
   std::unique_ptr<
     _tc_model_t<my_interface2>>
@@ -363,11 +402,26 @@ struct _tc_impl_t<forward_t, my_interface2>
     std::cout << "show for forward_t " << arg2 << std::endl;
     return "show for forward_t";
   };*/
+
   template<typename A>
   static std::string show(forward_t const &, A const & arg2) noexcept {
     std::cout << "show for forward_t " << arg2 << std::endl;
     return "show for forward_t";
-  };
+  }
+
+  std::string __show(std::string const & arg2) noexcept override final {
+    return show(concrete, arg2);
+  }
+
+  std::string __show(const char* arg2) noexcept override final {
+    return show(concrete, arg2);
+  }
+
+  /* {
+    std::cout << "show for forward_t " << arg2 << std::endl;
+    return "show for forward_t";
+  };*/
+
   /*void __show() override {
     show(concrete, "");
   }*/
@@ -383,7 +437,7 @@ struct _tc_impl_t<forward_t, my_interface2>
   }
 
   void __do_job(const char* filename, const char* access) noexcept override final {
-    return concrete.do_job(std::forward<decltype(filename)>(filename),
+    return concrete.do_job(concrete, std::forward<decltype(filename)>(filename),
       std::forward<decltype(access)>(access));
   }
 
@@ -511,7 +565,16 @@ struct _tc_impl_t<reverse_t, my_interface2>
   static std::string show(reverse_t const &, A const & arg2) noexcept {
     std::cout << "show for reverse_t " << arg2 << std::endl;
     return "show for reverse_t";
-  };
+  }
+
+  std::string __show(std::string const & arg2) noexcept override final {
+    return show<std::string>(concrete, arg2);
+  }
+
+  std::string __show(const char* arg2) noexcept override final {
+    return show<std::string>(concrete, arg2);
+  }
+
   /*void __show() override {
     show(concrete, "");
   }*/
@@ -605,6 +668,10 @@ struct _tc_impl_t<reverse_t, my_interface2>
   // Our actual data.
   reverse_t concrete;
 };
+
+/*template<>
+  static std::string _tc_impl_t<std::reference_wrapper<allcaps_t>, my_interface2>::
+    show(allcaps_t const &, std::string const & arg2) noexcept;*/
 
 ////////////////////////////////////////////////////////////////////////////////
 #if 0
@@ -845,12 +912,18 @@ struct _tc_combined_t<my_interface2> {
     return my_interface2_model->__do_job(std::forward<decltype(args)>(args)...);
   }
 
-  template<
+  /*template<
   typename B,
   typename C>
-  std::string show(const B& arg1, C const & arg2) noexcept {
+  static std::string show(const B& arg1, C const & arg2) noexcept {
     //std::cout << my_interface2_model->type_hash << std::endl;
     return _tc_impl_t<B, my_interface2>::show(arg1, arg2);
+  }*/
+
+  template<typename ...Params>
+  std::string show(Params&&... args) noexcept {
+    //std::cout << my_interface2_model->type_hash << std::endl;
+    return my_interface2_model->__show(std::forward<decltype(args)>(args)...);
   }
 
   /*template <typename T, typename ...Params>
@@ -1139,6 +1212,8 @@ _tc_impl_t<forward_t, my_interface2>*
 std::shared_ptr<_tc_model_t<my_interface2>>
   _tc_combined_t<my_interface2>
     ::ref_model<my_interface2>() const noexcept;*/
+
+//template struct _tc_impl_t<forward_t, my_interface2>;
 
 } // namespace cxxctp
 } // namespace generated

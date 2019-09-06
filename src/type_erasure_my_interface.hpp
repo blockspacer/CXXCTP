@@ -154,7 +154,7 @@ struct _tc_impl_t<allcaps_t, template_interface<int, const std::string&>>
     return true;
   }
   void __print_2(const char* text) const noexcept override final {
-    return concrete.print_2(std::forward<decltype(text)>(text));
+    return concrete.print_2(concrete, std::forward<decltype(text)>(text));
   }
 
   bool __has_print() const noexcept override final;
@@ -294,7 +294,7 @@ struct _tc_impl_t<std::reference_wrapper<allcaps_t>, template_interface<int, con
   }
   void __print_2(const char* text) const noexcept override final {
     /// \note passes data, not ref
-    return concrete.get().print_2(std::forward<decltype(text)>(text));
+    return concrete.get().print_2(concrete.get(), std::forward<decltype(text)>(text));
   }
 
   bool __has_print() const noexcept override final;
@@ -403,7 +403,7 @@ struct _tc_impl_t<forward_t, template_interface<int, const std::string&>>
   }
 
   void __save(const char* filename, const char* access) noexcept override final {
-    return concrete.save(std::forward<decltype(filename)>(filename),
+    return concrete.save(concrete, std::forward<decltype(filename)>(filename),
       std::forward<decltype(access)>(access));
   }
 
@@ -416,7 +416,7 @@ struct _tc_impl_t<forward_t, template_interface<int, const std::string&>>
     return true;
   }
   void __print_2(const char* text) const noexcept override final {
-    return concrete.print_2(std::forward<decltype(text)>(text));
+    return concrete.print_2(concrete, std::forward<decltype(text)>(text));
   }
 
   bool __has_print() const noexcept override final {
@@ -424,15 +424,15 @@ struct _tc_impl_t<forward_t, template_interface<int, const std::string&>>
   }
 
   void __print(const char* text) const noexcept override final {
-    return concrete.print(std::forward<decltype(text)>(text));
+    return concrete.print(concrete, std::forward<decltype(text)>(text));
   }
 
   void __set_data(const char* text) noexcept override final {
-    return concrete.set_data(std::forward<decltype(text)>(text));
+    return concrete.set_data(concrete, std::forward<decltype(text)>(text));
   }
 
   void __print_data() const noexcept override final {
-    return concrete.print_data();
+    return concrete.print_data(concrete);
   }
 
   void __draw(const char* surface) const noexcept override final;
@@ -547,7 +547,7 @@ struct _tc_impl_t<reverse_t, template_interface<int, const std::string&>>
     return true;
   }
   void __print_2(const char* text) const noexcept override final {
-    return concrete.print_2(std::forward<decltype(text)>(text));
+    return concrete.print_2(concrete, std::forward<decltype(text)>(text));
   }
 
   bool __has_print() const noexcept override final {
@@ -555,15 +555,15 @@ struct _tc_impl_t<reverse_t, template_interface<int, const std::string&>>
   }
 
   void __print(const char* text) const noexcept override final {
-    return concrete.print(std::forward<decltype(text)>(text));
+    return concrete.print(concrete, std::forward<decltype(text)>(text));
   }
 
   void __set_data(const char* text) noexcept override final {
-    return concrete.set_data(std::forward<decltype(text)>(text));
+    return concrete.set_data(concrete, std::forward<decltype(text)>(text));
   }
 
   void __print_data() const noexcept override final {
-    return concrete.print_data();
+    return concrete.print_data(concrete);
   }
 
   void __draw(const char* surface) const noexcept override final;
@@ -1070,6 +1070,11 @@ struct _tc_combined_t<template_interface<int, const std::string&>> {
   {
     return false;
   }
+
+  /*template<
+  typename B,
+  typename C>
+  static std::string external(const B& arg1, C const & arg2) noexcept;*/
 
   /*bool is_valid() const {
     return (bool)model;

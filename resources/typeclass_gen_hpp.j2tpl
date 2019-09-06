@@ -1,0 +1,53 @@
+﻿// This is generated file. Do not modify directly.
+// Path to the code generator: {{generator_path}}.
+
+{% if headerGuard is defined %}
+ #ifndef {{headerGuard}}
+ #define {{headerGuard}}
+{% else %}
+ #pragma once
+{% endif %}
+
+{% for fileName in generator_includes | sort %}
+ #include "{{fileName}}"
+{% endfor %}
+
+ #include <array>
+ #include <functional>
+
+namespace cxxctp {
+namespace generated {
+
+{{OriginalTypeclassBaseCode}};
+
+template<>
+struct _tc_model_t<{{GeneratedTypeclassName}}> {
+  virtual ~_tc_model_t() noexcept { }
+
+  virtual std::unique_ptr<_tc_model_t> clone() noexcept = 0;
+
+  virtual std::unique_ptr<_tc_model_t> move_clone() noexcept = 0;
+
+  virtual const size_t getModelTypeIndex() const noexcept = 0;
+
+{% for funcDecl in GeneratedTypeclassFuncs %}
+  {{funcDecl}};
+
+{% endfor %}
+
+  template <typename T>
+  T& ref_concrete() noexcept;
+
+  template <typename U>
+  _tc_impl_t<U, {{GeneratedTypeclassName}}>* as() noexcept
+  {
+    return nullptr;
+  }
+};
+
+} // namespace cxxctp
+} // namespace generated
+
+{% if headerGuard is defined %}
+ #endif // {{headerGuard}}
+{% endif %}

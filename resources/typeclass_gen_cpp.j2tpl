@@ -1,0 +1,18 @@
+﻿// This is generated file. Do not modify directly.
+// Path to the code generator: {{generator_path}}.
+
+{% for fileName in generator_includes | sort %}
+ #include "{{fileName}}"
+{% endfor %}
+
+ #include <iostream>
+ #include <cstring>
+ #include <type_traits>
+
+namespace cxxctp {
+namespace generated {
+
+{{GeneratedTypeclassName}}
+
+} // namespace cxxctp
+} // namespace generated

@@ -48,7 +48,6 @@
 //#include "mime_type.h"
 //#include "http_callbacks.h"
 
-
 #include <cling/Interpreter/Interpreter.h>
 #include <cling/Interpreter/Value.h>
 #include "cling/Interpreter/CIFactory.h"
@@ -108,6 +107,19 @@
 #include "clang/AST/DeclCXX.h"
 #include "clang/AST/PrettyPrinter.h"
 #include "clang/AST/Type.h"
+
+/*
+#include "clang/AST/ASTContext.h"
+#include "clang/AST/DeclVisitor.h"
+#include "clang/AST/Decl.h"
+#include "clang/AST/DeclCXX.h"
+#include "clang/AST/DeclObjC.h"
+#include "clang/AST/Expr.h"
+#include "clang/AST/ExprCXX.h"
+#include "clang/AST/PrettyPrinter.h"
+#include "clang/Basic/Module.h"
+#include "llvm/Support/raw_ostream.h"*/
+
 #include "clang/Frontend/CompilerInstance.h"
 #include "clang/Sema/Sema.h"
 #include <clang/Lex/Lexer.h>
@@ -405,12 +417,19 @@
 #include <string>
 #include <thread>
 #include <vector>
+#include <regex>
+#include <iterator>
 
 #include "jinja2cpp/value.h"
 #include "jinja2cpp/template.h"
 #include "jinja2cpp/filesystem_handler.h"
 #include "jinja2cpp/template_env.h"
 #include "jinja2cpp/reflected_value.h"
+
+#include "funcParser.h"
+#include "clangUtils.h"
+
+extern std::vector<parsed_func> split_to_funcs(std::string const& inStr);
 
 //using namespace jinja2;
 using namespace std;
@@ -720,6 +739,93 @@ struct jinja2::TypeReflection<ReflectedEnumItems>
     }
 };
 } // namespace jinja2*/
+
+const char* typeclass_instance(
+    const clang::ast_matchers::MatchFinder::MatchResult& matchResult,
+    clang::Rewriter& rewriter,
+    const clang::Decl* decl) {
+  return ""; // TODO
+}
+
+// see https://github.com/tlatkdgus1/llvm-code_obfuscate/blob/c4d0641f95704fb9909e2ac09500df1b6bc5d017/tools/clang/lib/AST/DeclPrinter.cpp#L447
+// see https://github.com/root-project/root/blob/331efa4c00fefc38980eaaf7b41b8e95fcd1a23b/interpreter/llvm/src/tools/clang/lib/AST/DeclPrinter.cpp#L474
+const char* typeclass(
+    const clang::ast_matchers::MatchFinder::MatchResult& matchResult,
+    clang::Rewriter& rewriter,
+    const clang::Decl* decl) {
+
+  printf("typeclass called...\n");
+
+  clang::CXXRecordDecl const *node =
+      matchResult.Nodes.getNodeAs<clang::CXXRecordDecl>("bind_gen");
+
+  if (node) {
+    printf("reflect is record %s\n", node->getName().str().c_str());
+    // TODO: getOriginalNamespace
+    {
+
+      jinja2::ValuesList GeneratedTypeclassFuncs;
+
+      // see https://github.com/asutton/clang/blob/master/lib/AST/DeclPrinter.cpp#L502
+      for(auto fct = node->method_begin();
+        fct != node->method_end(); ++fct)
+      {
+        CXXMethodDecl* tf = *fct;
+        std::string methodDecl = printMethodDecl(decl, node, tf);
+
+        if(!methodDecl.empty()) {
+          GeneratedTypeclassFuncs.push_back(jinja2::Value{methodDecl.c_str()});
+        }
+      }
+
+      jinja2::ValuesMap params;
+
+      SourceLocation startLoc = decl->getLocStart();
+      SourceLocation endLoc = decl->getLocEnd();
+      expandLocations(startLoc, endLoc, rewriter);
+      auto codeRange = SourceRange{startLoc, endLoc};
+      std::string OriginalTypeclassBaseCode =
+        rewriter.getRewrittenText(codeRange);
+      // removes $apply(typeclass, e.t.c.)
+      std::string CleanOriginalTypeclassBaseCode
+        = std::regex_replace(OriginalTypeclassBaseCode,
+            std::regex("\\$apply([^(]*)\\([^)]*\\)(.*)"), "$1$2");
+
+      params.emplace("OriginalTypeclassBaseCode",
+                     jinja2::Value{CleanOriginalTypeclassBaseCode.c_str()});
+
+      params.emplace("GeneratedTypeclassName",
+                     jinja2::Value{node->getName().str().c_str()});
+
+      params.emplace("GeneratedTypeclassFuncs",
+                     jinja2::Value{GeneratedTypeclassFuncs});
+
+      {
+        std::string gen_hpp_name
+            = node->getNameAsString() + ".typeclass.generated.hpp";
+        std::string typeclassHppConvertor =
+          getFileContent("../resources/typeclass_gen_hpp.j2tpl");
+        params.emplace("generator_path",
+                       jinja2::Value{"typeclass_gen_hpp.j2tpl"});
+        params.emplace("generator_includes",
+                       jinja2::Value{
+                           jinja2::ValuesList{
+                             /// \TODO
+                             "../src/type_erasure_common.hpp"}});
+        jinja2::Template tpl;
+        auto parseResult = tpl.Load(typeclassHppConvertor);
+        if(!parseResult) {
+          printf("ERROR: can`t load jinja2 template from %s [%s]\n",
+            typeclassHppConvertor.c_str(),
+            parseResult.error().GetLocationDescr().c_str());
+        }
+        writeToFile(tpl.RenderAsString(params).value(), gen_hpp_name);
+      }
+    }
+  }
+
+  return "";
+}
 
 const char* reflect_enum(
     const clang::ast_matchers::MatchFinder::MatchResult& matchResult,
