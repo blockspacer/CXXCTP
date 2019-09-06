@@ -248,9 +248,8 @@ struct _tc_impl_t<std::reference_wrapper<allcaps_t>, template_interface<int, con
     std::cout << "called clone "
                  "for ref template_interface allcaps_t" << std::endl;
     // Copy-construct a new instance of _tc_impl_t on the heap.
-    allcaps_t cloned = concrete;
     return std::make_unique<_tc_impl_t<allcaps_t, template_interface<int, const std::string&>>>
-      (std::move(cloned));
+      (allcaps_t{concrete.get()});
     /*return std::make_unique<_tc_impl_t<allcaps_t, _tc_model_t<template_interface<int, const std::string&>>>
       (std::move(cloned));*/
   }
@@ -260,13 +259,22 @@ struct _tc_impl_t<std::reference_wrapper<allcaps_t>, template_interface<int, con
       getTypeIndex<std::reference_wrapper<allcaps_t>>();
   }
 
+#if 0
+  /// \note disallow move on ref
+  std::unique_ptr<
+    _tc_model_t<template_interface<int, const std::string&>>>
+      move_clone() noexcept override final {
+    return nullptr;
+  };
+#endif
+
   std::unique_ptr<
     _tc_model_t<template_interface<int, const std::string&>>>
       move_clone() noexcept override final {
     std::cout << "called move_clone "
                  "for ref template_interface allcaps_t" << std::endl;
     /// \note moves data, not ref
-    return std::make_unique<_tc_impl_t<allcaps_t, template_interface<int, const std::string&>>>
+    //return std::make_unique<_tc_impl_t<allcaps_t, template_interface<int, const std::string&>>>
       (std::move(concrete.get()));
     /*return std::make_unique<_tc_impl_t<allcaps_t, _tc_model_t<template_interface<int, const std::string&>>>(
       std::move(concrete.get()));*/
@@ -1009,11 +1017,16 @@ struct _tc_combined_t<template_interface<int, const std::string&>> {
     return (bool)my_interface_model;
   }
 
-  std::shared_ptr<_tc_model_t<template_interface<int, const std::string&>>> ref_my_interface_model() const noexcept {
+  std::shared_ptr<_tc_model_t<template_interface<int, const std::string&>>> ref_model() const noexcept {
     return my_interface_model;
   }
 
-  std::unique_ptr<_tc_model_t<template_interface<int, const std::string&>>> clone_my_interface_model() const noexcept {
+  /*template<typename T>
+  std::shared_ptr<_tc_model_t<T>> ref_model() const noexcept {
+    return nullptr;
+  }*/
+
+  std::unique_ptr<_tc_model_t<template_interface<int, const std::string&>>> clone_model() const noexcept {
     if(!my_interface_model) {
       //throw std::runtime_error("my_interface_model not set");
       std::terminate();
@@ -1021,11 +1034,11 @@ struct _tc_combined_t<template_interface<int, const std::string&>> {
     return my_interface_model->clone();
   }
 
-  const _tc_model_t<template_interface<int, const std::string&>>* raw_my_interface_model() const noexcept {
+  const _tc_model_t<template_interface<int, const std::string&>>* raw_model() const noexcept {
     return my_interface_model.get();
   }
 
-  void replace_my_interface_model(
+  void replace_model(
     const std::shared_ptr<_tc_model_t<template_interface<int, const std::string&>>> rhs) noexcept {
     my_interface_model = rhs;
   }
@@ -1071,7 +1084,8 @@ struct _tc_combined_t<template_interface<int, const std::string&>> {
 
   // This is actually a unique_ptr to an impl type. We store a pointer to
   // the base type and rely on _tc_model_t's virtual dtor to free the object.
-  std::shared_ptr<_tc_model_t<template_interface<int, const std::string&>>> my_interface_model;
+  private:
+    std::shared_ptr<_tc_model_t<template_interface<int, const std::string&>>> my_interface_model;
 };
 
 /*template <>
@@ -1178,6 +1192,13 @@ template <>
 _tc_impl_t<forward_t, template_interface<int, const std::string&>>*
   _tc_model_t<template_interface<int, const std::string&>>
     ::as<forward_t>() noexcept;
+
+///////////////////////////////////////////////////////////////////////////////
+
+/*template <>
+std::shared_ptr<_tc_model_t<template_interface<int, const std::string&>>>
+  _tc_combined_t<template_interface<int, const std::string&>>
+    ::ref_model<template_interface<int, const std::string&>>() const noexcept;*/
 
 } // namespace cxxctp
 } // namespace generated

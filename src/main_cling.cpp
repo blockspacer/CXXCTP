@@ -2060,8 +2060,8 @@ int main(int /*argc*/, const char* const* /*argv*/) {
     do_big_smth(my_interface_my_interface2_obj_t{});
 
     my_interface_my_interface2_obj_t com1;
-    com1.create_my_interface_model(forward_t{});
-    com1.create_my_interface2_model(allcaps_t{});
+    com1.create_model<template_interface<int, const std::string&>>(forward_t{});
+    com1.create_model<my_interface2>(allcaps_t{});
     if(com1.has_do_job())
       com1.do_job("com1.save", "w");
     com1.print_interface_data();
@@ -2086,8 +2086,8 @@ int main(int /*argc*/, const char* const* /*argv*/) {
     do_big_smth(com1);
 
     my_interface_obj_t shared_my_interface_obj_t;
-    shared_my_interface_obj_t.replace_my_interface_model(
-      com1.ref_my_interface_model());
+    shared_my_interface_obj_t.replace_model(
+      com1.ref_model<template_interface<int, const std::string&>>());
     shared_my_interface_obj_t.set_interface_data("set_interface_data1");
     do_small_smth(shared_my_interface_obj_t);
 
@@ -2110,8 +2110,8 @@ int main(int /*argc*/, const char* const* /*argv*/) {
     com2 = shared_my_interface_obj_t;
     com2 = com1;
     com2.set_common_model(reverse_t{});
-    com2.replace_my_interface_model(
-      com1.ref_my_interface_model());
+    com2.replace_model<template_interface<int, const std::string&>>(
+      com1.ref_model<template_interface<int, const std::string&>>());
 
     com1.print_interface_data();
 

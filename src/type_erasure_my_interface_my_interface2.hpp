@@ -55,13 +55,13 @@ struct _tc_combined_t<template_interface<int, const std::string&>, my_interface2
   _tc_combined_t(std::reference_wrapper<_tc_combined_t<my_interface2>>&& rhs) noexcept {
     puts("_tc_combined_t{my_interface2} ref copy ctor");
     if(rhs.get())
-      my_interface2_model = rhs.get().my_interface2_model;
+      my_interface2_model = rhs.get().ref_model();
   }
 
   _tc_combined_t(std::reference_wrapper<_tc_combined_t<template_interface<int, const std::string&>>>&& rhs) noexcept {
     puts("_tc_combined_t{my_interface_mode} ref copy ctor");
     if(rhs.get())
-      my_interface_model = rhs.get().my_interface_model;
+      my_interface_model = rhs.get().ref_model();
   }
 
   template <
@@ -155,7 +155,7 @@ struct _tc_combined_t<template_interface<int, const std::string&>, my_interface2
   _tc_combined_t& operator=(const _tc_combined_t<template_interface<int, const std::string&>>& rhs) noexcept {
     my_interface_model.reset();
     if(rhs) {
-      my_interface_model = rhs.my_interface_model->clone();
+      my_interface_model = rhs.ref_model()->clone();
     }
     return *this;
   }
@@ -163,7 +163,7 @@ struct _tc_combined_t<template_interface<int, const std::string&>, my_interface2
   _tc_combined_t& operator=(const _tc_combined_t<my_interface2>& rhs) noexcept {
     my_interface2_model.reset();
     if(rhs) {
-      my_interface2_model = rhs.my_interface2_model->clone();
+      my_interface2_model = rhs.ref_model()->clone();
     }
     return *this;
   }
@@ -440,30 +440,77 @@ struct _tc_combined_t<template_interface<int, const std::string&>, my_interface2
     return (bool)my_interface_model && (bool)my_interface2_model;
   }
 
-  template <class T>
-  void create_my_interface2_model(const T&& u) noexcept {
+  template<typename T>
+  std::shared_ptr<_tc_model_t<T>> ref_model() const noexcept {
+    return nullptr;
+  }
+
+  /*template <class R, class T>
+  void create_model(const T&& u) const noexcept {
     my_interface2_model = std::make_shared<
       _tc_impl_t<T, my_interface2>>
         (std::forward<const std::decay_t<T>>(u));
     puts("create_my_interface2_model{T} called");
+  }*/
+
+  template<
+  typename T,
+  typename U,
+  typename std::enable_if<std::is_same<template_interface<int, const std::string&>, T>::value>::type* = nullptr
+  >
+  void create_model(const U&& u) noexcept {
+    my_interface_model = std::make_shared<
+      _tc_impl_t<U, template_interface<int, const std::string&>>>
+        (std::forward<const std::decay_t<U>>(u));
+    puts("create_my_interface_model{T} called");
   }
 
-  template <class T>
+  template<
+  typename T,
+  typename U,
+  typename std::enable_if<std::is_same<my_interface2, T>::value>::type* = nullptr
+  >
+  void create_model(const U&& u) noexcept {
+    my_interface2_model = std::make_shared<
+      _tc_impl_t<U, my_interface2>>
+        (std::forward<const std::decay_t<U>>(u));
+    puts("create_my_interface2_model{T} called");
+  }
+
+  /*template <class T>
   void create_my_interface_model(const T&& u) noexcept {
     my_interface_model = std::make_shared<
       _tc_impl_t<T, template_interface<int, const std::string&>>>
         (std::forward<const std::decay_t<T>>(u));
     puts("create_my_interface_model{T} called");
-  }
+  }*/
 
   template <class T>
   void set_common_model(const T&& u) noexcept {
-    create_my_interface_model(std::forward<const std::decay_t<T>>(u));
-    create_my_interface2_model(std::forward<const std::decay_t<T>>(u));
+    create_model<template_interface<int, const std::string&>>(std::forward<const std::decay_t<T>>(u));
+    create_model<my_interface2>(std::forward<const std::decay_t<T>>(u));
     puts("set_common_model{T} called");
   }
 
-  bool has_my_interface_model() const noexcept {
+  template<
+  typename T,
+  typename U,
+  typename std::enable_if<std::is_same<my_interface2, T>::value>::type* = nullptr
+  >
+  bool has_model() const noexcept {
+    return (bool)my_interface2_model;
+  }
+
+  template<
+  typename T,
+  typename U,
+  typename std::enable_if<std::is_same<template_interface<int, const std::string&>, T>::value>::type* = nullptr
+  >
+  bool has_model() const noexcept {
+    return (bool)my_interface_model;
+  }
+
+  /*bool has_my_interface_model() const noexcept {
     return (bool)my_interface_model;
   }
 
@@ -477,9 +524,35 @@ struct _tc_combined_t<template_interface<int, const std::string&>, my_interface2
 
   std::shared_ptr<_tc_model_t<my_interface2>> ref_my_interface2_model() const noexcept {
     return my_interface2_model;
+  }*/
+
+  template<
+  typename T,
+  typename std::enable_if<std::is_same<template_interface<int, const std::string&>, T>::value>::type* = nullptr
+  >
+  std::unique_ptr<_tc_model_t<template_interface<int, const std::string&>>>
+  clone_model() const noexcept {
+    if(!my_interface_model) {
+      //throw std::runtime_error("my_interface_model not set");
+      std::terminate();
+    }
+    return my_interface_model->clone();
   }
 
-  std::unique_ptr<_tc_model_t<template_interface<int, const std::string&>>> clone_my_interface_model() const noexcept {
+  template<
+  typename T,
+  typename std::enable_if<std::is_same<my_interface2, T>::value>::type* = nullptr
+  >
+  std::unique_ptr<_tc_model_t<my_interface2>>
+  clone_model() const noexcept {
+    if(!my_interface2_model) {
+      //throw std::runtime_error("my_interface_model not set");
+      std::terminate();
+    }
+    return my_interface2_model->clone();
+  }
+
+  /*std::unique_ptr<_tc_model_t<template_interface<int, const std::string&>>> clone_my_interface_model() const noexcept {
     if(!my_interface_model) {
       //throw std::runtime_error("my_interface_model not set");
       std::terminate();
@@ -493,17 +566,35 @@ struct _tc_combined_t<template_interface<int, const std::string&>, my_interface2
       std::terminate();
     }
     return my_interface2_model->clone();
-  }
+  }*/
 
-  const _tc_model_t<template_interface<int, const std::string&>>* raw_my_interface_model() const noexcept {
+  /*const _tc_model_t<template_interface<int, const std::string&>>* raw_my_interface_model() const noexcept {
     return my_interface_model.get();
   }
 
   const _tc_model_t<my_interface2>* raw_my_interface2_model() const noexcept {
     return my_interface2_model.get();
+  }*/
+
+  template<
+  typename T,
+  typename std::enable_if<std::is_same<template_interface<int, const std::string&>, T>::value>::type* = nullptr
+  >
+  void replace_model(
+    const std::shared_ptr<_tc_model_t<template_interface<int, const std::string&>>> rhs) noexcept {
+    my_interface_model = rhs;
   }
 
-  void replace_my_interface_model(
+  template<
+  typename T,
+  typename std::enable_if<std::is_same<my_interface2, T>::value>::type* = nullptr
+  >
+  void replace_model(
+    const std::shared_ptr<_tc_model_t<my_interface2>> rhs) noexcept {
+    my_interface2_model = rhs;
+  }
+
+  /*void replace_my_interface_model(
     const std::shared_ptr<_tc_model_t<template_interface<int, const std::string&>>> rhs) noexcept {
     my_interface_model = rhs;
   }
@@ -511,7 +602,7 @@ struct _tc_combined_t<template_interface<int, const std::string&>, my_interface2
   void replace_my_interface2_model(
     const std::shared_ptr<_tc_model_t<my_interface2>> rhs) noexcept {
     my_interface2_model = rhs;
-  }
+  }*/
 
   /*operator _tc_combined_t<my_interface2> {
     return _tc_combined_t<my_interface2>{forward_t{}};
@@ -578,8 +669,9 @@ struct _tc_combined_t<template_interface<int, const std::string&>, my_interface2
 
   // This is actually a unique_ptr to an impl type. We store a pointer to
   // the base type and rely on _tc_model_t's virtual dtor to free the object.
-  std::shared_ptr<_tc_model_t<template_interface<int, const std::string&>>> my_interface_model;
-  std::shared_ptr<_tc_model_t<my_interface2>> my_interface2_model;
+  private:
+    std::shared_ptr<_tc_model_t<template_interface<int, const std::string&>>> my_interface_model;
+    std::shared_ptr<_tc_model_t<my_interface2>> my_interface2_model;
   /// ... TODO: change to std::array and add typeclass_by_string?
 };
 
@@ -616,6 +708,50 @@ bool _tc_combined_t<template_interface<int, const std::string&>, my_interface2>:
 template <>
 bool _tc_combined_t<template_interface<int, const std::string&>, my_interface2>::
   can_convert<my_interface2>() const;
+
+
+///////////////////////////////////////////////////////////////////////////////
+
+template <>
+std::shared_ptr<_tc_model_t<template_interface<int, const std::string&>>>
+  _tc_combined_t<template_interface<int, const std::string&>, my_interface2>
+    ::ref_model<template_interface<int, const std::string&>>() const noexcept;
+
+template <>
+std::shared_ptr<_tc_model_t<my_interface2>>
+  _tc_combined_t<template_interface<int, const std::string&>, my_interface2>
+    ::ref_model<my_interface2>() const noexcept;
+
+template <>
+std::shared_ptr<_tc_model_t<template_interface<int, const std::string&>>>
+  _tc_combined_t<template_interface<int, const std::string&>, my_interface2>
+    ::ref_model<template_interface<int, const std::string&>>() const noexcept;
+
+/**template <>
+std::shared_ptr<_tc_model_t<my_interface2>>
+  _tc_combined_t<template_interface<int, const std::string&>, my_interface2>
+    ::create_model<my_interface2, T>(const T&& u) const noexcept {
+  my_interface2_model = std::make_shared<
+    _tc_impl_t<T, my_interface2>>
+      (std::forward<const std::decay_t<T>>(u));
+  puts("create_my_interface2_model{T} called");
+}*/
+/*
+  template <class T>
+  void create_my_interface2_model(const T&& u) noexcept {
+    my_interface2_model = std::make_shared<
+      _tc_impl_t<T, my_interface2>>
+        (std::forward<const std::decay_t<T>>(u));
+    puts("create_my_interface2_model{T} called");
+  }
+
+  template <class T>
+  void create_my_interface_model(const T&& u) noexcept {
+    my_interface_model = std::make_shared<
+      _tc_impl_t<T, template_interface<int, const std::string&>>>
+        (std::forward<const std::decay_t<T>>(u));
+    puts("create_my_interface_model{T} called");
+  }*/
 
 } // namespace cxxctp
 } // namespace generated

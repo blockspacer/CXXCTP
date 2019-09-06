@@ -6,6 +6,25 @@
 
 namespace cxxctp {
 namespace generated {
+
+///////////////////////////////////////////////////////////////////////////////
+
+template <>
+std::shared_ptr<_tc_model_t<template_interface<int, const std::string&>>>
+  _tc_combined_t<template_interface<int, const std::string&>, my_interface2>
+    ::ref_model<template_interface<int, const std::string&>>() const noexcept {
+  return my_interface_model;
+}
+
+template <>
+std::shared_ptr<_tc_model_t<my_interface2>>
+  _tc_combined_t<template_interface<int, const std::string&>, my_interface2>
+    ::ref_model<my_interface2>() const noexcept {
+  return my_interface2_model;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
   template <>
   bool _tc_combined_t<template_interface<int, const std::string&>, my_interface2>::
     can_convert<template_interface<int, const std::string&>>() const

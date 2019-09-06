@@ -17,6 +17,15 @@ bool _tc_combined_t<template_interface<int, const std::string&>>::
 
 ///////////////////////////////////////////////////////////////////////////////
 
+/*template <>
+std::shared_ptr<_tc_model_t<template_interface<int, const std::string&>>>
+  _tc_combined_t<template_interface<int, const std::string&>>
+    ::ref_model<template_interface<int, const std::string&>>() const noexcept {
+  return my_interface_model;
+}*/
+
+///////////////////////////////////////////////////////////////////////////////
+
 template <>
 _tc_impl_t<std::reference_wrapper<allcaps_t>, template_interface<int, const std::string&>>*
   _tc_model_t<template_interface<int, const std::string&>>::
