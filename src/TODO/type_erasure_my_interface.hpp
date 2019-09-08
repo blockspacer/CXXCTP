@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 // A Circle implementation of the type erasure tactic implemented here:
 // https://github.com/TartanLlama/typeclasses/blob/master/typeclass.hpp
@@ -274,7 +274,7 @@ struct _tc_impl_t<std::reference_wrapper<allcaps_t>, template_interface<int, con
     std::cout << "called move_clone "
                  "for ref template_interface allcaps_t" << std::endl;
     /// \note moves data, not ref
-    //return std::make_unique<_tc_impl_t<allcaps_t, template_interface<int, const std::string&>>>
+    return std::make_unique<_tc_impl_t<allcaps_t, template_interface<int, const std::string&>>>
       (std::move(concrete.get()));
     /*return std::make_unique<_tc_impl_t<allcaps_t, _tc_model_t<template_interface<int, const std::string&>>>(
       std::move(concrete.get()));*/

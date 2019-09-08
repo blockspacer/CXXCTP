@@ -61,32 +61,47 @@ find_package(Jinja2Cpp)
 set(ENABLE_CLING TRUE CACHE BOOL "ENABLE_CLING")
 
 if(ENABLE_CLING)
-  add_library(simple_lib SHARED #STATIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/simplelib.cpp
-  )
+  #add_library(simple_lib SHARED #STATIC
+  #  ${CMAKE_CURRENT_SOURCE_DIR}/src/simplelib.cpp
+  #)
 
   list(APPEND CLING_DEFINITIONS CLING_IS_ON=1)
   # The project has one binary:
   add_executable(CXXCTP
     ${CMAKE_CURRENT_SOURCE_DIR}/src/main_cling.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/clangUtils.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/clangUtils.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/funcParser.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/funcParser.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/someEnum.hpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/someEnum.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/type_erasure_my_interface.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/type_erasure_my_interface2.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/type_erasure_my_interface_my_interface2.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/types_for_erasure.cpp
+    #${CMAKE_CURRENT_SOURCE_DIR}/src/someEnum.hpp
+    #${CMAKE_CURRENT_SOURCE_DIR}/src/someEnum.cpp
+    #${CMAKE_CURRENT_SOURCE_DIR}/src/type_erasure_my_interface.cpp
+    #${CMAKE_CURRENT_SOURCE_DIR}/src/type_erasure_my_interface2.cpp
+    #${CMAKE_CURRENT_SOURCE_DIR}/src/type_erasure_my_interface_my_interface2.cpp
+    #${CMAKE_CURRENT_SOURCE_DIR}/src/types_for_erasure.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/DispatchQueue.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/DispatchQueue.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/clangPipeline.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/clangPipeline.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/ClingInterpreterModule.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/ClingInterpreterModule.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/utils.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/utils.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/inputThread.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/inputThread.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/reflect/ReflectionCache.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/reflect/ReflectionCache.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/reflect/ReflTypes.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/reflect/ReflTypes.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/reflect/TypeInfo.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/reflect/TypeInfo.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/reflect/ReflectAST.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/reflect/ReflectAST.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/reflect/ast_utils.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/reflect/jinja2_reflection.h
   )
 else(ENABLE_CLING)
   message(FATAL_ERROR "Only Cling interpreter is supported for now")
-  # The project has one binary:
-  #add_executable(CXXCTP
-  #  src/app_loop.cpp
-  #  src/http_callbacks.cpp
-  #  src/mime_type.cpp
-  #)
 endif(ENABLE_CLING)
 
 set( USED_SYSTEM_LIBS
@@ -119,7 +134,7 @@ set( USED_BOOST_LIBS
 
 # ...which links against clingInterpreter (and its dependencies).
 target_link_libraries(CXXCTP
-  simple_lib
+  #simple_lib
   # TODO: use FindClang.cmake
   ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangARCMigrate.a
   ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangAnalysis.a

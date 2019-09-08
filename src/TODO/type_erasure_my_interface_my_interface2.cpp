@@ -2,193 +2,144 @@
 // https://github.com/TartanLlama/typeclasses/blob/master/typeclass.hpp
 
 //#include "../gems/util.hxx"
-#include "type_erasure_my_interface.hpp"
-
-void my_interface::set_interface_data(const char* text) {
-    interface_data = text;
-}
-
-void my_interface::print_interface_data() {
-  puts(interface_data.c_str());
-}
-
-void forward_t::save(const char* filename, const char* access) {
-  puts("forward_t::save called");
-}
-
-void forward_t::set_data(const char* text) {
-  forward_t_data = text;
-}
-
-void forward_t::print_data() {
-  puts(forward_t_data.c_str());
-}
-
-void reverse_t::print(const char* text) {
-  int len = strlen(text);
-  for(int i = 0; i < len; ++i)
-    putchar(text[len - 1 - i]);
-  putchar('\n');
-}
-
-void reverse_t::set_data(const char* text) {
-  reverse_t_data = text;
-}
-
-void reverse_t::print_data() {
-  puts(reverse_t_data.c_str());
-}
-
-void allcaps_t::print(const char* text) {
-  while(char c = *text++)
-    putchar(toupper(c));
-  putchar('\n');
-}
-
-void allcaps_t::set_data(const char* text) {
-  allcaps_t_data = text;
-}
-
-void allcaps_t::print_data() {
-  puts(allcaps_t_data.c_str());
-}
-
-//namespace obj_t::typeclass_t {
-//  extern void draw(const allcaps_t&, const char* surface);
-//}
-
-//namespace obj_t::typeclass_t {
-//  extern void draw(const forward_t&, const char* surface);
-//}
-
-//namespace obj_t::typeclass_t {
-  /*extern template
-   void draw<my_interface, my_interface2>(const reverse_t&, const char* surface);*/
-//}
+#include "type_erasure_my_interface_my_interface2.hpp"
 
 namespace cxxctp {
 namespace generated {
 
-extern template
- /*explicit*/ void draw<my_interface>
-  (const allcaps_t&, const char* surface);
+///////////////////////////////////////////////////////////////////////////////
 
-extern template
- /*explicit*/ void draw<my_interface>
-  (const allcaps_t&, const char* surface);
-
-extern template
- /*explicit*/ void draw<my_interface>
-  (const reverse_t&, const char* surface);
-
-void model_t<my_interface, my_interface2>::set_interface_data(const char* text) {
-  interface_data = text;
+template <>
+std::shared_ptr<_tc_model_t<template_interface<int, const std::string&>>>
+  _tc_combined_t<template_interface<int, const std::string&>, my_interface2>
+    ::ref_model<template_interface<int, const std::string&>>() const noexcept {
+  return my_interface_model;
 }
 
-void model_t<my_interface, my_interface2>::print_interface_data() {
-  auto out = std::string("interface_data: ") + interface_data;
-  puts(out.c_str());
+template <>
+std::shared_ptr<_tc_model_t<my_interface2>>
+  _tc_combined_t<template_interface<int, const std::string&>, my_interface2>
+    ::ref_model<my_interface2>() const noexcept {
+  return my_interface2_model;
 }
 
-_tc_impl_t<allcaps_t, my_interface, my_interface2>::_tc_impl_t(const allcaps_t& concrete_arg)
-  : concrete(concrete_arg) {}
+///////////////////////////////////////////////////////////////////////////////
 
-std::unique_ptr<model_t<my_interface, my_interface2>>
- _tc_impl_t<allcaps_t, my_interface, my_interface2>::clone() {
-  // Copy-construct a new instance of _tc_impl_t on the heap.
-  return std::make_unique<_tc_impl_t>(concrete);
-}
+  template <>
+  bool _tc_combined_t<template_interface<int, const std::string&>, my_interface2>::
+    can_convert<template_interface<int, const std::string&>>() const
+  {
+    return true;
+  }
 
-bool _tc_impl_t<allcaps_t, my_interface, my_interface2>::__has_save() const {
-  return false;
-}
+  template <>
+  bool _tc_combined_t<template_interface<int, const std::string&>, my_interface2>::
+    can_convert<my_interface2>() const
+  {
+    return true;
+  }
 
-void _tc_impl_t<allcaps_t, my_interface, my_interface2>::__save(const char* filename, const char* access) {
-  // TODO: noexcept
-  throw std::runtime_error("allcaps_t::save not implemented");
-}
+  template <>
+  void _tc_combined_t<template_interface<int, const std::string&>, my_interface2>::set_set_bar<allcaps_t>(std::function<void(allcaps_t&, const std::string&)> arg) noexcept {
+    if(!my_interface2_model) {
+      //throw std::runtime_error("my_interface_model2 not set");
+      std::terminate();
+    }
+    return static_cast<_tc_impl_t<allcaps_t, my_interface2>*>(my_interface2_model.get())
+      ->__set_set_bar(std::forward<decltype(arg)>(arg));
+  }
 
-/*template <typename ...Params>
-void print(Params&&... args) override {
-  return concrete.print(std::forward<decltype(args)>(args)...);
-}*/
+  template <>
+  void _tc_combined_t<template_interface<int, const std::string&>, my_interface2>::set_set_bar<reverse_t>(std::function<void(reverse_t&, const std::string&)> arg) noexcept {
+    if(!my_interface2_model) {
+      //throw std::runtime_error("my_interface_model2 not set");
+      std::terminate();
+    }
+    return static_cast<_tc_impl_t<reverse_t, my_interface2>*>(my_interface2_model.get())
+      ->__set_set_bar(std::forward<decltype(arg)>(arg));
+  }
 
-bool _tc_impl_t<allcaps_t, my_interface, my_interface2>::__has_print() const {
-  return true;
-}
+  template <>
+  void _tc_combined_t<template_interface<int, const std::string&>, my_interface2>::set_set_bar<forward_t>(std::function<void(forward_t&, const std::string&)> arg) noexcept {
+    if(!my_interface2_model) {
+      //throw std::runtime_error("my_interface_model2 not set");
+      std::terminate();
+    }
+    return static_cast<_tc_impl_t<forward_t, my_interface2>*>(my_interface2_model.get())
+      ->__set_set_bar(std::forward<decltype(arg)>(arg));
+  }
 
-void _tc_impl_t<allcaps_t, my_interface, my_interface2>::__print(const char* text) {
-  return concrete.print(std::forward<decltype(text)>(text));
-}
+  template <>
+  void _tc_combined_t<template_interface<int, const std::string&>, my_interface2>::set_get_bar<allcaps_t>(std::function<std::string(allcaps_t&)> arg) noexcept {
+    if(!my_interface2_model) {
+      //throw std::runtime_error("my_interface_model2 not set");
+      std::terminate();
+    }
+    return static_cast<_tc_impl_t<allcaps_t, my_interface2>*>(my_interface2_model.get())
+      ->__set_get_bar(std::forward<decltype(arg)>(arg));
+  }
 
-void _tc_impl_t<allcaps_t, my_interface, my_interface2>::__set_data(const char* text) {
-  return concrete.set_data(std::forward<decltype(text)>(text));
-}
+  template <>
+  void _tc_combined_t<template_interface<int, const std::string&>, my_interface2>::set_get_bar<reverse_t>(std::function<std::string(reverse_t&)> arg) noexcept {
+    if(!my_interface2_model) {
+      //throw std::runtime_error("my_interface_model2 not set");
+      std::terminate();
+    }
+    return static_cast<_tc_impl_t<reverse_t, my_interface2>*>(my_interface2_model.get())
+      ->__set_get_bar(std::forward<decltype(arg)>(arg));
+  }
 
-void _tc_impl_t<allcaps_t, my_interface, my_interface2>::__print_data() {
-  return concrete.print_data();
-}
-
-void _tc_impl_t<allcaps_t, my_interface, my_interface2>::__draw(const char* surface) const {
-  return draw<my_interface>(concrete, surface);
-}
-
-// ====
-
-void _tc_impl_t<forward_t, my_interface, my_interface2>::__draw(const char* surface) const {
-  return draw<my_interface>(concrete, surface);
-}
-
-// ====
-
-void _tc_impl_t<reverse_t, my_interface, my_interface2>::__draw(const char* surface) const {
-  return draw<my_interface>(concrete, surface);
-}
-
-// ====
+  template <>
+  void _tc_combined_t<template_interface<int, const std::string&>, my_interface2>::set_get_bar<forward_t>(std::function<std::string(forward_t&)> arg) noexcept {
+    if(!my_interface2_model) {
+      //throw std::runtime_error("my_interface_model2 not set");
+      std::terminate();
+    }
+    return static_cast<_tc_impl_t<forward_t, my_interface2>*>(my_interface2_model.get())
+      ->__set_get_bar(std::forward<decltype(arg)>(arg));
+  }
 
 #if 0
-int main() {
+  // ================
+  template <>
+  allcaps_t& _tc_combined_t<my_interface, my_interface2>::ref_concrete<allcaps_t, my_interface>() {
+    /*return static_cast<_tc_impl_t<allcaps_t, my_interface>*>(my_interface_model.get())
+      ->concrete;*/
+    return my_interface_model->ref_concrete<allcaps_t>();
+  }
+  template <>
+  reverse_t& _tc_combined_t<my_interface, my_interface2>::ref_concrete<reverse_t, my_interface>() {
+    /*return static_cast<_tc_impl_t<reverse_t, my_interface>*>(my_interface_model.get())
+      ->concrete;*/
+    return my_interface_model->ref_concrete<reverse_t>();
+  }
+  template <>
+  forward_t& _tc_combined_t<my_interface, my_interface2>::ref_concrete<forward_t, my_interface>() {
+    /*return static_cast<_tc_impl_t<forward_t, my_interface>*>(my_interface_model.get())
+      ->concrete;*/
+    return my_interface_model->ref_concrete<forward_t>();
+  }
 
-  // Construct an object a.
-  obj_t a = obj_t::construct<allcaps_t>();
-  a.print("Hello a");
-
-  // Copy-construc a to get b.
-  obj_t b = a;
-  b.print("Hello b");
-
-  if(b.has_save())
-    b.save("my.save", "w");
-
-  // Copy-assign a to get c.
-  obj_t c;
-  c = b;
-  c.print("Hello c");
-
-  // Create a forward object.
-  obj_t d = obj_t::construct<forward_t>();
-  d.print("Hello d");
-  d.save("foo.save", "w");
-
-  // Create a reverse object.
-  obj_t e = obj_t::construct<reverse_t>();
-  e.print("Hello e");
-
-  // Throws:
-  // terminate called after throwing an instance of 'std::runtime_error'
-  //   what():  reverse_t::save not implemented
-  e.save("bar.save", "w");
-
-  return 0;
-}
+  // ================
+  template <>
+  allcaps_t& _tc_combined_t<my_interface, my_interface2>::ref_concrete<allcaps_t, my_interface2>() {
+    /*return static_cast<_tc_impl_t<allcaps_t, my_interface2>*>(my_interface2_model.get())
+      ->concrete;*/
+    return my_interface2_model->ref_concrete<allcaps_t>();
+  }
+  template <>
+  reverse_t& _tc_combined_t<my_interface, my_interface2>::ref_concrete<reverse_t, my_interface2>() {
+    /*return static_cast<_tc_impl_t<reverse_t, my_interface2>*>(my_interface2_model.get())
+      ->concrete;*/
+    return my_interface2_model->ref_concrete<reverse_t>();
+  }
+  template <>
+  forward_t& _tc_combined_t<my_interface, my_interface2>::ref_concrete<forward_t, my_interface2>() {
+    /*return static_cast<_tc_impl_t<forward_t, my_interface2>*>(my_interface2_model.get())
+      ->concrete;*/
+    return my_interface2_model->ref_concrete<forward_t>();
+  }
 #endif // 0
-
-/*template<>
-void _tc_impl_t<allcaps_t, my_interface>::draw(const allcaps_t &)
-{
-
-}*/
 
 } // namespace cxxctp
 } // namespace generated

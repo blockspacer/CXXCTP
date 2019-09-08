@@ -1,4 +1,4 @@
-/*#pragma comment(user, "user defined pragma comment")
+﻿/*#pragma comment(user, "user defined pragma comment")
 void foo() {
 #pragma omp parallel
 {
@@ -17,32 +17,7 @@ void foo() {
 #include <string>
 #include <iostream>
 
-struct
-$apply(typeclass)
-Spell {
-  virtual void cast(const char* spellname, const int spellpower,
-    const char* target) const noexcept = 0;
-
-  virtual void has_spell(const char* spellname) const noexcept = 0;
-
-  virtual void add_spell(const char* spellname) const noexcept = 0;
-
-  virtual void remove_spell(const char* spellname) const noexcept = 0;
-
-  virtual void set_spell_power(const char* spellname,
-    const int spellpower) const noexcept = 0;
-};
-
-// Print the text in forward order.
-struct
-$apply(typeclass_instance(Spell))
-SpellBook {
-  std::string title = "MySpellBook";
-  std::string description = "spell book full of spells";
-};
-
 //#pragma comment(user, "user defined pragma comment")
-
 
   $export (
 static int resultSomeInt = 2345;

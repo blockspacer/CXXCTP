@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 
-
 #include <cling/Interpreter/Interpreter.h>
 #include <cling/Interpreter/Value.h>
 #include "cling/Interpreter/CIFactory.h"
@@ -516,6 +515,18 @@
 
 #include <experimental/filesystem>
 
+namespace fs = std::experimental::filesystem;
+
+#include "DispatchQueue.h"
+
+#include "jinja2cpp/value.h"
+#include "jinja2cpp/template.h"
+
+#include "funcParser.h"
+
+#include "clangUtils.h"
+
+//using namespace jinja2;
 using namespace std;
 using namespace clang;
 using namespace clang::driver;
@@ -526,9 +537,58 @@ using clang::tooling::CommonOptionsParser;
 using clang::tooling::Replacement;
 using llvm::StringRef;
 
-std::string printMethodDecl(const clang::Decl* decl,
-  clang::CXXRecordDecl const * node, CXXMethodDecl* fct);
+class InterpreterModule {
+public:
+    InterpreterModule(const std::string& id, const std::vector<std::string>& moduleFiles);
 
-void expandLocations(SourceLocation& startLoc,
-      SourceLocation& endLoc,
-      Rewriter& rewriter_);
+    ~InterpreterModule();
+
+    void createInterpreter();
+
+    void prepare();
+
+    /*void run_update() {
+        cling::Interpreter::CompilationResult compilationResult;
+
+    metaProcessor_->process(id_ + "_cling_run_update();", compilationResult, nullptr, true);
+}*/
+
+    void run();
+
+public:
+    std::string id_;
+    std::vector<std::string> moduleFiles_;
+    std::unique_ptr<cling::Interpreter> interpreter_;
+    std::unique_ptr<cling::MetaProcessor> metaProcessor_;
+    //std::thread moduleThread;
+    //std::mutex canRunMutex;
+    //bool canRun = true;
+
+    static std::shared_ptr<DispatchQueue> receivedMessagesQueue_;
+
+    /// \note module loading order is important
+    static std::map<std::string, std::vector<std::string>> moduleToSources;
+
+    //static cling::MetaProcessor* m_metaProcessor1 = nullptr;
+    static std::map<std::string, std::unique_ptr<InterpreterModule>> interpMap;
+
+    static std::mutex clingReadyMutex;
+    static std::condition_variable clingReadyCV;
+    static bool isClingReady;
+};
+
+
+void reloadClingModule(const std::string& module_id, const std::vector<std::string>& sources);
+
+// NOTE: run under mutex
+void reloadAllCling();
+
+[[ noreturn ]] void cling_func();
+
+void removeClingModule(const std::string& module_id);
+
+void processCode(cling::Interpreter& interp, const std::string& code);
+
+void executeCode(cling::Interpreter& interp, const std::string& code);
+
+void add_default_cling_args(std::vector<string> &args);

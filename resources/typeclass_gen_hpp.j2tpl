@@ -9,16 +9,29 @@
 {% endif %}
 
 {% for fileName in generator_includes | sort %}
- #include "{{fileName}}"
+{{fileName}}
 {% endfor %}
 
  #include <array>
  #include <functional>
+ #include <memory>
 
 namespace cxxctp {
 namespace generated {
 
 {{OriginalTypeclassBaseCode}};
+
+{% for method in ReflectedStructInfo.methods %}
+{% if not method.isImplicit %}{% if not method.isOperator %}{% if not method.isCtor %}{% if not method.isDtor %}
+  template<
+    typename T,
+    typename V,
+    typename std::enable_if<std::is_same<{{GeneratedTypeclassName}}, T>::value>::type* = nullptr
+  >
+{{'explicit ' if method.isExplicitCtor}}{{'constexpr ' if method.isConstexpr}}{{'static ' if method.isStatic}}{{ method.returnType.printedName }} {{method.name}}(const V&{% if method.params|length > 0 %},{% endif %} {% for param in method.params %}{{ param.fullDecl}}{% if not loop.last %},{% endif %} {% endfor %}) {{'noexcept ' if method.isNoExcept}};
+
+{% endif %}{% endif %}{% endif %}{% endif %}
+{% endfor %}
 
 template<>
 struct _tc_model_t<{{GeneratedTypeclassName}}> {
@@ -28,21 +41,204 @@ struct _tc_model_t<{{GeneratedTypeclassName}}> {
 
   virtual std::unique_ptr<_tc_model_t> move_clone() noexcept = 0;
 
-  virtual const size_t getModelTypeIndex() const noexcept = 0;
+  //virtual const size_t getModelTypeIndex() const noexcept = 0;
 
-{% for funcDecl in GeneratedTypeclassFuncs %}
-  {{funcDecl}};
+{% for method in ReflectedStructInfo.methods %}
+{% if not method.isImplicit %}{% if not method.isOperator %}{% if not method.isCtor %}{% if not method.isDtor %}{% if method.isTemplate %}
+template< {{method.tplParams | map(attribute='tplDeclName') | join(', ') }} >{% endif %}
+{{'explicit ' if method.isExplicitCtor}}{{'virtual ' if method.isVirtual}}{{'constexpr ' if method.isConstexpr}}{{'static ' if method.isStatic}}{{ method.returnType.printedName }} __{{method.name}}({% for param in method.params %}{{ param.fullDecl}}{% if not loop.last %},{% endif %} {% endfor %}) {{'const ' if method.isConst}} {{'noexcept ' if method.isNoExcept}}{{'= 0' if method.isPure}}{{'= delete' if method.isDeleted}}{{'= default' if method.isDefault}}{% if method.isDefined and method.isClassScopeInlined %}{ {{method.body}} }{% else %};
 
+{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}
 {% endfor %}
 
-  template <typename T>
+  /*template <typename T>
   T& ref_concrete() noexcept;
 
   template <typename U>
   _tc_impl_t<U, {{GeneratedTypeclassName}}>* as() noexcept
   {
     return nullptr;
+  }*/
+};
+
+template<>
+struct _tc_combined_t<{{GeneratedTypeclassName}}> {
+    // Default initializer creates an empty _tc_combined_t.
+    _tc_combined_t() = default;
+
+    _tc_combined_t(std::reference_wrapper<_tc_combined_t<{{GeneratedTypeclassName}}>>&& rhs) noexcept {
+        puts("_tc_combined_t<{{GeneratedTypeclassName}}> ref copy ctor");
+        if(rhs.get())
+            my_interface_model = rhs.get().my_interface_model;
+    }
+
+    /// \note moves passed argument
+    template <
+        class T,
+        typename = IsNotReference<T>,
+        typename std::enable_if<!std::is_same<_tc_combined_t, T>::value>::type* = nullptr
+        >
+    _tc_combined_t(std::shared_ptr<T>&& u) noexcept :
+                                                      my_interface_model(std::move(u)) {
+        static_assert(!std::is_const<typename std::remove_reference<T>::type>::value,
+                      "You've attempted a cast to a const rvalue reference. "
+                      "Make sure you're not trying to move a const object, "
+                      "as this would likely result in a copy not a move. "
+                      "If you need it for real, call std::move(...) instead.");
+        puts("_tc_combined_t<{{GeneratedTypeclassName}}> called, moves passed argument");
+    }
+
+    template <
+        class T,
+        typename = IsNotReference<T>,
+        typename std::enable_if<!std::is_same<_tc_combined_t, T>::value>::type* = nullptr
+        >
+    _tc_combined_t(const std::shared_ptr<T>& u) noexcept :
+                                                           my_interface_model(u) {
+        puts("_tc_combined_t<{{GeneratedTypeclassName}}> called, shares passed argument");
+    }
+
+    template <
+        class T,
+        typename std::enable_if<!std::is_same<_tc_combined_t, T>::value>::type* = nullptr
+        >
+    _tc_combined_t(const std::reference_wrapper<T>& u) noexcept :
+                                                                  my_interface_model(
+                                                                      std::make_shared<
+                                                                          _tc_impl_t<std::reference_wrapper<T>, {{GeneratedTypeclassName}}>>
+                                                                      (std::forward<const std::reference_wrapper<std::decay_t<T>>>(u))) {
+        puts("_tc_combined_t{T} reference_wrapper called");
+    }
+
+    template<
+        typename T,
+        typename = IsNotReference<T>,
+        typename std::enable_if<!std::is_same<_tc_combined_t, T>::value>::type* = nullptr
+        >
+    _tc_combined_t(const T&& u) noexcept :
+                                           my_interface_model(
+                                               std::make_shared<
+                                                   _tc_impl_t<T, {{GeneratedTypeclassName}}>>
+                                               (std::forward<const std::decay_t<T>>(u))) {
+        puts("_tc_combined_t{T} called");
+    }
+
+    // Call clone for copy ctor/assign.
+    explicit _tc_combined_t(const _tc_combined_t& rhs) noexcept {
+        puts("_tc_combined_t<{{GeneratedTypeclassName}}> copy ctor");
+        if(rhs)
+            my_interface_model = rhs.my_interface_model->clone();
+    }
+
+    // Call move_clone for move ctor/assign.
+    explicit _tc_combined_t(_tc_combined_t&& rhs) noexcept {
+        if(rhs)
+            my_interface_model = rhs.my_interface_model->move_clone();
+    }
+
+    // The preferred initializer for a _tc_combined_t. This constructs an _tc_impl_t of
+    // type_t on the heap, and stores the pointer in a new _tc_combined_t.
+    template<
+        typename type_t,
+        typename... args_t,
+        typename = IsNotReference<type_t>
+        >
+    static _tc_combined_t construct(args_t&&... args) noexcept {
+        return _tc_combined_t(std::make_shared<_tc_impl_t<type_t, {{GeneratedTypeclassName}}> >(
+            std::forward<args_t>(args)...
+            ));
+    }
+
+    _tc_combined_t& operator=(_tc_combined_t&& rhs) noexcept {
+        my_interface_model.reset();
+        if(rhs)
+            my_interface_model = rhs.my_interface_model->move_clone();
+        return *this;
+    }
+
+    _tc_combined_t& operator=(const _tc_combined_t& rhs) noexcept {
+        my_interface_model.reset();
+        if(rhs)
+            my_interface_model = rhs.my_interface_model->clone();
+        return *this;
+    }
+
+    void reset() noexcept {
+        my_interface_model.reset();
+    }
+
+    // A virtual dtor triggers the dtor in the impl.
+    virtual ~_tc_combined_t() noexcept { }
+
+{% for method in ReflectedStructInfo.methods %}
+{% if not method.isImplicit %}{% if not method.isOperator %}{% if not method.isCtor %}{% if not method.isDtor %}
+  {{'explicit ' if method.isExplicitCtor}}{{'constexpr ' if method.isConstexpr}}{{'static ' if method.isStatic}}{{ method.returnType.printedName }} {{method.name}}({% for param in method.params %}{{ param.fullDecl}}{% if not loop.last %},{% endif %} {% endfor %}) {{'const ' if method.isConst}} {{'noexcept ' if method.isNoExcept}}
+  {
+    if(!my_interface_model) {
+        std::terminate();
+    }
+    my_interface_model->__{{method.name}}({% for param in method.params %}{{ param.name}}{% if not loop.last %},{% endif %} {% endfor %});
   }
+
+{% endif %}{% endif %}{% endif %}{% endif %}
+{% endfor %}
+
+    explicit operator bool() const noexcept {
+        return (bool)my_interface_model;
+    }
+
+    std::shared_ptr<_tc_model_t<{{GeneratedTypeclassName}}>> ref_model() const noexcept {
+        return my_interface_model;
+    }
+
+    std::unique_ptr<_tc_model_t<{{GeneratedTypeclassName}}>> clone_model() const noexcept {
+        if(!my_interface_model) {
+            std::terminate();
+        }
+        return my_interface_model->clone();
+    }
+
+    const _tc_model_t<{{GeneratedTypeclassName}}>* raw_model() const noexcept {
+        return my_interface_model.get();
+    }
+
+    void replace_model(
+        const std::shared_ptr<_tc_model_t<{{GeneratedTypeclassName}}>> rhs) noexcept {
+        my_interface_model = rhs;
+    }
+
+    /*const size_t getModelTypeIndex() {
+        if(!my_interface_model) {
+            std::terminate();
+        }
+        return my_interface_model->getModelTypeIndex();
+    }
+
+    template <typename T>
+    static const size_t getGlobalTypeIndex() {
+        return _tc_registry<{{GeneratedTypeclassName}}>
+            ::getTypeIndex<T>();
+    }
+
+    template <typename T>
+    T& ref_concrete() noexcept {
+        if(!my_interface_model || my_interface_model->getModelTypeIndex()
+                != getGlobalTypeIndex<T>()) {
+            std::terminate();
+        }
+        return my_interface_model->ref_concrete<T>();
+    }*/
+
+    template <typename U>
+    bool can_convert() const
+    {
+        return false;
+    }
+
+    // This is actually a unique_ptr to an impl type. We store a pointer to
+    // the base type and rely on _tc_model_t's virtual dtor to free the object.
+private:
+    std::shared_ptr<_tc_model_t<{{GeneratedTypeclassName}}>> my_interface_model;
 };
 
 } // namespace cxxctp

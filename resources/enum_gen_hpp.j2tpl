@@ -9,7 +9,7 @@
 {% endif %}
 
 {% for fileName in generator_includes | sort %}
- #include "{{fileName}}"
+{{fileName}}
 {% endfor %}
 
  #include <array>

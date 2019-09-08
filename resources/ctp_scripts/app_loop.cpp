@@ -426,8 +426,11 @@
 #include "jinja2cpp/template_env.h"
 #include "jinja2cpp/reflected_value.h"
 
-#include "funcParser.h"
-#include "clangUtils.h"
+#include "../../src/funcParser.h"
+#include "../../src/clangUtils.h"
+#include "../../src/clangPipeline.h"
+#include "../../src/reflect/ReflectionCache.h"
+#include "../../src/reflect/ReflectAST.h"
 
 extern std::vector<parsed_func> split_to_funcs(std::string const& inStr);
 
@@ -740,52 +743,294 @@ struct jinja2::TypeReflection<ReflectedEnumItems>
 };
 } // namespace jinja2*/
 
+std::string get_func_arg(const std::vector<parsed_func>& args, const std::string& funcName, const int index) {
+    std::string result;
+    for (auto const& seg : args) {
+        /*llvm::outs() << "segment: " << seg.func_with_args_as_string_ << "\n";
+        llvm::outs() << "funcs_to_call2  func_name_: " << seg.parsed_func_.func_name_ << "\n";*/
+        if(!seg.parsed_func_.func_name_.empty() && seg.parsed_func_.func_name_ == funcName) {
+            if(index < seg.parsed_func_.args_.as_vec_.size()) {
+                result = seg.parsed_func_.args_.as_vec_.at(index).value_;
+            }
+            break;
+        }
+    }
+    return result;
+}
+
 const char* typeclass_instance(
     const clang::ast_matchers::MatchFinder::MatchResult& matchResult,
     clang::Rewriter& rewriter,
-    const clang::Decl* decl) {
+    const clang::Decl* decl,
+    std::vector<parsed_func>& args) {
+    printf("typeclass_instance called...\n");
+
+    std::string typeclassBaseName = get_func_arg(args, "typeclass_instance", 0);
+
+    printf("typeclassBaseName = %s...\n", typeclassBaseName.c_str());
+    if(typeclassBaseName.empty()) {
+        return "";
+    }
+
+    if(reflection::ReflectionRegistry::getInstance()->reflectionCXXRecordRegistry.find(typeclassBaseName) == reflection::ReflectionRegistry::getInstance()->reflectionCXXRecordRegistry.end())
+    {
+        printf("typeclassBaseName = %s not found!\n", typeclassBaseName.c_str());
+        return "";
+    }
+
+    const reflection::ReflectionCXXRecordRegistry* ReflectedBaseTypeclass = reflection::ReflectionRegistry::getInstance()->reflectionCXXRecordRegistry[typeclassBaseName].get();
+    /*const clang::CXXRecordDecl* typeclassBaseNode = ReflectedBaseTypeclass->node_;
+    if(!typeclassBaseNode) {
+        printf("typeclassBaseNode not found for typeclassBaseNode = %s!\n", typeclassBaseName.c_str());
+        return "";
+    }*/
+
+    if(ReflectedBaseTypeclass->reflectedJinjaClass_.isEmpty()) {
+        printf("ReflectedBaseTypeclass not found for typeclassBaseNode = %s!\n", typeclassBaseName.c_str());
+        return "";
+    }
+
+    const clang::CXXRecordDecl *node =
+        matchResult.Nodes.getNodeAs<clang::CXXRecordDecl>("bind_gen");
+
+    if (!node) {
+        printf("CXXRecordDecl not found for typeclassBaseNode = %s!\n", typeclassBaseName.c_str());
+        return "";
+    }
+
+    printf("reflect is record %s\n", node->getName().str().c_str());
+
+    jinja2::ValuesMap params;
+
+    /*SourceLocation startLoc = decl->getLocStart();
+    SourceLocation endLoc = decl->getLocEnd();
+    expandLocations(startLoc, endLoc, rewriter);
+
+    auto codeRange = SourceRange{startLoc, endLoc};
+
+    std::string OriginalTypeclassBaseCode =
+        rewriter.getRewrittenText(codeRange);
+
+    // removes $apply(typeclass, e.t.c.)
+    std::string CleanOriginalTypeclassBaseCode
+        = std::regex_replace(OriginalTypeclassBaseCode,
+                             std::regex("\\$apply([^(]*)\\([^)]*\\)(.*)"), "$1$2");
+
+    params.emplace("OriginalTypeclassBaseImplCode",
+                   jinja2::Value{CleanOriginalTypeclassBaseCode.c_str()});*/
+
+    params.emplace("ReflectedBaseTypeclass",
+                   ReflectedBaseTypeclass->reflectedJinjaClass_);
+
+    params.emplace("ImplTypeclassName",
+                   jinja2::Value{node->getName().str().c_str()});
+
+    params.emplace("BaseTypeclassName",
+                   jinja2::Value{ReflectedBaseTypeclass->classInfoPtr_->name.c_str()});
+
+    SourceManager &SM = rewriter.getSourceMgr();
+    const auto fileID = SM.getMainFileID();
+    const auto fileEntry = SM.getFileEntryForID(SM.getMainFileID());
+    std::string original_full_file_path = fileEntry->getName();
+
+    std::cout << "original_full_file_path is " << original_full_file_path << "\n";
+
+    auto wrapLocalInclude = [](const std::string& inStr) {
+        std::string result = R"raw(#include ")raw";
+        result += inStr;
+        result += R"raw(")raw";
+        return result;
+    };
+
+    {
+        std::string gen_hpp_name
+            = node->getNameAsString() + ".typeclass_instance.generated.hpp";
+        std::string gen_base_typeclass_hpp_name
+            = ReflectedBaseTypeclass->classInfoPtr_->name + ".typeclass.generated.hpp";
+        std::string typeclassHppConvertor =
+            getFileContent("../resources/typeclass_instance_gen_hpp.j2tpl");
+        params.emplace("generator_path",
+                       jinja2::Value{"typeclass_instance_gen_hpp.j2tpl"});
+        params.emplace("generator_includes",
+                       jinja2::Value{
+                           jinja2::ValuesList{
+                               /// \TODO
+                               R"raw(#include "../resources/type_erasure_common.hpp")raw",
+                               wrapLocalInclude(gen_base_typeclass_hpp_name).c_str(),
+                               wrapLocalInclude(original_full_file_path).c_str()
+                           }
+                       });
+        jinja2::Template tpl;
+        auto parseResult = tpl.Load(typeclassHppConvertor);
+        if(!parseResult) {
+            printf("ERROR: can`t load jinja2 template from %s [%s]\n",
+                   typeclassHppConvertor.c_str(),
+                   parseResult.error().GetLocationDescr().c_str());
+        }
+        writeToFile(tpl.RenderAsString(params).value(), gen_hpp_name);
+    }
+
   return ""; // TODO
 }
+
+#if 0
+jinja2::Value PrepareStructInfo(reflection::ClassInfoPtr info, clang::ASTContext* context)
+{
+    jinja2::Value result;
+    jinja2::ValuesMap result_params;
+    jinja2::ValuesList reflected_methods;
+
+    /*params.emplace("generator_includes",
+                   jinja2::Value{
+                       jinja2::ValuesList{
+                           /// \TODO
+                           R"raw(#include "../resources/type_erasure_common.hpp")raw"}});*/
+
+    reflection::NamespacesTree m_namespaces; // TODO
+
+    using namespace reflection;
+    /*ReflectedStructInfo structInfo;
+    structInfo.name = info->name;
+    structInfo.fullQualifiedName = info->GetFullQualifiedName();*/
+
+    std::queue<reflection::ClassInfoPtr> classesStack;
+    std::set<std::string> reflectedClasses;
+
+    classesStack.push(info);
+
+    reflection::AstReflector reflector(context);
+
+    while (!classesStack.empty())
+    {
+        reflection::ClassInfoPtr curInfo = classesStack.front();
+        classesStack.pop();
+
+        /*for (reflection::MemberInfoPtr& m : curInfo->members)
+        {
+            if (m->accessType == reflection::AccessType::Undefined || m->accessType == reflection::AccessType::Public)
+            {
+                MemberInfo memberInfo;
+                memberInfo.reflectedName = m->name;
+                memberInfo.accessString = m->name;
+                const EnumType* et = m->type->getAsEnumType();
+                if (et)
+                    PrepareEnumInfo(reflector.ReflectEnum(et->decl, &m_namespaces), context);
+
+                structInfo.members.push_back(std::move(memberInfo));
+            }
+        }*/
+
+        /*for (reflection::MethodInfoPtr& m : curInfo->methods)
+        {
+            if (m->accessType == reflection::AccessType::Undefined || m->accessType == reflection::AccessType::Public)
+            {
+                if (m->params.size() != 0 || m->isCtor || m->isDtor || m->isStatic || m->isOperator || m->isImplicit)
+                    continue;
+
+                MemberInfo memberInfo;
+                reflected_methods.push_back()
+                memberInfo.reflectedName = m->name.find("Get") == 0 ? m->name.substr(3) : m->name;
+                memberInfo.accessString = m->name + "()";
+                const EnumType* et = m->returnType->getAsEnumType();
+                if (et)
+                    PrepareEnumInfo(reflector.ReflectEnum(et->decl, &m_namespaces), context);
+
+                structInfo.members.push_back(std::move(memberInfo));
+            }
+        }*/
+
+        /*for (auto& b : curInfo->baseClasses)
+        {
+            if (b.accessType != AccessType::Undefined && b.accessType != AccessType::Public)
+                continue;
+
+            TypeInfoPtr baseType = b.baseClass;
+            const RecordType* baseClassType = baseType->getAsRecord();
+            if (!baseClassType)
+                continue;
+
+            reflection::ClassInfoPtr baseClassInfo = reflector.ReflectClass(llvm::dyn_cast_or_null<clang::CXXRecordDecl>(baseClassType->decl), &m_namespaces);
+            if (reflectedClasses.count(baseClassInfo->GetFullQualifiedName()) == 1)
+                continue;
+            classesStack.push(baseClassInfo);
+        }*/
+
+        reflectedClasses.insert(curInfo->GetFullQualifiedName());
+    }
+
+    //m_reflectedStructs.push_back(std::move(structInfo));
+
+    return result;
+}
+#endif
 
 // see https://github.com/tlatkdgus1/llvm-code_obfuscate/blob/c4d0641f95704fb9909e2ac09500df1b6bc5d017/tools/clang/lib/AST/DeclPrinter.cpp#L447
 // see https://github.com/root-project/root/blob/331efa4c00fefc38980eaaf7b41b8e95fcd1a23b/interpreter/llvm/src/tools/clang/lib/AST/DeclPrinter.cpp#L474
 const char* typeclass(
     const clang::ast_matchers::MatchFinder::MatchResult& matchResult,
     clang::Rewriter& rewriter,
-    const clang::Decl* decl) {
+    const clang::Decl* decl,
+    std::vector<parsed_func>& args) {
+
+  reflection::NamespacesTree m_namespaces; // TODO
 
   printf("typeclass called...\n");
 
-  clang::CXXRecordDecl const *node =
+  const clang::CXXRecordDecl *node =
       matchResult.Nodes.getNodeAs<clang::CXXRecordDecl>("bind_gen");
 
   if (node) {
     printf("reflect is record %s\n", node->getName().str().c_str());
     // TODO: getOriginalNamespace
     {
+        jinja2::ValuesMap params;
 
-      jinja2::ValuesList GeneratedTypeclassFuncs;
+        printf("reflector... for record %s\n", node->getName().str().c_str());
+        reflection::AstReflector reflector(matchResult.Context);
+
+        printf("ClassInfoPtr... for record %s\n", node->getName().str().c_str());
+        reflection::ClassInfoPtr structInfo = reflector.ReflectClass(node, &m_namespaces);
+
+        printf("reflectClassInfoPtr... for record %s\n", node->getName().str().c_str());
+        jinja2::Value reflectedJinjaClass = reflectClassInfoPtr(structInfo);
+        params.emplace("ReflectedStructInfo",
+                        reflectedJinjaClass
+                       /*jinja2::Value{PrepareStructInfo(structInfo, matchResult.Context)}*/);
+        std::cout << "methods: " << structInfo->methods.size() << "\n";
+
+        for(auto mit : structInfo->methods){
+            std::cout << "methods: " << mit->name << "\n";
+            for(auto it : mit->params){
+                std::cout << "methods params: " << it.name << it.fullDecl << "\n";
+            }
+        }
+
+        printf("ReflectionRegistry... for record %s\n", node->getName().str().c_str());
+        reflection::ReflectionRegistry::getInstance()->reflectionCXXRecordRegistry[node->getName().str()] = std::make_unique<reflection::ReflectionCXXRecordRegistry>(node->getName().str(), /*node,*/ structInfo, reflectedJinjaClass);
+
+      //jinja2::ValuesList GeneratedTypeclassFuncs;
 
       // see https://github.com/asutton/clang/blob/master/lib/AST/DeclPrinter.cpp#L502
-      for(auto fct = node->method_begin();
+      /*for(auto fct = node->method_begin();
         fct != node->method_end(); ++fct)
       {
         CXXMethodDecl* tf = *fct;
-        std::string methodDecl = printMethodDecl(decl, node, tf);
+        std::string methodDecl = reflectMethodDecl(decl, node, tf);
 
         if(!methodDecl.empty()) {
           GeneratedTypeclassFuncs.push_back(jinja2::Value{methodDecl.c_str()});
         }
-      }
-
-      jinja2::ValuesMap params;
+      }*/
 
       SourceLocation startLoc = decl->getLocStart();
       SourceLocation endLoc = decl->getLocEnd();
       expandLocations(startLoc, endLoc, rewriter);
+
       auto codeRange = SourceRange{startLoc, endLoc};
+
       std::string OriginalTypeclassBaseCode =
         rewriter.getRewrittenText(codeRange);
+
       // removes $apply(typeclass, e.t.c.)
       std::string CleanOriginalTypeclassBaseCode
         = std::regex_replace(OriginalTypeclassBaseCode,
@@ -797,8 +1042,15 @@ const char* typeclass(
       params.emplace("GeneratedTypeclassName",
                      jinja2::Value{node->getName().str().c_str()});
 
-      params.emplace("GeneratedTypeclassFuncs",
-                     jinja2::Value{GeneratedTypeclassFuncs});
+      //params.emplace("GeneratedTypeclassFuncs",
+      //               jinja2::Value{GeneratedTypeclassFuncs});
+
+      auto wrapLocalInclude = [](const std::string& inStr) {
+          std::string result = R"raw(#include ")raw";
+          result += inStr;
+          result += R"raw(")raw";
+          return result;
+      };
 
       {
         std::string gen_hpp_name
@@ -811,7 +1063,7 @@ const char* typeclass(
                        jinja2::Value{
                            jinja2::ValuesList{
                              /// \TODO
-                             "../src/type_erasure_common.hpp"}});
+                               wrapLocalInclude(R"raw(../resources/type_erasure_common.hpp)raw")}});
         jinja2::Template tpl;
         auto parseResult = tpl.Load(typeclassHppConvertor);
         if(!parseResult) {
@@ -830,7 +1082,8 @@ const char* typeclass(
 const char* reflect_enum(
     const clang::ast_matchers::MatchFinder::MatchResult& matchResult,
     clang::Rewriter& rewriter,
-    const clang::Decl* decl) {
+    const clang::Decl* decl,
+    std::vector<parsed_func>& args) {
   printf("reflect_enum called...\n");
 
   clang::EnumDecl const *node =
@@ -954,8 +1207,10 @@ const char* reflect_enum(
       //tpl.LoadFromFile("simple_template1.j2tpl");
       //std::cout << tpl.RenderAsString(params);
 
-    std::string gen_hpp_name
-          = node->getNameAsString() + ".enum.generated.hpp";
+    std::string gen_hpp_name = node->getNameAsString() + ".enum.generated.hpp";
+    std::string gen_hpp_inc_code =  R"raw(#include ")raw";
+    gen_hpp_inc_code += node->getNameAsString() + ".enum.generated.hpp";
+    gen_hpp_inc_code += R"raw(")raw";
     {
       std::string enum2StringConvertor =
         getFileContent("../resources/enum_gen_cpp.j2tpl");
@@ -963,7 +1218,7 @@ const char* reflect_enum(
                      jinja2::Value{"enum_gen_cpp.j2tpl"});
       params.emplace("generator_includes",
                      jinja2::Value{
-                         jinja2::ValuesList{gen_hpp_name}});
+                         jinja2::ValuesList{gen_hpp_inc_code}});
       jinja2::Template tpl;
       auto parseResult = tpl.Load(enum2StringConvertor);
       if(!parseResult) {
@@ -996,7 +1251,8 @@ const char* reflect_enum(
 const char* make_reflect(
     const clang::ast_matchers::MatchFinder::MatchResult& matchResult,
     clang::Rewriter& rewriter,
-    const clang::Decl* decl) {
+    const clang::Decl* decl,
+    std::vector<parsed_func>& args) {
   printf("make_removefuncbody called...\n");
 
   std::string indent = "  ";
@@ -1111,7 +1367,8 @@ const char* make_reflect(
 const char* make_removefuncbody(
     const clang::ast_matchers::MatchFinder::MatchResult& matchResult,
     clang::Rewriter& rewriter,
-    const clang::Decl* decl) {
+    const clang::Decl* decl,
+    std::vector<parsed_func>& args) {
   printf("make_removefuncbody called...\n");
 
   clang::CXXRecordDecl const *record =
@@ -1152,7 +1409,8 @@ void expandLocations(SourceLocation& startLoc,
 const char* make_interface(
     const clang::ast_matchers::MatchFinder::MatchResult& matchResult,
     clang::Rewriter& rewriter,
-    const clang::Decl* decl) {
+    const clang::Decl* decl,
+    std::vector<parsed_func>& args) {
   printf("make_interface called...\n");
 
   clang::CXXRecordDecl const *record =

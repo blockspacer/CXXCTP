@@ -20,6 +20,7 @@ TODO:
 + DSL integration
 + Better JSON support
 + Better docs support
++ Replace Jinja with Cling
 
 ## Project status
 In development, see test.cpp and app_loop.cpp fo usage examples
@@ -846,6 +847,44 @@ TODO: Rust++
 strong types
  + https://www.youtube.com/watch?v=BtA92KmcECQ
  + https://github.com/boostcon/cppnow_presentations_2019/blob/master/05-06-2019_monday/How_I_Learned_to_Stop_worrying_and_Love_the_Cpp_Type_System__Peter_Sommerlad__cppnow_05062019.pdf
+
+pattern matching
++ https://habr.com/ru/post/282630/
++ https://github.com/mpark/patterns
+[
+before generator:
+int a = 5;
+bool b = true;
+std::string c = "sasd";
+match(a, b, c) {
+  case (true, true, true): {
+    //...
+    break;
+  }
+  default: {
+    //...
+    break;
+  }
+}
+after generator:
+enum BoolCombos { true_true_true, true_true_false, false_true_true, ... };
+// use bitmask enum https://stackoverflow.com/questions/27719098/java-permutation-and-combination-of-boolean-flags
+// use bitmask loop https://stackoverflow.com/a/12488907
+BoolCombos bc = MakeBoolCombos((bool)a, (bool)b, (bool)c);
+switch(bc)
+{
+case 0: // true_true_true
+    //...
+    break;
+case 1:
+    //...
+    break;
+case 2:
+    // ...
+    break;
+    // ...
+};
+]
 
 FileID != SourceManager.getMainFileID()
  + https://xinhuang.github.io/posts/2014-10-19-clang-tutorial-finding-declarations.html

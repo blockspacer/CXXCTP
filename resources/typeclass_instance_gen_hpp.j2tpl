@@ -1,0 +1,90 @@
+﻿// This is generated file. Do not modify directly.
+// Path to the code generator: {{generator_path}}.
+
+{% if headerGuard is defined %}
+ #ifndef {{headerGuard}}
+ #define {{headerGuard}}
+{% else %}
+ #pragma once
+{% endif %}
+
+{% for fileName in generator_includes | sort %}
+{{fileName}}
+{% endfor %}
+
+ #include <array>
+ #include <functional>
+ #include <memory>
+
+namespace cxxctp {
+namespace generated {
+
+{% for method in ReflectedBaseTypeclass.methods %}
+{% if not method.isImplicit %}{% if not method.isOperator %}{% if not method.isCtor %}{% if not method.isDtor %}
+template<>
+{{'explicit ' if method.isExplicitCtor}}{{'constexpr ' if method.isConstexpr}}{{'static ' if method.isStatic}}{{ method.returnType.printedName }} {{method.name}}<{{BaseTypeclassName}}, {{ImplTypeclassName}}>
+    (const SpellBook& data{% if method.params|length > 0 %},{% endif %} {% for param in method.params %}{{ param.fullDecl}}{% if not loop.last %},{% endif %} {% endfor %}) {{'noexcept ' if method.isNoExcept}};
+
+{% endif %}{% endif %}{% endif %}{% endif %}
+{% endfor %}
+
+/*template <>
+{{ImplTypeclassName}}& _tc_model_t<{{BaseTypeclassName}}>::ref_concrete<{{ImplTypeclassName}}>() noexcept;
+*/
+
+template<>
+struct _tc_impl_t<{{ImplTypeclassName}}, {{BaseTypeclassName}}>
+    : public _tc_model_t<{{BaseTypeclassName}}> {
+    typedef {{ImplTypeclassName}} val_type_t;
+
+    // Construct the embedded concrete type.
+    template<typename... args_t>
+    _tc_impl_t(args_t&&... args) noexcept : concrete(std::forward<args_t>(args)...) { }
+
+    explicit _tc_impl_t(const {{ImplTypeclassName}}& concrete_arg) noexcept
+      : concrete(concrete_arg) {}
+
+    /*const size_t getModelTypeIndex() const noexcept override final {
+        return _tc_registry<{{BaseTypeclassName}}>::
+            getTypeIndex<{{ImplTypeclassName}}>();
+    }*/
+
+{% for method in ReflectedBaseTypeclass.methods %}
+{% if not method.isImplicit %}{% if not method.isOperator %}{% if not method.isCtor %}{% if not method.isDtor %}{% if method.isTemplate %}
+template< {{method.tplParams | map(attribute='tplDeclName') | join(', ') }} >{% endif %}
+  {{'explicit ' if method.isExplicitCtor}}{{'constexpr ' if method.isConstexpr}}{{'static ' if method.isStatic}}{{ method.returnType.printedName }} __{{method.name}}({% for param in method.params %}{{ param.fullDecl}}{% if not loop.last %},{% endif %} {% endfor %}) {{'const ' if method.isConst}} {{'noexcept ' if method.isNoExcept}} override final
+  {
+    /// \note passes data, not ref
+    return {{method.name}}<{{BaseTypeclassName}}>(concrete{% if method.params|length > 0 %},{% endif %} {% for param in method.params %}{{ param.name}}{% if not loop.last %},{% endif %} {% endfor %});
+  }
+
+{% endif %}{% endif %}{% endif %}{% endif %}
+{% endfor %}
+
+    std::unique_ptr<
+        _tc_model_t<{{BaseTypeclassName}}>>
+    clone() noexcept override final {
+        // Copy-construct a new instance of _tc_impl_t on the heap.
+        return std::make_unique<_tc_impl_t>(concrete);
+    }
+
+    std::unique_ptr<
+        _tc_model_t<{{BaseTypeclassName}}>>
+    move_clone() noexcept override final {
+        return std::make_unique<_tc_impl_t>(std::move(concrete));
+    }
+
+    {{ImplTypeclassName}}* operator->() {
+        return &concrete;
+    }
+
+  // Our actual data.
+  {{ImplTypeclassName}} concrete;
+};
+
+} // namespace cxxctp
+} // namespace generated
+
+{% if headerGuard is defined %}
+ #endif // {{headerGuard}}
+{% endif %}
