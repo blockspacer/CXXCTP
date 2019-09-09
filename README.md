@@ -44,6 +44,8 @@ TODO
 
 ## Generate docs website
 TODO
+https://www.mkdocs.org/user-guide/configuration/
+https://github.com/modm-io/modm/tree/e748b1c3688e753c1e49354ad1cef25f447f9ff6/docs
 
 ## Integrate asan / e.t.c.
 TODO

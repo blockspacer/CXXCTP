@@ -74,6 +74,7 @@ namespace fs = std::experimental::filesystem;
 #include "clangUtils.h"
 #include "clangPipeline.h"
 #include "ClingInterpreterModule.h"
+#include "template_engine/CXTPL.h"
 
 #include "reflect/jinja2_reflection.h"
 
@@ -106,80 +107,7 @@ using llvm::StringRef;
     std::string declaration;
 };*/
 
-template<typename T = std::string>
-T next(std::istream& is) {
-    T value;
-    if (is >> value)
-        return value;
-    else
-        return "";
-}
-
-std::string cxxToCodePreprocessor(const std::string& input) {
-    std::string processStr = input;
-    std::string result;
-    std::stringstream ss;
-    const std::string openTagStart = "<CX=";
-    const std::string nextTagLine = "l>";
-    const std::string nextTagString = "s>";
-    const std::string closeTag = "<=CX>";
-    //while (!processStr.empty())
-    {
-        std::string::size_type pos = processStr.find_first_of(openTagStart);
-        if(pos != std::string::npos) {
-            std::cout << "seq1 = " << processStr.substr( 0, pos ) << std::endl;
-            pos += openTagStart.size();
-        } else {
-            std::cout << "seq = " << processStr.substr( 0, pos ) << std::endl;
-        }
-        processStr = processStr.substr( pos, processStr.size() );
-        std::cout << "processStr = " << processStr << std::endl;
-    }
-    return result;
-}
-
-std::string cxxMarkupPreprocessor(const std::string& input, const std::string& clinja_args) {
-    std::string inputToCode = cxxToCodePreprocessor(input);
-    std::string result = clinja_args + inputToCode;
-    return result;
-}
-
 int main(int /*argc*/, const char* const* /*argv*/) {
-    bool bVar = true;
-    bool cVar = true;
-    std::vector<std::string> carNames{ "Betta", "Bob", "Lily"};
-    std::string clinja_args;
-    clinja_args += "preprocessorOut";
-    clinja_args += "bVar";
-    clinja_args += "cVar";
-    clinja_args += "carNames";
-
-    std::string preprocessorOut = cxxMarkupPreprocessor(R"raw(
-        using namespace clang::tooling1;
-        using namespace clang::tooling2;
-        <CX=l>if(bVar) {
-        #include <somefile0>
-        #include <somefile00>
-        <CX="   if(cVar) {"=CX>
-        #include <somefile1>
-        #include <somefile11>
-        <CX=>   } // cVar <=CX>
-        <CX=> } else { // bVar <=CX>
-        #include <somefile2>
-        #include <somefile22>
-        <CX=>} // bVar <=CX>
-        <CX=>for(int i = 0; i < 10; ++i) { <=CX>
-        LOOPVALS:<CX=s>i<=CX>=<CX=s> carNames[i] <=CX>
-        using namespace clang;
-        <CX=> } // for <=CX>
-        using namespace jinja2;
-        )raw",
-        clinja_args);
-
-    std::cout << "preprocessorOut = " << preprocessorOut << std::endl;
-
-    //return 0;
-
     using namespace clang::tooling;
 
     // FIXME: cling linkage hack:
@@ -226,6 +154,52 @@ int main(int /*argc*/, const char* const* /*argv*/) {
       std::unique_lock<std::mutex> lk(InterpreterModule::clingReadyMutex);
       InterpreterModule::clingReadyCV.wait(lk, []{return InterpreterModule::isClingReady;});
     }
+
+    std::string preprocessorRawInput = (R"raw(using namespace clang::tooling1;
+using namespace clang::tooling2;
+<CX=l>if(bVar) {
+#include <somefile0>
+#include <somefile00>
+<CX=l>   if(cVar) {
+#include <somefile1>
+#include <somefile11>
+<CX=l>   } // cVar
+<CX=l> } else { // bVar
+#include <somefile2>
+#include <somefile22>
+<CX=l>} // bVar
+<CX=l>for(int i = 0; i < carNames.size(); ++i) {
+LOOPVALS:<CX=s>i<=CX>=<CX=r> carNames[i] <=CX>
+using namespace clang;
+<CX=l> } // for
+using namespace jinja2;
+)raw",
+        "");
+
+    bool bVar = true;
+    bool cVar = true;
+    std::vector<std::string> carNames{ "Betta", "Bob", "Lily"};
+
+    CXTPL cxtpl;
+
+    cxtpl.createFromFile("../resources/cxtpl/test1.cxtpl");
+
+    cxtpl.buildToFile("test1.cxtpl.cpp");
+
+    /*cxtpl.compileToFile("test1.compile.out", bVar, cVar, carNames);
+
+    std::cout << "preprocessorRawInput = "
+      << cxtpl.compileToString(bVar, cVar, carNames) << std::endl;
+
+    cxtpl.interpretToString(bVar, cVar, carNames);*/
+
+    cxtpl.interpretToFile("test1.interpret.out", bVar, cVar, carNames);
+
+    /*bool quit2 = false;
+    while(!quit2)
+    {
+      // TODO
+    }*/
 
     llvm::outs() << "clang... " << '\n';
 

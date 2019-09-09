@@ -44,6 +44,8 @@ void set_spell_power<Spell, SpellBook>
 int main(int /*argc*/, const char* const* /*argv*/) {
     using namespace cxxctp::generated;
 
+    // TODO: better example https://blog.rust-lang.org/2015/05/11/traits.html
+
     _tc_combined_t<Spell> myspell{SpellBook{"title1", "description1"}};
 
     myspell.set_spell_power(/*spellname*/ "spellname1", /*spellpower*/ 3);

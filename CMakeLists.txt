@@ -99,6 +99,8 @@ if(ENABLE_CLING)
     ${CMAKE_CURRENT_SOURCE_DIR}/src/reflect/ReflectAST.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/reflect/ast_utils.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/reflect/jinja2_reflection.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/template_engine/CXTPL.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/template_engine/CXTPL.h
   )
 else(ENABLE_CLING)
   message(FATAL_ERROR "Only Cling interpreter is supported for now")

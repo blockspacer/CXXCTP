@@ -239,11 +239,15 @@ void UseOverride::Checker::run(const UseOverride::Checker::MatchResult &Result) 
                     expandLocations(startLoc, endLoc, rewriter_);
 
                     void* resOptionVoid = result.getAs<void*>();
-                    auto resOption = static_cast<llvm::Optional<std::string>*>(resOptionVoid);
-                    if(resOption->hasValue()) {
-                        rewriter_.ReplaceText(
-                                    SourceRange(startLoc, endLoc),
-                                    resOption->getValue());
+                    auto resOption =
+                      static_cast<llvm::Optional<std::string>*>(resOptionVoid);
+                    if(resOption) {
+                      if(resOption->hasValue()) {
+                          rewriter_.ReplaceText(
+                                      SourceRange(startLoc, endLoc),
+                                      resOption->getValue());
+                      }
+                      delete resOption; /// \note frees resOptionVoid memory
                     }
                 } else if(isEval) {
                     llvm::outs() << "eval for code: "
