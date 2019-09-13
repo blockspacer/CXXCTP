@@ -53,6 +53,8 @@ TODO
 ## Unit tests & CI/CD
 TODO
 
+like https://github.com/Manu343726/unittest#unittest
+
 ## Benchmark (https://github.com/CathalT/Cerializer#parse--string---json-dom-object---c-struct-)
 TODO
 
@@ -284,6 +286,9 @@ Usefull links:
 
 ## Similar projects
 
+Clava
++ https://github.com/specs-feup/clava
+
 Compile-time EXecution of C++ code https://github.com/MaliusArth/cex/blob/6f6e700a253b06c7ae6801e1a3c1f3d842931d77/tool/src/MatchCallbacks/AnnotatedFunctionCallback.cpp
 
 SaferCPlusPlus
@@ -305,6 +310,7 @@ type_safe
 
 Opaque Typedefs aka phantom types (strong types)
  + https://nullptr.nl/2018/02/phantom-types/
+ + https://github.com/doom/strong_type
 
 translations / i18n
  + https://www.gnu.org/software/gettext/
@@ -327,6 +333,7 @@ Guidelines Support Library
 not_null
  + https://www.bfilipek.com/2017/10/notnull.html
  + https://github.com/Microsoft/GSL/issues/89#issuecomment-280104052
+ + http://nullptr.nl/2018/02/some-pointers-on-references/
 
 circle https://github.com/seanbaxter/circle/blob/master/examples/README.md
 
@@ -345,13 +352,6 @@ modules
  + https://www.modernescpp.com/index.php/c-20-modules
  + https://github.com/boostcon/cppnow_presentations_2019/blob/master/05-10-2019_friday/The_Rough_Road_Towards_Upgrading_to_Cpp_Modules__Rich%C3%A1rd_Szalay__cppnow_05102019.pdf
 
-backports various facilities from more recent C++ Standards
- + http://ryan.gulix.cl/fossil.cgi/cxxomfort/index
-
-Actors
- + https://github.com/italiancpp/meetup-milano-2014/tree/300013def6f2182c0b0bce7b3d511613581a437f/cpp_actor_model
- + https://github.com/actor-framework/actor-framework
-
 c++ modules backwards compatible
  + https://github.com/build2/build2/blob/master/doc/manual.cli#L6362
  + #ifndef __cpp_modules https://build2.org/doc/modules-cppcon2017.pdf
@@ -360,6 +360,13 @@ c++ modules backwards compatible
  + https://stackoverflow.com/questions/34652029/how-should-i-write-my-c-to-be-prepared-for-c-modules
  + https://build2.org/article/cxx-modules-misconceptions.xhtml
  + https://build2.org/doc/modules-cppcon2017.pdf
+
+backports various facilities from more recent C++ Standards
+ + http://ryan.gulix.cl/fossil.cgi/cxxomfort/index
+
+Actors
+ + https://github.com/italiancpp/meetup-milano-2014/tree/300013def6f2182c0b0bce7b3d511613581a437f/cpp_actor_model
+ + https://github.com/actor-framework/actor-framework
 
 C/C++ subset resyntaxed like Rust,+ tagged-union/Pattern-Matching, UFCS,inference; LLVM https://github.com/dobkeratops/compiler
 
@@ -785,6 +792,7 @@ Type Erasure
  + https://www.youtube.com/watch?v=OtU51Ytfe04
  + https://www.youtube.com/watch?v=QGcVXgEVMJg
  + http://ldionne.com/accu-2017-rust-traits-in-cpp/#/
+ + https://locka99.gitbooks.io/a-guide-to-porting-c-to-rust/content/porting_from_cpp/multiple_inheritance.html
  + https://github.com/italiancpp/meetup-milano-2014/blob/300013def6f2182c0b0bce7b3d511613581a437f/cpp_typeclass/presentation/Types%2C%20classes%20and%20concepts%20(updated).pdf
  + http://www.goldsborough.me/cpp/2018/05/22/00-32-43-type_erasure_for_unopinionated_interfaces_in_c++/
  + https://quuxplusone.github.io/blog/2019/03/18/what-is-type-erasure/
@@ -845,14 +853,18 @@ A Revisited Command Pattern https://www.oreilly.com/library/view/practical-c-met
 
 TODO: Rust++
  + http://mainisusuallyafunction.blogspot.com/2017/06/a-rust-view-on-effective-modern-c.html
-
+ + "Learning Rust With Entirely Too Many Linked Lists" https://rust-unofficial.github.io/too-many-lists/ https://news.ycombinator.com/item?id=16442743
 strong types
  + https://www.youtube.com/watch?v=BtA92KmcECQ
  + https://github.com/boostcon/cppnow_presentations_2019/blob/master/05-06-2019_monday/How_I_Learned_to_Stop_worrying_and_Love_the_Cpp_Type_System__Peter_Sommerlad__cppnow_05062019.pdf
+ + https://www.slideshare.net/corehard_by/rust-vs-c
 
-pattern matching
+pattern matching + YOU CAN MATCH ON FUCKING STRINGS.
++ http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p1260r0.pdf
 + https://habr.com/ru/post/282630/
 + https://github.com/mpark/patterns
++ https://github.com/dobkeratops/compiler
++ https://people.gnome.org/~federico/blog/rust-things-i-miss-in-c.html
 [
 before generator:
 int a = 5;
@@ -894,6 +906,46 @@ FileID != SourceManager.getMainFileID()
 TODO: mutable/ref/box traits as in
  + https://habr.com/ru/post/322208/
  + https://github.com/jamboree/polytail
+
+Use codegen & data serialization (restore state on reload) for REPL
+
+templated traits / Associated types
++ https://people.gnome.org/~federico/blog/rust-things-i-miss-in-c.html
+
+state machine
+
+https://manu343726.github.io/2019-07-14-reflections-on-user-defined-attributes/
+https://manu343726.github.io/2019-04-18-more-fun-with-user-defined-attributes/
+```
+    [[math::range(0.0f, 1.0f)]]
+    float x;
+```
+
+file organization of generated code
++ https://arne-mertz.de/2017/07/generated-code/
++ https://arne-mertz.de/2017/07/organizing-dependencies-generated-code/
+
+unittest.mock.patch https://manu343726.github.io/2019-04-18-more-fun-with-user-defined-attributes/
+
+session types
++ http://simonjf.com/2016/05/28/session-type-implementations.html
+
+TypePrinter:
++ #[derive(Debug)] will know how to automatically print that type's contents for debug output.
+
+TODO: span<T> can prevent at least some classes of memory safety issues
++ https://msrc-blog.microsoft.com/2019/07/18/we-need-a-safer-systems-programming-language/
+
+cpp dangers
++ https://gist.github.com/blockspacer/c44b00fa355c920efcb2abfa84e3990f
+
+Pretty Printer & reflection of structs
++ https://github.com/p-ranav/pprint
+
+TODO: CMake integration
+
+emscripten webidl_binder.py
+ > https://github.com/google/draco/blob/master/CMakeLists.txt#L715
 
 ## Misc
 https://medium.com/fluence-network/porting-redis-to-webassembly-with-clang-wasi-af99b264ca8
