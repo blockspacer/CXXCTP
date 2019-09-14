@@ -59,6 +59,11 @@
 #include <thread>
 #include <vector>
 
+#include <iostream>
+#include <map>
+#include <string>
+#include <any>
+
 #include <experimental/filesystem>
 
 namespace fs = std::experimental::filesystem;
@@ -176,24 +181,44 @@ using namespace jinja2;
 )raw",
         "");
 
-    bool bVar = true;
-    bool cVar = true;
-    std::vector<std::string> carNames{ "Betta", "Bob", "Lily"};
+    bool bVar1 = true;
+    bool cVar1 = true;
+    std::vector<std::string> carNames1{ "Betta", "Bob", "Lily"};
 
-    CXTPL cxtpl;
+    std::map<std::string, std::any> anyDictionary;
+    anyDictionary["bVar"] =  std::make_any<bool>(std::move(bVar1));
+    anyDictionary["cVar"] = std::make_any<bool>(std::move(cVar1));
+    anyDictionary["carNames"] = std::make_any<std::vector<std::string>>(std::move(carNames1));
+
+    /*bool bVar = std::any_cast< bool>(anyDictionary.at("bVar"));
+    bool cVar = std::any_cast< bool>(anyDictionary.at("cVar"));
+    std::vector<std::string> carNames = std::any_cast< std::vector<std::string>>(anyDictionary.at("carNames"));
+
+    std::cout << "bVar = " << bVar << std::endl;
+    std::cout << "cVar = " << cVar << std::endl;
+    std::cout << "carNames = " << carNames.size() << std::endl;*/
+
+    CXTPL<AnyDict> cxtpl;
 
     cxtpl.createFromFile("../resources/cxtpl/test1.cxtpl");
 
     cxtpl.buildToFile("test1.cxtpl.cpp");
 
-    /*cxtpl.compileToFile("test1.compile.out", bVar, cVar, carNames);
-
+    /*
     std::cout << "preprocessorRawInput = "
       << cxtpl.compileToString(bVar, cVar, carNames) << std::endl;
 
     cxtpl.interpretToString(bVar, cVar, carNames);*/
 
-    cxtpl.interpretToFile("test1.interpret.out", bVar, cVar, carNames);
+    cxtpl.interpretToFile("test1.interpret.out", anyDictionary, R"raw(
+#include <iostream>
+#include <map>
+#include <string>
+#include <any>
+#include <vector>
+)raw");
+
+    //cxtpl.compileToFile("test1.compile.out", anyDictionary);
 
     /*bool quit2 = false;
     while(!quit2)

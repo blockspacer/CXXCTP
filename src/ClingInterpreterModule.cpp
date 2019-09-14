@@ -70,8 +70,10 @@ InterpreterModule::InterpreterModule(const string &id, const std::vector<string>
 }
 
 InterpreterModule::~InterpreterModule() {
-    cling::Interpreter::CompilationResult compilationResult;
-    metaProcessor_->process(id_ + "_cling_shutdown();", compilationResult, nullptr, true);
+    if(!moduleFiles_.empty()) {
+        cling::Interpreter::CompilationResult compilationResult;
+        metaProcessor_->process(id_ + "_cling_shutdown();", compilationResult, nullptr, true);
+    }
 }
 
 void add_default_cling_args(std::vector<string> &args) {
@@ -154,20 +156,24 @@ void InterpreterModule::createInterpreter() {
 void InterpreterModule::prepare() {
     cling::Interpreter::CompilationResult compilationResult;
 
-    for(const auto& it: moduleFiles_) {
-        printf("processes module %s\n", it.c_str());
-        metaProcessor_->process(".x " + it, compilationResult, nullptr, true);
-    }
+    if(!moduleFiles_.empty()) {
+        for(const auto& it: moduleFiles_) {
+            printf("processes module %s\n", it.c_str());
+            metaProcessor_->process(".x " + it, compilationResult, nullptr, true);
+        }
 
-    metaProcessor_->process(id_ + "_cling_prepare();", compilationResult, nullptr);
+        metaProcessor_->process(id_ + "_cling_prepare();", compilationResult, nullptr);
+    }
 }
 
 void InterpreterModule::run() {
-    std::thread module_main([this](){
-        cling::Interpreter::CompilationResult compilationResult;
-        metaProcessor_->process(id_ + "_cling_run();", compilationResult, nullptr, true);
-    });
-    module_main.detach();
+    if(!moduleFiles_.empty()) {
+        std::thread module_main([this](){
+            cling::Interpreter::CompilationResult compilationResult;
+            metaProcessor_->process(id_ + "_cling_run();", compilationResult, nullptr, true);
+        });
+        module_main.detach();
+    }
 }
 
 void reloadClingModule(const string &module_id, const std::vector<string> &sources) {

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <iostream>
 #include <string>
@@ -56,6 +56,7 @@
 #include <string>
 #include <thread>
 #include <vector>
+#include <any>
 
 #include <experimental/filesystem>
 
@@ -72,7 +73,16 @@ namespace fs = std::experimental::filesystem;
 
 #define ARG_REF_TO_CLING(varType, varName) argRefToCling(varType, #varName, (varName))
 
+struct AnyDict {
+  std::map<std::string, std::any> dictionary;
+};
+
+template<typename T>
 class CXTPL {
+};
+
+template<>
+class CXTPL<AnyDict> {
  public:
   typedef std::function<void(std::unique_ptr<std::string> res)> interp_callback;
 
@@ -92,19 +102,20 @@ class CXTPL {
     bool& bVar, bool& cVar, std::vector<std::string>& carNames);*/
 
   void interpretToFile(const string &path,
-    bool& bVar, bool& cVar, std::vector<std::string>& carNames);
+                       const std::map<std::string, std::any>& dictionary,
+                       const std::string &includes_code);
 
   /*std::unique_ptr<std::string> compileToString(
-    bool& bVar, bool& cVar, std::vector<std::string>& carNames);
+    bool& bVar, bool& cVar, std::vector<std::string>& carNames);*/
 
   void compileToFile(const std::string& path,
-    bool& bVar, bool& cVar, std::vector<std::string>& carNames);*/
+    const std::map<std::string, std::any>& dictionary);
 
  private:
   void rebuild();
 
-  std::string loadClingArgs(bool& bVar, bool& cVar,
-    std::vector<std::string>& carNames);
+  std::string loadClingArgs(const std::map<std::string, std::any>& dictionary,
+                            const std::string &includes_code);
 
   // TODO: WASM & Node.js support
   // TODO: filtering
@@ -123,9 +134,9 @@ class CXTPL {
   // TODO: example with external function call workaround
   std::string buildFromString(const std::string& input);
 
-  template <typename T>
+  template <typename K>
   std::string argRefToCling(const std::string varType,
-      const std::string varName, const T& arg) {
+      const std::string varName, const K& arg) {
     std::ostringstream sstr;
     sstr << " ; \n const " << varType << " & " << varName << " = ";
     sstr << "*(const " << varType << "*)("
@@ -146,7 +157,8 @@ class CXTPL {
 
   void runInInterpreter(
     const interp_callback& callback,  const std::string& inStr,
-    bool& bVar, bool& cVar, std::vector<std::string>& carNames);
+    const std::map<std::string, std::any>& dictionary,
+    const std::string &includes_code);
 
   std::string code_before_build_;
   std::string code_after_build_;

@@ -419,6 +419,8 @@
 #include <vector>
 #include <regex>
 #include <iterator>
+#include <any>
+#include <optional>
 
 #include "jinja2cpp/value.h"
 #include "jinja2cpp/template.h"
