@@ -1,121 +1,135 @@
-﻿// This is generated file. Do not modify directly.
-// Path to the code generator: {{generator_path}}.
+﻿<CX=> // parameters begin
 
-{% for fileName in generator_includes | sort %}
-{{fileName}}
-{% endfor %}
+const auto GeneratedEnumName
+  = GetWithDefault<std::string>(cxtpl_params, "GeneratedEnumName", "");
 
- #include <iostream>
- #include <cstring>
- #include <type_traits>
+const auto generator_path
+  = GetWithDefault<std::string>(cxtpl_params, "generator_path", "");
+
+std::vector<std::string> generator_includes
+  = GetWithDefault<std::vector<std::string>>
+      (cxtpl_params, "generator_includes", std::vector<std::string>{});
+
+// parameters end
+/* no newline */ <=CX><CX=l>
+// This is generated file. Do not modify directly.
+// Path to the code generator: <CX=r> generator_path <=CX>.
+
+<CX=l> for(const auto& fileName: generator_includes) {
+<CX=r> fileName <=CX>
+<CX=l> } // end for
+
+#include <iostream>
+#include <cstring>
+#include <type_traits>
 
 namespace cxxctp {
 namespace generated {
 
-{{GeneratedEnumName}}::_enumerated operator & (
-  const {{GeneratedEnumName}}::_enumerated& lhs, const {{GeneratedEnumName}}::_enumerated& rhs )
+<CX=r> GeneratedEnumName <=CX>::_enumerated operator & (
+  const <CX=r> GeneratedEnumName <=CX>::_enumerated& lhs, const <CX=r> GeneratedEnumName <=CX>::_enumerated& rhs )
 {
-  return static_cast<{{GeneratedEnumName}}::_enumerated>(
-    static_cast<{{GeneratedEnumName}}::_enumerated_t>(lhs)
-      & static_cast<{{GeneratedEnumName}}::_enumerated_t>(rhs));
+  return static_cast<<CX=r> GeneratedEnumName <=CX>::_enumerated>(
+    static_cast<<CX=r> GeneratedEnumName <=CX>::_enumerated_t>(lhs)
+      & static_cast<<CX=r> GeneratedEnumName <=CX>::_enumerated_t>(rhs));
 }
 
-{{GeneratedEnumName}}::_enumerated operator ^ (
-  const {{GeneratedEnumName}}::_enumerated& lhs, const {{GeneratedEnumName}}::_enumerated& rhs )
+<CX=r> GeneratedEnumName <=CX>::_enumerated operator ^ (
+  const <CX=r> GeneratedEnumName <=CX>::_enumerated& lhs, const <CX=r> GeneratedEnumName <=CX>::_enumerated& rhs )
 {
-  return static_cast<{{GeneratedEnumName}}::_enumerated>(
-    static_cast<{{GeneratedEnumName}}::_enumerated_t>(lhs)
-      ^ static_cast<{{GeneratedEnumName}}::_enumerated_t>(rhs));
+  return static_cast<<CX=r> GeneratedEnumName <=CX>::_enumerated>(
+    static_cast<<CX=r> GeneratedEnumName <=CX>::_enumerated_t>(lhs)
+      ^ static_cast<<CX=r> GeneratedEnumName <=CX>::_enumerated_t>(rhs));
 }
 
-{{GeneratedEnumName}}::_enumerated operator ~ (
-  const {{GeneratedEnumName}}::_enumerated& rhs )
+<CX=r> GeneratedEnumName <=CX>::_enumerated operator ~ (
+  const <CX=r> GeneratedEnumName <=CX>::_enumerated& rhs )
 {
-  return static_cast<{{GeneratedEnumName}}::_enumerated>(
-    ~static_cast<{{GeneratedEnumName}}::_enumerated_t>(rhs));
+  return static_cast<<CX=r> GeneratedEnumName <=CX>::_enumerated>(
+    ~static_cast<<CX=r> GeneratedEnumName <=CX>::_enumerated_t>(rhs));
 }
 
-{{GeneratedEnumName}}::_enumerated operator | (
-  {{GeneratedEnumName}}::_enumerated& lhs, const {{GeneratedEnumName}}::_enumerated& rhs )
+<CX=r> GeneratedEnumName <=CX>::_enumerated operator | (
+  <CX=r> GeneratedEnumName <=CX>::_enumerated& lhs, const <CX=r> GeneratedEnumName <=CX>::_enumerated& rhs )
 {
-  return static_cast<{{GeneratedEnumName}}::_enumerated>(
-    static_cast<{{GeneratedEnumName}}::_enumerated_t>(lhs)
-      | static_cast<{{GeneratedEnumName}}::_enumerated_t>(rhs));
+  return static_cast<<CX=r> GeneratedEnumName <=CX>::_enumerated>(
+    static_cast<<CX=r> GeneratedEnumName <=CX>::_enumerated_t>(lhs)
+      | static_cast<<CX=r> GeneratedEnumName <=CX>::_enumerated_t>(rhs));
 }
 
-{{GeneratedEnumName}}::_enumerated operator &= (
-  {{GeneratedEnumName}}::_enumerated& lhs, const {{GeneratedEnumName}}::_enumerated& rhs )
+<CX=r> GeneratedEnumName <=CX>::_enumerated operator &= (
+  <CX=r> GeneratedEnumName <=CX>::_enumerated& lhs, const <CX=r> GeneratedEnumName <=CX>::_enumerated& rhs )
 {
   lhs
     = lhs & rhs;
   return lhs;
 }
 
-{{GeneratedEnumName}}::_enumerated operator ^= (
-  {{GeneratedEnumName}}::_enumerated& lhs, const {{GeneratedEnumName}}::_enumerated& rhs )
+<CX=r> GeneratedEnumName <=CX>::_enumerated operator ^= (
+  <CX=r> GeneratedEnumName <=CX>::_enumerated& lhs, const <CX=r> GeneratedEnumName <=CX>::_enumerated& rhs )
 {
   lhs
     = lhs ^ rhs;
   return lhs;
 }
 
-{{GeneratedEnumName}}::_enumerated operator |= (
-  {{GeneratedEnumName}}::_enumerated& lhs, const {{GeneratedEnumName}}::_enumerated& rhs )
+<CX=r> GeneratedEnumName <=CX>::_enumerated operator |= (
+  <CX=r> GeneratedEnumName <=CX>::_enumerated& lhs, const <CX=r> GeneratedEnumName <=CX>::_enumerated& rhs )
 {
   lhs
     = lhs | rhs;
   return lhs;
 }
 
-/*bool operator ==(const {{GeneratedEnumName}}::_enumerated &a, const {{GeneratedEnumName}}::_enumerated &b)
+/*bool operator ==(const <CX=r> GeneratedEnumName <=CX>::_enumerated &a, const <CX=r> GeneratedEnumName <=CX>::_enumerated &b)
 {
-  return static_cast<{{GeneratedEnumName}}::_enumerated_t>(a)
-          == static_cast<{{GeneratedEnumName}}::_enumerated_t>(b);
+  return static_cast<<CX=r> GeneratedEnumName <=CX>::_enumerated_t>(a)
+          == static_cast<<CX=r> GeneratedEnumName <=CX>::_enumerated_t>(b);
 }
 
-bool operator !=(const {{GeneratedEnumName}}::_enumerated &a, const {{GeneratedEnumName}}::_enumerated &b)
+bool operator !=(const <CX=r> GeneratedEnumName <=CX>::_enumerated &a, const <CX=r> GeneratedEnumName <=CX>::_enumerated &b)
 {
-  return static_cast<{{GeneratedEnumName}}::_enumerated_t>(a)
-          != static_cast<{{GeneratedEnumName}}::_enumerated_t>(b);
+  return static_cast<<CX=r> GeneratedEnumName <=CX>::_enumerated_t>(a)
+          != static_cast<<CX=r> GeneratedEnumName <=CX>::_enumerated_t>(b);
 }
 
-bool operator <(const {{GeneratedEnumName}}::_enumerated &a, const {{GeneratedEnumName}}::_enumerated &b)
+bool operator <(const <CX=r> GeneratedEnumName <=CX>::_enumerated &a, const <CX=r> GeneratedEnumName <=CX>::_enumerated &b)
 {
-  return static_cast<{{GeneratedEnumName}}::_enumerated_t>(a)
-          < static_cast<{{GeneratedEnumName}}::_enumerated_t>(b);
+  return static_cast<<CX=r> GeneratedEnumName <=CX>::_enumerated_t>(a)
+          < static_cast<<CX=r> GeneratedEnumName <=CX>::_enumerated_t>(b);
 }
 
-bool operator <=(const {{GeneratedEnumName}}::_enumerated &a, const {{GeneratedEnumName}}::_enumerated &b)
+bool operator <=(const <CX=r> GeneratedEnumName <=CX>::_enumerated &a, const <CX=r> GeneratedEnumName <=CX>::_enumerated &b)
 {
-  return static_cast<{{GeneratedEnumName}}::_enumerated_t>(a)
-          <= static_cast<{{GeneratedEnumName}}::_enumerated_t>(b);
+  return static_cast<<CX=r> GeneratedEnumName <=CX>::_enumerated_t>(a)
+          <= static_cast<<CX=r> GeneratedEnumName <=CX>::_enumerated_t>(b);
 }
 
-bool operator >(const {{GeneratedEnumName}}::_enumerated &a, const {{GeneratedEnumName}}::_enumerated &b)
+bool operator >(const <CX=r> GeneratedEnumName <=CX>::_enumerated &a, const <CX=r> GeneratedEnumName <=CX>::_enumerated &b)
 {
-  return static_cast<{{GeneratedEnumName}}::_enumerated_t>(a)
-          > static_cast<{{GeneratedEnumName}}::_enumerated_t>(b);
+  return static_cast<<CX=r> GeneratedEnumName <=CX>::_enumerated_t>(a)
+          > static_cast<<CX=r> GeneratedEnumName <=CX>::_enumerated_t>(b);
 }
 
-bool operator >=(const {{GeneratedEnumName}}::_enumerated &a, const {{GeneratedEnumName}}::_enumerated &b)
+bool operator >=(const <CX=r> GeneratedEnumName <=CX>::_enumerated &a, const <CX=r> GeneratedEnumName <=CX>::_enumerated &b)
 {
-  return static_cast<{{GeneratedEnumName}}::_enumerated_t>(a)
-          >= static_cast<{{GeneratedEnumName}}::_enumerated_t>(b);
+  return static_cast<<CX=r> GeneratedEnumName <=CX>::_enumerated_t>(a)
+          >= static_cast<<CX=r> GeneratedEnumName <=CX>::_enumerated_t>(b);
 }*/
 
 // Stream extraction operator: read from stream
-std::istream& operator >> ( std::istream& ins, {{GeneratedEnumName}}& val ) /*noexcept*/
+std::istream& operator >> ( std::istream& ins, <CX=r> GeneratedEnumName <=CX>& val ) /*noexcept*/
 {
   std::string str;
   ins >> str;
-  val = {{GeneratedEnumName}}::FromString( str.c_str() );
-  if (val == {{GeneratedEnumName}}::TOTAL)
+  val = <CX=r> GeneratedEnumName <=CX>::FromString( str.c_str() );
+  if (val == <CX=r> GeneratedEnumName <=CX>::TOTAL)
     ins.setstate( ins.rdstate() | std::ios::failbit );
   return ins;
 }
 
 // Stream insertion operator: write to stream
-std::ostream& operator << ( std::ostream& outs, const {{GeneratedEnumName}}& val ) /*noexcept*/
+std::ostream& operator << ( std::ostream& outs, const <CX=r> GeneratedEnumName <=CX>& val ) /*noexcept*/
 {
   const auto str = val.ToString();
   if(str) {
@@ -124,109 +138,109 @@ std::ostream& operator << ( std::ostream& outs, const {{GeneratedEnumName}}& val
   return outs;
 }
 
-{{GeneratedEnumName}}::const_value_iterator {{GeneratedEnumName}}::values_begin() const { return values_.begin(); }
+<CX=r> GeneratedEnumName <=CX>::const_value_iterator <CX=r> GeneratedEnumName <=CX>::values_begin() const { return values_.begin(); }
 
-{{GeneratedEnumName}}::const_value_iterator {{GeneratedEnumName}}::values_end() const { return values_.end(); }
+<CX=r> GeneratedEnumName <=CX>::const_value_iterator <CX=r> GeneratedEnumName <=CX>::values_end() const { return values_.end(); }
 
-{{GeneratedEnumName}}::const_name_iterator {{GeneratedEnumName}}::names_begin() const { return names_.begin(); }
+<CX=r> GeneratedEnumName <=CX>::const_name_iterator <CX=r> GeneratedEnumName <=CX>::names_begin() const { return names_.begin(); }
 
-{{GeneratedEnumName}}::const_name_iterator {{GeneratedEnumName}}::names_end() const { return names_.end(); }
+<CX=r> GeneratedEnumName <=CX>::const_name_iterator <CX=r> GeneratedEnumName <=CX>::names_end() const { return names_.end(); }
 
-bool {{GeneratedEnumName}}::test_flag({{GeneratedEnumName}}::_enumerated flag) const noexcept {
+bool <CX=r> GeneratedEnumName <=CX>::test_flag(<CX=r> GeneratedEnumName <=CX>::_enumerated flag) const noexcept {
   return static_cast<bool>(
-        static_cast<{{GeneratedEnumName}}::_enumerated_t>(value_)
-        & static_cast<{{GeneratedEnumName}}::_enumerated_t>(flag));
+        static_cast<<CX=r> GeneratedEnumName <=CX>::_enumerated_t>(value_)
+        & static_cast<<CX=r> GeneratedEnumName <=CX>::_enumerated_t>(flag));
 }
 
-{{GeneratedEnumName}}::{{GeneratedEnumName}}(const {{GeneratedEnumName}}::_enumerated value)
+<CX=r> GeneratedEnumName <=CX>::<CX=r> GeneratedEnumName <=CX>(const <CX=r> GeneratedEnumName <=CX>::_enumerated value)
   : value_(value) { }
 
-const {{GeneratedEnumName}} &{{GeneratedEnumName}}::operator =(const char *dummy) noexcept {
-  value_ = {{GeneratedEnumName}}::FromString(dummy);
+const <CX=r> GeneratedEnumName <=CX> &<CX=r> GeneratedEnumName <=CX>::operator =(const char *dummy) noexcept {
+  value_ = <CX=r> GeneratedEnumName <=CX>::FromString(dummy);
   return *this;
 }
 
-{{GeneratedEnumName}} operator & (
-  const {{GeneratedEnumName}}& lhs, const {{GeneratedEnumName}}& rhs )
+<CX=r> GeneratedEnumName <=CX> operator & (
+  const <CX=r> GeneratedEnumName <=CX>& lhs, const <CX=r> GeneratedEnumName <=CX>& rhs )
 {
   return lhs.value_
     & rhs.value_;
 }
 
-{{GeneratedEnumName}} operator ^ (
-  const {{GeneratedEnumName}}& lhs, const {{GeneratedEnumName}}& rhs )
+<CX=r> GeneratedEnumName <=CX> operator ^ (
+  const <CX=r> GeneratedEnumName <=CX>& lhs, const <CX=r> GeneratedEnumName <=CX>& rhs )
 {
   return lhs.value_
     ^ rhs.value_;
 }
 
-{{GeneratedEnumName}} operator ~ ( const {{GeneratedEnumName}}& rhs )
+<CX=r> GeneratedEnumName <=CX> operator ~ ( const <CX=r> GeneratedEnumName <=CX>& rhs )
 {
   return ~rhs.value_;
 }
 
-{{GeneratedEnumName}} operator | (
-  {{GeneratedEnumName}}& lhs, const {{GeneratedEnumName}}& rhs )
+<CX=r> GeneratedEnumName <=CX> operator | (
+  <CX=r> GeneratedEnumName <=CX>& lhs, const <CX=r> GeneratedEnumName <=CX>& rhs )
 {
   return lhs.value_
     | rhs.value_;
 }
 
-{{GeneratedEnumName}} operator &= (
-  {{GeneratedEnumName}}& lhs, const {{GeneratedEnumName}}& rhs )
+<CX=r> GeneratedEnumName <=CX> operator &= (
+  <CX=r> GeneratedEnumName <=CX>& lhs, const <CX=r> GeneratedEnumName <=CX>& rhs )
 {
   lhs.value_
     &= rhs.value_;
   return lhs;
 }
 
-{{GeneratedEnumName}} operator ^= (
-  {{GeneratedEnumName}}& lhs, const {{GeneratedEnumName}}& rhs )
+<CX=r> GeneratedEnumName <=CX> operator ^= (
+  <CX=r> GeneratedEnumName <=CX>& lhs, const <CX=r> GeneratedEnumName <=CX>& rhs )
 {
  lhs.value_
     ^= rhs.value_;
   return lhs;
 }
 
-{{GeneratedEnumName}} operator |= (
-  {{GeneratedEnumName}}& lhs, const {{GeneratedEnumName}}& rhs )
+<CX=r> GeneratedEnumName <=CX> operator |= (
+  <CX=r> GeneratedEnumName <=CX>& lhs, const <CX=r> GeneratedEnumName <=CX>& rhs )
 {
   lhs.value_
     |= rhs.value_;
   return lhs;
 }
 
-/*bool operator ==(const {{GeneratedEnumName}} &a, const {{GeneratedEnumName}} &b)
+/*bool operator ==(const <CX=r> GeneratedEnumName <=CX> &a, const <CX=r> GeneratedEnumName <=CX> &b)
 {
   return a.value_ == b.value_;
 }
 
-bool operator !=(const {{GeneratedEnumName}} &a, const {{GeneratedEnumName}} &b)
+bool operator !=(const <CX=r> GeneratedEnumName <=CX> &a, const <CX=r> GeneratedEnumName <=CX> &b)
 {
   return a.value_ != b.value_;
 }*/
 
-bool operator <(const {{GeneratedEnumName}} &a, const {{GeneratedEnumName}} &b)
+bool operator <(const <CX=r> GeneratedEnumName <=CX> &a, const <CX=r> GeneratedEnumName <=CX> &b)
 {
   return a.value_ < b.value_;
 }
 
-bool operator <=(const {{GeneratedEnumName}} &a, const {{GeneratedEnumName}} &b)
+bool operator <=(const <CX=r> GeneratedEnumName <=CX> &a, const <CX=r> GeneratedEnumName <=CX> &b)
 {
   return a.value_ <= b.value_;
 }
 
-bool operator >(const {{GeneratedEnumName}} &a, const {{GeneratedEnumName}} &b)
+bool operator >(const <CX=r> GeneratedEnumName <=CX> &a, const <CX=r> GeneratedEnumName <=CX> &b)
 {
   return a.value_ > b.value_;
 }
 
-bool operator >=(const {{GeneratedEnumName}} &a, const {{GeneratedEnumName}} &b)
+bool operator >=(const <CX=r> GeneratedEnumName <=CX> &a, const <CX=r> GeneratedEnumName <=CX> &b)
 {
   return a.value_ >= b.value_;
 }
 
-{{GeneratedEnumName}}::_enumerated {{GeneratedEnumName}}::FromString(const char *txt) noexcept {
+<CX=r> GeneratedEnumName <=CX>::_enumerated <CX=r> GeneratedEnumName <=CX>::FromString(const char *txt) noexcept {
   for (size_t index = 0; index < _count; ++index) {
     if (names_[index] == txt)
       return static_cast<_enumerated>(values_[index]);
@@ -234,12 +248,12 @@ bool operator >=(const {{GeneratedEnumName}} &a, const {{GeneratedEnumName}} &b)
   return _enumerated::TOTAL; // TODO: use optional
 }
 
-{{GeneratedEnumName}}::_enumerated_t {{GeneratedEnumName}}::ToNumber(const {{GeneratedEnumName}}::_enumerated val) noexcept {
+<CX=r> GeneratedEnumName <=CX>::_enumerated_t <CX=r> GeneratedEnumName <=CX>::ToNumber(const <CX=r> GeneratedEnumName <=CX>::_enumerated val) noexcept {
   return
       static_cast<_enumerated_t>(val);
 }
 
-const char *{{GeneratedEnumName}}::ToString(const {{GeneratedEnumName}}::_enumerated val) noexcept {
+const char *<CX=r> GeneratedEnumName <=CX>::ToString(const <CX=r> GeneratedEnumName <=CX>::_enumerated val) noexcept {
   for (size_t index = 0; index < _count; ++index) {
     if (values_[index] == static_cast<_enumerated_t>(val))
       return names_[index];
@@ -247,7 +261,7 @@ const char *{{GeneratedEnumName}}::ToString(const {{GeneratedEnumName}}::_enumer
   return nullptr;
 }
 
-{{GeneratedEnumName}}::_enumerated {{GeneratedEnumName}}::FromNumber(const {{GeneratedEnumName}}::_enumerated_t val) noexcept {
+<CX=r> GeneratedEnumName <=CX>::_enumerated <CX=r> GeneratedEnumName <=CX>::FromNumber(const <CX=r> GeneratedEnumName <=CX>::_enumerated_t val) noexcept {
   auto val_to_type = static_cast<std::underlying_type_t<_enumerated>>(val);
   for (size_t index = 0; index < _count; ++index) {
     if (values_[index] == val_to_type)
@@ -256,32 +270,32 @@ const char *{{GeneratedEnumName}}::ToString(const {{GeneratedEnumName}}::_enumer
   return _enumerated::TOTAL; // TODO: use optional
 }
 
-const char *{{GeneratedEnumName}}::ToString() const noexcept {
+const char *<CX=r> GeneratedEnumName <=CX>::ToString() const noexcept {
   return ToString(value_);
 }
 
-{{GeneratedEnumName}}::_enumerated_t {{GeneratedEnumName}}::ToNumber() const noexcept {
+<CX=r> GeneratedEnumName <=CX>::_enumerated_t <CX=r> GeneratedEnumName <=CX>::ToNumber() const noexcept {
   return ToNumber(value_);
 }
 
-const {{GeneratedEnumName}} &{{GeneratedEnumName}}::operator =({{GeneratedEnumName}}::_enumerated_t dummy) noexcept {
+const <CX=r> GeneratedEnumName <=CX> &<CX=r> GeneratedEnumName <=CX>::operator =(<CX=r> GeneratedEnumName <=CX>::_enumerated_t dummy) noexcept {
   value_ = FromNumber(dummy);
   return *this;
 }
 
-const {{GeneratedEnumName}} &{{GeneratedEnumName}}::operator =({{GeneratedEnumName}} dummy) noexcept {
+const <CX=r> GeneratedEnumName <=CX> &<CX=r> GeneratedEnumName <=CX>::operator =(<CX=r> GeneratedEnumName <=CX> dummy) noexcept {
   value_ = dummy.value_;
   return *this;
 }
 
-{{GeneratedEnumName}}::operator _enumerated() const { return value_; }
+<CX=r> GeneratedEnumName <=CX>::operator _enumerated() const { return value_; }
 
 } // namespace cxxctp
 } // namespace generated
 
 // Support using as key in dictionaries and maps
-size_t std::hash<cxxctp::generated::{{GeneratedEnumName}}>::operator()(
-  const cxxctp::generated::{{GeneratedEnumName}}& x) const
+size_t std::hash<cxxctp::generated::<CX=r> GeneratedEnumName <=CX>>::operator()(
+  const cxxctp::generated::<CX=r> GeneratedEnumName <=CX>& x) const
 {
   return std::hash<size_t>()(
     static_cast<size_t>(x.ToNumber()));

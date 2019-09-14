@@ -383,6 +383,11 @@
 #include "../../src/template_engine/CXTPL.h"
 
 // generated
+
+/*#if !defined(ENABLE_CLING)
+#include "CXTPL_STD.cpp"
+#endif // !ENABLE_CLING*/
+
 #include "../../resources/cxtpl/enum_gen_hpp.cxtpl.h"
 #include "../../resources/cxtpl/enum_gen_cpp.cxtpl.h"
 

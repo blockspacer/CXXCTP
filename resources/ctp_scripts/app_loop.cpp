@@ -247,7 +247,9 @@ const char* typeclass_instance(
     const clang::Decl* decl,
     const std::vector<parsed_func>& args) {
     printf("typeclass_instance called...\n");
-#if 0
+
+    std::map<std::string, std::any> cxtpl_params;
+
     std::string typeclassBaseName = get_func_arg(args, "typeclass_instance", 0);
 
     printf("typeclassBaseName = %s...\n", typeclassBaseName.c_str());
@@ -268,10 +270,10 @@ const char* typeclass_instance(
         return "";
     }*/
 
-    if(ReflectedBaseTypeclass->reflectedJinjaClass_.isEmpty()) {
+    /*if(ReflectedBaseTypeclass->reflectedJinjaClass_.isEmpty()) {
         printf("ReflectedBaseTypeclass not found for typeclassBaseNode = %s!\n", typeclassBaseName.c_str());
         return "";
-    }
+    }*/
 
     const clang::CXXRecordDecl *node =
         matchResult.Nodes.getNodeAs<clang::CXXRecordDecl>("bind_gen");
@@ -283,33 +285,14 @@ const char* typeclass_instance(
 
     printf("reflect is record %s\n", node->getNameAsString().c_str());
 
-    jinja2::ValuesMap params;
+    cxtpl_params.emplace("ReflectedBaseTypeclass",
+                         std::make_any<reflection::ClassInfoPtr>(ReflectedBaseTypeclass->classInfoPtr_));
 
-    /*SourceLocation startLoc = decl->getLocStart();
-    SourceLocation endLoc = decl->getLocEnd();
-    expandLocations(startLoc, endLoc, rewriter);
+    cxtpl_params.emplace("ImplTypeclassName",
+                         std::make_any<std::string>(node->getNameAsString()));
 
-    auto codeRange = SourceRange{startLoc, endLoc};
-
-    std::string OriginalTypeclassBaseCode =
-        rewriter.getRewrittenText(codeRange);
-
-    // removes $apply(typeclass, e.t.c.)
-    std::string CleanOriginalTypeclassBaseCode
-        = std::regex_replace(OriginalTypeclassBaseCode,
-                             std::regex("\\$apply([^(]*)\\([^)]*\\)(.*)"), "$1$2");
-
-    params.emplace("OriginalTypeclassBaseImplCode",
-                   jinja2::Value{CleanOriginalTypeclassBaseCode.c_str()});*/
-
-    params.emplace("ReflectedBaseTypeclass",
-                   ReflectedBaseTypeclass->reflectedJinjaClass_);
-
-    params.emplace("ImplTypeclassName",
-                   jinja2::Value{node->getNameAsString().c_str()});
-
-    params.emplace("BaseTypeclassName",
-                   jinja2::Value{ReflectedBaseTypeclass->classInfoPtr_->name.c_str()});
+    cxtpl_params.emplace("BaseTypeclassName",
+                         std::make_any<std::string>(ReflectedBaseTypeclass->classInfoPtr_->name));
 
     SourceManager &SM = rewriter.getSourceMgr();
     const auto fileID = SM.getMainFileID();
@@ -330,10 +313,27 @@ const char* typeclass_instance(
             = node->getNameAsString() + ".typeclass_instance.generated.hpp";
         std::string gen_base_typeclass_hpp_name
             = ReflectedBaseTypeclass->classInfoPtr_->name + ".typeclass.generated.hpp";
+        cxtpl_params.emplace("generator_path",
+                             std::make_any<std::string>("typeclass_instance_gen_hpp.cxtpl"));
+        cxtpl_params.emplace("generator_includes",
+                             std::make_any<std::vector<std::string>>(
+                                 std::vector<std::string>{
+                                     /// \TODO
+                                     R"raw(#include "../resources/type_erasure_common.hpp")raw",
+                                     wrapLocalInclude(gen_base_typeclass_hpp_name).c_str(),
+                                     wrapLocalInclude(original_full_file_path).c_str()
+                                 })
+                             );
+
+        std::string cxtpl_output;
+
+#include "../../resources/cxtpl/typeclass_instance_gen_hpp.cxtpl.cpp"
+
+        writeToFile(cxtpl_output, gen_hpp_name);
+
+        /*
         std::string typeclassHppConvertor =
             getFileContent("../resources/typeclass_instance_gen_hpp.cxtpl");
-        params.emplace("generator_path",
-                       jinja2::Value{"typeclass_instance_gen_hpp.cxtpl"});
         params.emplace("generator_includes",
                        jinja2::Value{
                            jinja2::ValuesList{
@@ -350,9 +350,8 @@ const char* typeclass_instance(
                    typeclassHppConvertor.c_str(),
                    parseResult.error().GetLocationDescr().c_str());
         }
-        writeToFile(tpl.RenderAsString(params).value(), gen_hpp_name);
+        writeToFile(tpl.RenderAsString(params).value(), gen_hpp_name);*/
     }
-#endif
   return ""; // TODO
 }
 
@@ -368,17 +367,15 @@ const char* typeclass(
 
   printf("typeclass called...\n");
 
-#if 0
-
   const clang::CXXRecordDecl *node =
       matchResult.Nodes.getNodeAs<clang::CXXRecordDecl>("bind_gen");
 
   if (node) {
     printf("reflect is record %s\n", node->getNameAsString().c_str());
-    // TODO: getOriginalNamespace
-    {
-        jinja2::ValuesMap params;
 
+    std::map<std::string, std::any> cxtpl_params;
+
+    {
         printf("reflector... for record %s\n", node->getNameAsString().c_str());
         reflection::AstReflector reflector(matchResult.Context);
 
@@ -386,10 +383,9 @@ const char* typeclass(
         reflection::ClassInfoPtr structInfo = reflector.ReflectClass(node, &m_namespaces);
 
         printf("reflectClassInfoPtr... for record %s\n", node->getNameAsString().c_str());
-        jinja2::Value reflectedJinjaClass = reflectClassInfoPtr(structInfo);
-        params.emplace("ReflectedStructInfo",
-                        reflectedJinjaClass
-                       /*jinja2::Value{PrepareStructInfo(structInfo, matchResult.Context)}*/);
+        //jinja2::Value reflectedJinjaClass = reflectClassInfoPtr(structInfo);
+        cxtpl_params.emplace("ReflectedStructInfo",
+                       std::make_any<reflection::ClassInfoPtr>(structInfo));
         std::cout << "methods: " << structInfo->methods.size() << "\n";
 
         for(auto mit : structInfo->methods){
@@ -400,7 +396,7 @@ const char* typeclass(
         }
 
         printf("ReflectionRegistry... for record %s\n", node->getNameAsString().c_str());
-        reflection::ReflectionRegistry::getInstance()->reflectionCXXRecordRegistry[node->getNameAsString()] = std::make_unique<reflection::ReflectionCXXRecordRegistry>(node->getNameAsString(), /*node,*/ structInfo, reflectedJinjaClass);
+        reflection::ReflectionRegistry::getInstance()->reflectionCXXRecordRegistry[node->getNameAsString()] = std::make_unique<reflection::ReflectionCXXRecordRegistry>(node->getNameAsString(), /*node,*/ structInfo);
 
       //jinja2::ValuesList GeneratedTypeclassFuncs;
 
@@ -430,11 +426,11 @@ const char* typeclass(
         = std::regex_replace(OriginalTypeclassBaseCode,
             std::regex("\\$apply([^(]*)\\([^)]*\\)(.*)"), "$1$2");
 
-      params.emplace("OriginalTypeclassBaseCode",
-                     jinja2::Value{CleanOriginalTypeclassBaseCode.c_str()});
+      cxtpl_params.emplace("OriginalTypeclassBaseCode",
+                           std::make_any<std::string>(CleanOriginalTypeclassBaseCode));
 
-      params.emplace("GeneratedTypeclassName",
-                     jinja2::Value{node->getNameAsString().c_str()});
+      cxtpl_params.emplace("GeneratedTypeclassName",
+                     std::make_any<std::string>(node->getNameAsString()));
 
       //params.emplace("GeneratedTypeclassFuncs",
       //               jinja2::Value{GeneratedTypeclassFuncs});
@@ -449,15 +445,24 @@ const char* typeclass(
       {
         std::string gen_hpp_name
             = node->getNameAsString() + ".typeclass.generated.hpp";
+        cxtpl_params.emplace("generator_path",
+                       std::make_any<std::string>("typeclass_gen_hpp.cxtpl"));
+        cxtpl_params.emplace("generator_includes",
+                             std::make_any<std::vector<std::string>>(
+                                 std::vector<std::string>{
+                                     wrapLocalInclude(R"raw(../resources/type_erasure_common.hpp)raw")
+                                 })
+                             );
+
+        std::string cxtpl_output;
+
+#include "../../resources/cxtpl/typeclass_gen_hpp.cxtpl.cpp"
+
+        writeToFile(cxtpl_output, gen_hpp_name);
+
+        /*
         std::string typeclassHppConvertor =
           getFileContent("../resources/typeclass_gen_hpp.cxtpl");
-        params.emplace("generator_path",
-                       jinja2::Value{"typeclass_gen_hpp.cxtpl"});
-        params.emplace("generator_includes",
-                       jinja2::Value{
-                           jinja2::ValuesList{
-                             /// \TODO
-                               wrapLocalInclude(R"raw(../resources/type_erasure_common.hpp)raw")}});
         jinja2::Template tpl;
         auto parseResult = tpl.Load(typeclassHppConvertor);
         if(!parseResult) {
@@ -465,11 +470,10 @@ const char* typeclass(
             typeclassHppConvertor.c_str(),
             parseResult.error().GetLocationDescr().c_str());
         }
-        writeToFile(tpl.RenderAsString(params).value(), gen_hpp_name);
+        writeToFile(tpl.RenderAsString(params).value(), gen_hpp_name);*/
       }
     }
   }
-#endif
 
   return "";
 }
@@ -487,9 +491,9 @@ const char* reflect_enum(
   if (node) {
     printf("reflect is record %s\n", node->getNameAsString().c_str());
 
-    std::map<std::string, std::any> dictionary;
+    std::map<std::string, std::any> cxtpl_params;
 
-    std::map<std::string, std::string> GeneratedEnumItems;
+    std::unordered_map<std::string, std::string> GeneratedEnumItems;
 
     GeneratedEnumItems.emplace("NONE", std::to_string(0));
 
@@ -524,9 +528,9 @@ const char* reflect_enum(
         printf("    %s %ld\n", iter->getNameAsString().c_str(),
           iter->getInitVal().getExtValue());
         GeneratedEnumItems.emplace(
+            iter->getNameAsString(),
             std::to_string(
-                iter->getInitVal().getExtValue()),
-            iter->getNameAsString());
+                iter->getInitVal().getExtValue()));
         maxval = std::max(maxval, iter->getInitVal().getExtValue());
     }
     printf("\n");
@@ -534,11 +538,11 @@ const char* reflect_enum(
     GeneratedEnumItems.emplace(
         "TOTAL", std::to_string(maxval + 1));
 
-      dictionary["GeneratedEnumItems"] =
-        std::make_any<std::map<std::string, std::string>>(GeneratedEnumItems);
-      dictionary["GeneratedEnumName"] =
+      cxtpl_params["GeneratedEnumItems"] =
+        std::make_any<std::unordered_map<std::string, std::string>>(GeneratedEnumItems);
+      cxtpl_params["GeneratedEnumName"] =
           std::make_any<std::string>(nameString);
-      dictionary["GeneratedEnumType"] =
+      cxtpl_params["GeneratedEnumType"] =
           std::make_any<std::string>(typeString);
 
     std::string gen_hpp_name = node->getNameAsString() + ".enum.generated.hpp";
@@ -546,33 +550,33 @@ const char* reflect_enum(
     gen_hpp_inc_code += node->getNameAsString() + ".enum.generated.hpp";
     gen_hpp_inc_code += R"raw(")raw";*/
     {
-      dictionary["generator_path"] =
+      cxtpl_params["generator_path"] =
           std::make_any<std::string>("enum_gen_cpp.cxtpl");
-      dictionary["generator_includes"] =
+      cxtpl_params["generator_includes"] =
           std::make_any<std::vector<std::string>>(
               std::vector<std::string>{
                   wrapLocalInclude(gen_hpp_name)
               });
 
-      std::string output;
+      std::string cxtpl_output;
 
 #include "../../resources/cxtpl/enum_gen_cpp.cxtpl.cpp"
 
-      writeToFile(output, node->getNameAsString() + ".enum.generated.cpp");
+      writeToFile(cxtpl_output, node->getNameAsString() + ".enum.generated.cpp");
     }
 
     {
-      dictionary["generator_path"] =
+      cxtpl_params["generator_path"] =
           std::make_any<std::string>("enum_gen_hpp.cxtpl");
-      dictionary["generator_includes"] =
+      cxtpl_params["generator_includes"] =
           std::make_any<std::vector<std::string>>(
               std::vector<std::string>{});
 
-      std::string output;
+      std::string cxtpl_output;
 
 #include "../../resources/cxtpl/enum_gen_hpp.cxtpl.cpp"
 
-      writeToFile(output, gen_hpp_name);
+      writeToFile(cxtpl_output, gen_hpp_name);
     }
   }
 

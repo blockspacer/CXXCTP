@@ -15,6 +15,7 @@ Note: this project is provided as is, without any warranty (see License).
 + Ability to modify source files (implement metaclasses, transpile from C++X to C++Y e.t.c.)
 + Ability to create new files (separate generated class to .hpp and .cpp, e.t.c.)
 + Ability to check source files (implement style checks, design patterns, e.t.c.)
++ Ability to compile scripts (rules for code transformations) for maximum performance, not only interpret them in Cling.
 
 TODO:
 + DSL integration
@@ -129,7 +130,8 @@ export CXX=g++
 rm -rf build
 mkdir build
 cd build
-cmake -DENABLE_CLING=TRUE -DCMAKE_BUILD_TYPE=Debug ..
+cmake -DENABLE_CLING=FALSE -DCMAKE_BUILD_TYPE=Debug ..
+# NOTE: first build may fail without codegen, continue anyway!
 cmake --build . -- -j6
 ./CXTPL
 cmake --build . -- -j6

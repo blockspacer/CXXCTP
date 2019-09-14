@@ -84,6 +84,7 @@ list(APPEND COMMON_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/reflect/ReflectAST.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/reflect/ast_utils.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/template_engine/CXTPL.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/template_engine/CXTPL_AnyDict.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/template_engine/CXTPL.h
 )
 
@@ -111,6 +112,8 @@ else(ENABLE_CLING)
    ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/app_loop.h
    ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/ctp_registry.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/ctp_registry.h
+   ${CMAKE_CURRENT_SOURCE_DIR}/resources/cxtpl/CXTPL_STD.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/resources/cxtpl/CXTPL_STD.h
   )
 endif(ENABLE_CLING)
 

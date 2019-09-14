@@ -1,16 +1,19 @@
 ﻿<CX=> // parameters begin
 
-std::string headerGuard
-  = GetWithDefault<std::string>(dictionary, "headerGuard", "");
+const auto headerGuard
+  = GetWithDefault<std::string>(cxtpl_params, "headerGuard", "");
 
-std::string GeneratedEnumName
-  = GetWithDefault<std::string>(dictionary, "GeneratedEnumName", "");
+const auto GeneratedEnumName
+  = GetWithDefault<std::string>(cxtpl_params, "GeneratedEnumName", "");
 
-std::string GeneratedEnumType
-  = GetWithDefault<std::string>(dictionary, "GeneratedEnumType", "");
+const auto generator_path
+  = GetWithDefault<std::string>(cxtpl_params, "generator_path", "");
 
-std::map<std::string, std::string> GeneratedEnumItems
-  = GetWithDefault<std::map<std::string, std::string>>(dictionary, "GeneratedEnumItems", std::map<std::string, std::string>{});
+const auto GeneratedEnumType
+  = GetWithDefault<std::string>(cxtpl_params, "GeneratedEnumType", "");
+
+const auto GeneratedEnumItems
+  = GetWithDefault<std::unordered_map<std::string, std::string>>(cxtpl_params, "GeneratedEnumItems", std::unordered_map<std::string, std::string>{});
 
 const size_t GeneratedEnumItemsSize = GeneratedEnumItems.size();
 if(!GeneratedEnumItemsSize) {
@@ -19,20 +22,14 @@ if(!GeneratedEnumItemsSize) {
 
 std::vector<std::string> generator_includes
   = GetWithDefault<std::vector<std::string>>
-      (dictionary, "generator_includes", std::vector<std::string>{});
+      (cxtpl_params, "generator_includes", std::vector<std::string>{});
 
 // parameters end
-<=CX>
+/* no newline */ <=CX><CX=l>
 // This is generated file. Do not modify directly.
-// Path to the code generator: {{generator_path}}.
+// Path to the code generator: <CX=r> generator_path <=CX>.
 
-<CX=l> if(!headerGuard.empty()) {
-#ifndef {{headerGuard}}
-#define {{headerGuard}}
-<CX=l> } else {
-#pragma once
-<CX=l> } // !headerGuard.empty()
-<CX=l> printf("headerGuard4 \n");
+<CX=r> startHeaderGuard(headerGuard) /* no newline */ <=CX><CX=l>
 
 <CX=l> for(const auto& fileName: generator_includes) {
 <CX=r> fileName <=CX>
@@ -53,7 +50,7 @@ struct <CX=r> GeneratedEnumName <=CX>
   enum class _enumerated : _enumerated_t {
 <CX=l>  { // startscope
 <CX=l>    size_t elemIter = 0;
-<CX=l>    for(const auto& [value, name]: GeneratedEnumItems) {
+<CX=l>    for(const auto& [name, value]: GeneratedEnumItems) {
 <CX=l>      const std::string delim  =
 <CX=l>        (elemIter != GeneratedEnumItemsSize) ? "," : "";
 <CX=l>      const std::string comment  =
@@ -164,7 +161,7 @@ struct <CX=r> GeneratedEnumName <=CX>
       {
 <CX=l>  { // startscope
 <CX=l>    size_t elemIter = 0;
-<CX=l>    for(const auto& [value, name]: GeneratedEnumItems) {
+<CX=l>    for(const auto& [name, value]: GeneratedEnumItems) {
 <CX=l>      const std::string delim  =
 <CX=l>        (elemIter != GeneratedEnumItemsSize) ? "," : "";
         <CX=r>value<=CX> <CX=r>delim<=CX> // <CX=r>name<=CX>
@@ -177,7 +174,7 @@ struct <CX=r> GeneratedEnumName <=CX>
       {
 <CX=l>  { // startscope
 <CX=l>    size_t elemIter = 0;
-<CX=l>    for(const auto& [value, name]: GeneratedEnumItems) {
+<CX=l>    for(const auto& [name, value]: GeneratedEnumItems) {
 <CX=l>      const std::string delim  =
 <CX=l>        (elemIter != GeneratedEnumItemsSize) ? "," : "";
         "<CX=r>name<=CX>" <CX=r>delim<=CX> // <CX=r>value<=CX>
@@ -198,6 +195,4 @@ namespace std {
     };
 }
 
-<CX=l> if(!headerGuard.empty()) {
-#endif // {{headerGuard}}
-<CX=l> } // !headerGuard.empty()
+<CX=r> endHeaderGuard(headerGuard) /* no newline */ <=CX><CX=l>

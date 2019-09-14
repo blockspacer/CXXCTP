@@ -1,9 +1,9 @@
 ﻿using namespace clang::tooling;
 <CX=l>std::cout << "123\n";
-<CX=l> bool bVar = std::any_cast< bool>(dictionary.at("bVar"));
+<CX=l> bool bVar = std::any_cast< bool>(cxtpl_params.at("bVar"));
 <CX=l>std::cout << "0123\n";
-<CX=l> bool cVar = std::any_cast< bool>(dictionary.at("cVar"));
-<CX=l> std::vector<std::string> carNames = std::any_cast< std::vector<std::string>>(dictionary.at("carNames"));
+<CX=l> bool cVar = std::any_cast< bool>(cxtpl_params.at("cVar"));
+<CX=l> std::vector<std::string> carNames = std::any_cast< std::vector<std::string>>(cxtpl_params.at("carNames"));
 <CX=l>std::cout << "1123\n";
 <CX=l>if(bVar) {
 #include <somefile0>

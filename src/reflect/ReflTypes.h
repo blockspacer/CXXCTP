@@ -126,6 +126,7 @@ struct MethodInfo : public NamedDeclInfo
     AccessType accessType = AccessType::Undefined;
     std::string body;
 
+    bool isConstexpr = false;
     bool isConst = false;
     bool isVirtual = false;
     bool isPure = false;
@@ -141,6 +142,7 @@ struct MethodInfo : public NamedDeclInfo
     bool isInlined = false;
     bool isClassScopeInlined = false;
     bool isDefined = false;
+    bool isDefault = false;
     AssignmentOperType assignmentOperType = AssignmentOperType::None;
     ConstructorType constructorType = ConstructorType::None;
 

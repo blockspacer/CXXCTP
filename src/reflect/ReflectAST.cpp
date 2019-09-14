@@ -386,7 +386,7 @@ MethodInfoPtr AstReflector::ReflectMethod(const FunctionDecl* decl, NamespacesTr
     methodInfo->isImplicit = decl->isImplicit();
     if (fnProtoType)
         methodInfo->isNoExcept = isNoexceptExceptionSpec(fnProtoType->getExceptionSpecType());
-    // methodInfo->isNoExcept = decl->is
+    methodInfo->isConstexpr = cxxDecl && cxxDecl->isConstexpr();
     methodInfo->isPure = decl->isPure();
     methodInfo->isStatic = cxxDecl && cxxDecl->isStatic();
     methodInfo->isVirtual = cxxDecl && cxxDecl->isVirtual();
@@ -396,6 +396,7 @@ MethodInfoPtr AstReflector::ReflectMethod(const FunctionDecl* decl, NamespacesTr
     methodInfo->returnType = TypeInfo::Create(decl->getReturnType(), m_astContext);
     methodInfo->isInlined = decl->isInlined();
     methodInfo->isDefined = decl->isDefined();
+    methodInfo->isDefault = decl->isDefaulted();
 
     const clang::Stmt* body = nullptr;
     if ((body = decl->getBody()) != nullptr)
