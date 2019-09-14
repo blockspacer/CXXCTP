@@ -10,8 +10,8 @@ ReflectionRegistry *ReflectionRegistry::getInstance() {
     return instance;
 }
 
-ReflectionCXXRecordRegistry::ReflectionCXXRecordRegistry(const reflectionID &id/*, const CXXRecordDecl *node*/, ClassInfoPtr classInfoPtr, const jinja2::Value& reflectedJinjaClass)
-    : id_(id)/*, node_(node)*/, classInfoPtr_(classInfoPtr), reflectedJinjaClass_(reflectedJinjaClass) {
+ReflectionCXXRecordRegistry::ReflectionCXXRecordRegistry(const reflectionID &id/*, const CXXRecordDecl *node*/, ClassInfoPtr classInfoPtr)
+    : id_(id)/*, node_(node)*/, classInfoPtr_(classInfoPtr) {
 }
 
 } // namespace reflection

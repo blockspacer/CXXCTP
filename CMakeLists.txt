@@ -36,9 +36,6 @@ set(CLING_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cling-build/" CACHE STRING "CLING DIR
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules)
-# TODO
-list(APPEND CMAKE_MODULE_PATH ${JINJA2CPP_INSTALL_DIR}/lib/jinja2cpp)
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/submodules/Jinja2Cpp/cmake/public)
 
 # Keep symbols for JIT resolution
 set(LLVM_NO_DEAD_STRIP 1)
@@ -52,13 +49,48 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti")
 
 include( Dependencies.cmake )
 
-# TODO
-#find_package(jinja2cpp)
-find_package(Jinja2Cpp)
-
 # NOTE: disable CLING by default,
 # so you can see sources in IDE and use tab-complete
-set(ENABLE_CLING TRUE CACHE BOOL "ENABLE_CLING")
+set(ENABLE_CLING FALSE CACHE BOOL "ENABLE_CLING")
+
+list(APPEND COMMON_FILES
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/clangUtils.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/clangUtils.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/funcParser.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/funcParser.cpp
+  #${CMAKE_CURRENT_SOURCE_DIR}/src/someEnum.hpp
+  #${CMAKE_CURRENT_SOURCE_DIR}/src/someEnum.cpp
+  #${CMAKE_CURRENT_SOURCE_DIR}/src/type_erasure_my_interface.cpp
+  #${CMAKE_CURRENT_SOURCE_DIR}/src/type_erasure_my_interface2.cpp
+  #${CMAKE_CURRENT_SOURCE_DIR}/src/type_erasure_my_interface_my_interface2.cpp
+  #${CMAKE_CURRENT_SOURCE_DIR}/src/types_for_erasure.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/DispatchQueue.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/DispatchQueue.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/clangPipeline.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/clangPipeline.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/ClingInterpreterModule.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/ClingInterpreterModule.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/utils.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/utils.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/inputThread.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/inputThread.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/reflect/ReflectionCache.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/reflect/ReflectionCache.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/reflect/ReflTypes.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/reflect/ReflTypes.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/reflect/TypeInfo.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/reflect/TypeInfo.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/reflect/ReflectAST.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/reflect/ReflectAST.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/reflect/ast_utils.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/template_engine/CXTPL.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/template_engine/CXTPL.h
+)
+
+add_executable(CXTPL
+ ${COMMON_FILES}
+ ${CMAKE_CURRENT_SOURCE_DIR}/src/template_engine/engine_main.cpp
+)
 
 if(ENABLE_CLING)
   #add_library(simple_lib SHARED #STATIC
@@ -66,44 +98,20 @@ if(ENABLE_CLING)
   #)
 
   list(APPEND CLING_DEFINITIONS CLING_IS_ON=1)
-  # The project has one binary:
   add_executable(CXXCTP
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/main_cling.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/clangUtils.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/clangUtils.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/funcParser.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/funcParser.cpp
-    #${CMAKE_CURRENT_SOURCE_DIR}/src/someEnum.hpp
-    #${CMAKE_CURRENT_SOURCE_DIR}/src/someEnum.cpp
-    #${CMAKE_CURRENT_SOURCE_DIR}/src/type_erasure_my_interface.cpp
-    #${CMAKE_CURRENT_SOURCE_DIR}/src/type_erasure_my_interface2.cpp
-    #${CMAKE_CURRENT_SOURCE_DIR}/src/type_erasure_my_interface_my_interface2.cpp
-    #${CMAKE_CURRENT_SOURCE_DIR}/src/types_for_erasure.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/DispatchQueue.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/DispatchQueue.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/clangPipeline.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/clangPipeline.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ClingInterpreterModule.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ClingInterpreterModule.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/utils.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/utils.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/inputThread.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/inputThread.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/reflect/ReflectionCache.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/reflect/ReflectionCache.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/reflect/ReflTypes.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/reflect/ReflTypes.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/reflect/TypeInfo.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/reflect/TypeInfo.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/reflect/ReflectAST.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/reflect/ReflectAST.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/reflect/ast_utils.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/reflect/jinja2_reflection.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/template_engine/CXTPL.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/template_engine/CXTPL.h
+   ${COMMON_FILES}
+   ${CMAKE_CURRENT_SOURCE_DIR}/src/main_cling.cpp
   )
 else(ENABLE_CLING)
-  message(FATAL_ERROR "Only Cling interpreter is supported for now")
+  #message(FATAL_ERROR "Only Cling interpreter is supported for now")
+  add_executable(CXXCTP
+   ${COMMON_FILES}
+   ${CMAKE_CURRENT_SOURCE_DIR}/src/main_cling.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/app_loop.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/app_loop.h
+   ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/ctp_registry.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/ctp_registry.h
+  )
 endif(ENABLE_CLING)
 
 set( USED_SYSTEM_LIBS
@@ -134,9 +142,7 @@ set( USED_BOOST_LIBS
   Boost::thread
   CACHE INTERNAL "USED_BOOST_LIBS" )
 
-# ...which links against clingInterpreter (and its dependencies).
-target_link_libraries(CXXCTP
-  #simple_lib
+list(APPEND CLING_LIBS
   # TODO: use FindClang.cmake
   ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangARCMigrate.a
   ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangAnalysis.a
@@ -189,13 +195,26 @@ target_link_libraries(CXXCTP
   ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangParse.a
   ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangStaticAnalyzerCheckers.a
   ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangARCMigrate.a
+)
+
+# ...which links against clingInterpreter (and its dependencies).
+target_link_libraries(CXXCTP
+  #simple_lib
+  ${CLING_LIBS}
   # system libs
   ${USED_SYSTEM_LIBS}
   # boost libs
   ${USED_BOOST_LIBS}
-  #
-  #${JINJA2CPP_LIBRARY}
-  /usr/local/lib/static/libjinja2cpp.a
+)
+
+# ...which links against clingInterpreter (and its dependencies).
+target_link_libraries(CXTPL
+  #simple_lib
+  ${CLING_LIBS}
+  # system libs
+  ${USED_SYSTEM_LIBS}
+  # boost libs
+  ${USED_BOOST_LIBS}
 )
 
 target_compile_definitions( CXXCTP PUBLIC
@@ -203,17 +222,23 @@ target_compile_definitions( CXXCTP PUBLIC
   # https://stackoverflow.com/a/30877725
   BOOST_SYSTEM_NO_DEPRECATED
   BOOST_ERROR_CODE_HEADER_ONLY
-  # https://jinja2cpp.dev/docs/build_and_install.html#dependency-management-modes
-  variant_CONFIG_SELECT_VARIANT=variant_VARIANT_NONSTD
 )
 
-target_include_directories( CXXCTP PUBLIC
-  ${JINJA2CPP_INCLUDE_DIR}
-  ${CMAKE_CURRENT_SOURCE_DIR}/submodules/Jinja2Cpp/thirdparty/nonstd/expected-light/include/
+target_compile_definitions( CXTPL PUBLIC
+  ${CLING_DEFINITIONS}
+  # https://stackoverflow.com/a/30877725
+  BOOST_SYSTEM_NO_DEPRECATED
+  BOOST_ERROR_CODE_HEADER_ONLY
 )
+
+#target_include_directories( CXXCTP PUBLIC
+#)
 
 set_target_properties(CXXCTP
   PROPERTIES ENABLE_EXPORTS 1)
+
+ set_target_properties(CXTPL
+   PROPERTIES ENABLE_EXPORTS 1)
 
 if(MSVC)
   set_target_properties(CXXCTP PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS 1)
@@ -221,4 +246,10 @@ if(MSVC)
               "/EXPORT:?setValueNoAlloc@internal@runtime@cling@@YAXPEAX00D_K@Z
                /EXPORT:?setValueNoAlloc@internal@runtime@cling@@YAXPEAX00DM@Z
                /EXPORT:cling_runtime_internal_throwIfInvalidPointer")
+
+   set_target_properties(CXTPL PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS 1)
+   set_property(TARGET CXTPL APPEND_STRING PROPERTY LINK_FLAGS
+               "/EXPORT:?setValueNoAlloc@internal@runtime@cling@@YAXPEAX00D_K@Z
+                /EXPORT:?setValueNoAlloc@internal@runtime@cling@@YAXPEAX00DM@Z
+                /EXPORT:cling_runtime_internal_throwIfInvalidPointer")
 endif()

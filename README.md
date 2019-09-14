@@ -11,7 +11,7 @@ Note: this project is provided as is, without any warranty (see License).
 
 ## Features
 + C++ as compile-time scripting language (https://github.com/derofim/cling-cmake)
-+ Jinja support (https://github.com/jinja2cpp/Jinja2Cpp)
++ Template engine with C++ syntax
 + Ability to modify source files (implement metaclasses, transpile from C++X to C++Y e.t.c.)
 + Ability to create new files (separate generated class to .hpp and .cpp, e.t.c.)
 + Ability to check source files (implement style checks, design patterns, e.t.c.)
@@ -20,7 +20,6 @@ TODO:
 + DSL integration
 + Better JSON support
 + Better docs support
-+ Replace Jinja with Cling
 
 ## Project status
 In development, see test.cpp and app_loop.cpp fo usage examples
@@ -70,9 +69,6 @@ https://hub.docker.com/r/codible/clang_dev/
 ## Better args parser & lines/spaces support ( make_interface(    outfile = filepath  ,   DISABLE   =   ${cling_var}) )
 TODO
 
-## Pass common reflected info to jinja for all decls (enum/class/e.t.c.)
-TODO
-
 ## Refactor
 TODO
 
@@ -110,30 +106,6 @@ sudo apt-get install openmpi-bin openmpi-common libopenmpi-dev
 # CMake
 bash scripts/install_cmake.sh
 
-# Jinja
-# see https://jinja2cpp.dev/docs/build_and_install.html
-cd submodules/Jinja2Cpp
-#sudo git checkout 0bd14188165769565d53f2bfb5c2e41a2b3a6c9c
-sudo git checkout release_1_0_prep
-sudo git submodule sync --recursive
-sudo git submodule update --init --recursive --depth 50
-rm -rf thirdparty/nonstd/expected-light/
-git clone https://github.com/martinmoene/expected-lite.git thirdparty/nonstd/expected-light/
-rm -rf thirdparty/fmtlib/
-git clone https://github.com/fmtlib/fmt.git thirdparty/fmtlib/
-rm -rf .build
-mkdir .build
-cd .build
-#     target_link_libraries(jinja2cpp_tests gtest gtest_main nlohmann_json ${LIB_TARGET_NAME} ${EXTRA_TEST_LIBS} boost_system )
-#BOOST_ERROR_CODE_HEADER_ONLY
-# target_compile_definitions(${LIB_TARGET_NAME} PUBLIC variant_CONFIG_SELECT_VARIANT=variant_VARIANT_NONSTD BOOST_SYSTEM_NO_DEPRECATED )
-# -DJINJA2CPP_DEPS_MODE=external-boost -DJINJA2CPP_BUILD_TESTS=OFF -Dvariant_CONFIG_SELECT_VARIANT=variant_VARIANT_NONSTD
-# BOOST_SYSTEM_NO_DEPRECATED likely makes it unnecessary to link with boost_system at all
-cmake .. -DJINJA2CPP_DEPS_MODE=external-boost -DJINJA2CPP_EXTRA_LIBS=boost_system
-cmake --build . --target all
-sudo cmake --build . --target install
-```
-
 ## How to build
 ```
 BEFORE setup.sh:
@@ -158,6 +130,8 @@ rm -rf build
 mkdir build
 cd build
 cmake -DENABLE_CLING=TRUE -DCMAKE_BUILD_TYPE=Debug ..
+cmake --build . -- -j6
+./CXTPL
 cmake --build . -- -j6
 ./CXXCTP
 ```
@@ -461,7 +435,7 @@ std::string out_var2;
 
 // for example: copyright comment
 @gen(
-  generate_code_from_jinja("some/file/path_here.jinja");
+  generate_code_from_template("some/file/path_here.cxtpl");
 )
 
 @gen(
@@ -578,9 +552,6 @@ string to/from hash (to use in switch e.t.c.) https://stackoverflow.com/question
 
 .template https://github.com/mlomb/MetaCPP/blob/8eddde5e1bf4809ad70a68a385b9cbcc8e237370/MetaCPP-CLI/templates/source.template
 
-jinja
-// see https://github.com/flexferrum/autoprogrammer/blob/b391ecd178de34047e110725ece696841729492d/src/jinja2_reflection.h
-
 $gen(import) for compile-time testing
 
 compile_commands.json
@@ -590,8 +561,6 @@ ability to embed rules for speed (run without cling)
 
 base64 Embed Resources Into Executables
  + https://github.com/caiorss/C-Cpp-Notes/blob/master/resources-executable.org#base-64-implementations
-
-add_func_by_jinja(jinja_arg1, jinja_arg2). NOTE: jinja_arg1 - may be cling var name
 
 C++ class state serialization (byte serialization)
  + http://ithare.com/ultra-fast-serialization-of-c-objects/
@@ -651,7 +620,7 @@ protoc https://github.com/feed57005/librfl/blob/master/rfl/CMakeLists.txt#L18
 
 dynamically calling functions by name with the runtime library https://www.reddit.com/r/gamedev/comments/3lh0ba/using_clang_to_generate_c_reflection_data/
 
-separate hpp & cpp: move decl/impl to file/cling var/jinja
+separate hpp & cpp: move decl/impl to file/cling var/tpl
 
 editor support? #include generated files?
 
@@ -719,12 +688,12 @@ type from var https://github.com/pthom/cleantype
 
 script to C++ for speed
 
-in-code jinja with (optional) filename & args
-$jinja(filename = ..., arg1 = ..., arg2 = ...)
+in-code cxtpl with (optional) filename & args
+$cxtpl(filename = ..., arg1 = ..., arg2 = ...)
 
 fix args split, don`t separate based on args in quotes
 
-in-class jinja placeholder attrs & make_jinja_placeholders attr
+in-class cxtpl placeholder attrs & make_cxtpl_placeholders attr
 
 http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p0707r3.pdf
 

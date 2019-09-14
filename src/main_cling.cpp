@@ -71,9 +71,6 @@ namespace fs = std::experimental::filesystem;
 #include "utils.h"
 #include "DispatchQueue.h"
 
-#include "jinja2cpp/value.h"
-#include "jinja2cpp/template.h"
-
 #include "funcParser.h"
 #include "inputThread.h"
 #include "clangUtils.h"
@@ -81,9 +78,10 @@ namespace fs = std::experimental::filesystem;
 #include "ClingInterpreterModule.h"
 #include "template_engine/CXTPL.h"
 
-#include "reflect/jinja2_reflection.h"
+#if !defined(CLING_IS_ON)
+#include "../resources/ctp_scripts/ctp_registry.h"
+#endif // CLING_IS_ON
 
-//using namespace jinja2;
 using namespace std;
 using namespace clang;
 using namespace clang::driver;
@@ -112,41 +110,32 @@ using llvm::StringRef;
     std::string declaration;
 };*/
 
+/*template <typename M>
+M GetWithDefault(const std::map<std::string, std::any>& m, const std::string& key, const M& defval) {
+    auto it = m.find( key );
+    if ( it == m.end() ) {
+        return defval;
+    }
+    else {
+        return std::any_cast<M>(it->second);
+    }
+}*/
+
 int main(int /*argc*/, const char* const* /*argv*/) {
+
+#if !defined(CLING_IS_ON)
+    add_modulecallbacks();
+#endif // CLING_IS_ON
+
     using namespace clang::tooling;
 
-    // FIXME: cling linkage hack:
-    // must use jinja before usage in cling
-    {
+    /*CXTPL<AnyDict> cxtpl;
 
-      reflection::ClassInfo structInfo{};
+    cxtpl.createFromFile("../resources/cxtpl/enum_gen_hpp.cxtpl");
+    cxtpl.buildToFile("../resources/cxtpl/enum_gen_hpp.cxtpl.cpp");
 
-      std::string enum2StringConvertor = R"(
-      inline const char* {{enumName}}ToString({{enumName}} e)
-      {
-          HELLO
-      })";
-      //jinja2::RealFileSystem fs;
-      //std::string enum2StringConvertor =
-      //  getFileContent("simple_template1.j2tpl");
-      //auto test1Stream = fs.OpenStream("test_data/simple_template1.j2tpl");
-      jinja2::ValuesMap params = {
-          {"enumName", jinja2::Reflect(structInfo)},
-          {"enumName2", jinja2::Reflect(reflection::ClassInfo{})},
-          {"enumName3", jinja2::Reflect(reflection::NamespaceInfo{})},
-          {"items", jinja2::ValuesList{"Dog", "Cat", "Monkey", "Elephant"} }
-      };
-      jinja2::Template tpl;
-      auto parseResult = tpl.Load(enum2StringConvertor);
-      if(!parseResult) {
-        printf("ERROR: can`t load jinja2 template from %s [%s]\n",
-          enum2StringConvertor.c_str(), parseResult.error().GetLocationDescr().c_str());
-      }
-      //tpl.Load("{{'Hello World' }}!!!");
-      //tpl.LoadFromFile("simple_template1.j2tpl");
-      //llvm::outs() << tpl.RenderAsString(params);
-      writeToFile(tpl.RenderAsString(params).value(), "tmp.enum.generated.hpp");
-    }
+    cxtpl.createFromFile("../resources/cxtpl/enum_gen_cpp.cxtpl");
+    cxtpl.buildToFile("../resources/cxtpl/enum_gen_cpp.cxtpl.cpp");*/
 
     llvm::outs() << "input_func!... " << '\n';
     std::thread inp_thread(input_func);
@@ -160,28 +149,7 @@ int main(int /*argc*/, const char* const* /*argv*/) {
       InterpreterModule::clingReadyCV.wait(lk, []{return InterpreterModule::isClingReady;});
     }
 
-    std::string preprocessorRawInput = (R"raw(using namespace clang::tooling1;
-using namespace clang::tooling2;
-<CX=l>if(bVar) {
-#include <somefile0>
-#include <somefile00>
-<CX=l>   if(cVar) {
-#include <somefile1>
-#include <somefile11>
-<CX=l>   } // cVar
-<CX=l> } else { // bVar
-#include <somefile2>
-#include <somefile22>
-<CX=l>} // bVar
-<CX=l>for(int i = 0; i < carNames.size(); ++i) {
-LOOPVALS:<CX=s>i<=CX>=<CX=r> carNames[i] <=CX>
-using namespace clang;
-<CX=l> } // for
-using namespace jinja2;
-)raw",
-        "");
-
-    bool bVar1 = true;
+    /*bool bVar1 = true;
     bool cVar1 = true;
     std::vector<std::string> carNames1{ "Betta", "Bob", "Lily"};
 
@@ -189,6 +157,9 @@ using namespace jinja2;
     anyDictionary["bVar"] =  std::make_any<bool>(std::move(bVar1));
     anyDictionary["cVar"] = std::make_any<bool>(std::move(cVar1));
     anyDictionary["carNames"] = std::make_any<std::vector<std::string>>(std::move(carNames1));
+
+    std::string headerGuard = GetWithDefault<std::string>(anyDictionary, "headerGuard", "");
+    std::vector<std::string> generator_includes = GetWithDefault<std::vector<std::string>>(anyDictionary, "headerGuard", carNames1);*/
 
     /*bool bVar = std::any_cast< bool>(anyDictionary.at("bVar"));
     bool cVar = std::any_cast< bool>(anyDictionary.at("cVar"));
@@ -198,25 +169,19 @@ using namespace jinja2;
     std::cout << "cVar = " << cVar << std::endl;
     std::cout << "carNames = " << carNames.size() << std::endl;*/
 
-    CXTPL<AnyDict> cxtpl;
-
-    cxtpl.createFromFile("../resources/cxtpl/test1.cxtpl");
-
-    cxtpl.buildToFile("test1.cxtpl.cpp");
-
     /*
     std::cout << "preprocessorRawInput = "
       << cxtpl.compileToString(bVar, cVar, carNames) << std::endl;
 
     cxtpl.interpretToString(bVar, cVar, carNames);*/
 
-    cxtpl.interpretToFile("test1.interpret.out", anyDictionary, R"raw(
+    /*cxtpl.interpretToFile("test1.interpret.out", anyDictionary, R"raw(
 #include <iostream>
 #include <map>
 #include <string>
 #include <any>
 #include <vector>
-)raw");
+)raw");*/
 
     //cxtpl.compileToFile("test1.compile.out", anyDictionary);
 

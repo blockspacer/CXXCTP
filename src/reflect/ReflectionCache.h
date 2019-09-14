@@ -16,12 +16,10 @@ class ReflectionCXXRecordRegistry {
 public:
     ReflectionCXXRecordRegistry(const reflectionID& id,
                                 //clang::CXXRecordDecl const *node,
-                                ClassInfoPtr classInfoPtr,
-                                const jinja2::Value& reflectedJinjaClass);
+                                ClassInfoPtr classInfoPtr);
     reflectionID id_;
     //clang::CXXRecordDecl const *node_;
     ClassInfoPtr classInfoPtr_;
-    jinja2::Value reflectedJinjaClass_;
 };
 
 class ReflectionRegistry {

@@ -6,24 +6,11 @@ std::map<std::string, std::vector<std::string>> InterpreterModule::moduleToSourc
     {
         "main_module",
         std::vector<std::string>{
+#if defined(CLING_IS_ON)
             "../resources/ctp_scripts/app_loop.cpp"
+#endif // CLING_IS_ON
         }
     }
-    /*{
-        "http_callbacks_module",
-        std::vector<std::string>{
-            "/home/denis/workspace/cling-cmake/src/http_callbacks.cpp"
-        }
-    },
-    /// \note module with app loop must be loaded last
-    {
-        "main_module",
-        std::vector<std::string>{
-            "/home/denis/workspace/cling-cmake/src/mime_type.cpp",
-            /// \note file with app loop must be loaded last
-            "/home/denis/workspace/cling-cmake/src/app_loop.cpp"
-        }
-    }*/
 };
 
 bool InterpreterModule::isClingReady = false;
@@ -97,7 +84,7 @@ void add_default_cling_args(std::vector<string> &args) {
     args.push_back("-I../cling-build/build/tools/clang/include/");
     args.push_back("-I../cling-build/src/tools/cling/include/");
 
-    args.push_back("-I../submodules/Jinja2Cpp/thirdparty/nonstd/expected-light/include/");
+    //args.push_back("-I../submodules/Jinja2Cpp/thirdparty/nonstd/expected-light/include/");
 
     args.push_back("-I../resources");
 
@@ -105,7 +92,7 @@ void add_default_cling_args(std::vector<string> &args) {
     args.push_back("-DBOOST_SYSTEM_NO_DEPRECATED");
     args.push_back("-DBOOST_ERROR_CODE_HEADER_ONLY");
     // https://jinja2cpp.dev/docs/build_and_install.html#dependency-management-modes
-    args.push_back("-Dvariant_CONFIG_SELECT_VARIANT=variant_VARIANT_NONSTD");
+    //args.push_back("-Dvariant_CONFIG_SELECT_VARIANT=variant_VARIANT_NONSTD");
 
     //args.push_back("-I/usr/local/tander/i586-pc-linux-gnu/usr/lib/gcc/i586-pc-linux-gnu/7.3.0/include/g++-v7/");
     //args.push_back("-I/usr/local/tander/i586-pc-linux-gnu/usr/lib/gcc/i586-pc-linux-gnu/7.3.0/include/g++-v7/i586-pc-linux-gnu/");

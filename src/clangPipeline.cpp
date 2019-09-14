@@ -1,5 +1,18 @@
 ﻿#include "clangPipeline.h"
 
+static std::map<std::string, cxxctp_callback> cxxctp_callbacks;
+
+void add_cxxctp_callback(const std::string& id, const cxxctp_callback& func) {
+    cxxctp_callbacks[id] = func;
+}
+
+cxxctp_callback get_cxxctp_callback(const std::string& id) {
+    auto it = cxxctp_callbacks.find( id );
+    if ( it == cxxctp_callbacks.end() ) {
+        return nullptr;
+    }
+    return cxxctp_callbacks[id];
+}
 /*OPTIONS:
 
 Generic Options:
@@ -24,8 +37,6 @@ void add_default_clang_args(std::vector<string> &args)
     // https://stackoverflow.com/a/30877725
     args.push_back("-extra-arg=-DBOOST_SYSTEM_NO_DEPRECATED");
     args.push_back("-extra-arg=-DBOOST_ERROR_CODE_HEADER_ONLY");
-    // https://jinja2cpp.dev/docs/build_and_install.html#dependency-management-modes
-    args.push_back("-extra-arg=-Dvariant_CONFIG_SELECT_VARIANT=variant_VARIANT_NONSTD");
 
     args.push_back("-extra-arg=-I../cling-build/build/lib/clang/5.0.0/include");
     args.push_back("-extra-arg=-I../cling-build/src/include/");
@@ -33,8 +44,6 @@ void add_default_clang_args(std::vector<string> &args)
     args.push_back("-extra-arg=-I../cling-build/src/tools/clang/include/");
     args.push_back("-extra-arg=-I../cling-build/build/tools/clang/include/");
     args.push_back("-extra-arg=-I../cling-build/src/tools/cling/include/");
-
-    args.push_back("-extra-arg=-I../submodules/Jinja2Cpp/thirdparty/nonstd/expected-light/include/");
 
     args.push_back("-extra-arg=-I../resources");
 
@@ -54,7 +63,70 @@ void add_default_clang_args(std::vector<string> &args)
     //args.push_back("-help");
 }
 
-void UseOverride::Checker::run(const UseOverride::Checker::MatchResult &Result) {
+#if defined(CLING_IS_ON)
+
+void callModuleFunc(const UseOverride::Checker::MatchResult& Result,
+                    clang::Rewriter &rewriter_,
+                    const clang::Decl* decl,
+                    const std::string& func_to_call,
+                    const std::vector<parsed_func>& parsedFuncs) {
+    std::ostringstream sstr;
+    // scope begin
+    sstr << "[](){";
+    sstr << "return ";
+    // func begin
+    sstr << func_to_call << "( ";
+    // func arguments
+    sstr << "*(const clang::ast_matchers::MatchFinder::MatchResult*)("
+         // Pass a pointer into cling as a string.
+         << std::hex << std::showbase
+         << reinterpret_cast<size_t>(&Result) << ')';
+    sstr << " , "; // next argument
+    sstr << "*(clang::Rewriter*)("
+         // Pass a pointer into cling as a string.
+         << std::hex << std::showbase
+         << reinterpret_cast<size_t>(&rewriter_) << ')';
+    sstr << " , "; // next argument
+    sstr << "(const clang::Decl*)("
+         // Pass a pointer into cling as a string.
+         << std::hex << std::showbase
+         << reinterpret_cast<size_t>(decl) << ')';
+    sstr << " , "; // next argument
+    sstr << "*(std::vector<parsed_func>*)("
+         // Pass a pointer into cling as a string.
+         << std::hex << std::showbase
+         << reinterpret_cast<size_t>(&parsedFuncs) << ')';
+    // func end
+    sstr << " );" << ";";
+    // scope end
+    sstr << "}();";
+    if(InterpreterModule::interpMap.find("main_module")
+        != InterpreterModule::interpMap.end()) {
+        cling::Interpreter::CompilationResult compilationResult;
+        InterpreterModule::interpMap["main_module"]->metaProcessor_->process(
+            sstr.str(), compilationResult, nullptr, true);
+    }
+}
+
+#else
+
+void callModuleFunc(const UseOverride::Checker::MatchResult& Result,
+                    clang::Rewriter &rewriter_,
+                    const clang::Decl* decl,
+                    const std::string& func_to_call,
+                    const std::vector<parsed_func>& parsedFuncs) {
+    printf("callModuleFunc %s\n", func_to_call.c_str());
+    /*llvm::outs() << "!callModuleFunc: "
+                 << func_to_call << "\n";*/
+    auto func = get_cxxctp_callback(func_to_call);
+    if(func) {
+        func(Result, rewriter_, decl, parsedFuncs);
+    }
+}
+
+#endif // CLING_IS_ON
+
+void UseOverride::Checker::run(const UseOverride::Checker::MatchResult& Result) {
     //llvm::outs() << "match1 = " << "\n";
 
     /*auto any_decl = Result.Nodes.getNodeAs<clang::NamedDecl>( "any_decl" );
@@ -184,6 +256,7 @@ void UseOverride::Checker::run(const UseOverride::Checker::MatchResult &Result) 
                 if(isEmbed) {
                     llvm::outs() << "embed for code: "
                                  << code << "\n";
+#if defined(CLING_IS_ON)
                     std::ostringstream sstr;
                     // scope begin
                     sstr << "[](){";
@@ -211,12 +284,6 @@ void UseOverride::Checker::run(const UseOverride::Checker::MatchResult &Result) 
                     cling::Value result;
                     if(InterpreterModule::interpMap.find("main_module") != InterpreterModule::interpMap.end()) {
                         cling::Interpreter::CompilationResult compilationResult;
-                        /*InterpreterModule::interpMap["main_module"]->metaProcessor_->process(
-                "#include <iostream>\n", compilationResult, nullptr, true);
-              InterpreterModule::interpMap["main_module"]->metaProcessor_->process(
-                "#include <string>\n", compilationResult, nullptr, true);
-              InterpreterModule::interpMap["main_module"]->metaProcessor_->process(
-                "#include <optional>\n", compilationResult, nullptr, true);*/
                         InterpreterModule::interpMap["main_module"]->metaProcessor_->process(
                                     sstr.str(), compilationResult, &result, true);
                     }
@@ -249,13 +316,14 @@ void UseOverride::Checker::run(const UseOverride::Checker::MatchResult &Result) 
                       }
                       delete resOption; /// \note frees resOptionVoid memory
                     }
+#endif // CLING_IS_ON
                 } else if(isEval) {
                     llvm::outs() << "eval for code: "
                                  << code << "\n";
+#if defined(CLING_IS_ON)
                     std::ostringstream sstr;
                     sstr << code;
                     if(InterpreterModule::interpMap.find("main_module") != InterpreterModule::interpMap.end()) {
-                        cling::Value result;
                         cling::Interpreter::CompilationResult compilationResult;
                         InterpreterModule::interpMap["main_module"]->metaProcessor_->process(
                                     sstr.str(), compilationResult, nullptr, true);
@@ -284,13 +352,14 @@ void UseOverride::Checker::run(const UseOverride::Checker::MatchResult &Result) 
                     rewriter_.ReplaceText(
                                 SourceRange(startLoc, endLoc),
                                 "");
+#endif // CLING_IS_ON
                 } else if(isExport) {
                     llvm::outs() << "export for code: "
                                  << code << "\n";
+#if defined(CLING_IS_ON)
                     std::ostringstream sstr;
                     sstr << code;
                     if(InterpreterModule::interpMap.find("main_module") != InterpreterModule::interpMap.end()) {
-                        cling::Value result;
                         cling::Interpreter::CompilationResult compilationResult;
                         InterpreterModule::interpMap["main_module"]->metaProcessor_->process(
                                     sstr.str(), compilationResult, nullptr, true);
@@ -343,57 +412,19 @@ void UseOverride::Checker::run(const UseOverride::Checker::MatchResult &Result) 
                     /*rewriter_.ReplaceText(
             SourceRange(startLoc, endLoc),
             code);*/
+#endif // CLING_IS_ON
                 } else if(isFuncCall) {
+
                     // Generate bindings for a decl with pyspot annotation
                     //generate_bindings( *decl );
                     llvm::outs() << "generator for code: "
                                  << code << "\n";
 
-                    cling::Value result;
-
                     //receivedMessagesQueue_->dispatch([] {
-                    for (const auto& func_to_call : funcs_to_call) {
+                    for (const std::string& func_to_call : funcs_to_call) {
                         llvm::outs() << "main_module task " << func_to_call << "!... " << '\n';
-                        std::ostringstream sstr;
-                        // scope begin
-                        sstr << "[](){";
-                        sstr << "return ";
-                        // func begin
-                        sstr << func_to_call << "( ";
-                        // func arguments
-                        sstr << "*(const clang::ast_matchers::MatchFinder::MatchResult*)("
-                                // Pass a pointer into cling as a string.
-                             << std::hex << std::showbase
-                             << reinterpret_cast<size_t>(&Result) << ')';
-                        sstr << " , "; // next argument
-                        sstr << "*(clang::Rewriter*)("
-                                // Pass a pointer into cling as a string.
-                             << std::hex << std::showbase
-                             << reinterpret_cast<size_t>(&rewriter_) << ')';
-                        sstr << " , "; // next argument
-                        sstr << "(const clang::Decl*)("
-                                // Pass a pointer into cling as a string.
-                             << std::hex << std::showbase
-                             << reinterpret_cast<size_t>(decl) << ')';
-                        sstr << " , "; // next argument
-                        sstr << "*(std::vector<parsed_func>*)("
-                             // Pass a pointer into cling as a string.
-                             << std::hex << std::showbase
-                             << reinterpret_cast<size_t>(&parsedFuncs) << ')';
-                        // func end
-                        sstr << " );" << ";";
-                        // scope end
-                        sstr << "}();";
-                        if(InterpreterModule::interpMap.find("main_module") != InterpreterModule::interpMap.end()) {
-                            cling::Interpreter::CompilationResult compilationResult;
-                            InterpreterModule::interpMap["main_module"]->metaProcessor_->process(
-                                        sstr.str(), compilationResult, &result, true);
-                        }
+                        callModuleFunc(Result, rewriter_, decl, func_to_call, parsedFuncs);
                     }
-                    //});
-                    /*rewriter_.ReplaceText(
-            decl->getSourceRange(),
-            result.getAs<const char*>());*/
                 }
             }
     }

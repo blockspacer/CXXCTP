@@ -16,12 +16,24 @@ void CXTPL<AnyDict>::createFromString(const string &code) {
 
 void CXTPL<AnyDict>::loadBuiltFromFile(const string &path) {
     code_after_build_ = readWholeFile(path);
+    if(code_after_build_.empty()) {
+        // TODO: better warning
+        printf("WARNING: empty code passed to CXTPL\n");
+    }
     code_for_cling_after_build_ = prepareForCling(code_after_build_);
 }
 
 void CXTPL<AnyDict>::loadBuiltFromString(const string &code) {
     code_after_build_ = code;
+    if(code_after_build_.empty()) {
+        // TODO: better warning
+        printf("WARNING: empty code passed to CXTPL\n");
+    }
     code_for_cling_after_build_ = prepareForCling(code_after_build_);
+    if(code_for_cling_after_build_.empty()) {
+        // TODO: better warning
+        printf("WARNING: empty code passed to cling\n");
+    }
 }
 
 /*std::unique_ptr<string> CXTPL<AnyDict>::interpretToString(bool& bVar, bool& cVar,
@@ -35,7 +47,11 @@ void CXTPL<AnyDict>::loadBuiltFromString(const string &code) {
 void CXTPL<AnyDict>::interpretToFile(const string &path,
                                      const std::map<std::string, std::any>& dictionary,
                                      const std::string &includes_code) {
+    printf("interpretToFile: with dictionary = %lu\n", dictionary.size());
+
     if(code_for_cling_after_build_.empty()) {
+        // TODO: better warning
+        printf("WARNING: empty code passed to cling\n");
         return;
     }
     interp_callback cb = [path/* copyed! */](std::unique_ptr<std::string> res) {
@@ -62,6 +78,10 @@ void CXTPL<AnyDict>::compileToFile(const string &path,
 }*/
 
 void CXTPL<AnyDict>::buildToFile(const string &path) {
+    if(code_after_build_.empty()) {
+       // TODO: better warning
+       printf("WARNING: empty code passed to CXTPL\n");
+    }
     writeToFile(code_after_build_, path);
 }
 
@@ -167,6 +187,7 @@ string CXTPL<AnyDict>::buildFromString(const string &input) {
                 processStr = removePrefix( processStr, nextTagMultiLine );
                 EncloseTagResult closedTag = encloseTag( processStr, closeTag );
                 if(closedTag.close_pos == std::string::npos) {
+                    // TODO: better error reporting
                     std::cout << "ERROR: missing closing tag after "
                               << openTagStart + nextTagMultiLine << std::endl;
                     break;
@@ -181,6 +202,7 @@ string CXTPL<AnyDict>::buildFromString(const string &input) {
                 processStr = removePrefix( processStr, nextTagLine );
                 EncloseTagResult closedTag = encloseTag( processStr, "\n" );
                 if(closedTag.close_pos == std::string::npos) {
+                    // TODO: better error reporting
                     std::cout << "ERROR: missing closing tag after "
                               << openTagStart + nextTagMultiLine << std::endl;
                     break;
@@ -193,6 +215,7 @@ string CXTPL<AnyDict>::buildFromString(const string &input) {
                 processStr = removePrefix( processStr, nextTagString );
                 EncloseTagResult closedTag = encloseTag( processStr, closeTag );
                 if(closedTag.close_pos == std::string::npos) {
+                    // TODO: better error reporting
                     std::cout << "ERROR: missing closing tag after "
                               << openTagStart + nextTagMultiLine << std::endl;
                     break;
@@ -205,6 +228,7 @@ string CXTPL<AnyDict>::buildFromString(const string &input) {
                 processStr = removePrefix( processStr, nextTagRawString );
                 EncloseTagResult closedTag = encloseTag( processStr, closeTag );
                 if(closedTag.close_pos == std::string::npos) {
+                    // TODO: better error reporting
                     std::cout << "ERROR: missing closing tag after "
                               << openTagStart + nextTagMultiLine << std::endl;
                     break;
@@ -245,8 +269,7 @@ string CXTPL<AnyDict>::prepareForCling(const string &inputToCode) {
     return wrapToLambda(inputToCode, "output");
 }
 
-std::string CXTPL<AnyDict>::loadClingArgs(const std::map<std::string, std::any>& dictionary,
-                                          const std::string &includes_code) {
+std::string CXTPL<AnyDict>::loadClingArgs(const std::string& appende, const std::map<std::string, std::any>& dictionary) {
     //std::string result = /*clinja_args +*/ inputToCode;
     std::string result;
 
@@ -277,17 +300,20 @@ std::string CXTPL<AnyDict>::loadClingArgs(const std::map<std::string, std::any>&
         sstr << "}()";
         return sstr.str();
     };
-    return wrapArgsToCling(code_for_cling_after_build_);
+    return wrapArgsToCling(appende);
 }
 
 void CXTPL<AnyDict>::runInInterpreter(
     const interp_callback& callback, const string &inStr,
     const std::map<std::string, std::any>& dictionary,
     const std::string &includes_code) {
-    const std::string inStrWithArgs = loadClingArgs(dictionary, includes_code);
+    if(inStr.empty()) {
+        // TODO: better warning
+    }
+    const std::string inStrWithArgs = loadClingArgs(inStr, dictionary);
     //#if 0
     InterpreterModule::receivedMessagesQueue_->
-        dispatch([includes_code /* copyed! */, inStrWithArgs /* copyed! */, callback /* copyed! */]() {
+        dispatch([includes_code /* copy! */, inStrWithArgs /* copy! */, callback /* copy! */]() {
             //#endif
             cling::Value clingResult;
             auto interp = std::make_unique<InterpreterModule>("template_module", std::vector<std::string>{});
@@ -302,13 +328,6 @@ void CXTPL<AnyDict>::runInInterpreter(
                 cling::Interpreter::CompilationResult compilationResult;
                 interp->metaProcessor_->process(inStrWithArgs, compilationResult,
                                                 &clingResult, true);
-                /*if(InterpreterModule::interpMap.find("main_module")
-                != InterpreterModule::interpMap.end()) {
-                cling::Interpreter::CompilationResult compilationResult;
-                InterpreterModule::interpMap["main_module"]->
-                    metaProcessor_->process(inStrWithArgs, compilationResult,
-                                            &clingResult, true);
-            }*/
 
                 void* resOptionVoid = clingResult.getAs<void*>();
                 /// \note free memory by unique_ptr

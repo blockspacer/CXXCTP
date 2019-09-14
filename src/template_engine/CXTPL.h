@@ -114,8 +114,8 @@ class CXTPL<AnyDict> {
  private:
   void rebuild();
 
-  std::string loadClingArgs(const std::map<std::string, std::any>& dictionary,
-                            const std::string &includes_code);
+  std::string loadClingArgs(const std::string& appende,
+                            const std::map<std::string, std::any>& dictionary);
 
   // TODO: WASM & Node.js support
   // TODO: filtering

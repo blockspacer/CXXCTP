@@ -1,5 +1,4 @@
-﻿using namespace clang::tooling1;
-using namespace clang::tooling2;
+﻿using namespace clang::tooling;
 <CX=l>std::cout << "123\n";
 <CX=l> bool bVar = std::any_cast< bool>(dictionary.at("bVar"));
 <CX=l>std::cout << "0123\n";
@@ -21,4 +20,4 @@ using namespace clang::tooling2;
 LOOPVALS:<CX=s>i<=CX>=<CX=r> carNames[i] <=CX>
 using namespace clang;
 <CX=l> } // for
-using namespace jinja2;
+using namespace std;

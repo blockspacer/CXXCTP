@@ -58,3 +58,19 @@ struct ToolFactory : public clang::tooling::FrontendActionFactory {
 };
 
 void add_default_clang_args(std::vector<std::string>& args);
+
+typedef std::function<const char*(
+    const clang::ast_matchers::MatchFinder::MatchResult& matchResult,
+    clang::Rewriter& rewriter,
+    const clang::Decl* decl,
+    const std::vector<parsed_func>& args)> cxxctp_callback;
+
+void add_cxxctp_callback(const std::string& id, const cxxctp_callback& func);
+
+cxxctp_callback get_cxxctp_callback(const std::string& id);
+
+/*typedef const char* make_removefuncbody(
+    const clang::ast_matchers::MatchFinder::MatchResult& matchResult,
+    clang::Rewriter& rewriter,
+    const clang::Decl* decl,
+    std::vector<parsed_func>& args)*/

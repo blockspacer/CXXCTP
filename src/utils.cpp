@@ -7,6 +7,7 @@ getFileContent(const std::string& path)
 {
     std::ifstream file(path);
     if(!file.is_open()) {
+        // TODO: better error reporting
         printf("ERROR: can`t read file %s\n", path.c_str());
         return "";
     }
@@ -15,23 +16,29 @@ getFileContent(const std::string& path)
     return content;
 }
 
-void writeToFile(const std::string& str, const std::string& path) {
-    std::ofstream file(path);
-    if(!file.is_open()) {
-        printf("ERROR: can`t write to file %s\n", path.c_str());
+void writeToFile(const std::string& str, const std::string& file_path) {
+    std::ofstream ofs(file_path);
+    if(!ofs) {
+        // TODO: better error reporting
+        printf("ERROR: can`t write to file %s\n", file_path.c_str());
         return;
     }
-    file << str;
-    file.close();
+    ofs << str;
+    ofs.close();
+    if(!ofs)    //bad() function will check for badbit
+    {
+        printf("ERROR: writing to file failed %s\n", file_path.c_str());
+        return;
+    }
 }
 
 std::string readWholeFile(const std::string &file_path) {
     std::ifstream file_stream(file_path, std::ios::binary);
+    if(!file_stream.is_open()) {
+        // TODO: better error reporting
+        printf("ERROR: can`t read from file %s\n", file_path.c_str());
+        return "";
+    }
     return std::string((std::istreambuf_iterator<char>(file_stream)),
                        std::istreambuf_iterator<char>());
-}
-
-jinja2::Value reflectClassInfoPtr(reflection::ClassInfoPtr ptr)
-{
-    return jinja2::Reflect(*ptr.get());
 }
