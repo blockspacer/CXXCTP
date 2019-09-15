@@ -69,7 +69,7 @@ Note: this project is provided as is, without any warranty (see License).
 
 ## Features
 + C++ as compile-time scripting language (https://github.com/derofim/cling-cmake)
-+ Template engine with C++ syntax
++ Template engine with full C++ power (transpiles template to valid C++ code, supports Cling, e.t.c.).
 + Ability to modify source files (implement metaclasses, transpile from C++X to C++Y e.t.c.)
 + Ability to create new files (separate generated class to .hpp and .cpp, e.t.c.)
 + Ability to check source files (implement style checks, design patterns, e.t.c.)
@@ -343,6 +343,11 @@ Usefull links:
 + http://www.wilxoft.com/
 + https://github.com/djc/askama
 + https://www.reddit.com/r/rust/comments/b06z9m/cuach_a_compiletime_html_template_system/
+
+## How to add `.cxtpl`
+Modify `CXTPL_config.cpp` to include list of your `.cxtpl` files. `CXTPL_config.cpp` will be executed at runtime, so you can change code to get files from cmd arguments, parse from `.json`, e.t.c.
+
+It is also possible to use `CXTPL.cpp` without cling, just copy `CXTPL.cpp` to you project with minor fixes. You can also pass typed arguments to template, just copy & modify `CXTPL_AnyDict.cpp` to replace `std::map<std::string, std::any>` with your typed arguments.
 
 ## How to use `.cxtpl` with CXXCTP
 Pass reflection data into template engine.
