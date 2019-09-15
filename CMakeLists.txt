@@ -53,6 +53,10 @@ include( Dependencies.cmake )
 # so you can see sources in IDE and use tab-complete
 set(ENABLE_CLING FALSE CACHE BOOL "ENABLE_CLING")
 
+set(ENABLE_CXXCTP TRUE CACHE BOOL "ENABLE_CXXCTP")
+
+set(ENABLE_CXTPL TRUE CACHE BOOL "ENABLE_CXTPL")
+
 list(APPEND COMMON_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/clangUtils.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/clangUtils.cpp
@@ -88,10 +92,12 @@ list(APPEND COMMON_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/template_engine/CXTPL.h
 )
 
-add_executable(CXTPL
- ${COMMON_FILES}
- ${CMAKE_CURRENT_SOURCE_DIR}/src/template_engine/engine_main.cpp
-)
+if(ENABLE_CXTPL)
+  add_executable(CXTPL
+   ${COMMON_FILES}
+   ${CMAKE_CURRENT_SOURCE_DIR}/src/template_engine/engine_main.cpp
+  )
+endif(ENABLE_CXTPL)
 
 if(ENABLE_CLING)
   #add_library(simple_lib SHARED #STATIC
@@ -99,22 +105,26 @@ if(ENABLE_CLING)
   #)
 
   list(APPEND CLING_DEFINITIONS CLING_IS_ON=1)
-  add_executable(CXXCTP
-   ${COMMON_FILES}
-   ${CMAKE_CURRENT_SOURCE_DIR}/src/main_cling.cpp
-  )
+  if(ENABLE_CXXCTP)
+    add_executable(CXXCTP
+     ${COMMON_FILES}
+     ${CMAKE_CURRENT_SOURCE_DIR}/src/main_cling.cpp
+    )
+  endif(ENABLE_CXXCTP)
 else(ENABLE_CLING)
   #message(FATAL_ERROR "Only Cling interpreter is supported for now")
-  add_executable(CXXCTP
-   ${COMMON_FILES}
-   ${CMAKE_CURRENT_SOURCE_DIR}/src/main_cling.cpp
-   ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/app_loop.cpp
-   ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/app_loop.h
-   ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/ctp_registry.cpp
-   ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/ctp_registry.h
-   ${CMAKE_CURRENT_SOURCE_DIR}/resources/cxtpl/CXTPL_STD.cpp
-   ${CMAKE_CURRENT_SOURCE_DIR}/resources/cxtpl/CXTPL_STD.h
-  )
+  if(ENABLE_CXXCTP)
+    add_executable(CXXCTP
+     ${COMMON_FILES}
+     ${CMAKE_CURRENT_SOURCE_DIR}/src/main_cling.cpp
+     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/app_loop.cpp
+     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/app_loop.h
+     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/ctp_registry.cpp
+     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/ctp_registry.h
+     ${CMAKE_CURRENT_SOURCE_DIR}/resources/cxtpl/CXTPL_STD.cpp
+     ${CMAKE_CURRENT_SOURCE_DIR}/resources/cxtpl/CXTPL_STD.h
+    )
+  endif(ENABLE_CXXCTP)
 endif(ENABLE_CLING)
 
 set( USED_SYSTEM_LIBS
@@ -201,58 +211,76 @@ list(APPEND CLING_LIBS
 )
 
 # ...which links against clingInterpreter (and its dependencies).
-target_link_libraries(CXXCTP
-  #simple_lib
-  ${CLING_LIBS}
-  # system libs
-  ${USED_SYSTEM_LIBS}
-  # boost libs
-  ${USED_BOOST_LIBS}
-)
+if(ENABLE_CXXCTP)
+  target_link_libraries(CXXCTP
+    #simple_lib
+    ${CLING_LIBS}
+    # system libs
+    ${USED_SYSTEM_LIBS}
+    # boost libs
+    ${USED_BOOST_LIBS}
+  )
+endif(ENABLE_CXXCTP)
 
 # ...which links against clingInterpreter (and its dependencies).
-target_link_libraries(CXTPL
-  #simple_lib
-  ${CLING_LIBS}
-  # system libs
-  ${USED_SYSTEM_LIBS}
-  # boost libs
-  ${USED_BOOST_LIBS}
-)
+if(ENABLE_CXTPL)
+  target_link_libraries(CXTPL
+    #simple_lib
+    ${CLING_LIBS}
+    # system libs
+    ${USED_SYSTEM_LIBS}
+    # boost libs
+    ${USED_BOOST_LIBS}
+  )
+endif(ENABLE_CXTPL)
 
-target_compile_definitions( CXXCTP PUBLIC
-  ${CLING_DEFINITIONS}
-  # https://stackoverflow.com/a/30877725
-  BOOST_SYSTEM_NO_DEPRECATED
-  BOOST_ERROR_CODE_HEADER_ONLY
-)
+if(ENABLE_CXXCTP)
+  target_compile_definitions( CXXCTP PUBLIC
+    ${CLING_DEFINITIONS}
+    # https://stackoverflow.com/a/30877725
+    BOOST_SYSTEM_NO_DEPRECATED
+    BOOST_ERROR_CODE_HEADER_ONLY
+    IS_CXXCTP=1
+  )
+endif(ENABLE_CXXCTP)
 
-target_compile_definitions( CXTPL PUBLIC
-  ${CLING_DEFINITIONS}
-  # https://stackoverflow.com/a/30877725
-  BOOST_SYSTEM_NO_DEPRECATED
-  BOOST_ERROR_CODE_HEADER_ONLY
-)
+if(ENABLE_CXTPL)
+  target_compile_definitions( CXTPL PUBLIC
+    ${CLING_DEFINITIONS}
+    # https://stackoverflow.com/a/30877725
+    BOOST_SYSTEM_NO_DEPRECATED
+    BOOST_ERROR_CODE_HEADER_ONLY
+    IS_CXTPL=1
+  )
+endif(ENABLE_CXTPL)
 
 #target_include_directories( CXXCTP PUBLIC
 #)
 
-set_target_properties(CXXCTP
-  PROPERTIES ENABLE_EXPORTS 1)
+if(ENABLE_CXXCTP)
+  set_target_properties(CXXCTP
+    PROPERTIES ENABLE_EXPORTS 1)
+endif(ENABLE_CXXCTP)
 
- set_target_properties(CXTPL
-   PROPERTIES ENABLE_EXPORTS 1)
+if(ENABLE_CXTPL)
+  set_target_properties(CXTPL
+    PROPERTIES ENABLE_EXPORTS 1)
+endif(ENABLE_CXTPL)
 
 if(MSVC)
-  set_target_properties(CXXCTP PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS 1)
-  set_property(TARGET CXXCTP APPEND_STRING PROPERTY LINK_FLAGS
-              "/EXPORT:?setValueNoAlloc@internal@runtime@cling@@YAXPEAX00D_K@Z
-               /EXPORT:?setValueNoAlloc@internal@runtime@cling@@YAXPEAX00DM@Z
-               /EXPORT:cling_runtime_internal_throwIfInvalidPointer")
-
-   set_target_properties(CXTPL PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS 1)
-   set_property(TARGET CXTPL APPEND_STRING PROPERTY LINK_FLAGS
+ if(ENABLE_CXXCTP)
+   set_target_properties(CXXCTP PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS 1)
+   set_property(TARGET CXXCTP APPEND_STRING PROPERTY LINK_FLAGS
                "/EXPORT:?setValueNoAlloc@internal@runtime@cling@@YAXPEAX00D_K@Z
                 /EXPORT:?setValueNoAlloc@internal@runtime@cling@@YAXPEAX00DM@Z
                 /EXPORT:cling_runtime_internal_throwIfInvalidPointer")
+  endif(ENABLE_CXXCTP)
+
+   if(ENABLE_CXTPL)
+     set_target_properties(CXTPL PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS 1)
+     set_property(TARGET CXTPL APPEND_STRING PROPERTY LINK_FLAGS
+                 "/EXPORT:?setValueNoAlloc@internal@runtime@cling@@YAXPEAX00D_K@Z
+                  /EXPORT:?setValueNoAlloc@internal@runtime@cling@@YAXPEAX00DM@Z
+                  /EXPORT:cling_runtime_internal_throwIfInvalidPointer")
+   endif(ENABLE_CXTPL)
 endif()

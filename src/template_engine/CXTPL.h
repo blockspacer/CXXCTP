@@ -94,6 +94,18 @@ public:
 
     std::string buildToString();
 
+    template <typename K>
+    std::string argRefToCling(const std::string varType,
+                              const std::string varName, const K& arg) {
+        std::ostringstream sstr;
+        sstr << " ; \n " << varType << " & " << varName << " = ";
+        sstr << "*( " << varType << " * )("
+             // Pass a pointer into cling as a string.
+             << std::hex << std::showbase
+             << reinterpret_cast<size_t>(&arg) << "); \n";
+        return sstr.str();
+    }
+
 protected:
     void rebuild();
 
@@ -113,18 +125,6 @@ protected:
     // TODO: example with includes workaround
     // TODO: example with external function call workaround
     std::string buildFromString(const std::string& input);
-
-    template <typename K>
-    std::string argRefToCling(const std::string varType,
-                              const std::string varName, const K& arg) {
-        std::ostringstream sstr;
-        sstr << " ; \n const " << varType << " & " << varName << " = ";
-        sstr << "*(const " << varType << "*)("
-             // Pass a pointer into cling as a string.
-             << std::hex << std::showbase
-             << reinterpret_cast<size_t>(&arg) << "); \n";
-        return sstr.str();
-    }
 
     // see
     // https://bits.theorem.co/how-to-write-a-template-library/
@@ -147,6 +147,8 @@ class CXTPL {
 template<>
 class CXTPL<AnyDict> : public I_CXTPL {
  public:
+  ~CXTPL<AnyDict>();
+
   /*std::unique_ptr<std::string> interpretToString(
     bool& bVar, bool& cVar, std::vector<std::string>& carNames);*/
 
@@ -157,8 +159,8 @@ class CXTPL<AnyDict> : public I_CXTPL {
   /*std::unique_ptr<std::string> compileToString(
     bool& bVar, bool& cVar, std::vector<std::string>& carNames);*/
 
-  void compileToFile(const std::string& path,
-    const std::map<std::string, std::any>& cxtpl_params);
+  /*void compileToFile(const std::string& path,
+    const std::map<std::string, std::any>& cxtpl_params);*/
 
  private:
 

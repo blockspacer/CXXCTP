@@ -45,14 +45,14 @@ void add_default_clang_args(std::vector<string> &args)
     args.push_back("-extra-arg=-I../cling-build/build/tools/clang/include/");
     args.push_back("-extra-arg=-I../cling-build/src/tools/cling/include/");
 
-    args.push_back("-extra-arg=-I../resources");
-
     args.push_back("-extra-arg=-std=c++17");
     //args.push_back("-extra-arg=--std=c++2a");
     //args.push_back("-extra-arg=-fmodules-ts");
 
     //args.push_back("-extra-arg=-I/usr/local/tander/i586-pc-linux-gnu/usr/include/");
 
+    /*
+    args.push_back("-extra-arg=-I../resources");
     args.push_back("-p=\".\""); // Build path
 
     // TODO: crash when changed order, may be thread race
@@ -60,6 +60,8 @@ void add_default_clang_args(std::vector<string> &args)
     args.push_back("../resources/test_typeclass_base1.hpp");
     args.push_back("../resources/test_typeclass_instance1.hpp");
     args.push_back("../resources/test.cpp");
+*/
+
     //args.push_back("-help");
 }
 

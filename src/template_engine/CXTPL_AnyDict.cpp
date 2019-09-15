@@ -20,15 +20,15 @@ void CXTPL<AnyDict>::interpretToFile(const string &path,
     runInInterpreter(cb, code_for_cling_after_build_, cxtpl_params, includes_code);
 }
 
-void CXTPL<AnyDict>::compileToFile(const string &path,
+/*void CXTPL<AnyDict>::compileToFile(const string &path,
                                    const std::map<std::string, std::any>& cxtpl_params) {
-    /*std::string cxtpl_output;
+    std::string cxtpl_output;
 
     /// \note uses `cxtpl_output` and `cxtpl_params`
 #include "../../build/test1.cxtpl.cpp"
 
-    writeToFile(cxtpl_output, path);*/
-}
+    writeToFile(cxtpl_output, path);
+}*/
 
 /*void CXTPL<AnyDict>::interpretToFile(const string &path) {
   const auto interRes = interpretToString(bVar, cVar, carNames);
@@ -112,3 +112,5 @@ void CXTPL<AnyDict>::runInInterpreter(
     //#endif
     //return nullptr; // TODO
 }
+
+CXTPL<AnyDict>::~CXTPL() {}

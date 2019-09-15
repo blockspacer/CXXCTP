@@ -327,7 +327,7 @@ const char* typeclass_instance(
 
         std::string cxtpl_output;
 
-#include "../../resources/cxtpl/typeclass_instance_gen_hpp.cxtpl.cpp"
+#include "../../resources/cxtpl/generated/typeclass_instance_gen_hpp.cxtpl.cpp"
 
         writeToFile(cxtpl_output, gen_hpp_name);
 
@@ -456,7 +456,7 @@ const char* typeclass(
 
         std::string cxtpl_output;
 
-#include "../../resources/cxtpl/typeclass_gen_hpp.cxtpl.cpp"
+#include "../../resources/cxtpl/generated/typeclass_gen_hpp.cxtpl.cpp"
 
         writeToFile(cxtpl_output, gen_hpp_name);
 
@@ -560,7 +560,7 @@ const char* reflect_enum(
 
       std::string cxtpl_output;
 
-#include "../../resources/cxtpl/enum_gen_cpp.cxtpl.cpp"
+#include "../../resources/cxtpl/generated/enum_gen_cpp.cxtpl.cpp"
 
       writeToFile(cxtpl_output, node->getNameAsString() + ".enum.generated.cpp");
     }
@@ -574,7 +574,7 @@ const char* reflect_enum(
 
       std::string cxtpl_output;
 
-#include "../../resources/cxtpl/enum_gen_hpp.cxtpl.cpp"
+#include "../../resources/cxtpl/generated/enum_gen_hpp.cxtpl.cpp"
 
       writeToFile(cxtpl_output, gen_hpp_name);
     }

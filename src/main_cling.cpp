@@ -76,7 +76,7 @@ namespace fs = std::experimental::filesystem;
 #include "clangUtils.h"
 #include "clangPipeline.h"
 #include "ClingInterpreterModule.h"
-#include "template_engine/CXTPL.h"
+//#include "template_engine/CXTPL.h"
 
 #if !defined(CLING_IS_ON)
 #include "../resources/ctp_scripts/ctp_registry.h"
@@ -121,7 +121,7 @@ M GetWithDefault(const std::map<std::string, std::any>& m, const std::string& ke
     }
 }*/
 
-int main(int /*argc*/, const char* const* /*argv*/) {
+int main(int argc, const char* const* argv) {
 
 #if !defined(CLING_IS_ON)
     add_modulecallbacks();
@@ -129,17 +129,12 @@ int main(int /*argc*/, const char* const* /*argv*/) {
 
     using namespace clang::tooling;
 
-    /*CXTPL<AnyDict> cxtpl;
-
-    cxtpl.createFromFile("../resources/cxtpl/enum_gen_hpp.cxtpl");
-    cxtpl.buildToFile("../resources/cxtpl/enum_gen_hpp.cxtpl.cpp");
-
-    cxtpl.createFromFile("../resources/cxtpl/enum_gen_cpp.cxtpl");
-    cxtpl.buildToFile("../resources/cxtpl/enum_gen_cpp.cxtpl.cpp");*/
-
-    llvm::outs() << "input_func!... " << '\n';
+    // input thread allows sending commands via cmd
+    // usefull if you want to debug/quit/.. long running tasks
     std::thread inp_thread(input_func);
     inp_thread.detach();
+
+    // cling thread used as C++ interpreter
     std::thread cling_thread(cling_func);
     cling_thread.detach();
 
@@ -196,6 +191,11 @@ int main(int /*argc*/, const char* const* /*argv*/) {
     std::vector<std::string> args_storage;
     add_default_clang_args(args_storage);
 
+    ///\note skip first arg (app name)
+    for(int i = 1; i < argc; i++) {
+        args_storage.push_back(argv[i]);
+    }
+
     // https://stackoverflow.com/questions/53525502/compiling-c-on-the-fly-clang-libtooling-fails-to-set-triple-for-llvm-ir
     // https://stackoverflow.com/questions/27092593/how-to-use-standard-library-with-clang-and-libtooling
     std::vector< const char* > args_vec;
@@ -210,6 +210,21 @@ int main(int /*argc*/, const char* const* /*argv*/) {
     llvm::cl::OptionCategory UseOverrideCategory("Use override options");
     CommonOptionsParser op(args_arc, args_argv, UseOverrideCategory);
     // TODO: https://github.com/mlomb/MetaCPP/blob/8eddde5e1bf4809ad70a68a385b9cbcc8e237370/MetaCPP-CLI/ScraperTool.cpp#L19
+
+    auto MakeAbsolute = [](const std::string &Input) -> SmallString<256> {
+        if (Input.empty())
+            return {};
+        SmallString<256> AbsolutePath(Input);
+        if (std::error_code EC = llvm::sys::fs::make_absolute(AbsolutePath)) {
+            llvm::errs() << "Can't make absolute path from " << Input << ": "
+                         << EC.message() << "\n";
+        }
+        return AbsolutePath;
+    };
+    for(const auto& it: op.getSourcePathList()) {
+        llvm::outs() << "added source path = " << MakeAbsolute(it) << '\n';
+    }
+
     ClangTool Tool(op.getCompilations(), op.getSourcePathList());
 
     Tool.run(new ToolFactory(/*new UseOverride::Action()*/));
@@ -217,7 +232,8 @@ int main(int /*argc*/, const char* const* /*argv*/) {
     bool quit = false;
     while(!quit)
     {
-      // TODO
+        /// \note must wait for Cling & ClangTool threads
+        quit = InterpreterModule::receivedMessagesQueue_->isEmpty();
     }
     // TODO: free mem
     //delete m_metaProcessor1;

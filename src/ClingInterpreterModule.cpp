@@ -6,7 +6,9 @@ std::map<std::string, std::vector<std::string>> InterpreterModule::moduleToSourc
     {
         "main_module",
         std::vector<std::string>{
-#if defined(CLING_IS_ON)
+#if defined(IS_CXTPL)
+//            "..src/template_engine/CXTPL_config.cpp",
+#elif defined(CLING_IS_ON)
             "../resources/cxtpl/CXTPL_STD.cpp",
             "../resources/ctp_scripts/app_loop.cpp"
 #endif // CLING_IS_ON

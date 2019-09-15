@@ -1,4 +1,4 @@
-# Compiled Object files
+﻿# Compiled Object files
 *.slo
 *.lo
 *.o
@@ -32,3 +32,5 @@ build/
 cling-build/
 
 CMakeLists\.txt\.user
+
+generated/

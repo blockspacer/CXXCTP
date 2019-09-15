@@ -17,73 +17,12 @@ Note: this project is provided as is, without any warranty (see License).
 + Ability to check source files (implement style checks, design patterns, e.t.c.)
 + Ability to compile scripts (rules for code transformations) for maximum performance, not only interpret them in Cling.
 
-TODO:
-+ DSL integration
-+ Better JSON support
-+ Better docs support
-
 ## Project status
 In development, see test.cpp and app_loop.cpp fo usage examples
 
 Currently supports only linux.
 
 Note that you can run linux containers under windows/mac/e.t.c.
-
-## in-dev now
-JSON support
-Safer CPP support
-
-## ctp_scripts folder
-TODO
-
-## Run as commandline tool & compile_commands.json support / CMake integration
-TODO
-
-## Tutorials
-TODO
-
-## Generate docs website
-TODO
-https://www.mkdocs.org/user-guide/configuration/
-https://github.com/modm-io/modm/tree/e748b1c3688e753c1e49354ad1cef25f447f9ff6/docs
-
-## Integrate asan / e.t.c.
-TODO
-
-## Unit tests & CI/CD
-TODO
-
-like https://github.com/Manu343726/unittest#unittest
-
-## Benchmark (https://github.com/CathalT/Cerializer#parse--string---json-dom-object---c-struct-)
-TODO
-
-## Try it online (Jypiter/wandbox)
-
-## Provide header with common defines
-TODO
-
-## Docker / Vagrant
-TODO
-https://hub.docker.com/r/codible/clang_dev/
-
-## Better args parser & lines/spaces support ( make_interface(    outfile = filepath  ,   DISABLE   =   ${cling_var}) )
-TODO
-
-## Refactor
-TODO
-
-## exception stack traces (backward-cpp, ...)
-TODO
-
-## Log & error reporting
-TODO
-
-## Change detection (watcher like https://github.com/Manu343726/siplasplas/tree/master/examples/fswatch ) & hot reload
-TODO
-
-## Articles in media (medium, twitter, reddit, ...)
-TODO
 
 ### Clone code
 ```
@@ -106,6 +45,7 @@ sudo apt-get install openmpi-bin openmpi-common libopenmpi-dev
 
 # CMake
 bash scripts/install_cmake.sh
+```
 
 ## How to build
 ```
@@ -127,15 +67,18 @@ bash setup.sh
 ```
 export CC=gcc
 export CXX=g++
-rm -rf build
-mkdir build
-cd build
-cmake -DENABLE_CLING=FALSE -DCMAKE_BUILD_TYPE=Debug ..
-# NOTE: first build may fail without codegen, continue anyway!
-cmake --build . -- -j6
-./CXTPL
-cmake --build . -- -j6
-./CXXCTP
+cmake -E remove_directory build
+cmake -E make_directory build
+cmake -E remove_directory resources/cxtpl/generated
+cmake -E make_directory resources/cxtpl/generated
+cmake -E chdir build cmake -E time cmake -DENABLE_CLING=FALSE -DCMAKE_BUILD_TYPE=Debug -DENABLE_CXXCTP=FALSE ..
+cmake -E chdir build cmake -E time cmake --build . -- -j6
+cmake -E chdir build ./CXTPL
+cmake -E chdir build cmake -E time cmake -DENABLE_CLING=FALSE -DCMAKE_BUILD_TYPE=Debug -DENABLE_CXXCTP=TRUE ..
+cmake -E chdir build cmake -E time cmake --build . -- -j6
+# cmake -E chdir build ./CXXCTP -help
+cmake -E chdir build ./CXXCTP -extra-arg=-I../resources ../resources/ReflShapeKind.hpp ../resources/test_typeclass_base1.hpp ../resources/test_typeclass_instance1.hpp ../resources/test.cpp
+# NOTE: You can also use the “-p” flag. See https://variousburglarious.com/2018/02/18/include-paths-for-clang-tools/
 ```
 
 OR under gdb:
@@ -226,6 +169,124 @@ SomeInterfaceName {
 
 Using similar approach you can apply multiple soure code transformation steps to same `class` / `struct` / e.t.c.
 
+## How to add custom code transformation
+Add your function to `resources/ctp_scripts/app_loop.cpp`
+
+Add your function name `to resources/ctp_scripts/ctp_registry.cpp`
+
+## What is `.cxtpl`
+`.cxtpl` is file extention for C++ template engine.
+
+You can pass C++ variables by pointers into cxtpl, that is very usefull if you want to use complex data structures as template parameters.
+
+C++ template engine compiles template into C++ code, so you will gain VERY good performance and full power of C++.
+
+C++ template engine may run in two modes:
++ compile-mode: compile cxtpl code into C++ file or std::string, then `#include` generated code & compile app as usual. Best performance.
++ cling-mode (C++ JIT executed at runtime): compile cxtpl code into C++ file or std::string, then run generated code in Cling interpreter (no need to recompile app, usefull in dev-mode or for php-style apps).
+
+Code genetated from `.cxtpl` must create variable with name `cxtpl_output`, so structure your code as below:
+```
+void somefunc() {
+  std::string cxtpl_output;
+
+  #include "../../resources/cxtpl/generated/typeclass_instance_gen_hpp.cxtpl.cpp"
+
+  writeToFile(cxtpl_output, gen_hpp_name);
+}
+```
+
+You need to `#include` all headers used by template generator in your app code. It is good practice to create separate `.cxtpl.h` file near to your `.cxtpl`. Separation of include files allows to use same includes/logic both in compile-mode (just `#include` your `.cxtpl.h`) and cling-mode (pass contents of your `.cxtpl.h` as function argument). See `enum_gen_hpp.cxtpl.h` and `CXTPL_STD.h` as example.
+
+cxtpl uses approach similar to `How to write a template engine in less than 30 lines of code` from https://bits.theorem.co/how-to-write-a-template-library/
+
++ `<CX=>` means `start execution of C++ code while parsing template`. Requires `<=CX>` as closing tag.
++ `<=CX>` means `end execution of C++ code while parsing template`
++ `<CX=l>` means `start execution of C++ code while parsing template`. Requires newline (`\n`) as closing tag.
++ `<CX=r>` means `add result of execution of C++ code to output while parsing template`. Result must be string. Requires `<=CX>` as closing tag.
++ `<CX=s>` means `add result of execution of C++ code to output while parsing template`. Result will be converted to string (just wrapped in std::to_string). Requires `<=CX>` as closing tag.
+
+Example before template parsing:
+```
+<CX=> // parameters begin
+
+const std::string generator_path = "somepath";
+
+std::vector<std::string> generator_includes{"someinclude"};
+
+// parameters end
+/* no newline, see CX=l */ <=CX><CX=l>
+// This is generated file. Do not modify directly.
+// Path to the code generator: <CX=r> generator_path <=CX>.
+
+<CX=l> for(const auto& fileName: generator_includes) {
+<CX=r> fileName /* CX=r used to append to cxtpl_output */ <=CX>
+<CX=l> } // end for
+```
+
+Example after template parsing:
+```
+// This is generated file. Do not modify directly.
+// Path to the code generator: someinclude.
+
+someinclude
+```
+
+Usefull links:
++ https://bits.theorem.co/how-to-write-a-template-library/
++ https://lambda.xyz/blog/maud-is-fast/
++ https://dzone.com/articles/modern-type-safe-template-engines
++ http://www.wilxoft.com/
++ https://github.com/djc/askama
++ https://www.reddit.com/r/rust/comments/b06z9m/cuach_a_compiletime_html_template_system/
+
+## How to use `.cxtpl` with CXXCTP
+Pass reflection data to template engine.
+
+In CXXCTP script (`.cpp`):
+```
+reflection::NamespacesTree m_namespaces;
+// node from AST parser (libtooling)
+reflection::ClassInfoPtr structInfo = reflector.ReflectClass(node, &m_namespaces);
+
+// ...
+
+stuct Arguments {
+  // any custom arguments here ...
+  std::string arg1 = "arg1...";
+  std::string arg2 = "arg2...";
+  // reflection data here (ClassInfoPtr) ...
+};
+
+// ...
+
+std::map<std::string, std::any> cxtpl_params;
+{
+    cxtpl_params["Arguments"] =
+        std::make_any<Arguments>(Arguments{});
+    cxtpl_params["generator_path"] =
+        std::make_any<std::string>("enum_gen_hpp.cxtpl");
+    cxtpl_params["generator_includes"] =
+        std::make_any<std::vector<std::string>>(
+            std::vector<std::string>{});
+
+    std::string cxtpl_output;
+
+#include "../../resources/cxtpl/generated/enum_gen_hpp.cxtpl.cpp"
+
+    writeToFile(cxtpl_output, gen_hpp_name);
+}
+```
+
+In `.cxtpl` template:
+
+```
+const auto arguments = std::any_cast<Arguments>(cxtpl_params.at("Arguments"));
+std::cout << arguments.arg1;
+```
+
+See `resources/cxtpl/enum_gen_hpp.cxtpl` as example.
+
 ## About libtooling
 CXXCTP uses LibTooling to parse and modify C++.
 
@@ -249,6 +310,7 @@ Usefull links:
 + https://eli.thegreenplace.net/tag/llvm-clang
 + http://www.goldsborough.me/c++/clang/llvm/tools/2017/02/24/00-00-06-emitting_diagnostics_and_fixithints_in_clang_tools/
 + https://www.amazon.com/Getting-Started-LLVM-Core-Libraries/dp/1782166920
++ https://variousburglarious.com/tag/clang/
 
 ## About cling
 CXXCTP uses cling to execute C++ at compile-time.
@@ -917,6 +979,67 @@ TODO: CMake integration
 
 emscripten webidl_binder.py
  > https://github.com/google/draco/blob/master/CMakeLists.txt#L715
+
+TODO: UNIT TESTING AN AST MATCHER https://variousburglarious.com/2017/01/19/unit-testing-an-ast-matcher/
+
+TODO: https://github.com/goto40/rpp/blob/ec8a4c4a3ac32dccee8c4e8ba97be8c2ba1c8f88/src/parser/common_parser.cpp#L21
+
+
+## in-dev now
+JSON support
+Safer CPP support
+
+## ctp_scripts folder
+TODO
+
+## Run as commandline tool & compile_commands.json support / CMake integration
+TODO
+
+## Tutorials
+TODO
+
+## Generate docs website
+TODO
+https://www.mkdocs.org/user-guide/configuration/
+https://github.com/modm-io/modm/tree/e748b1c3688e753c1e49354ad1cef25f447f9ff6/docs
+
+## Integrate asan / e.t.c.
+TODO
+
+## Unit tests & CI/CD
+TODO
+
+like https://github.com/Manu343726/unittest#unittest
+
+## Benchmark (https://github.com/CathalT/Cerializer#parse--string---json-dom-object---c-struct-)
+TODO
+
+## Try it online (Jypiter/wandbox)
+
+## Provide header with common defines
+TODO
+
+## Docker / Vagrant
+TODO
+https://hub.docker.com/r/codible/clang_dev/
+
+## Better args parser & lines/spaces support ( make_interface(    outfile = filepath  ,   DISABLE   =   ${cling_var}) )
+TODO
+
+## Refactor
+TODO
+
+## exception stack traces (backward-cpp, ...)
+TODO
+
+## Log & error reporting
+TODO
+
+## Change detection (watcher like https://github.com/Manu343726/siplasplas/tree/master/examples/fswatch ) & hot reload
+TODO
+
+## Articles in media (medium, twitter, reddit, ...)
+TODO
 
 ## Misc
 https://medium.com/fluence-network/porting-redis-to-webassembly-with-clang-wasi-af99b264ca8
