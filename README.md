@@ -174,8 +174,46 @@ Add your function to `resources/ctp_scripts/app_loop.cpp`
 
 Add your function name `to resources/ctp_scripts/ctp_registry.cpp`
 
+function signature must be compatable with:
+```
+typedef std::function<const char*(
+    const clang::ast_matchers::MatchFinder::MatchResult& matchResult,
+    clang::Rewriter& rewriter,
+    const clang::Decl* decl,
+    const std::vector<parsed_func>& args)> cxxctp_callback;
+```
+
+Detailed function signature:
++ return value (const char*) - used to replace original code, if needed.
++ clang::ast_matchers::MatchFinder::MatchResult - see https://xinhuang.github.io/posts/2015-02-08-clang-tutorial-the-ast-matcher.html
++ clang::Rewriter - see https://devblogs.microsoft.com/cppblog/exploring-clang-tooling-part-3-rewriting-code-with-clang-tidy/
++ clang::Decl - found by MatchFinder, see https://devblogs.microsoft.com/cppblog/exploring-clang-tooling-part-2-examining-the-clang-ast-with-clang-query/
++ std::vector<parsed_func> - arguments extracted from attribute. Example: $apply(interface, foo_with_args(1, "2")) becomes two `parsed_func` - interface and foo_with_args.
+
+Think about function name as one of `__VA_ARGS__` from
+
+```
+#define $apply(...) \
+  __attribute__((annotate("{gen};{funccall};" #__VA_ARGS__)))
+```
+
+Example where `make_interface` and `make_removefuncbody` - two function names:
+```
+$apply(make_interface;
+  make_removefuncbody)
+```
+
 ## What is `.cxtpl`
 `.cxtpl` is file extention for C++ template engine.
+
+Example (more below):
+```
+<div> some template string here </div>
+<CX=> int valid_cpp_code_block_here = 0; <=CX>
+<CX=l> int and_valid_cpp_code_line_here = 0;
+<div> another template string here </div>
+<div> and_valid_cpp_code_line_here = <CX=s> valid_cpp_code_block_here <=CX> </div>
+```
 
 You can pass C++ variables by pointers into cxtpl, that is very usefull if you want to use complex data structures as template parameters.
 
@@ -185,11 +223,19 @@ C++ template engine may run in two modes:
 + compile-mode: compile cxtpl code into C++ file or std::string, then `#include` generated code & compile app as usual. Best performance.
 + cling-mode (C++ JIT executed at runtime): compile cxtpl code into C++ file or std::string, then run generated code in Cling interpreter (no need to recompile app, usefull in dev-mode or for php-style apps).
 
+Again: Think about `.cxtpl` as lambda-function returning std::string. Prefer not to use `#include` from `.cxtpl`, just create `.cxtpl.h` file. Then `#include` both generated `.cxtpl.cpp` and created `.cxtpl.h` in your app code.
+
 Code genetated from `.cxtpl` must create variable with name `cxtpl_output`, so structure your code as below:
 ```
+/// \note header is NOT generated, it includes stuff for other generated file
+#include "../../resources/cxtpl/typeclass_instance_gen_hpp.cxtpl.h"
+
+// ...
+
 void somefunc() {
   std::string cxtpl_output;
 
+  /// \note this is generated .cpp file, it must not use #include
   #include "../../resources/cxtpl/generated/typeclass_instance_gen_hpp.cxtpl.cpp"
 
   writeToFile(cxtpl_output, gen_hpp_name);
@@ -245,8 +291,9 @@ Pass reflection data to template engine.
 
 In CXXCTP script (`.cpp`):
 ```
+// see ReflectAST.cpp
 reflection::NamespacesTree m_namespaces;
-// node from AST parser (libtooling)
+// `node` from AST parser (libtooling)
 reflection::ClassInfoPtr structInfo = reflector.ReflectClass(node, &m_namespaces);
 
 // ...

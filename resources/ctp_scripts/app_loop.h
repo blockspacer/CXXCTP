@@ -391,6 +391,12 @@
 #include "../../resources/cxtpl/enum_gen_hpp.cxtpl.h"
 #include "../../resources/cxtpl/enum_gen_cpp.cxtpl.h"
 
+#include "../../resources/cxtpl/typeclass_gen_hpp.cxtpl.h"
+#include "../../resources/cxtpl/typeclass_gen_cpp.cxtpl.h"
+
+#include "../../resources/cxtpl/typeclass_instance_gen_hpp.cxtpl.h"
+#include "../../resources/cxtpl/typeclass_instance_gen_cpp.cxtpl.h"
+
 const char* make_interface(
     const clang::ast_matchers::MatchFinder::MatchResult& matchResult,
     clang::Rewriter& rewriter,
