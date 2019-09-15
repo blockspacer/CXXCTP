@@ -1,13 +1,71 @@
 ﻿# About CXXCTP (CXX compile-time programming)
 CXXCTP is a transpiler that extends C++ for new introspection, reflection and compile-time execution.
 
-CXXCTP don`t use predefined set of code transformations. Users can share C++ scripts for source code transformation.
+CXXCTP doesn`t aim to create predefined set of source code transformations. Users can share C++ scripts for source code transformation.
 
-Suppose some big company shared to opensource community usefull scripts like `interface.cxx` and `enum_to_json.cxx`. Just place that scripts into `ctp_scripts` folder to use them in your project.
+Suppose somebody shared to opensource community usefull scripts like `interface.cxx` and `enum_to_json.cxx`. Just place that scripts into `ctp_scripts` folder to use them in your project.
 
 Metaprogramming is an “art” of writing programs to treats other programs as their data. This means that a program could generate, read, analyse, and transform code or even itself to achieve a certain solution.
 
 Note: this project is provided as is, without any warranty (see License).
+
+## Usage examples
++ enum_gen_hpp.cxtpl - (codegen) enum to string + reflection metadata.
+ ```
+ // usage example from ReflShapeKind.hpp
+ enum class
+ $apply(
+   reflect_enum
+ )
+ ReflShapeKind0 : uint32_t {
+   Box = 3,
+   Sphere = 6,
+ };
+ ```
++ typeclass_gen_cpp.cxtpl - (codegen) typeclasses. Supports combinations of multiple typeclasses and out-of-source method definition (data and logic separation). See also https://twitter.com/TartanLlama/status/1159457033441165313
++ parse-time/compile-time code execution (see test.cpp)
+ ```
+ $export (
+ static int resultSomeInt = 2345;
+ )
+ $eval("#include <optional>")
+ $exec(
+   printf("execkjljlk\n");
+   printf("execasdasd\n");
+ )
+ $set_embed("set_embed103",
+   printf("set_embed101\n");
+   printf("set_embed102\n");
+ )
+ $embed(
+   [&clangMatchResult, &clangRewriter, &clangDecl]() {
+     printf("embed01\n");
+     printf("embed02\n");
+     return new llvm::Optional<std::string>{"embed03"};
+   }();
+ )
+ ```
++ metaclasses. Supports combinations of multiple metaclasses (see test.cpp).
+ ```
+ class
+ $apply(make_interface;make_removefuncbody;make_reflect)
+ SomeInterfaceName {
+   virtual ~SomeInterfaceName() = 0;
+   /*int    f   (   )   {     // {}
+     int i = 6;
+     {
+       // {
+       // }
+     }
+     return i;
+   };*/
+   int foo();
+   virtual void foobar(int& arg1) = 0;
+   virtual inline void zoobar(int& arg2);
+   //int m_bar;
+   //int m_bar2 = 2;
+ };
+ ```
 
 ## Features
 + C++ as compile-time scripting language (https://github.com/derofim/cling-cmake)
@@ -188,7 +246,7 @@ Detailed function signature:
 + clang::ast_matchers::MatchFinder::MatchResult - see https://xinhuang.github.io/posts/2015-02-08-clang-tutorial-the-ast-matcher.html
 + clang::Rewriter - see https://devblogs.microsoft.com/cppblog/exploring-clang-tooling-part-3-rewriting-code-with-clang-tidy/
 + clang::Decl - found by MatchFinder, see https://devblogs.microsoft.com/cppblog/exploring-clang-tooling-part-2-examining-the-clang-ast-with-clang-query/
-+ std::vector<parsed_func> - arguments extracted from attribute. Example: $apply(interface, foo_with_args(1, "2")) becomes two `parsed_func` - interface and foo_with_args.
++ std::vector<parsed_func> - arguments extracted from attribute. Example: $apply(interface, foo_with_args(1, "2")) becomes two `parsed_func` - `interface` and `foo_with_args`.
 
 Think about function name as one of `__VA_ARGS__` from
 
@@ -217,7 +275,7 @@ Example (more below):
 
 You can pass C++ variables by pointers into cxtpl, that is very usefull if you want to use complex data structures as template parameters.
 
-C++ template engine compiles template into C++ code, so you will gain VERY good performance and full power of C++.
+C++ template engine transpiles template into C++ code, so you will gain VERY good performance and full power of C++.
 
 C++ template engine may run in two modes:
 + compile-mode: compile cxtpl code into C++ file or std::string, then `#include` generated code & compile app as usual. Best performance.
@@ -225,7 +283,7 @@ C++ template engine may run in two modes:
 
 Again: Think about `.cxtpl` as lambda-function returning std::string. Prefer not to use `#include` from `.cxtpl`, just create `.cxtpl.h` file. Then `#include` both generated `.cxtpl.cpp` and created `.cxtpl.h` in your app code.
 
-Code genetated from `.cxtpl` must create variable with name `cxtpl_output`, so structure your code as below:
+Code generated from `.cxtpl` must create variable with name `cxtpl_output`, so structure your code as below:
 ```
 /// \note header is NOT generated, it includes stuff for other generated file
 #include "../../resources/cxtpl/typeclass_instance_gen_hpp.cxtpl.h"
@@ -252,7 +310,7 @@ cxtpl uses approach similar to `How to write a template engine in less than 30 l
 + `<CX=r>` means `add result of execution of C++ code to output while parsing template`. Result must be string. Requires `<=CX>` as closing tag.
 + `<CX=s>` means `add result of execution of C++ code to output while parsing template`. Result will be converted to string (just wrapped in std::to_string). Requires `<=CX>` as closing tag.
 
-Example before template parsing:
+Example before template parsing/transpiling:
 ```
 <CX=> // parameters begin
 
@@ -270,7 +328,7 @@ std::vector<std::string> generator_includes{"someinclude"};
 <CX=l> } // end for
 ```
 
-Example after template parsing:
+Example after template parsing/transpiling:
 ```
 // This is generated file. Do not modify directly.
 // Path to the code generator: someinclude.
@@ -287,7 +345,7 @@ Usefull links:
 + https://www.reddit.com/r/rust/comments/b06z9m/cuach_a_compiletime_html_template_system/
 
 ## How to use `.cxtpl` with CXXCTP
-Pass reflection data to template engine.
+Pass reflection data into template engine.
 
 In CXXCTP script (`.cpp`):
 ```
@@ -365,7 +423,7 @@ CXXCTP uses cling to execute C++ at compile-time.
 You can use cling for hot code reload / REPL / Fast C++ prototyping / Scripting engine / JIT / e.t.c.
 
 Usefull links:
- + https://github.com/derofim/cling-cmake
+ + (how to add Cling into CMake project) https://github.com/derofim/cling-cmake
  + https://github.com/root-project/cling/tree/master/www/docs/talks
  + https://github.com/caiorss/C-Cpp-Notes/blob/master/Root-cern-repl.org
 
