@@ -23,6 +23,50 @@ Note: this project is provided as is, without any warranty (see License).
  };
  ```
 + typeclass_gen_cpp.cxtpl - (codegen) typeclasses. Supports combinations of multiple typeclasses and out-of-source method definition (data and logic separation). See also https://twitter.com/TartanLlama/status/1159457033441165313
+ ```
+ // Usage example. NOTE: no inheritance & definition outside lib.
+ // in lib .h
+ struct drawable {
+   virtual void draw(const char* arg1) const noexcept = 0;
+ };
+ struct printable {
+   virtual void print(const char* arg1, const char* arg2) const noexcept = 0;
+ };
+ struct canvas3D {
+   std::string name3D;
+ };
+ struct canvas4D {
+   std::string name4D;
+ };
+ // in app .cpp
+ void draw<drawable>(const canvas3D& data, const char* arg1){
+   std::cout << "drawing to canvas3D name = " << data.name3D << std::endl;
+ }
+ void draw<drawable>(const canvas4D& data, const char* arg1){
+   std::cout << "drawing to canvas4D name = " << data.name4D << std::endl;
+ }
+ void print<printable>(const canvas3D& data, const char* arg1, const char* arg2){
+   std::cout << "printing to canvas3D name = " << data.name3D << std::endl;
+ }
+ void print<printable>(const canvas4D& data, const char* arg1, const char* arg2){
+   std::cout << "printing to canvas4D name = " << data.name4D << std::endl;
+ }
+ std::vector<_tc_combined_t<drawable>> vec {
+  canvas3D{},
+  canvas4D{},
+ };
+ _tc_combined_t<drawable, printable> CVS = canvas4D{};
+ CVS.draw("");
+ CVS.print("", "");
+
+ canvas3D cvs3D;
+ CVS = std::move(cvs3D);
+
+ canvas4D cvs4D;
+ CVS = cvs4D; // copy
+
+ CVS = vec.at(0); // <drawable> to <drawable, printable>
+ ```
 + parse-time/compile-time code execution (see test.cpp)
  ```
  $export (
@@ -118,6 +162,7 @@ export CXX=clang++
 ```
 
 ```
+# Build Cling into `cling-build` folder
 cd scripts
 bash setup.sh
 ```
@@ -331,7 +376,7 @@ std::vector<std::string> generator_includes{"someinclude"};
 Example after template parsing/transpiling:
 ```
 // This is generated file. Do not modify directly.
-// Path to the code generator: someinclude.
+// Path to the code generator: somepath.
 
 someinclude
 ```
