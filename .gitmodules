@@ -1,0 +1,3 @@
+[submodule "submodules/CXTPL"]
+	path = submodules/CXTPL
+	url = https://github.com/blockspacer/CXTPL.git
