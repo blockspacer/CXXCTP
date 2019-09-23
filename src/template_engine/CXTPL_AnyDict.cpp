@@ -78,10 +78,9 @@ void Dict<AnyDict>::runInInterpreter(
         // TODO: better warning
     }
     const std::string inStrWithArgs = loadClingArgs(inStr, cxtpl_params);
-    //#if 0
+#if defined(CLING_IS_ON)
     cling_utils::InterpreterModule::receivedMessagesQueue_->
         dispatch([includes_code /* copy! */, inStrWithArgs /* copy! */, callback /* copy! */]() {
-            //#endif
             cling::Value clingResult;
             auto interp = std::make_unique<cling_utils::InterpreterModule>("template_module", std::vector<std::string>{});
             interp->prepare();
@@ -107,10 +106,8 @@ void Dict<AnyDict>::runInInterpreter(
                 //////////////return std::move(resOption);
                 callback(std::move(resOption));
             }
-            //#if 0
         });
-    //#endif
-    //return nullptr; // TODO
+#endif // CLING_IS_ON
 }
 
 Dict<AnyDict>::~Dict<AnyDict>() {}

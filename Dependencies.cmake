@@ -18,7 +18,7 @@ set( BOOST_LIBS CACHE STRING ${BOOST_ROOT}/lib )
 # set( Boost_COMPILER "-gcc" )
 find_package( Boost
   COMPONENTS program_options filesystem regex date_time system thread graph log
-  EXACT REQUIRED )
+  REQUIRED )
 
 find_package( Threads REQUIRED )
 message(STATUS "CMAKE_THREAD_LIBS_INIT = ${CMAKE_THREAD_LIBS_INIT}")

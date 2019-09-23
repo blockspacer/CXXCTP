@@ -1,36 +1,7 @@
-﻿#------------------------------------------------------------------------------
-# CLING - the C++ LLVM-based InterpreterG :)
-#
-# This file is dual-licensed: you can choose to license it under the University
-# of Illinois Open Source License or the GNU Lesser General Public License. See
-# LICENSE.TXT for details.
-#------------------------------------------------------------------------------
-
-cmake_minimum_required( VERSION 3.10.0 FATAL_ERROR )
+﻿cmake_minimum_required( VERSION 3.10.0 FATAL_ERROR )
 
 # Building as separate project.
 project(CXXCTP)
-
-#set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lc++abi")
-#set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -lc++abi")
-#set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -lc++abi")
-
-#set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++")
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++ -lc++abi")
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
-
-#set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++")
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
-#set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -stdlib=libc++")
-#set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -stdlib=libc++")
-#
-#set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-undefined")
-#set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -Wl,--no-undefined")
-#set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--no-undefined")
-#
-#set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--as-needed")
-#set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -Wl,--as-needed")
-#set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--as-needed")
 
 set(CLING_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cling-build/" CACHE STRING "CLING DIR")
 
@@ -55,17 +26,13 @@ set(ENABLE_CLING FALSE CACHE BOOL "ENABLE_CLING")
 
 set(ENABLE_CXXCTP TRUE CACHE BOOL "ENABLE_CXXCTP")
 
+include(Utils.cmake)
+
 list(APPEND COMMON_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/clangUtils.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/clangUtils.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/funcParser.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/funcParser.cpp
-  #${CMAKE_CURRENT_SOURCE_DIR}/src/someEnum.hpp
-  #${CMAKE_CURRENT_SOURCE_DIR}/src/someEnum.cpp
-  #${CMAKE_CURRENT_SOURCE_DIR}/src/type_erasure_my_interface.cpp
-  #${CMAKE_CURRENT_SOURCE_DIR}/src/type_erasure_my_interface2.cpp
-  #${CMAKE_CURRENT_SOURCE_DIR}/src/type_erasure_my_interface_my_interface2.cpp
-  #${CMAKE_CURRENT_SOURCE_DIR}/src/types_for_erasure.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/DispatchQueue.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/DispatchQueue.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/clangPipeline.hpp
@@ -112,12 +79,25 @@ else(ENABLE_CLING)
     add_executable(CXXCTP
      ${COMMON_FILES}
      ${CMAKE_CURRENT_SOURCE_DIR}/src/main_cling.cpp
-     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/app_loop.cpp
-     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/app_loop.hpp
-     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/ctp_registry.cpp
-     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/ctp_registry.hpp
-     ${CMAKE_CURRENT_SOURCE_DIR}/resources/cxtpl/CXTPL_STD.cpp
-     ${CMAKE_CURRENT_SOURCE_DIR}/resources/cxtpl/CXTPL_STD.hpp
+     ${CMAKE_CURRENT_SOURCE_DIR}/src/ctp_registry.cpp
+     ${CMAKE_CURRENT_SOURCE_DIR}/src/ctp_registry.hpp
+     # NOTE: we control loading order by file names (0_file, 1_file, ...)
+     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/0_CXTPL_STD.cpp
+     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/CXTPL_STD.hpp
+     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/1_CXXCTP_STD.cpp
+     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/CXXCTP_STD.hpp
+     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/2_make_interface.cpp
+     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/make_interface.hpp
+     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/2_make_reflect.cpp
+     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/make_reflect.hpp
+     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/2_typeclass_instance.cpp
+     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/typeclass_instance.hpp
+     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/2_typeclass.cpp
+     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/typeclass.hpp
+     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/2_make_removefuncbody.cpp
+     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/make_removefuncbody.hpp
+     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/2_reflect_enum.cpp
+     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/reflect_enum.hpp
     )
   endif(ENABLE_CXXCTP)
 endif(ENABLE_CLING)
@@ -215,52 +195,22 @@ if(ENABLE_CXXCTP)
     # boost libs
     ${USED_BOOST_LIBS}
   )
-endif(ENABLE_CXXCTP)
 
-if(ENABLE_CXXCTP)
+  target_include_directories(CXXCTP PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}
+  )
+
   target_compile_definitions( CXXCTP PUBLIC
     ${CLING_DEFINITIONS}
+  )
+
+  target_compile_definitions( CXXCTP PRIVATE
     # https://stackoverflow.com/a/30877725
     BOOST_SYSTEM_NO_DEPRECATED
     BOOST_ERROR_CODE_HEADER_ONLY
     IS_CXXCTP=1
   )
 endif(ENABLE_CXXCTP)
-
-macro(conditional_remove ARG_DO_REMOVE ARG_DIR ARG_WORKING_DIR)
-  if(${ARG_DO_REMOVE})
-    if (NOT EXISTS ${ARG_DIR})
-      message(STATUS "not existent: ${ARG_DIR}" --yellow --bold)
-    endif (NOT EXISTS ${ARG_DIR})
-
-    if(IS_DIRECTORY ${ARG_DIR})
-      execute_process(
-        COMMAND ${CMAKE_COMMAND} "-E" "remove_directory" "${ARG_DIR}"
-        WORKING_DIRECTORY ${ARG_WORKING_DIR}
-        TIMEOUT 7200 # sec
-      )
-      message(STATUS "removed old directory ${ARG_DIR}" --yellow --bold)
-      if (EXISTS ${ARG_DIR})
-        message(STATUS "can`t remove directory ${ARG_DIR}" --red --bold)
-      endif(EXISTS ${ARG_DIR})
-    else(IS_DIRECTORY ${ARG_DIR})
-      execute_process(
-        COMMAND ${CMAKE_COMMAND} "-E" "remove" "${ARG_DIR}"
-        WORKING_DIRECTORY ${ARG_WORKING_DIR}
-        TIMEOUT 7200 # sec
-      )
-      message(STATUS "removed old file ${ARG_DIR}" --yellow --bold)
-      if (EXISTS ${ARG_DIR})
-        message(STATUS "can`t remove file ${ARG_DIR}" --red --bold)
-      endif(EXISTS ${ARG_DIR})
-    endif(IS_DIRECTORY ${ARG_DIR})
-  else(${ARG_DO_REMOVE})
-    message(STATUS "kept old path: ${ARG_DIR}" --yellow --bold)
-  endif(${ARG_DO_REMOVE})
-endmacro(conditional_remove)
-
-#target_include_directories( CXXCTP PUBLIC
-#)
 
 if(ENABLE_CXXCTP)
   set_target_properties(CXXCTP

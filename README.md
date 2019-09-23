@@ -276,7 +276,7 @@ Using similar approach you can apply multiple soure code transformation steps to
 ## How to add custom code transformation rules
 Add your function to `resources/ctp_scripts/app_loop.cpp`
 
-Add your function name `to resources/ctp_scripts/ctp_registry.cpp`
+Add your function name into `ctp_registry.cpp` (may be skipped in Cling / dev-mode)
 
 function signature must be compatable with:
 ```

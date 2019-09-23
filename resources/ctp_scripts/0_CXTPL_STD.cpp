@@ -1,4 +1,4 @@
-﻿#include "CXTPL_STD.hpp"
+﻿#include "../ctp_scripts/CXTPL_STD.hpp"
 
 namespace cxtpl_utils {
 

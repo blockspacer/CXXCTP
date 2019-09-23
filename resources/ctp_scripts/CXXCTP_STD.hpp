@@ -380,54 +380,34 @@
 #include "../../src/ClingInterpreterModule.hpp"
 #include "../../src/reflect/ReflectionCache.hpp"
 #include "../../src/reflect/ReflectAST.hpp"
-
-// generated
-
 /*#if !defined(ENABLE_CLING)
 #include "CXTPL_STD.cpp"
 #endif // !ENABLE_CLING*/
 
-#include "../../resources/cxtpl/enum_gen_hpp.cxtpl.hpp"
-#include "../../resources/cxtpl/enum_gen_cpp.cxtpl.hpp"
+struct ReflectedEnumItems {
+  std::string name;
+  int64_t value;
+};
 
-#include "../../resources/cxtpl/typeclass_gen_hpp.cxtpl.hpp"
-#include "../../resources/cxtpl/typeclass_gen_cpp.cxtpl.hpp"
+extern std::vector<cxxctp::parsed_func> split_to_funcs(std::string const& inStr);
 
-#include "../../resources/cxtpl/typeclass_instance_gen_hpp.cxtpl.hpp"
-#include "../../resources/cxtpl/typeclass_instance_gen_cpp.cxtpl.hpp"
+clang::SourceLocation
+findPureInsertionPoint(clang::CXXMethodDecl *MethodDecl,
+                   const clang::ASTContext &Context);
 
-const char* make_interface(
-    const clang::ast_matchers::MatchFinder::MatchResult& matchResult,
-    clang::Rewriter& rewriter,
-    const clang::Decl* decl,
-    const std::vector<cxxctp::parsed_func>& args);
+clang::SourceRange
+findFuncBodyRange(clang::CXXMethodDecl *MethodDecl,
+                   const clang::ASTContext &Context);
 
-const char* make_reflect(
-    const clang::ast_matchers::MatchFinder::MatchResult& matchResult,
-    clang::Rewriter& rewriter,
-    const clang::Decl* decl,
-    const std::vector<cxxctp::parsed_func>& args);
+clang::SourceLocation
+findVirtualInsertionPoint(clang::CXXMethodDecl *MethodDecl,
+                   const clang::ASTContext &Context);
+clang::SourceLocation
+findCXXRecordNameEndPoint(clang::CXXRecordDecl const *decl,
+                   const clang::ASTContext &Context);
 
-const char* reflect_enum(
-    const clang::ast_matchers::MatchFinder::MatchResult& matchResult,
-    clang::Rewriter& rewriter,
-    const clang::Decl* decl,
-    const std::vector<cxxctp::parsed_func>& args);
+const bool isReflectable(DeclaratorDecl* decl);
 
-const char* typeclass(
-    const clang::ast_matchers::MatchFinder::MatchResult& matchResult,
-    clang::Rewriter& rewriter,
-    const clang::Decl* decl,
-    const std::vector<cxxctp::parsed_func>& args);
+std::string wrapLocalInclude(const std::string& inStr);
 
-const char* typeclass_instance(
-    const clang::ast_matchers::MatchFinder::MatchResult& matchResult,
-    clang::Rewriter& rewriter,
-    const clang::Decl* decl,
-    const std::vector<cxxctp::parsed_func>& args);
-
-const char* make_removefuncbody(
-    const clang::ast_matchers::MatchFinder::MatchResult& matchResult,
-    clang::Rewriter& rewriter,
-    const clang::Decl* decl,
-    const std::vector<cxxctp::parsed_func>& args);
+std::string get_func_arg(const std::vector<cxxctp::parsed_func>& args, const std::string& funcName, const int index);

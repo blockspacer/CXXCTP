@@ -75,10 +75,10 @@ namespace fs = std::experimental::filesystem;
 #include "inputThread.hpp"
 #include "clangUtils.hpp"
 #include "clangPipeline.hpp"
-#include "ClingInterpreterModule.hpp"
 
 #if !defined(CLING_IS_ON)
-#include "../resources/ctp_scripts/ctp_registry.hpp"
+#include "ClingInterpreterModule.hpp"
+#include "src/ctp_registry.hpp"
 #endif // CLING_IS_ON
 
 using namespace std;
@@ -93,6 +93,8 @@ using llvm::StringRef;
 
 int main(int argc, const char* const* argv) {
 
+/// \note that function may be usefull only if Cling is turned off
+/// because functions may be called by name in Cling
 #if !defined(CLING_IS_ON)
     add_modulecallbacks();
 #endif // CLING_IS_ON
@@ -104,6 +106,7 @@ int main(int argc, const char* const* argv) {
     std::thread inp_thread(cxxctp::input_func);
     inp_thread.detach();
 
+#if defined(CLING_IS_ON)
     // cling thread used as C++ interpreter
     std::thread cling_thread(cling_utils::cling_func);
     cling_thread.detach();
@@ -113,6 +116,7 @@ int main(int argc, const char* const* argv) {
       std::unique_lock<std::mutex> lk(cling_utils::InterpreterModule::clingReadyMutex);
       cling_utils::InterpreterModule::clingReadyCV.wait(lk, []{return cling_utils::InterpreterModule::isClingReady;});
     }
+#endif // CLING_IS_ON
 
     /*bool quit2 = false;
     while(!quit2)
@@ -163,12 +167,14 @@ int main(int argc, const char* const* argv) {
 
     Tool.run(new clang_utils::ToolFactory(/*new UseOverride::Action()*/));
 
+#if defined(CLING_IS_ON)
     bool quit = false;
     while(!quit)
     {
         /// \note must wait for Cling & ClangTool threads
         quit = cling_utils::InterpreterModule::receivedMessagesQueue_->isEmpty();
     }
+#endif // CLING_IS_ON
     // TODO: free mem
     //delete m_metaProcessor1;
     //delete m_metaProcessor2;

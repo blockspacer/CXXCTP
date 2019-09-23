@@ -3,8 +3,9 @@
 namespace cling_utils {
 
 /// \note module loading order is important
-std::map<std::string, std::vector<std::string>> InterpreterModule::moduleToSources {
-    /// \note module with app loop must be loaded last
+std::map<std::string, std::vector<std::string>>
+  InterpreterModule::moduleToSources {
+/*    /// \note module with app loop must be loaded last
     {
         "main_module",
         std::vector<std::string>{
@@ -13,7 +14,7 @@ std::map<std::string, std::vector<std::string>> InterpreterModule::moduleToSourc
             "../resources/ctp_scripts/app_loop.cpp"
 #endif // CLING_IS_ON
         }
-    }
+    }*/
 };
 
 bool InterpreterModule::isClingReady = false;
@@ -60,10 +61,10 @@ InterpreterModule::InterpreterModule(const string &id, const std::vector<string>
 }
 
 InterpreterModule::~InterpreterModule() {
-    if(!moduleFiles_.empty()) {
+    /*if(!moduleFiles_.empty()) {
         cling::Interpreter::CompilationResult compilationResult;
         metaProcessor_->process(id_ + "_cling_shutdown();", compilationResult, nullptr, true);
-    }
+    }*/
 }
 
 void add_default_cling_args(std::vector<string> &args) {
@@ -149,21 +150,21 @@ void InterpreterModule::prepare() {
     if(!moduleFiles_.empty()) {
         for(const auto& it: moduleFiles_) {
             printf("processes module %s\n", it.c_str());
-            metaProcessor_->process(".x " + it, compilationResult, nullptr, true);
+            metaProcessor_->process(".L " + it, compilationResult, nullptr, true);
         }
 
-        metaProcessor_->process(id_ + "_cling_prepare();", compilationResult, nullptr);
+        //metaProcessor_->process(id_ + "_cling_prepare();", compilationResult, nullptr);
     }
 }
 
 void InterpreterModule::run() {
-    if(!moduleFiles_.empty()) {
+    /*if(!moduleFiles_.empty()) {
         std::thread module_main([this](){
             cling::Interpreter::CompilationResult compilationResult;
             metaProcessor_->process(id_ + "_cling_run();", compilationResult, nullptr, true);
         });
         module_main.detach();
-    }
+    }*/
 }
 
 void reloadClingModule(const string &module_id, const std::vector<string> &sources) {
@@ -183,10 +184,71 @@ void reloadAllCling() {
 
     llvm::outs() << "LLVMDIR is " << LLVMDIR << '\n';
 
+    fs::path abs_cur_path = fs::absolute(fs::current_path());
+
+    llvm::outs() << "fs::current_path() is " << abs_cur_path.string() << '\n';
+
+#if defined(CLING_IS_ON)
+    // Init InterpreterModule files
+    if(const auto Interp_it = InterpreterModule::moduleToSources.find("main_module")
+       ; Interp_it == InterpreterModule::moduleToSources.end())
+    {
+      /*const std::string cxtpl_scripts_path
+        = abs_cur_path / ".." / "resources" / "cxtpl";
+
+      llvm::outs() << "cxtpl_scripts_path size is " << cxtpl_scripts_path.size() << '\n';
+
+      std::vector<fs::path> cxtpl_scripts_paths(
+        fs::directory_iterator(cxtpl_scripts_path), fs::directory_iterator{}
+      );
+
+      /// \note we must be able to change loading order
+      /// by file naming (0_file, 1_file)
+      std::sort(cxtpl_scripts_paths.begin(), cxtpl_scripts_paths.end());
+
+      for (const auto & file_entry : cxtpl_scripts_paths) {
+        //llvm::outs() << "file_entry.filename() = " << file_entry.filename() << '\n';
+        if(file_entry.filename() != "CXTPL_STD.cpp"){
+          continue; // TODO
+        }
+
+        fs::path full_path = fs::absolute(file_entry);
+
+        llvm::outs() << "full_path.extension() = " << full_path.extension() << '\n';
+
+        if(full_path.extension() == ".cpp")
+        {
+          InterpreterModule::moduleToSources["main_module"].push_back(full_path.string());
+          llvm::outs() << "added to InterpreterModule file " << full_path.string() << '\n';
+        }
+      }*/
+
+      const std::string ctp_scripts_path
+        = abs_cur_path / ".." / "resources" / "ctp_scripts";
+
+      std::vector<fs::path> ctp_scripts_paths(
+        fs::directory_iterator(ctp_scripts_path), fs::directory_iterator{}
+      );
+
+      /// \note we must be able to change loading order
+      /// by file naming (0_file, 1_file)
+      std::sort(ctp_scripts_paths.begin(), ctp_scripts_paths.end());
+
+      for (const auto & file_entry : ctp_scripts_paths) {
+        fs::path full_path = fs::absolute(file_entry);
+        if(full_path.extension() == ".cpp")
+        {
+          InterpreterModule::moduleToSources["main_module"].push_back(full_path.string());
+          llvm::outs() << "added to InterpreterModule file " << full_path.string() << '\n';
+        }
+      }
+    }
+
     for(const auto& it : InterpreterModule::moduleToSources) {
         reloadClingModule(it.first, it.second);
         llvm::outs() << "reloaded module " << it.first << '\n';
     }
+#endif // CLING_IS_ON
 
     cling::Value res; // Will hold the result of the expression evaluation.
 }

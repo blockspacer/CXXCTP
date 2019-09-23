@@ -1,5 +1,5 @@
 ﻿#pragma once
 
-#include "CXTPL_STD.hpp"
+#include "../ctp_scripts/CXTPL_STD.hpp"
 
 #include <unordered_map>

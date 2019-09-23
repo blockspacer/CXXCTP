@@ -1,5 +1,15 @@
 ﻿#include "clangPipeline.hpp"
 
+#include "DispatchQueue.hpp"
+
+#include "funcParser.hpp"
+
+#include "clangUtils.hpp"
+
+#include <experimental/filesystem>
+
+namespace fs = std::experimental::filesystem;
+
 namespace clang_utils {
 
 static std::map<std::string, cxxctp_callback> cxxctp_callbacks;
@@ -122,9 +132,9 @@ void callModuleFunc(const UseOverride::Checker::MatchResult& Result,
     printf("callModuleFunc %s\n", func_to_call.c_str());
     /*llvm::outs() << "!callModuleFunc: "
                  << func_to_call << "\n";*/
-    auto func = get_cxxctp_callback(func_to_call);
-    if(func) {
-        func(Result, rewriter_, decl, parsedFuncs);
+    auto func_cxxctp = get_cxxctp_callback(func_to_call);
+    if(func_cxxctp) {
+        func_cxxctp(Result, rewriter_, decl, parsedFuncs);
     }
 }
 

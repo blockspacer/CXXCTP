@@ -1,6 +1,8 @@
 ﻿#include "inputThread.hpp"
 
+#if defined(CLING_IS_ON)
 #include "ClingInterpreterModule.hpp"
+#endif // CLING_IS_ON
 #include "utils.hpp"
 
 namespace cxxctp {
@@ -25,11 +27,14 @@ namespace cxxctp {
         } else if (command == "reload_all") {
             //std::scoped_lock lock(InterpreterModule::interpMap["main_module"]->canRunMutex);
             //reloadAllCling(); // NOTE: run under mutex
+#if defined(CLING_IS_ON)
             cling_utils::InterpreterModule::receivedMessagesQueue_->dispatch([] {
                 llvm::outs() << "dispatch reloadAllCling 2!... " << '\n';
                 cling_utils::reloadAllCling();
             });
+#endif // CLING_IS_ON
         }  else if (command == "reload_file") {
+#if defined(CLING_IS_ON)
             std::cin >> command_param1 >> command_param2;
             {
                 //std::scoped_lock lock(InterpreterModule::interpMap["main_module"]->canRunMutex);
@@ -39,7 +44,9 @@ namespace cxxctp {
                     cling_utils::InterpreterModule::InterpreterModule::interpMap[command_param1.c_str()]->metaProcessor_->process(".x " + command_param2, compilationResult, nullptr, true);
                 });
             }
+#endif // CLING_IS_ON
         } else if (command == "reload_module") {
+#if defined(CLING_IS_ON)
             std::cin >> command_param1;
             {
                 //std::scoped_lock lock(InterpreterModule::interpMap["main_module"]->canRunMutex);
@@ -55,7 +62,9 @@ namespace cxxctp {
                     llvm::outs() << "UNKNOWN MODULE! " << '\n';
                 }
             }
+#endif // CLING_IS_ON
         } else if (command == "unload") {
+#if defined(CLING_IS_ON)
             unsigned int times = 1;
             std::cin >> command_param1 >> times;
             {
@@ -65,7 +74,9 @@ namespace cxxctp {
                     cling_utils::InterpreterModule::InterpreterModule::interpMap[command_param1]->interpreter_->unload(times);
                 });
             }
+#endif // CLING_IS_ON
         } else if (command == "process_code") {
+#if defined(CLING_IS_ON)
             std::cin >> command_param1;
             std::getline(std::cin, command_param1);
             llvm::outs() << "command_param: " << command_param1 << '\n';
@@ -77,7 +88,9 @@ namespace cxxctp {
                     cling_utils::processCode(*cling_utils::InterpreterModule::InterpreterModule::interpMap[command_param1.c_str()]->interpreter_, command_param2);
                 });
             }
+#endif // CLING_IS_ON
         } else if (command == "execute_code") {
+#if defined(CLING_IS_ON)
             std::cin >> command_param1;
             std::getline(std::cin, command_param1);
             llvm::outs() << "command_param: " << command_param1 << '\n';
@@ -89,7 +102,9 @@ namespace cxxctp {
                     cling_utils::executeCode(*cling_utils::InterpreterModule::InterpreterModule::interpMap[command_param1.c_str()]->interpreter_, command_param2);
                 });
             }
+#endif // CLING_IS_ON
         } else if (command == "declare") {
+#if defined(CLING_IS_ON)
             std::cin >> command_param1;
             std::getline(std::cin, command_param1);
             llvm::outs() << "command_param: " << command_param1 << '\n';
@@ -100,7 +115,9 @@ namespace cxxctp {
                     cling_utils::InterpreterModule::InterpreterModule::interpMap[command_param1.c_str()]->interpreter_->declare(command_param2);
                 });
             }
+#endif // CLING_IS_ON
         } else if (command == "execute_code_from_file") {
+#if defined(CLING_IS_ON)
             /// note file must be without UTF BOM
             std::cin >> command_param1 >> command_param2;
             {
@@ -110,6 +127,7 @@ namespace cxxctp {
                     cling_utils::processCode(*cling_utils::InterpreterModule::InterpreterModule::interpMap[command_param1.c_str()]->interpreter_, cxxctp::utils::readWholeFile(command_param2));
                 });
             }
+#endif // CLING_IS_ON
         } else {
             llvm::outs() << "UNKNOWN COMMAND! " << '\n';
         }

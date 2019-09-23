@@ -523,7 +523,7 @@ namespace fs = std::experimental::filesystem;
 
 #include "clangUtils.hpp"
 
-using namespace std;
+/*using namespace std;
 using namespace clang;
 using namespace clang::driver;
 using namespace clang::tooling;
@@ -531,7 +531,7 @@ using namespace llvm;
 using namespace clang::ast_matchers;
 using clang::tooling::CommonOptionsParser;
 using clang::tooling::Replacement;
-using llvm::StringRef;
+using llvm::StringRef;*/
 
 namespace cling_utils {
 
