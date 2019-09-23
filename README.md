@@ -5,7 +5,7 @@ CXXCTP doesn`t aim to create predefined set of source code transformations. User
 
 Suppose somebody shared to opensource community usefull scripts like `interface.cxx` and `enum_to_json.cxx`. Just place that scripts into `ctp_scripts` folder to use them in your project.
 
-Metaprogramming is an “art” of writing programs to treats other programs as their data. This means that a program could generate, read, analyse, and transform code or even itself to achieve a certain solution.
+Metaprogramming is an “art” of writing programs to treat other programs as their data. This means that a program could generate, read, analyse, and transform code or even itself to achieve a certain solution.
 
 Note: this project is provided as is, without any warranty (see License).
 
@@ -113,14 +113,14 @@ Note: this project is provided as is, without any warranty (see License).
 
 ## Features
 + C++ as compile-time scripting language (https://github.com/derofim/cling-cmake)
-+ Template engine with full C++ power (transpiles template to valid C++ code, supports Cling, e.t.c.).
++ Template engine with full C++ power (transpiles template to valid C++ code, supports Cling, e.t.c.). https://github.com/blockspacer/CXTPL
 + Ability to modify source files (implement metaclasses, transpile from C++X to C++Y e.t.c.)
 + Ability to create new files (separate generated class to .hpp and .cpp, e.t.c.)
 + Ability to check source files (implement style checks, design patterns, e.t.c.)
 + Ability to compile scripts (rules for code transformations) for maximum performance, not only interpret them in Cling.
 
 ## Project status
-In development, see test.cpp and app_loop.cpp fo usage examples
+In development, see test.cpp and app_loop.cpp for usage examples
 
 Currently supports only linux.
 
@@ -149,9 +149,13 @@ sudo apt-get install openmpi-bin openmpi-common libopenmpi-dev
 bash scripts/install_cmake.sh
 ```
 
+Install CXTPL library https://github.com/blockspacer/CXTPL
+
+Install CXTPL_tool https://github.com/blockspacer/CXTPL#how-to-build
+
 ## How to build
 ```
-BEFORE setup.sh:
+BEFORE setup_cling.sh:
 sudo apt-get update && sudo apt-get upgrade
 sudo apt-get install clang libstdc++6
 sudo update-alternatives --config c++
@@ -164,7 +168,7 @@ export CXX=clang++
 ```
 # Build Cling into `cling-build` folder
 cd scripts
-bash setup.sh
+bash setup_cling.sh
 ```
 
 ```
@@ -174,9 +178,6 @@ cmake -E remove_directory build
 cmake -E make_directory build
 cmake -E remove_directory resources/cxtpl/generated
 cmake -E make_directory resources/cxtpl/generated
-cmake -E chdir build cmake -E time cmake -DENABLE_CLING=FALSE -DCMAKE_BUILD_TYPE=Debug -DENABLE_CXXCTP=FALSE ..
-cmake -E chdir build cmake -E time cmake --build . -- -j6
-cmake -E chdir build ./CXTPL
 cmake -E chdir build cmake -E time cmake -DENABLE_CLING=FALSE -DCMAKE_BUILD_TYPE=Debug -DENABLE_CXXCTP=TRUE ..
 cmake -E chdir build cmake -E time cmake --build . -- -j6
 # cmake -E chdir build ./CXXCTP -help
@@ -272,7 +273,7 @@ SomeInterfaceName {
 
 Using similar approach you can apply multiple soure code transformation steps to same `class` / `struct` / e.t.c.
 
-## How to add custom code transformation
+## How to add custom code transformation rules
 Add your function to `resources/ctp_scripts/app_loop.cpp`
 
 Add your function name `to resources/ctp_scripts/ctp_registry.cpp`
@@ -306,8 +307,14 @@ $apply(make_interface;
   make_removefuncbody)
 ```
 
+If you need code generation:
++ Create template file (`.cxtpl`). Build your file using CXTPL_tool https://github.com/blockspacer/CXTPL
++ Create all needed template arguments inside of your function. Names, types, e.t.c. for arguments must be same as in template (cause generated template is valid C++ code).
++ Create variable `std::string cxtpl_output`, that will store result of template rendering with some arguments.
++ Include file generation from template file (`.cxtpl`) inside of your function.
+
 ## What is `.cxtpl`
-`.cxtpl` is file extention for C++ template engine.
+`.cxtpl` is file extention for C++ template engine https://github.com/blockspacer/CXTPL
 
 Example (more below):
 ```
@@ -389,13 +396,25 @@ Usefull links:
 + https://github.com/djc/askama
 + https://www.reddit.com/r/rust/comments/b06z9m/cuach_a_compiletime_html_template_system/
 
-## How to add `.cxtpl`
-Modify `CXTPL_config.cpp` to include list of your `.cxtpl` files. `CXTPL_config.cpp` will be executed at runtime, so you can change code to get files from cmd arguments, parse from `.json`, e.t.c.
+## How to add `.cxtpl` at compile-time (CMake)
+Add your `.cxtpl` file into `Codegen_files.cmake`
 
-It is also possible to use `CXTPL.cpp` without cling, just copy `CXTPL.cpp` to you project with minor fixes. You can also pass typed arguments to template, just copy & modify `CXTPL_AnyDict.cpp` to replace `std::map<std::string, std::any>` with your typed arguments.
+NOTE:
+  In dev mode (like cling mode) it may be good idea to generate files from templates using CXTPL_tool https://github.com/blockspacer/CXTPL
+  You can add generation rules into `Codegen_files.cmake` later, in release build.
+
+NOTE:
+  Don`t forget to provide both `.cxtpl` and `.cxtpl.h` files with shared codegen rules (add to version control system).
+
+## How to use `.cxtpl` at runtime with Cling
+You have two options:
++ Generate file from your `.cxtpl`, than include it into Cling C++ script. Similar to compile-time, but you can re-generate/change files without program recompilation. Note that it is possible to generate files and include them in your script, just split script into multiple includes.
++ Generate string from your `.cxtpl`, than run it in separate Cling interpreter. In most cases you will need first option.
 
 ## How to use `.cxtpl` with CXXCTP
 Pass reflection data into template engine.
+
+Generate files from templates using CXTPL_tool https://github.com/blockspacer/CXTPL
 
 In CXXCTP script (`.cpp`):
 ```

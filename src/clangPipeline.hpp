@@ -1,8 +1,10 @@
 ﻿#pragma once
 
-#include "clangUtils.h"
-#include "ClingInterpreterModule.h"
-#include "utils.h"
+#include "clangUtils.hpp"
+#include "ClingInterpreterModule.hpp"
+#include "utils.hpp"
+
+namespace clang_utils {
 
 namespace UseOverride {
 class Checker : public clang::ast_matchers::MatchFinder::MatchCallback {
@@ -63,7 +65,7 @@ typedef std::function<const char*(
     const clang::ast_matchers::MatchFinder::MatchResult& matchResult,
     clang::Rewriter& rewriter,
     const clang::Decl* decl,
-    const std::vector<parsed_func>& args)> cxxctp_callback;
+    const std::vector<cxxctp::parsed_func>& args)> cxxctp_callback;
 
 void add_cxxctp_callback(const std::string& id, const cxxctp_callback& func);
 
@@ -73,4 +75,6 @@ cxxctp_callback get_cxxctp_callback(const std::string& id);
     const clang::ast_matchers::MatchFinder::MatchResult& matchResult,
     clang::Rewriter& rewriter,
     const clang::Decl* decl,
-    std::vector<parsed_func>& args)*/
+    std::vector<cxxctp::parsed_func>& args)*/
+
+} // namespace clang_utils

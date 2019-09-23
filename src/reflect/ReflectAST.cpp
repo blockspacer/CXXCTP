@@ -1,10 +1,10 @@
-﻿#include "ReflectAST.h"
+﻿#include "ReflectAST.hpp"
 
 #include <clang/AST/ASTContext.h>
 
 #include <iostream>
 
-#include "ast_utils.h"
+#include "ast_utils.hpp"
 
 #include <boost/algorithm/string/replace.hpp>
 

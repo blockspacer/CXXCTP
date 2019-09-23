@@ -1,8 +1,8 @@
 ﻿#pragma once
 
-#include "ReflTypes.h"
-#include "ReflectAST.h"
-#include "../clangPipeline.h"
+#include "ReflTypes.hpp"
+#include "ReflectAST.hpp"
+#include "../clangPipeline.hpp"
 
 namespace reflection {
 

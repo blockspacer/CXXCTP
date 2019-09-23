@@ -8,6 +8,10 @@
 #include <thread>
 #include <condition_variable>
 
+namespace cxxctp {
+
+namespace utils {
+
 /*
  * DispatchQueue: Based on
  * https://embeddedartistry.com/blog/2017/2/1/c11-implementing-a-dispatch-queue-using-stdfunction
@@ -51,4 +55,6 @@ public:
     }
 };
 
+} // namespace utils
 
+} // namespace cxxctp

@@ -1,4 +1,6 @@
-#include "funcParser.h"
+#include "funcParser.hpp"
+
+namespace cxxctp {
 
 func_arg extract_func_arg(std::string const& inStr) {
   std::string arg_value_ = inStr;
@@ -14,8 +16,8 @@ func_arg extract_func_arg(std::string const& inStr) {
   return {arg_name_, arg_value_};
 }
 
-std::vector<parsed_func> split_to_funcs(std::string const& inStr) {
-  std::vector<parsed_func> result;
+std::vector<cxxctp::parsed_func> split_to_funcs(std::string const& inStr) {
+  std::vector<cxxctp::parsed_func> result;
   std::stringstream ss;
   ss << inStr
     << ";"; // close funcs list with ';'
@@ -97,7 +99,7 @@ std::vector<parsed_func> split_to_funcs(std::string const& inStr) {
             func_name_unprocessed_ = func_with_args_;
           }
           result.push_back(
-            parsed_func{
+            cxxctp::parsed_func{
               func_with_args_,
               {
                 func_name_unprocessed_,
@@ -126,3 +128,5 @@ std::vector<parsed_func> split_to_funcs(std::string const& inStr) {
   }
   return result;
 }
+
+} // namespace cxxctp

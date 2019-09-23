@@ -6,7 +6,9 @@
 #include <any>
 #include <vector>
 
-#include "../../src/reflect/ReflTypes.h"
+#include "../../src/reflect/ReflTypes.hpp"
+
+namespace cxtpl_utils {
 
 template <typename M>
 M GetWithDefault(const std::map<std::string, std::any>& m, const std::string& key, const M& defval) {
@@ -27,3 +29,5 @@ std::string paramsFullDecls(const std::vector<reflection::MethodParamInfo>& para
 std::string paramsCallDecls(const std::vector<reflection::MethodParamInfo>& params);
 
 std::string templateParamsFullDecls(const std::vector<reflection::TemplateParamInfo>& params);
+
+} // namespace cxtpl_utils

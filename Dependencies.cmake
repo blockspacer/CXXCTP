@@ -4,6 +4,7 @@
 
 # This project needs cling.
 find_package(Cling REQUIRED)
+find_package(CXTPL_tool REQUIRED)
 
 #
 # If you have built boost statically you will need to set the Boost_USE_STATIC_LIBS CMake variable to ON

@@ -6,7 +6,7 @@
 #include <map>
 #include <string>
 
-#include "TypeInfo.h"
+#include "TypeInfo.hpp"
 
 namespace reflection
 {

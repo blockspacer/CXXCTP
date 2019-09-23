@@ -517,11 +517,11 @@
 
 namespace fs = std::experimental::filesystem;
 
-#include "DispatchQueue.h"
+#include "DispatchQueue.hpp"
 
-#include "funcParser.h"
+#include "funcParser.hpp"
 
-#include "clangUtils.h"
+#include "clangUtils.hpp"
 
 using namespace std;
 using namespace clang;
@@ -532,6 +532,8 @@ using namespace clang::ast_matchers;
 using clang::tooling::CommonOptionsParser;
 using clang::tooling::Replacement;
 using llvm::StringRef;
+
+namespace cling_utils {
 
 class InterpreterModule {
 public:
@@ -560,7 +562,7 @@ public:
     //std::mutex canRunMutex;
     //bool canRun = true;
 
-    static std::shared_ptr<DispatchQueue> receivedMessagesQueue_;
+    static std::shared_ptr<cxxctp::utils::DispatchQueue> receivedMessagesQueue_;
 
     /// \note module loading order is important
     static std::map<std::string, std::vector<std::string>> moduleToSources;
@@ -572,7 +574,6 @@ public:
     static std::condition_variable clingReadyCV;
     static bool isClingReady;
 };
-
 
 void reloadClingModule(const std::string& module_id, const std::vector<std::string>& sources);
 
@@ -588,3 +589,5 @@ void processCode(cling::Interpreter& interp, const std::string& code);
 void executeCode(cling::Interpreter& interp, const std::string& code);
 
 void add_default_cling_args(std::vector<string> &args);
+
+} // namespace cling_utils

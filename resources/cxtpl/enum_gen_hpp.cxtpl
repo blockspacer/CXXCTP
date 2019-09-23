@@ -1,5 +1,7 @@
 ﻿<CX=> // parameters begin
 
+using namespace cxtpl_utils;
+
 const auto headerGuard
   = GetWithDefault<std::string>(cxtpl_params, "headerGuard", "");
 

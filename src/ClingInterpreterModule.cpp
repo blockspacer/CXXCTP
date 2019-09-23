@@ -1,4 +1,6 @@
-﻿#include "ClingInterpreterModule.h"
+﻿#include "ClingInterpreterModule.hpp"
+
+namespace cling_utils {
 
 /// \note module loading order is important
 std::map<std::string, std::vector<std::string>> InterpreterModule::moduleToSources {
@@ -6,9 +8,7 @@ std::map<std::string, std::vector<std::string>> InterpreterModule::moduleToSourc
     {
         "main_module",
         std::vector<std::string>{
-#if defined(IS_CXTPL)
-//            "..src/template_engine/CXTPL_config.cpp",
-#elif defined(CLING_IS_ON)
+#if defined(CLING_IS_ON)
             "../resources/cxtpl/CXTPL_STD.cpp",
             "../resources/ctp_scripts/app_loop.cpp"
 #endif // CLING_IS_ON
@@ -18,7 +18,7 @@ std::map<std::string, std::vector<std::string>> InterpreterModule::moduleToSourc
 
 bool InterpreterModule::isClingReady = false;
 
-std::shared_ptr<DispatchQueue> InterpreterModule::receivedMessagesQueue_{};
+std::shared_ptr<cxxctp::utils::DispatchQueue> InterpreterModule::receivedMessagesQueue_{};
 
 std::map<std::string, std::unique_ptr<InterpreterModule>> InterpreterModule::interpMap{};
 
@@ -193,7 +193,7 @@ void reloadAllCling() {
 
 [[ noreturn ]] void cling_func() {
     InterpreterModule::receivedMessagesQueue_ =
-            std::make_shared<DispatchQueue>(std::string{"Cling Dispatch Queue"}, 0);
+            std::make_shared<cxxctp::utils::DispatchQueue>(std::string{"Cling Dispatch Queue"}, 0);
 
     InterpreterModule::receivedMessagesQueue_->dispatch([] {
         llvm::outs() << "dispatch reloadAllCling 1!... " << '\n';
@@ -215,3 +215,5 @@ void reloadAllCling() {
         }
     }
 }
+
+} // namespace cling_utils

@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "ReflTypes.h"
+#include "ReflTypes.hpp"
 
 #include <clang/Basic/SourceManager.h>
 #include <clang/AST/PrettyPrinter.h>

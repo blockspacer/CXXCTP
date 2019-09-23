@@ -1,4 +1,8 @@
-﻿#include "DispatchQueue.h"
+﻿#include "DispatchQueue.hpp"
+
+namespace cxxctp {
+
+namespace utils {
 
 DispatchQueue::DispatchQueue(const std::string& name, const size_t thread_cnt)
     : name_(name), threads_(thread_cnt) {
@@ -102,3 +106,7 @@ void DispatchQueue::DispatchQueued(void) {
 
     lock.unlock();
 }
+
+} // namespace utils
+
+} // namespace cxxctp

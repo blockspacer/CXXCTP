@@ -1,10 +1,10 @@
-﻿#include "CXTPL.h"
+﻿#include "CXTPL_AnyDict.hpp"
 
-/*using namespace clang;
-using namespace llvm;
-using llvm::StringRef;*/
+#include "I_Dict.hpp"
 
-void CXTPL<AnyDict>::interpretToFile(const string &path,
+namespace cxtpl_util {
+
+void Dict<AnyDict>::interpretToFile(const string &path,
                                      const std::map<std::string, std::any>& cxtpl_params,
                                      const std::string &includes_code) {
     printf("interpretToFile: with cxtpl_params = %lu\n", cxtpl_params.size());
@@ -15,29 +15,29 @@ void CXTPL<AnyDict>::interpretToFile(const string &path,
         return;
     }
     interp_callback cb = [path/* copyed! */](std::unique_ptr<std::string> res) {
-        writeToFile(res->c_str(), path);
+        cxxctp::utils::writeToFile(res->c_str(), path);
     };
     runInInterpreter(cb, code_for_cling_after_build_, cxtpl_params, includes_code);
 }
 
-/*void CXTPL<AnyDict>::compileToFile(const string &path,
+/*void Dict<AnyDict>::compileToFile(const string &path,
                                    const std::map<std::string, std::any>& cxtpl_params) {
     std::string cxtpl_output;
 
     /// \note uses `cxtpl_output` and `cxtpl_params`
 #include "../../build/test1.cxtpl.cpp"
 
-    writeToFile(cxtpl_output, path);
+    cxxctp::utils::writeToFile(cxtpl_output, path);
 }*/
 
-/*void CXTPL<AnyDict>::interpretToFile(const string &path) {
+/*void Dict<AnyDict>::interpretToFile(const string &path) {
   const auto interRes = interpretToString(bVar, cVar, carNames);
   if(interRes) {
-    writeToFile(interRes->c_str(), path);
+    cxxctp::utils::writeToFile(interRes->c_str(), path);
   }
 }*/
 
-std::string CXTPL<AnyDict>::loadClingArgs(const std::string& appende, const std::map<std::string, std::any>& cxtpl_params) {
+std::string Dict<AnyDict>::loadClingArgs(const std::string& appende, const std::map<std::string, std::any>& cxtpl_params) {
     //std::string result = /*clinja_args +*/ inputToCode;
     std::string result;
 
@@ -70,7 +70,7 @@ std::string CXTPL<AnyDict>::loadClingArgs(const std::string& appende, const std:
     return wrapArgsToCling(appende);
 }
 
-void CXTPL<AnyDict>::runInInterpreter(
+void Dict<AnyDict>::runInInterpreter(
     const interp_callback& callback, const string &inStr,
     const std::map<std::string, std::any>& cxtpl_params,
     const std::string &includes_code) {
@@ -79,11 +79,11 @@ void CXTPL<AnyDict>::runInInterpreter(
     }
     const std::string inStrWithArgs = loadClingArgs(inStr, cxtpl_params);
     //#if 0
-    InterpreterModule::receivedMessagesQueue_->
+    cling_utils::InterpreterModule::receivedMessagesQueue_->
         dispatch([includes_code /* copy! */, inStrWithArgs /* copy! */, callback /* copy! */]() {
             //#endif
             cling::Value clingResult;
-            auto interp = std::make_unique<InterpreterModule>("template_module", std::vector<std::string>{});
+            auto interp = std::make_unique<cling_utils::InterpreterModule>("template_module", std::vector<std::string>{});
             interp->prepare();
             interp->run();
             {
@@ -113,4 +113,6 @@ void CXTPL<AnyDict>::runInInterpreter(
     //return nullptr; // TODO
 }
 
-CXTPL<AnyDict>::~CXTPL() {}
+Dict<AnyDict>::~Dict<AnyDict>() {}
+
+} // namespace cxtpl_util

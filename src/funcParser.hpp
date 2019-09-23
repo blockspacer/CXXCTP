@@ -15,6 +15,8 @@
 #include <boost/spirit/home/x3/operator.hpp>
 #include <boost/spirit/home/x3/char.hpp>*/
 
+namespace cxxctp {
+
 struct func_arg {
   std::string name_;
   std::string value_;
@@ -39,3 +41,5 @@ struct parsed_func {
 func_arg extract_func_arg(std::string const& inStr);
 
 std::vector<parsed_func> split_to_funcs(std::string const& inStr);
+
+} // namespace cxxctp

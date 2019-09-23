@@ -1,6 +1,10 @@
-﻿#include "utils.h"
+﻿#include "utils.hpp"
 
 #include <string>
+
+namespace cxxctp {
+
+namespace utils {
 
 const std::string
 getFileContent(const std::string& path)
@@ -42,3 +46,7 @@ std::string readWholeFile(const std::string &file_path) {
     return std::string((std::istreambuf_iterator<char>(file_stream)),
                        std::istreambuf_iterator<char>());
 }
+
+} // namespace utils
+
+} // namespace cxxctp

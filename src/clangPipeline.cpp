@@ -1,4 +1,6 @@
-﻿#include "clangPipeline.h"
+﻿#include "clangPipeline.hpp"
+
+namespace clang_utils {
 
 static std::map<std::string, cxxctp_callback> cxxctp_callbacks;
 
@@ -71,7 +73,7 @@ void callModuleFunc(const UseOverride::Checker::MatchResult& Result,
                     clang::Rewriter &rewriter_,
                     const clang::Decl* decl,
                     const std::string& func_to_call,
-                    const std::vector<parsed_func>& parsedFuncs) {
+                    const std::vector<cxxctp::parsed_func>& parsedFuncs) {
     std::ostringstream sstr;
     // scope begin
     sstr << "[](){";
@@ -94,7 +96,7 @@ void callModuleFunc(const UseOverride::Checker::MatchResult& Result,
          << std::hex << std::showbase
          << reinterpret_cast<size_t>(decl) << ')';
     sstr << " , "; // next argument
-    sstr << "*(std::vector<parsed_func>*)("
+    sstr << "*(std::vector<cxxctp::parsed_func>*)("
          // Pass a pointer into cling as a string.
          << std::hex << std::showbase
          << reinterpret_cast<size_t>(&parsedFuncs) << ')';
@@ -102,10 +104,10 @@ void callModuleFunc(const UseOverride::Checker::MatchResult& Result,
     sstr << " );" << ";";
     // scope end
     sstr << "}();";
-    if(InterpreterModule::interpMap.find("main_module")
-        != InterpreterModule::interpMap.end()) {
+    if(cling_utils::InterpreterModule::interpMap.find("main_module")
+        != cling_utils::InterpreterModule::interpMap.end()) {
         cling::Interpreter::CompilationResult compilationResult;
-        InterpreterModule::interpMap["main_module"]->metaProcessor_->process(
+        cling_utils::InterpreterModule::interpMap["main_module"]->metaProcessor_->process(
             sstr.str(), compilationResult, nullptr, true);
     }
 }
@@ -116,7 +118,7 @@ void callModuleFunc(const UseOverride::Checker::MatchResult& Result,
                     clang::Rewriter &rewriter_,
                     const clang::Decl* decl,
                     const std::string& func_to_call,
-                    const std::vector<parsed_func>& parsedFuncs) {
+                    const std::vector<cxxctp::parsed_func>& parsedFuncs) {
     printf("callModuleFunc %s\n", func_to_call.c_str());
     /*llvm::outs() << "!callModuleFunc: "
                  << func_to_call << "\n";*/
@@ -214,10 +216,10 @@ void UseOverride::Checker::run(const UseOverride::Checker::MatchResult& Result) 
                 const bool startsWithFunccall =
                         code.rfind(funccall_token, 0) == 0;
 
-                std::vector<parsed_func> parsedFuncs;
+                std::vector<cxxctp::parsed_func> parsedFuncs;
                 if (startsWithGen && startsWithFunccall) {
                     code.erase(0, funccall_token.size());
-                    parsedFuncs = split_to_funcs(code);
+                    parsedFuncs = cxxctp::split_to_funcs(code);
                     for (auto const& seg : parsedFuncs) {
                         llvm::outs() << "segment: " << seg.func_with_args_as_string_ << "\n";
                         llvm::outs() << "funcs_to_call1  func_name_: " << seg.parsed_func_.func_name_ << "\n";
@@ -284,9 +286,9 @@ void UseOverride::Checker::run(const UseOverride::Checker::MatchResult& Result) 
                     // scope end
                     sstr << "}();";
                     cling::Value result;
-                    if(InterpreterModule::interpMap.find("main_module") != InterpreterModule::interpMap.end()) {
+                    if(cling_utils::InterpreterModule::interpMap.find("main_module") != cling_utils::InterpreterModule::interpMap.end()) {
                         cling::Interpreter::CompilationResult compilationResult;
-                        InterpreterModule::interpMap["main_module"]->metaProcessor_->process(
+                        cling_utils::InterpreterModule::interpMap["main_module"]->metaProcessor_->process(
                                     sstr.str(), compilationResult, &result, true);
                     }
                     SourceLocation startLoc = decl->getLocStart();
@@ -305,7 +307,7 @@ void UseOverride::Checker::run(const UseOverride::Checker::MatchResult& Result) 
           rewriter_.InsertText(startLoc, " startLoc ");
           rewriter_.InsertText(endLoc, " endLoc ");*/
 
-                    expandLocations(startLoc, endLoc, rewriter_);
+                    clang_utils::expandLocations(startLoc, endLoc, rewriter_);
 
                     void* resOptionVoid = result.getAs<void*>();
                     auto resOption =
@@ -325,9 +327,9 @@ void UseOverride::Checker::run(const UseOverride::Checker::MatchResult& Result) 
 #if defined(CLING_IS_ON)
                     std::ostringstream sstr;
                     sstr << code;
-                    if(InterpreterModule::interpMap.find("main_module") != InterpreterModule::interpMap.end()) {
+                    if(cling_utils::InterpreterModule::interpMap.find("main_module") != cling_utils::InterpreterModule::interpMap.end()) {
                         cling::Interpreter::CompilationResult compilationResult;
-                        InterpreterModule::interpMap["main_module"]->metaProcessor_->process(
+                        cling_utils::InterpreterModule::interpMap["main_module"]->metaProcessor_->process(
                                     sstr.str(), compilationResult, nullptr, true);
                     }
                     SourceLocation startLoc = decl->getLocStart();
@@ -346,7 +348,7 @@ void UseOverride::Checker::run(const UseOverride::Checker::MatchResult& Result) 
                     /*rewriter_.InsertText(startLoc, " 1startLoc ");
           rewriter_.InsertText(endLoc, " 1endLoc ");*/
 
-                    expandLocations(startLoc, endLoc, rewriter_);
+                    clang_utils::expandLocations(startLoc, endLoc, rewriter_);
 
                     /*rewriter_.InsertText(startLoc, " 2startLoc ");
           rewriter_.InsertText(endLoc, " 2endLoc ");*/
@@ -361,9 +363,9 @@ void UseOverride::Checker::run(const UseOverride::Checker::MatchResult& Result) 
 #if defined(CLING_IS_ON)
                     std::ostringstream sstr;
                     sstr << code;
-                    if(InterpreterModule::interpMap.find("main_module") != InterpreterModule::interpMap.end()) {
+                    if(cling_utils::InterpreterModule::interpMap.find("main_module") != cling_utils::InterpreterModule::interpMap.end()) {
                         cling::Interpreter::CompilationResult compilationResult;
-                        InterpreterModule::interpMap["main_module"]->metaProcessor_->process(
+                        cling_utils::InterpreterModule::interpMap["main_module"]->metaProcessor_->process(
                                     sstr.str(), compilationResult, nullptr, true);
                     }
                     SourceLocation startLoc = decl->getLocStart();
@@ -381,7 +383,7 @@ void UseOverride::Checker::run(const UseOverride::Checker::MatchResult& Result) 
                     /*rewriter_.InsertText(startLoc, " 1startLoc ");
           rewriter_.InsertText(endLoc, " 1endLoc ");*/
 
-                    expandLocations(startLoc, endLoc, rewriter_);
+                    clang_utils::expandLocations(startLoc, endLoc, rewriter_);
 
                     /*rewriter_.InsertText(startLoc, " 2startLoc ");
           rewriter_.InsertText(endLoc, " 2endLoc ");*/
@@ -564,3 +566,5 @@ void UseOverride::Action::EndSourceFileAction() {
 FrontendAction *ToolFactory::create() {
     return new UseOverride::Action();
 }
+
+} // namespace clang_utils

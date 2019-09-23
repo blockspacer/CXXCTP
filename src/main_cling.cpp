@@ -68,18 +68,17 @@
 
 namespace fs = std::experimental::filesystem;
 
-#include "utils.h"
-#include "DispatchQueue.h"
+#include "utils.hpp"
+#include "DispatchQueue.hpp"
 
-#include "funcParser.h"
-#include "inputThread.h"
-#include "clangUtils.h"
-#include "clangPipeline.h"
-#include "ClingInterpreterModule.h"
-//#include "template_engine/CXTPL.h"
+#include "funcParser.hpp"
+#include "inputThread.hpp"
+#include "clangUtils.hpp"
+#include "clangPipeline.hpp"
+#include "ClingInterpreterModule.hpp"
 
 #if !defined(CLING_IS_ON)
-#include "../resources/ctp_scripts/ctp_registry.h"
+#include "../resources/ctp_scripts/ctp_registry.hpp"
 #endif // CLING_IS_ON
 
 using namespace std;
@@ -92,35 +91,6 @@ using clang::tooling::CommonOptionsParser;
 using clang::tooling::Replacement;
 using llvm::StringRef;
 
-/*struct animal
-{
-    std::string name;
-    int legs;
-};*/
-
-/*typedef boost::multi_index_container<
-    std::unique_ptr<InterpreterModule>,
-  boost::indexed_by<
-    boost::random_access<>,  // keep insertion order
-        boost::ordered_non_unique< member<some, long, &some::key> >
-        >
-> InterpreterModuleContainer;*/
-
-/*struct clinja_arg {
-    std::string declaration;
-};*/
-
-/*template <typename M>
-M GetWithDefault(const std::map<std::string, std::any>& m, const std::string& key, const M& defval) {
-    auto it = m.find( key );
-    if ( it == m.end() ) {
-        return defval;
-    }
-    else {
-        return std::any_cast<M>(it->second);
-    }
-}*/
-
 int main(int argc, const char* const* argv) {
 
 #if !defined(CLING_IS_ON)
@@ -131,54 +101,18 @@ int main(int argc, const char* const* argv) {
 
     // input thread allows sending commands via cmd
     // usefull if you want to debug/quit/.. long running tasks
-    std::thread inp_thread(input_func);
+    std::thread inp_thread(cxxctp::input_func);
     inp_thread.detach();
 
     // cling thread used as C++ interpreter
-    std::thread cling_thread(cling_func);
+    std::thread cling_thread(cling_utils::cling_func);
     cling_thread.detach();
 
     // Wait until main() sends data
     {
-      std::unique_lock<std::mutex> lk(InterpreterModule::clingReadyMutex);
-      InterpreterModule::clingReadyCV.wait(lk, []{return InterpreterModule::isClingReady;});
+      std::unique_lock<std::mutex> lk(cling_utils::InterpreterModule::clingReadyMutex);
+      cling_utils::InterpreterModule::clingReadyCV.wait(lk, []{return cling_utils::InterpreterModule::isClingReady;});
     }
-
-    /*bool bVar1 = true;
-    bool cVar1 = true;
-    std::vector<std::string> carNames1{ "Betta", "Bob", "Lily"};
-
-    std::map<std::string, std::any> anyDictionary;
-    anyDictionary["bVar"] =  std::make_any<bool>(std::move(bVar1));
-    anyDictionary["cVar"] = std::make_any<bool>(std::move(cVar1));
-    anyDictionary["carNames"] = std::make_any<std::vector<std::string>>(std::move(carNames1));
-
-    std::string headerGuard = GetWithDefault<std::string>(anyDictionary, "headerGuard", "");
-    std::vector<std::string> generator_includes = GetWithDefault<std::vector<std::string>>(anyDictionary, "headerGuard", carNames1);*/
-
-    /*bool bVar = std::any_cast< bool>(anyDictionary.at("bVar"));
-    bool cVar = std::any_cast< bool>(anyDictionary.at("cVar"));
-    std::vector<std::string> carNames = std::any_cast< std::vector<std::string>>(anyDictionary.at("carNames"));
-
-    std::cout << "bVar = " << bVar << std::endl;
-    std::cout << "cVar = " << cVar << std::endl;
-    std::cout << "carNames = " << carNames.size() << std::endl;*/
-
-    /*
-    std::cout << "preprocessorRawInput = "
-      << cxtpl.compileToString(bVar, cVar, carNames) << std::endl;
-
-    cxtpl.interpretToString(bVar, cVar, carNames);*/
-
-    /*cxtpl.interpretToFile("test1.interpret.out", anyDictionary, R"raw(
-#include <iostream>
-#include <map>
-#include <string>
-#include <any>
-#include <vector>
-)raw");*/
-
-    //cxtpl.compileToFile("test1.compile.out", anyDictionary);
 
     /*bool quit2 = false;
     while(!quit2)
@@ -189,7 +123,7 @@ int main(int argc, const char* const* argv) {
     llvm::outs() << "clang... " << '\n';
 
     std::vector<std::string> args_storage;
-    add_default_clang_args(args_storage);
+    clang_utils::add_default_clang_args(args_storage);
 
     ///\note skip first arg (app name)
     for(int i = 1; i < argc; i++) {
@@ -227,13 +161,13 @@ int main(int argc, const char* const* argv) {
 
     ClangTool Tool(op.getCompilations(), op.getSourcePathList());
 
-    Tool.run(new ToolFactory(/*new UseOverride::Action()*/));
+    Tool.run(new clang_utils::ToolFactory(/*new UseOverride::Action()*/));
 
     bool quit = false;
     while(!quit)
     {
         /// \note must wait for Cling & ClangTool threads
-        quit = InterpreterModule::receivedMessagesQueue_->isEmpty();
+        quit = cling_utils::InterpreterModule::receivedMessagesQueue_->isEmpty();
     }
     // TODO: free mem
     //delete m_metaProcessor1;

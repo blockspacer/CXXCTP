@@ -55,12 +55,10 @@ set(ENABLE_CLING FALSE CACHE BOOL "ENABLE_CLING")
 
 set(ENABLE_CXXCTP TRUE CACHE BOOL "ENABLE_CXXCTP")
 
-set(ENABLE_CXTPL TRUE CACHE BOOL "ENABLE_CXTPL")
-
 list(APPEND COMMON_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/clangUtils.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/clangUtils.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/clangUtils.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/funcParser.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/funcParser.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/funcParser.cpp
   #${CMAKE_CURRENT_SOURCE_DIR}/src/someEnum.hpp
   #${CMAKE_CURRENT_SOURCE_DIR}/src/someEnum.cpp
@@ -69,35 +67,31 @@ list(APPEND COMMON_FILES
   #${CMAKE_CURRENT_SOURCE_DIR}/src/type_erasure_my_interface_my_interface2.cpp
   #${CMAKE_CURRENT_SOURCE_DIR}/src/types_for_erasure.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/DispatchQueue.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/DispatchQueue.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/clangPipeline.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/DispatchQueue.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/clangPipeline.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/clangPipeline.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/ClingInterpreterModule.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/ClingInterpreterModule.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/ClingInterpreterModule.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/utils.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/utils.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/utils.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/inputThread.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/inputThread.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/inputThread.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/reflect/ReflectionCache.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/reflect/ReflectionCache.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/reflect/ReflectionCache.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/reflect/ReflTypes.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/reflect/ReflTypes.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/reflect/ReflTypes.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/reflect/TypeInfo.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/reflect/TypeInfo.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/reflect/TypeInfo.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/reflect/ReflectAST.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/reflect/ReflectAST.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/reflect/ast_utils.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/template_engine/CXTPL.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/reflect/ReflectAST.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/reflect/ast_utils.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/template_engine/CXTPL_AnyDict.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/template_engine/CXTPL_AnyDict.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/template_engine/CXTPL.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/template_engine/I_Dict.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/template_engine/I_Dict.cpp
 )
 
-if(ENABLE_CXTPL)
-  add_executable(CXTPL
-   ${COMMON_FILES}
-   ${CMAKE_CURRENT_SOURCE_DIR}/src/template_engine/engine_main.cpp
-  )
-endif(ENABLE_CXTPL)
+include(Codegen_files.cmake)
 
 if(ENABLE_CLING)
   #add_library(simple_lib SHARED #STATIC
@@ -109,6 +103,7 @@ if(ENABLE_CLING)
     add_executable(CXXCTP
      ${COMMON_FILES}
      ${CMAKE_CURRENT_SOURCE_DIR}/src/main_cling.cpp
+     # TODO: DEPENDS ${cxtpl_outputs}
     )
   endif(ENABLE_CXXCTP)
 else(ENABLE_CLING)
@@ -118,11 +113,11 @@ else(ENABLE_CLING)
      ${COMMON_FILES}
      ${CMAKE_CURRENT_SOURCE_DIR}/src/main_cling.cpp
      ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/app_loop.cpp
-     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/app_loop.h
+     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/app_loop.hpp
      ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/ctp_registry.cpp
-     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/ctp_registry.h
+     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/ctp_registry.hpp
      ${CMAKE_CURRENT_SOURCE_DIR}/resources/cxtpl/CXTPL_STD.cpp
-     ${CMAKE_CURRENT_SOURCE_DIR}/resources/cxtpl/CXTPL_STD.h
+     ${CMAKE_CURRENT_SOURCE_DIR}/resources/cxtpl/CXTPL_STD.hpp
     )
   endif(ENABLE_CXXCTP)
 endif(ENABLE_CLING)
@@ -222,18 +217,6 @@ if(ENABLE_CXXCTP)
   )
 endif(ENABLE_CXXCTP)
 
-# ...which links against clingInterpreter (and its dependencies).
-if(ENABLE_CXTPL)
-  target_link_libraries(CXTPL
-    #simple_lib
-    ${CLING_LIBS}
-    # system libs
-    ${USED_SYSTEM_LIBS}
-    # boost libs
-    ${USED_BOOST_LIBS}
-  )
-endif(ENABLE_CXTPL)
-
 if(ENABLE_CXXCTP)
   target_compile_definitions( CXXCTP PUBLIC
     ${CLING_DEFINITIONS}
@@ -244,15 +227,37 @@ if(ENABLE_CXXCTP)
   )
 endif(ENABLE_CXXCTP)
 
-if(ENABLE_CXTPL)
-  target_compile_definitions( CXTPL PUBLIC
-    ${CLING_DEFINITIONS}
-    # https://stackoverflow.com/a/30877725
-    BOOST_SYSTEM_NO_DEPRECATED
-    BOOST_ERROR_CODE_HEADER_ONLY
-    IS_CXTPL=1
-  )
-endif(ENABLE_CXTPL)
+macro(conditional_remove ARG_DO_REMOVE ARG_DIR ARG_WORKING_DIR)
+  if(${ARG_DO_REMOVE})
+    if (NOT EXISTS ${ARG_DIR})
+      message(STATUS "not existent: ${ARG_DIR}" --yellow --bold)
+    endif (NOT EXISTS ${ARG_DIR})
+
+    if(IS_DIRECTORY ${ARG_DIR})
+      execute_process(
+        COMMAND ${CMAKE_COMMAND} "-E" "remove_directory" "${ARG_DIR}"
+        WORKING_DIRECTORY ${ARG_WORKING_DIR}
+        TIMEOUT 7200 # sec
+      )
+      message(STATUS "removed old directory ${ARG_DIR}" --yellow --bold)
+      if (EXISTS ${ARG_DIR})
+        message(STATUS "can`t remove directory ${ARG_DIR}" --red --bold)
+      endif(EXISTS ${ARG_DIR})
+    else(IS_DIRECTORY ${ARG_DIR})
+      execute_process(
+        COMMAND ${CMAKE_COMMAND} "-E" "remove" "${ARG_DIR}"
+        WORKING_DIRECTORY ${ARG_WORKING_DIR}
+        TIMEOUT 7200 # sec
+      )
+      message(STATUS "removed old file ${ARG_DIR}" --yellow --bold)
+      if (EXISTS ${ARG_DIR})
+        message(STATUS "can`t remove file ${ARG_DIR}" --red --bold)
+      endif(EXISTS ${ARG_DIR})
+    endif(IS_DIRECTORY ${ARG_DIR})
+  else(${ARG_DO_REMOVE})
+    message(STATUS "kept old path: ${ARG_DIR}" --yellow --bold)
+  endif(${ARG_DO_REMOVE})
+endmacro(conditional_remove)
 
 #target_include_directories( CXXCTP PUBLIC
 #)
@@ -262,11 +267,6 @@ if(ENABLE_CXXCTP)
     PROPERTIES ENABLE_EXPORTS 1)
 endif(ENABLE_CXXCTP)
 
-if(ENABLE_CXTPL)
-  set_target_properties(CXTPL
-    PROPERTIES ENABLE_EXPORTS 1)
-endif(ENABLE_CXTPL)
-
 if(MSVC)
  if(ENABLE_CXXCTP)
    set_target_properties(CXXCTP PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS 1)
@@ -275,12 +275,10 @@ if(MSVC)
                 /EXPORT:?setValueNoAlloc@internal@runtime@cling@@YAXPEAX00DM@Z
                 /EXPORT:cling_runtime_internal_throwIfInvalidPointer")
   endif(ENABLE_CXXCTP)
-
-   if(ENABLE_CXTPL)
-     set_target_properties(CXTPL PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS 1)
-     set_property(TARGET CXTPL APPEND_STRING PROPERTY LINK_FLAGS
-                 "/EXPORT:?setValueNoAlloc@internal@runtime@cling@@YAXPEAX00D_K@Z
-                  /EXPORT:?setValueNoAlloc@internal@runtime@cling@@YAXPEAX00DM@Z
-                  /EXPORT:cling_runtime_internal_throwIfInvalidPointer")
-   endif(ENABLE_CXTPL)
 endif()
+
+# remove old codegen files
+conditional_remove(TRUE ${cxtpl_out_dir} ${CMAKE_CURRENT_SOURCE_DIR})
+
+# create new codegen files
+target_add_CXTPL_tool(CXXCTP "${cxtpl_inputs}" "${cxtpl_outputs}")

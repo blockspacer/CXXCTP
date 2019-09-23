@@ -1,4 +1,6 @@
-﻿#include "clangUtils.h"
+﻿#include "clangUtils.hpp"
+
+namespace clang_utils {
 
 std::string printMethodDecl(const clang::Decl* decl, clang::CXXRecordDecl const * node, CXXMethodDecl* fct) {
     std::string methodDecl;
@@ -166,3 +168,5 @@ void expandLocations(SourceLocation& startLoc,
         endLoc = expansionRange.second;
     }
 }
+
+} // namespace clang_utils

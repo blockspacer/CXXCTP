@@ -1,6 +1,6 @@
-﻿#include "ctp_registry.h"
+﻿#include "ctp_registry.hpp"
 
-#include "app_loop.h"
+#include "app_loop.hpp"
 
 void add_modulecallbacks() {
     add_cxxctp_callback("make_interface", &make_interface);

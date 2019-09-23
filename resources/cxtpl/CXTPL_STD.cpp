@@ -1,4 +1,6 @@
-﻿#include "CXTPL_STD.h"
+﻿#include "CXTPL_STD.hpp"
+
+namespace cxtpl_utils {
 
 std::string startHeaderGuard(const std::string& guardName) {
     std::string out;
@@ -75,3 +77,9 @@ std::string templateParamsFullDecls(const std::vector<reflection::TemplateParamI
     } // params endfor
     return out;
 }
+
+} // namespace cxtpl_utils
+
+#if defined(CLING_IS_ON)
+void CXTPL_STD(){}
+#endif

@@ -1,8 +1,8 @@
-﻿#include "app_loop.h"
+﻿#include "app_loop.hpp"
 
-#include "ctp_registry.h"
+#include "ctp_registry.hpp"
 
-extern std::vector<parsed_func> split_to_funcs(std::string const& inStr);
+extern std::vector<cxxctp::parsed_func> split_to_funcs(std::string const& inStr);
 
 using namespace std;
 using namespace clang;
@@ -226,7 +226,7 @@ struct ReflectedEnumItems {
   int64_t value;
 };
 
-std::string get_func_arg(const std::vector<parsed_func>& args, const std::string& funcName, const int index) {
+std::string get_func_arg(const std::vector<cxxctp::parsed_func>& args, const std::string& funcName, const int index) {
     std::string result;
     for (auto const& seg : args) {
         /*llvm::outs() << "segment: " << seg.func_with_args_as_string_ << "\n";
@@ -245,7 +245,7 @@ const char* typeclass_instance(
     const clang::ast_matchers::MatchFinder::MatchResult& matchResult,
     clang::Rewriter& rewriter,
     const clang::Decl* decl,
-    const std::vector<parsed_func>& args) {
+    const std::vector<cxxctp::parsed_func>& args) {
     printf("typeclass_instance called...\n");
 
     std::map<std::string, std::any> cxtpl_params;
@@ -329,7 +329,7 @@ const char* typeclass_instance(
 
 #include "../../resources/cxtpl/generated/typeclass_instance_gen_hpp.cxtpl.cpp"
 
-        writeToFile(cxtpl_output, gen_hpp_name);
+        cxxctp::utils::writeToFile(cxtpl_output, gen_hpp_name);
 
         /*
         std::string typeclassHppConvertor =
@@ -361,7 +361,7 @@ const char* typeclass(
     const clang::ast_matchers::MatchFinder::MatchResult& matchResult,
     clang::Rewriter& rewriter,
     const clang::Decl* decl,
-    const std::vector<parsed_func>& args) {
+    const std::vector<cxxctp::parsed_func>& args) {
 
   reflection::NamespacesTree m_namespaces; // TODO
 
@@ -414,7 +414,7 @@ const char* typeclass(
 
       SourceLocation startLoc = decl->getLocStart();
       SourceLocation endLoc = decl->getLocEnd();
-      expandLocations(startLoc, endLoc, rewriter);
+      clang_utils::expandLocations(startLoc, endLoc, rewriter);
 
       auto codeRange = SourceRange{startLoc, endLoc};
 
@@ -458,7 +458,7 @@ const char* typeclass(
 
 #include "../../resources/cxtpl/generated/typeclass_gen_hpp.cxtpl.cpp"
 
-        writeToFile(cxtpl_output, gen_hpp_name);
+        cxxctp::utils::writeToFile(cxtpl_output, gen_hpp_name);
 
         /*
         std::string typeclassHppConvertor =
@@ -482,7 +482,7 @@ const char* reflect_enum(
     const clang::ast_matchers::MatchFinder::MatchResult& matchResult,
     clang::Rewriter& rewriter,
     const clang::Decl* decl,
-    const std::vector<parsed_func>& args) {
+    const std::vector<cxxctp::parsed_func>& args) {
   printf("reflect_enum called...\n");
 
   clang::EnumDecl const *node =
@@ -562,7 +562,7 @@ const char* reflect_enum(
 
 #include "../../resources/cxtpl/generated/enum_gen_cpp.cxtpl.cpp"
 
-      writeToFile(cxtpl_output, node->getNameAsString() + ".enum.generated.cpp");
+      cxxctp::utils::writeToFile(cxtpl_output, node->getNameAsString() + ".enum.generated.cpp");
     }
 
     {
@@ -576,7 +576,7 @@ const char* reflect_enum(
 
 #include "../../resources/cxtpl/generated/enum_gen_hpp.cxtpl.cpp"
 
-      writeToFile(cxtpl_output, gen_hpp_name);
+      cxxctp::utils::writeToFile(cxtpl_output, gen_hpp_name);
     }
   }
 
@@ -587,7 +587,7 @@ const char* make_reflect(
     const clang::ast_matchers::MatchFinder::MatchResult& matchResult,
     clang::Rewriter& rewriter,
     const clang::Decl* decl,
-    const std::vector<parsed_func>& args) {
+    const std::vector<cxxctp::parsed_func>& args) {
   printf("make_removefuncbody called...\n");
 
   std::string indent = "  ";
@@ -703,7 +703,7 @@ const char* make_removefuncbody(
     const clang::ast_matchers::MatchFinder::MatchResult& matchResult,
     clang::Rewriter& rewriter,
     const clang::Decl* decl,
-    const std::vector<parsed_func>& args) {
+    const std::vector<cxxctp::parsed_func>& args) {
   printf("make_removefuncbody called...\n");
 
   clang::CXXRecordDecl const *record =
@@ -745,7 +745,7 @@ const char* make_interface(
     const clang::ast_matchers::MatchFinder::MatchResult& matchResult,
     clang::Rewriter& rewriter,
     const clang::Decl* decl,
-    const std::vector<parsed_func>& args) {
+    const std::vector<cxxctp::parsed_func>& args) {
   printf("make_interface called...\n");
 
   clang::CXXRecordDecl const *record =
@@ -754,7 +754,7 @@ const char* make_interface(
 
     /*SourceLocation startLoc = record->getLocStart();
     SourceLocation endLoc = record->getLocEnd();
-    expandLocations(startLoc, endLoc, rewriter);
+    clang_utils::expandLocations(startLoc, endLoc, rewriter);
     rewriter.InsertText(startLoc, " startLoc1 ");
     rewriter.InsertText(endLoc, " endLoc2 ");*/
 

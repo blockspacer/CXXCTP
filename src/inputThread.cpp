@@ -1,7 +1,9 @@
-﻿#include "inputThread.h"
+﻿#include "inputThread.hpp"
 
-#include "ClingInterpreterModule.h"
-#include "utils.h"
+#include "ClingInterpreterModule.hpp"
+#include "utils.hpp"
+
+namespace cxxctp {
 
 [[ noreturn ]] void input_func()
 {
@@ -23,30 +25,31 @@
         } else if (command == "reload_all") {
             //std::scoped_lock lock(InterpreterModule::interpMap["main_module"]->canRunMutex);
             //reloadAllCling(); // NOTE: run under mutex
-            InterpreterModule::receivedMessagesQueue_->dispatch([] {
+            cling_utils::InterpreterModule::receivedMessagesQueue_->dispatch([] {
                 llvm::outs() << "dispatch reloadAllCling 2!... " << '\n';
-                reloadAllCling();
+                cling_utils::reloadAllCling();
             });
         }  else if (command == "reload_file") {
             std::cin >> command_param1 >> command_param2;
             {
                 //std::scoped_lock lock(InterpreterModule::interpMap["main_module"]->canRunMutex);
-                InterpreterModule::receivedMessagesQueue_->dispatch([command_param1, command_param2] {
+                cling_utils::InterpreterModule::receivedMessagesQueue_->dispatch([command_param1, command_param2] {
                     llvm::outs() << "dispatch reload_file 1!... " << '\n';
                     cling::Interpreter::CompilationResult compilationResult;
-                    InterpreterModule::InterpreterModule::interpMap[command_param1.c_str()]->metaProcessor_->process(".x " + command_param2, compilationResult, nullptr, true);
+                    cling_utils::InterpreterModule::InterpreterModule::interpMap[command_param1.c_str()]->metaProcessor_->process(".x " + command_param2, compilationResult, nullptr, true);
                 });
             }
         } else if (command == "reload_module") {
             std::cin >> command_param1;
             {
                 //std::scoped_lock lock(InterpreterModule::interpMap["main_module"]->canRunMutex);
-                if(InterpreterModule::moduleToSources.find(command_param1) != InterpreterModule::moduleToSources.end()) {
+                if(cling_utils::InterpreterModule::moduleToSources.find(command_param1)
+                   != cling_utils::InterpreterModule::moduleToSources.end()) {
                     //removeClingModule(command_param1);
-                    InterpreterModule::receivedMessagesQueue_->dispatch([command_param1] {
+                    cling_utils::InterpreterModule::receivedMessagesQueue_->dispatch([command_param1] {
                         llvm::outs() << "dispatch reloadClingModule 1!... " << '\n';
-                        reloadClingModule(command_param1,
-                                          InterpreterModule::moduleToSources[command_param1]);
+                        cling_utils::reloadClingModule(command_param1,
+                                          cling_utils::InterpreterModule::moduleToSources[command_param1]);
                     });
                 } else {
                     llvm::outs() << "UNKNOWN MODULE! " << '\n';
@@ -57,9 +60,9 @@
             std::cin >> command_param1 >> times;
             {
                 //std::scoped_lock lock(InterpreterModule::interpMap["main_module"]->canRunMutex);
-                InterpreterModule::receivedMessagesQueue_->dispatch([command_param1, times] {
+                cling_utils::InterpreterModule::receivedMessagesQueue_->dispatch([command_param1, times] {
                     llvm::outs() << "dispatch unload 1!... " << '\n';
-                    InterpreterModule::InterpreterModule::interpMap[command_param1]->interpreter_->unload(times);
+                    cling_utils::InterpreterModule::InterpreterModule::interpMap[command_param1]->interpreter_->unload(times);
                 });
             }
         } else if (command == "process_code") {
@@ -68,9 +71,10 @@
             llvm::outs() << "command_param: " << command_param1 << '\n';
             {
                 //std::scoped_lock lock(InterpreterModule::interpMap["main_module"]->canRunMutex);
-                InterpreterModule::receivedMessagesQueue_->dispatch([command_param1, command_param2] {
+                cling_utils::InterpreterModule::receivedMessagesQueue_->
+                  dispatch([command_param1, command_param2] {
                     llvm::outs() << "dispatch process_code 1!... " << '\n';
-                    processCode(*InterpreterModule::InterpreterModule::interpMap[command_param1.c_str()]->interpreter_, command_param2);
+                    cling_utils::processCode(*cling_utils::InterpreterModule::InterpreterModule::interpMap[command_param1.c_str()]->interpreter_, command_param2);
                 });
             }
         } else if (command == "execute_code") {
@@ -79,9 +83,10 @@
             llvm::outs() << "command_param: " << command_param1 << '\n';
             {
                 //std::scoped_lock lock(InterpreterModule::interpMap["main_module"]->canRunMutex);
-                InterpreterModule::receivedMessagesQueue_->dispatch([command_param1, command_param2] {
+                cling_utils::InterpreterModule::receivedMessagesQueue_->
+                  dispatch([command_param1, command_param2] {
                     llvm::outs() << "dispatch execute_code 1!... " << '\n';
-                    executeCode(*InterpreterModule::InterpreterModule::interpMap[command_param1.c_str()]->interpreter_, command_param2);
+                    cling_utils::executeCode(*cling_utils::InterpreterModule::InterpreterModule::interpMap[command_param1.c_str()]->interpreter_, command_param2);
                 });
             }
         } else if (command == "declare") {
@@ -90,9 +95,9 @@
             llvm::outs() << "command_param: " << command_param1 << '\n';
             {
                 //std::scoped_lock lock(InterpreterModule::interpMap["main_module"]->canRunMutex);
-                InterpreterModule::receivedMessagesQueue_->dispatch([command_param1, command_param2] {
+                cling_utils::InterpreterModule::receivedMessagesQueue_->dispatch([command_param1, command_param2] {
                     llvm::outs() << "dispatch declare 1!... " << '\n';
-                    InterpreterModule::InterpreterModule::interpMap[command_param1.c_str()]->interpreter_->declare(command_param2);
+                    cling_utils::InterpreterModule::InterpreterModule::interpMap[command_param1.c_str()]->interpreter_->declare(command_param2);
                 });
             }
         } else if (command == "execute_code_from_file") {
@@ -100,9 +105,9 @@
             std::cin >> command_param1 >> command_param2;
             {
                 //std::scoped_lock lock(InterpreterModule::interpMap["main_module"]->canRunMutex);
-                InterpreterModule::receivedMessagesQueue_->dispatch([command_param1, command_param2] {
+                cling_utils::InterpreterModule::receivedMessagesQueue_->dispatch([command_param1, command_param2] {
                     llvm::outs() << "dispatch execute_code_from_file 1!... " << '\n';
-                    processCode(*InterpreterModule::InterpreterModule::interpMap[command_param1.c_str()]->interpreter_, readWholeFile(command_param2));
+                    cling_utils::processCode(*cling_utils::InterpreterModule::InterpreterModule::interpMap[command_param1.c_str()]->interpreter_, cxxctp::utils::readWholeFile(command_param2));
                 });
             }
         } else {
@@ -113,3 +118,5 @@
     llvm::outs() << "end input_func! " << '\n';
     std::terminate();
 }
+
+} // namespace cxxctp

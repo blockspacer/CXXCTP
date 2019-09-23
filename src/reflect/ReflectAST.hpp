@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "ReflTypes.h"
+#include "ReflTypes.hpp"
 
 namespace reflection
 {

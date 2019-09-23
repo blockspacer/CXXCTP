@@ -5,6 +5,7 @@
 
 namespace reflection
 {
+
 class TypeInfo;
 using TypeInfoPtr = std::shared_ptr<TypeInfo>;
 
