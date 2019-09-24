@@ -1,3 +1,33 @@
 [submodule "submodules/CXTPL"]
 	path = submodules/CXTPL
 	url = https://github.com/blockspacer/CXTPL.git
+[submodule "submodules/boost.outcome"]
+	path = submodules/boost.outcome
+	url = https://github.com/ned14/outcome.git
+[submodule "submodules/GSL"]
+	path = submodules/GSL
+	url = https://github.com/microsoft/GSL.git
+[submodule "submodules/folly"]
+	path = submodules/folly
+	url = https://github.com/facebook/folly.git
+[submodule "submodules/iwyu"]
+	path = submodules/iwyu
+	url = https://github.com/include-what-you-use/include-what-you-use.git
+[submodule "submodules/g3log"]
+	path = submodules/g3log
+	url = https://github.com/KjellKod/g3log.git
+[submodule "submodules/rang"]
+	path = submodules/rang
+	url = https://github.com/agauniyal/rang.git
+[submodule "submodules/Catch"]
+	path = submodules/Catch
+	url = https://github.com/philsquared/Catch.git
+[submodule "submodules/FakeIt"]
+	path = submodules/FakeIt
+	url = https://github.com/eranpeer/FakeIt.git
+[submodule "submodules/glog"]
+	path = submodules/glog
+	url = https://github.com/google/glog.git
+[submodule "submodules/gflags"]
+	path = submodules/gflags
+	url = https://github.com/gflags/gflags.git
