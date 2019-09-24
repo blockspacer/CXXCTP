@@ -1,6 +1,8 @@
 ﻿#include "make_reflect.hpp"
 
-#include "src/ctp_registry.hpp"
+#include "ctp_registry.hpp"
+
+#include <folly/logging/xlog.h>
 
 using namespace clang;
 using namespace clang::driver;
@@ -21,37 +23,44 @@ const char* typeclass(
 
   reflection::NamespacesTree m_namespaces; // TODO
 
-  printf("typeclass called...\n");
+  XLOG(DBG9) << "typeclass called...";
 
   const clang::CXXRecordDecl *node =
       matchResult.Nodes.getNodeAs<clang::CXXRecordDecl>("bind_gen");
 
   if (node) {
-    printf("reflect is record %s\n", node->getNameAsString().c_str());
+    XLOG(DBG9) << "reflect is record = "
+      << node->getNameAsString();
 
     std::map<std::string, std::any> cxtpl_params;
 
     {
-        printf("reflector... for record %s\n", node->getNameAsString().c_str());
+        XLOG(DBG9) << "reflector... for record "
+          << node->getNameAsString();
         reflection::AstReflector reflector(matchResult.Context);
 
-        printf("ClassInfoPtr... for record %s\n", node->getNameAsString().c_str());
+        XLOG(DBG9) << "ClassInfoPtr... for record"
+          << node->getNameAsString();
         reflection::ClassInfoPtr structInfo = reflector.ReflectClass(node, &m_namespaces);
 
-        printf("reflectClassInfoPtr... for record %s\n", node->getNameAsString().c_str());
-        //jinja2::Value reflectedJinjaClass = reflectClassInfoPtr(structInfo);
+        XLOG(DBG9) << "reflectClassInfoPtr... for record"
+          << node->getNameAsString();
+
         cxtpl_params.emplace("ReflectedStructInfo",
                        std::make_any<reflection::ClassInfoPtr>(structInfo));
-        std::cout << "methods: " << structInfo->methods.size() << "\n";
+        XLOG(DBG9) << "methods count: " << structInfo->methods.size();
 
         for(auto mit : structInfo->methods){
-            std::cout << "methods: " << mit->name << "\n";
+            std::cout << "methods: " << mit->name;
             for(auto it : mit->params){
-                std::cout << "methods params: " << it.name << it.fullDecl << "\n";
+                XLOG(DBG9) << "methods params: "
+                  << it.name << it.fullDecl;
             }
         }
 
-        printf("ReflectionRegistry... for record %s\n", node->getNameAsString().c_str());
+        XLOG(DBG9) << "ReflectionRegistry... for record" <<
+          node->getNameAsString();
+
         reflection::ReflectionRegistry::getInstance()->reflectionCXXRecordRegistry[node->getNameAsString()] = std::make_unique<reflection::ReflectionCXXRecordRegistry>(node->getNameAsString(), /*node,*/ structInfo);
 
       // see https://github.com/asutton/clang/blob/master/lib/AST/DeclPrinter.cpp#L502

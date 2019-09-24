@@ -128,10 +128,10 @@ Note that you can run linux containers under windows/mac/e.t.c.
 
 ### Clone code
 ```
-sudo git submodule sync --recursive
-sudo git submodule update --init --recursive --depth 50
+git submodule sync --recursive
+git submodule update --init --recursive --depth 50
 # or
-sudo git submodule update --force --recursive --init --remote
+git submodule update --force --recursive --init --remote
 ```
 
 ## DEPENDENCIES
@@ -171,6 +171,8 @@ cd scripts
 bash setup_cling.sh
 ```
 
+Install deps as in CXTPL https://github.com/blockspacer/CXTPL#how-to-build
+
 ```
 export CC=gcc
 export CXX=g++
@@ -180,14 +182,53 @@ cmake -E remove_directory resources/cxtpl/generated
 cmake -E make_directory resources/cxtpl/generated
 cmake -E chdir build cmake -E time cmake -DENABLE_CLING=FALSE -DCMAKE_BUILD_TYPE=Debug -DENABLE_CXXCTP=TRUE ..
 cmake -E chdir build cmake -E time cmake --build . -- -j6
-# cmake -E chdir build ./CXXCTP -help
-cmake -E chdir build ./CXXCTP -extra-arg=-I../resources ../resources/ReflShapeKind.hpp ../resources/test_typeclass_base1.hpp ../resources/test_typeclass_instance1.hpp ../resources/test.cpp
-# NOTE: You can also use the “-p” flag. See https://variousburglarious.com/2018/02/18/include-paths-for-clang-tools/
+
+# NOTE: you can install CXXCTP_tool:
+# sudo cmake -E chdir build make install
+
+# NOTE: You can also use the “-p” flag with CMAKE_EXPORT_COMPILE_COMMANDS. See https://variousburglarious.com/2018/02/18/include-paths-for-clang-tools/
+# cmake -E chdir build ./tool/CXXCTP_tool -p=../example_compile_commands/
+
+# NOTE: runs CXXCTP_tool on multiple files and adds include paths by `-extra-arg=-I`
+cmake -E chdir build ./tool/CXXCTP_tool -extra-arg=-I$PWD/include -extra-arg=-I../resources ../resources/ReflShapeKind.hpp ../resources/test_typeclass_base1.hpp ../resources/test_typeclass_instance1.hpp ../resources/test.cpp
 ```
 
 OR under gdb:
 ```
 rm -rf *generated* ; clear && clear ; gdb ./CXXCTP -ex "run" -ex "bt" -ex "q"
+```
+
+## How to build with Cling support
+Run bash scripts/install_folly.sh from https://github.com/blockspacer/CXTPL or patch folly manually for clang support (replace FOLLY_USE_JEMALLOC with FOLLY_ASSUME_NO_JEMALLOC) https://github.com/facebook/folly/issues/976
+
+Use clang (NOT GCC!) before build:
+```
+export CC=clang
+export CXX=clang++
+cmake -E remove_directory build
+cmake -E make_directory build
+cmake -E remove_directory resources/cxtpl/generated
+cmake -E make_directory resources/cxtpl/generated
+cmake -E chdir build cmake -E time cmake -DENABLE_CLING=FALSE -DCMAKE_BUILD_TYPE=Debug -DENABLE_CXXCTP=TRUE ..
+cmake -E chdir build cmake -E time cmake --build . -- -j6
+```
+
+And `-DENABLE_CLING=TRUE`:
+
+```
+cmake -E chdir build cmake -E time cmake -DENABLE_CLING=TRUE -DCMAKE_BUILD_TYPE=Debug -DENABLE_CXXCTP=TRUE ..
+```
+
+## How to add include paths or definitions for Cling
+Use `-extra-arg` option of `CXXCTP_tool`:
+
+```
+-extra-arg=-I$PWD/include -extra-arg=-I$PWD/include/foo -extra-arg=-DMY_DEFINITION=1 -extra-arg=-DONE_MORE_DEFINITION=1
+```
+
+Example:
+```
+cmake -E chdir build ./tool/CXXCTP_tool -extra-arg=-I$PWD/include -extra-arg=-I../resources ../resources/ReflShapeKind.hpp ../resources/test_typeclass_base1.hpp ../resources/test_typeclass_instance1.hpp ../resources/test.cpp -L .=DBG9
 ```
 
 ## Motivation
@@ -206,7 +247,7 @@ CXXCTP allows you to create and share scripts for
 ## Writing code that writes code
 You can write custom C++ scripts for source code transformation or use existing ones.
 
-CXXCTP loads all C++ scripts from ctp_scripts folder.
+CXXCTP loads all C++ scripts from ctp_scripts folder in lexicographical order.
 
 You can use `#include`, use filesystem, access internet, e.t.c. in C++ scripts.
 
@@ -460,6 +501,34 @@ std::cout << arguments.arg1;
 ```
 
 See `resources/cxtpl/enum_gen_hpp.cxtpl` as example.
+
+## How to use CXTPL_tool
+CXTPL_tool wrapls libtooling to add custom command-line options.
+
+Options related to libtooling (type -help or --help):
+
+```
+Generic Options:
+
+  -help                      - Display available options (-help-hidden for more)
+  -help-list                 - Display list of available options (-help-list-hidden for more)
+  -version                   - Display the version of this program
+
+Use override options:
+
+  -extra-arg=<string>        - Additional argument to append to the compiler command line
+  -extra-arg-before=<string> - Additional argument to prepend to the compiler command line
+  -p=<string>                - Build path
+```
+
+Options related to CXTPL_tool (type --help, not -help):
+
+`-L .=DBG9` is log configuration in format https://github.com/facebook/folly/blob/master/folly/logging/docs/Config.md
+
+Example of log configuration which writes both into the file and console stream:
+```
+./build/tool/CXTPL_tool -L ".:=INFO:default:console; default=file:path=y.log,async=true,sync_level=DBG9;console=stream:stream=stderr"
+```
 
 ## About libtooling
 CXXCTP uses LibTooling to parse and modify C++.

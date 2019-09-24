@@ -1,5 +1,7 @@
 ﻿#include "../ctp_scripts/CXTPL_STD.hpp"
 
+#include <folly/logging/xlog.h>
+
 namespace cxtpl_utils {
 
 std::string startHeaderGuard(const std::string& guardName) {

@@ -1,6 +1,8 @@
 ﻿#include "make_reflect.hpp"
 
-#include "src/ctp_registry.hpp"
+#include "ctp_registry.hpp"
+
+#include <folly/logging/xlog.h>
 
 using namespace clang;
 using namespace clang::driver;
@@ -16,19 +18,19 @@ const char* make_removefuncbody(
     clang::Rewriter& rewriter,
     const clang::Decl* decl,
     const std::vector<cxxctp::parsed_func>& args) {
-  printf("make_removefuncbody called...\n");
+  XLOG(DBG9) << "make_removefuncbody called...";
 
   clang::CXXRecordDecl const *record =
       matchResult.Nodes.getNodeAs<clang::CXXRecordDecl>("bind_gen");
   if (record) {
-    printf("is record %s\n", record->getNameAsString().c_str());
+    XLOG(DBG9) << "is record " << record->getNameAsString();
     for(auto fct = record->method_begin();
       fct!= record->method_end(); ++fct)
     {
       if(fct->hasBody() && !fct->getNameAsString().empty()) {
-          printf("INFO: removed body from function %s in CXXRecordDecl %s\n",
-            fct->getNameAsString().c_str(),
-            record->getNameAsString().c_str());
+          XLOG(DBG9) << "INFO: removed body from function " <<
+            fct->getNameAsString() << " in CXXRecordDecl " <<
+              record->getNameAsString();
           rewriter.RemoveText(findFuncBodyRange(*fct, *matchResult.Context));
         }
     }

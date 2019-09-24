@@ -1,6 +1,8 @@
 ﻿#include "make_reflect.hpp"
 
-#include "src/ctp_registry.hpp"
+#include "ctp_registry.hpp"
+
+#include <folly/logging/xlog.h>
 
 using namespace clang;
 using namespace clang::driver;
@@ -16,13 +18,13 @@ const char* reflect_enum(
     clang::Rewriter& rewriter,
     const clang::Decl* decl,
     const std::vector<cxxctp::parsed_func>& args) {
-  printf("reflect_enum called...\n");
+  XLOG(DBG9) << "reflect_enum called...";
 
   clang::EnumDecl const *node =
       matchResult.Nodes.getNodeAs<clang::EnumDecl>("bind_gen");
 
   if (node) {
-    printf("reflect is record %s\n", node->getNameAsString().c_str());
+    XLOG(DBG9) << "reflect is record" << node->getNameAsString();
 
     std::map<std::string, std::any> cxtpl_params;
 
@@ -41,32 +43,30 @@ const char* reflect_enum(
 
     std::string nameString = node->getNameAsString();
     if(nameString.empty()) {
-      printf("ERROR (reflect_enum): "
-             "can`t handle enum without name [%s:%d]\n",
-              pLoc.getFilename(), pLoc.getLine());
+      XLOG(DBG9) << "ERROR (reflect_enum): "
+             "can`t handle enum without name [" <<
+             pLoc.getFilename() << ", " << pLoc.getLine() << "]";
     }
     std::string typeString = "int";
     const QualType QT = node->getIntegerType();
     if(!QT.isNull()) {
       typeString = QT.getAsString(); // getTypeClassName
     }
-    printf("%s : %s [%s:%d]\n",
-      nameString.c_str(), typeString.c_str(),
-      pLoc.getFilename(), pLoc.getLine());
+    XLOG(DBG9) << nameString << " : " << typeString
+      << " [" << pLoc.getFilename() << ":" << pLoc.getLine() << "]";
 
     int64_t maxval = std::numeric_limits<int64_t>::min();
     for (auto iter = node->enumerator_begin();
          iter != node->enumerator_end(); iter++)
     {
-        printf("    %s %ld\n", iter->getNameAsString().c_str(),
-          iter->getInitVal().getExtValue());
+        XLOG(DBG9) << "    " << iter->getNameAsString() << " " <<
+          iter->getInitVal().getExtValue();
         GeneratedEnumItems.emplace(
             iter->getNameAsString(),
             std::to_string(
                 iter->getInitVal().getExtValue()));
         maxval = std::max(maxval, iter->getInitVal().getExtValue());
     }
-    printf("\n");
 
     GeneratedEnumItems.emplace(
         "TOTAL", std::to_string(maxval + 1));

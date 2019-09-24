@@ -1,8 +1,8 @@
-﻿#include "TypeInfo.hpp"
+﻿#include "reflect/TypeInfo.hpp"
 
-#include "ast_utils.hpp"
-#include "ReflectAST.hpp"
-#include "ast_utils.hpp"
+#include "reflect/ast_utils.hpp"
+#include "reflect/ReflectAST.hpp"
+#include "reflect/ast_utils.hpp"
 
 #include <clang/AST/TypeVisitor.h>
 #include <clang/AST/DeclTemplate.h>

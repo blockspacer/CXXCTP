@@ -1,6 +1,8 @@
 ﻿#include "make_reflect.hpp"
 
-#include "src/ctp_registry.hpp"
+#include "ctp_registry.hpp"
+
+#include <folly/logging/xlog.h>
 
 using namespace clang;
 using namespace clang::driver;
@@ -11,12 +13,13 @@ using clang::tooling::CommonOptionsParser;
 using clang::tooling::Replacement;
 using llvm::StringRef;
 
+/// \note that example used
 const char* make_reflect(
     const clang::ast_matchers::MatchFinder::MatchResult& matchResult,
     clang::Rewriter& rewriter,
     const clang::Decl* decl,
     const std::vector<cxxctp::parsed_func>& args) {
-  printf("make_removefuncbody called...\n");
+  XLOG(DBG9) << "make_removefuncbody called...";
 
   std::string indent = "  ";
   std::string output{};
@@ -32,18 +35,18 @@ const char* make_reflect(
   clang::CXXRecordDecl const *record =
       matchResult.Nodes.getNodeAs<clang::CXXRecordDecl>("bind_gen");
   if (record) {
-    //printf("reflect is record %s\n", record->getNameAsString().c_str());
+    XLOG(DBG9) << "reflect is record " << record->getNameAsString().c_str();
 
     // see https://github.com/Papierkorb/bindgen/blob/b55578e517a308778f5a510de02af499b353f15d/clang/src/record_match_handler.cpp
     for (clang::Decl *decl : record->decls()) {
       if (clang::CXXMethodDecl *method
             = llvm::dyn_cast<clang::CXXMethodDecl>(decl)) {
         //runOnMethod(method, isSignal);
-        printf("reflect is CXXMethodDecl %s %s %s %s\n",
-          method->getNameInfo().getName().getAsString().c_str(),
-          method->getReturnType().getAsString().c_str(),
-          method->getType().getUnqualifiedType().getAsString().c_str(),
-          method->getNameAsString().c_str());
+        XLOG(DBG9) << "reflect is CXXMethodDecl " <<
+          method->getNameInfo().getName().getAsString().c_str() << " " <<
+          method->getReturnType().getAsString().c_str() << " " <<
+          method->getType().getUnqualifiedType().getAsString().c_str() << " " <<
+          method->getNameAsString().c_str();
         if(isReflectable(method)) {
           methods[method->getNameInfo().getName().getAsString()] =
             method->getReturnType().getAsString().c_str();
@@ -51,13 +54,13 @@ const char* make_reflect(
       } else if (clang::AccessSpecDecl *spec
                     = llvm::dyn_cast<clang::AccessSpecDecl>(decl)) {
         //isSignal = AccessSpecDecl(spec);
-        //printf("is CXXMethodDecl %s\n", spec->getNameAsString().c_str());
+        //XLOG(DBG9) << ("is CXXMethodDecl %s\n", spec->getNameAsString().c_str());
       } else if (clang::FieldDecl *field
                     = llvm::dyn_cast<clang::FieldDecl>(decl)) {
         //runOnField(field);
-        printf("reflect is FieldDecl %s %s\n",
-          field->getType().getUnqualifiedType().getAsString().c_str(),
-          field->getNameAsString().c_str());
+        XLOG(DBG9) << "reflect is FieldDecl" <<
+          field->getType().getUnqualifiedType().getAsString().c_str() << " " <<
+          field->getNameAsString().c_str();
         if(isReflectable(field)) {
           fields[field->getNameAsString()] =
             field->getType().getUnqualifiedType().getAsString().c_str();

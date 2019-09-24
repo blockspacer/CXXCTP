@@ -6,7 +6,7 @@
 #include <any>
 #include <vector>
 
-#include "../../src/reflect/ReflTypes.hpp"
+#include "reflect/ReflTypes.hpp"
 
 namespace cxtpl_utils {
 

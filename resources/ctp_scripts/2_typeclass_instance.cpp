@@ -1,6 +1,8 @@
 ﻿#include "make_reflect.hpp"
 
-#include "src/ctp_registry.hpp"
+#include "ctp_registry.hpp"
+
+#include <folly/logging/xlog.h>
 
 using namespace clang;
 using namespace clang::driver;
@@ -16,13 +18,13 @@ const char* typeclass_instance(
     clang::Rewriter& rewriter,
     const clang::Decl* decl,
     const std::vector<cxxctp::parsed_func>& args) {
-    printf("typeclass_instance called...\n");
+    XLOG(DBG9) << "typeclass_instance called...";
 
     std::map<std::string, std::any> cxtpl_params;
 
     std::string typeclassBaseName = get_func_arg(args, "typeclass_instance", 0);
 
-    printf("typeclassBaseName = %s...\n", typeclassBaseName.c_str());
+    XLOG(DBG9) << "typeclassBaseName = " << typeclassBaseName;
     if(typeclassBaseName.empty()) {
         return "";
     }
@@ -31,7 +33,8 @@ const char* typeclass_instance(
       reflectionCXXRecordRegistry.find(typeclassBaseName)
         == reflection::ReflectionRegistry::getInstance()->reflectionCXXRecordRegistry.end())
     {
-        printf("typeclassBaseName = %s not found!\n", typeclassBaseName.c_str());
+        XLOG(DBG9) << "typeclassBaseName = "
+          << typeclassBaseName << " not found!";
         return "";
     }
 
@@ -41,11 +44,12 @@ const char* typeclass_instance(
         matchResult.Nodes.getNodeAs<clang::CXXRecordDecl>("bind_gen");
 
     if (!node) {
-        printf("CXXRecordDecl not found for typeclassBaseNode = %s!\n", typeclassBaseName.c_str());
+        XLOG(DBG9) << "CXXRecordDecl not found "
+                      "for typeclassBaseNode " << typeclassBaseName;
         return "";
     }
 
-    printf("reflect is record %s\n", node->getNameAsString().c_str());
+    XLOG(DBG9) << "reflect is record = " << node->getNameAsString();
 
     cxtpl_params.emplace("ReflectedBaseTypeclass",
                          std::make_any<reflection::ClassInfoPtr>(ReflectedBaseTypeclass->classInfoPtr_));
@@ -61,7 +65,7 @@ const char* typeclass_instance(
     const auto fileEntry = SM.getFileEntryForID(SM.getMainFileID());
     std::string original_full_file_path = fileEntry->getName();
 
-    std::cout << "original_full_file_path is " << original_full_file_path << "\n";
+    XLOG(DBG9) << "original_full_file_path = " << original_full_file_path;
 
     {
         std::string gen_hpp_name

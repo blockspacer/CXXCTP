@@ -1,7 +1,7 @@
 ﻿cmake_minimum_required( VERSION 3.10.0 FATAL_ERROR )
 
 # Building as separate project.
-project(CXXCTP)
+project(CXXCTP_core)
 
 set(CLING_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cling-build/" CACHE STRING "CLING DIR")
 
@@ -17,7 +17,13 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -frtti")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti")
+
+option(USE_G3LOG "Use g3log logger" ON)
+
+option(USE_FOLLY "Use facebook/folly library (Apache License 2.0)" ON)
+
+option(USE_RANG "Use RANG for coloring terminal" ON)
 
 include( Dependencies.cmake )
 
@@ -30,33 +36,37 @@ set(ENABLE_CXXCTP TRUE CACHE BOOL "ENABLE_CXXCTP")
 include(Utils.cmake)
 
 list(APPEND COMMON_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/clangUtils.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/clangUtils.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/clangUtils.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/funcParser.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/funcParser.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/funcParser.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/DispatchQueue.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/DispatchQueue.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/clangPipeline.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/DispatchQueue.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/clangPipeline.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/clangPipeline.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/ClingInterpreterModule.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/ClingInterpreterModule.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/ClingInterpreterModule.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/utils.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/utils.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/utils.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/inputThread.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/inputThread.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/inputThread.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/reflect/ReflectionCache.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/reflect/ReflectionCache.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/reflect/ReflectionCache.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/reflect/ReflTypes.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/reflect/ReflTypes.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/reflect/ReflTypes.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/reflect/TypeInfo.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/reflect/TypeInfo.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/reflect/TypeInfo.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/reflect/ReflectAST.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/reflect/ReflectAST.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/reflect/ast_utils.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/template_engine/CXTPL_AnyDict.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/reflect/ReflectAST.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/reflect/ast_utils.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/template_engine/CXTPL_AnyDict.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/template_engine/CXTPL_AnyDict.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/template_engine/I_Dict.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/template_engine/I_Dict.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/template_engine/I_Dict.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/integrations/outcome/error_utils.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/integrations/outcome/error_macros.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/errors/errors_CodegenError.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/core/errors/errors.hpp
 )
 
 include(Codegen_files.cmake)
@@ -68,20 +78,20 @@ if(ENABLE_CLING)
 
   list(APPEND CLING_DEFINITIONS CLING_IS_ON=1)
   if(ENABLE_CXXCTP)
-    add_executable(CXXCTP
+    add_library(CXXCTP_core
      ${COMMON_FILES}
-     ${CMAKE_CURRENT_SOURCE_DIR}/src/main_cling.cpp
+     #${CMAKE_CURRENT_SOURCE_DIR}/src/main_cling.cpp
      # TODO: DEPENDS ${cxtpl_outputs}
     )
   endif(ENABLE_CXXCTP)
 else(ENABLE_CLING)
   #message(FATAL_ERROR "Only Cling interpreter is supported for now")
   if(ENABLE_CXXCTP)
-    add_executable(CXXCTP
+    add_library(CXXCTP_core
      ${COMMON_FILES}
-     ${CMAKE_CURRENT_SOURCE_DIR}/src/main_cling.cpp
+     #${CMAKE_CURRENT_SOURCE_DIR}/src/main_cling.cpp
      ${CMAKE_CURRENT_SOURCE_DIR}/src/ctp_registry.cpp
-     ${CMAKE_CURRENT_SOURCE_DIR}/src/ctp_registry.hpp
+     ${CMAKE_CURRENT_SOURCE_DIR}/include/ctp_registry.hpp
      # NOTE: we control loading order by file names (0_file, 1_file, ...)
      ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/0_CXTPL_STD.cpp
      ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/CXTPL_STD.hpp
@@ -109,10 +119,10 @@ set( USED_SYSTEM_LIBS
   Cling::clingUtils
   Cling::clingMetaProcessor
   Threads::Threads # pthread, https://cmake.org/cmake/help/v3.13/module/FindThreads.html
-  #${X11_LIBRARIES} # https://cmake.org/cmake/help/v3.13/module/FindX11.html
-  #${CMAKE_DL_LIBS} # https://cmake.org/cmake/help/v3.13/variable/CMAKE_DL_LIBS.html
-  #EXPAT::EXPAT # https://cmake.org/cmake/help/v3.13/module/FindEXPAT.html
-  #ZLIB::ZLIB # https://cmake.org/cmake/help/v3.13/module/FindZLIB.html
+  ${X11_LIBRARIES} # https://cmake.org/cmake/help/v3.13/module/FindX11.html
+  ${CMAKE_DL_LIBS} # https://cmake.org/cmake/help/v3.13/variable/CMAKE_DL_LIBS.html
+  EXPAT::EXPAT # https://cmake.org/cmake/help/v3.13/module/FindEXPAT.html
+  ZLIB::ZLIB # https://cmake.org/cmake/help/v3.13/module/FindZLIB.html
   # Custom libs
   stdc++fs # C++17 std::filesystem
   CACHE INTERNAL "USED_SYSTEM_LIBS" )
@@ -188,48 +198,68 @@ list(APPEND CLING_LIBS
 
 # ...which links against clingInterpreter (and its dependencies).
 if(ENABLE_CXXCTP)
-  target_link_libraries(CXXCTP
-    #simple_lib
-    ${CLING_LIBS}
+  target_link_libraries(CXXCTP_core PUBLIC
     # system libs
     ${USED_SYSTEM_LIBS}
     # boost libs
     ${USED_BOOST_LIBS}
+    boost_outcome
+    microsoft_gsl
+    double-conversion
   )
 
-  target_include_directories(CXXCTP PUBLIC
+  target_link_libraries(CXXCTP_core PRIVATE
+    ${CLING_LIBS}
+  )
+
+  target_include_directories(CXXCTP_core PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
   )
 
-  target_compile_definitions( CXXCTP PUBLIC
+  target_include_directories(CXXCTP_core PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+  )
+
+  target_compile_options(CXXCTP_core PRIVATE
+    -fno-rtti)
+
+  target_compile_definitions( CXXCTP_core PUBLIC
     ${CLING_DEFINITIONS}
   )
 
-  target_compile_definitions( CXXCTP PRIVATE
+  target_compile_definitions( CXXCTP_core PRIVATE
     # https://stackoverflow.com/a/30877725
     BOOST_SYSTEM_NO_DEPRECATED
     BOOST_ERROR_CODE_HEADER_ONLY
     IS_CXXCTP=1
+    # https://github.com/facebook/folly/issues/976
+    #FOLLY_ASSUME_NO_JEMALLOC=1
+    #UFOLLY_USE_JEMALLOC
   )
-endif(ENABLE_CXXCTP)
 
-if(ENABLE_CXXCTP)
-  set_target_properties(CXXCTP
+  set_target_properties(CXXCTP_core
     PROPERTIES ENABLE_EXPORTS 1)
-endif(ENABLE_CXXCTP)
 
-if(MSVC)
- if(ENABLE_CXXCTP)
-   set_target_properties(CXXCTP PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS 1)
-   set_property(TARGET CXXCTP APPEND_STRING PROPERTY LINK_FLAGS
-               "/EXPORT:?setValueNoAlloc@internal@runtime@cling@@YAXPEAX00D_K@Z
-                /EXPORT:?setValueNoAlloc@internal@runtime@cling@@YAXPEAX00DM@Z
-                /EXPORT:cling_runtime_internal_throwIfInvalidPointer")
-  endif(ENABLE_CXXCTP)
-endif()
+  if(ENABLE_CLING)
+    if(MSVC)
+     set_target_properties(CXXCTP_tool PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS 1)
+     set_property(TARGET CXXCTP_tool APPEND_STRING PROPERTY LINK_FLAGS
+                 "/EXPORT:?setValueNoAlloc@internal@runtime@cling@@YAXPEAX00D_K@Z
+                  /EXPORT:?setValueNoAlloc@internal@runtime@cling@@YAXPEAX00DM@Z
+                  /EXPORT:cling_runtime_internal_throwIfInvalidPointer")
+    endif()
+  endif(ENABLE_CLING)
+endif(ENABLE_CXXCTP)
 
 # remove old codegen files
 conditional_remove(TRUE ${cxtpl_out_dir} ${CMAKE_CURRENT_SOURCE_DIR})
 
 # create new codegen files
-target_add_CXTPL_tool(CXXCTP "${cxtpl_inputs}" "${cxtpl_outputs}")
+target_add_CXTPL_tool(CXXCTP_core "${cxtpl_inputs}" "${cxtpl_outputs}")
+
+install(TARGETS CXXCTP_core DESTINATION lib)
+
+add_subdirectory(tool)
+
+#add_subdirectory(examples)

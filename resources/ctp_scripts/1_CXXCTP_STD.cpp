@@ -1,5 +1,7 @@
 #include "CXXCTP_STD.hpp"
 
+#include <folly/logging/xlog.h>
+
 clang::SourceLocation
 findPureInsertionPoint(clang::CXXMethodDecl *MethodDecl,
                    const clang::ASTContext &Context) {

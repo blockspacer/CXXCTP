@@ -50,6 +50,7 @@ void add_default_clang_args(std::vector<string> &args)
     args.push_back("-extra-arg=-DBOOST_SYSTEM_NO_DEPRECATED");
     args.push_back("-extra-arg=-DBOOST_ERROR_CODE_HEADER_ONLY");
 
+    // TODO: custom paths
     args.push_back("-extra-arg=-I../cling-build/build/lib/clang/5.0.0/include");
     args.push_back("-extra-arg=-I../cling-build/src/include/");
     args.push_back("-extra-arg=-I../cling-build/build/include/");

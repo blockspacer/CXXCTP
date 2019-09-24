@@ -7,7 +7,7 @@
 #include "resources/ctp_scripts/reflect_enum.hpp"
 #include "resources/ctp_scripts/make_removefuncbody.hpp"
 
-#include "src/clangPipeline.hpp"
+#include "clangPipeline.hpp"
 
 /// \note that function may be usefull only if Cling is turned off
 /// because functions may be called by name in Cling

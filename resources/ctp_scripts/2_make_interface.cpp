@@ -1,6 +1,8 @@
 ﻿#include "make_interface.hpp"
 
-#include "src/ctp_registry.hpp"
+#include "ctp_registry.hpp"
+
+#include <folly/logging/xlog.h>
 
 using namespace clang;
 using namespace clang::driver;
@@ -19,12 +21,12 @@ const char* make_interface(
     clang::Rewriter& rewriter,
     const clang::Decl* decl,
     const std::vector<cxxctp::parsed_func>& args) {
-  printf("make_interface called...\n");
+  XLOG(DBG9) << "make_interface called...";
 
   clang::CXXRecordDecl const *record =
       matchResult.Nodes.getNodeAs<clang::CXXRecordDecl>("bind_gen");
   if (record) {
-    printf("is record %s\n", record->getNameAsString().c_str());
+    XLOG(DBG9) << "is record " << record->getNameAsString();
 
     // TODO:
     // see https://stackoverflow.com/questions/24706053/how-to-find-move-constructors-in-codebase-using-clang-ast-tools/32082812#32082812
@@ -35,23 +37,21 @@ const char* make_interface(
     // see https://github.com/crosswalk-project/chromium-crosswalk/blob/master/tools/clang/plugins/FindBadConstructsConsumer.cpp
     // see https://github.com/csmith-project/creduce/blob/master/clang_delta/RemoveUnusedOuterClass.cpp#L68
     if (!record->hasUserDeclaredDestructor()) {
-      printf("ERROR: found interface %s without virtual destructor\n",
-        record->getNameAsString().c_str());
-      //rewriter.InsertText(PureInsertionPoint,
-      //  "\nvirtual ~CLASSNAME_HERE() noexcept {}\n");
+      XLOG(DBG9) << "ERROR: found interface without virtual destructor " <<
+        record->getNameAsString();
     } else if (!record->getDestructor()->isVirtual()) {
-      printf("ERROR: found not-virtual destructor in interface %s\n",
-        record->getNameAsString().c_str());
+      XLOG(DBG9) << "ERROR: found not-virtual destructor in interface" <<
+        record->getNameAsString();
     }
 
     for(auto fld = record->fields().begin();
       fld!= record->fields().end(); ++fld)
     {
-        printf("ERROR: found data %s in interface %s\n",
-          fld->getNameAsString().c_str(),
-          record->getNameAsString().c_str());
+        XLOG(DBG9) << "ERROR: found data "
+          << fld->getNameAsString().c_str()
+          << " in interface"
+          << record->getNameAsString();
     }
-
 
     for(auto fct = record->method_begin();
       fct!= record->method_end(); ++fct)
@@ -59,26 +59,25 @@ const char* make_interface(
       if(!fct->isInvalidDecl() && !fct->getNameAsString().empty()) {
         // check
         if(fct->isModulePrivate()) {
-          printf("ERROR: found private function %s in interface %s\n",
-            fct->getNameAsString().c_str(),
-            record->getNameAsString().c_str());
+          XLOG(DBG9) << "ERROR: found private function "
+            << fct->getNameAsString() << " in interface"
+            << record->getNameAsString();
         }
 
         // check
         if(fct->hasBody()) {
-          printf("ERROR: found function %s with body in interface %s\n",
-            fct->getNameAsString().c_str(),
-            record->getNameAsString().c_str());
+           XLOG(DBG9) << "ERROR: found function "
+             << fct->getNameAsString()
+             << " with body in interface "
+             << record->getNameAsString();
         }
 
         // modify
         if(!fct->isPure()) {
           //fct->setPure(true);
-          printf("INFO: made pure function %s in interface %s\n",
-            fct->getNameAsString().c_str(),
-            record->getNameAsString().c_str());
-          //clang::CXXMethodDecl f =
-          //findInsertionPoint()
+          XLOG(DBG9) << "INFO: made pure function " <<
+            fct->getNameAsString() << " in interface "
+            << record->getNameAsString();
 
           clang::SourceLocation PureInsertionPoint =
               findPureInsertionPoint(*fct, *matchResult.Context);
@@ -87,12 +86,10 @@ const char* make_interface(
 
         // modify
         if(!fct->isVirtual()) {
-          //fct->setPure(true);
-          printf("INFO: made virtual function %s in interface %s\n",
-            fct->getNameAsString().c_str(),
-            record->getNameAsString().c_str());
-          //clang::CXXMethodDecl f =
-          //findInsertionPoint()
+          XLOG(DBG9) << "INFO: made virtual function "
+            << fct->getNameAsString()
+            << " in interface"
+            << record->getNameAsString();
 
           clang::SourceLocation VirtualInsertionPoint =
               findVirtualInsertionPoint(*fct, *matchResult.Context);
@@ -105,13 +102,13 @@ const char* make_interface(
   clang::FieldDecl const *field =
     matchResult.Nodes.getNodeAs<clang::FieldDecl>("bind_gen");
   if (field) {
-    printf("is field\n");
+    XLOG(DBG9) << "is field";
   }
 
   clang::FunctionDecl const *function =
       matchResult.Nodes.getNodeAs<clang::FunctionDecl>("bind_gen");
   if (function) {
-    printf("is function\n");
+    XLOG(DBG9) << "is function";
   }
 
   return "";

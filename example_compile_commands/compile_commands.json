@@ -1,0 +1,7 @@
+[
+    {
+        "command": "/some_custom_compiler -o components/math.obj -std=c99 -g -s -os -o3 -DLOCAL_BUILD=1 -I/some_custom_compiler/include components/math.c",
+        "file": "resources/test.cpp",
+        "directory": "/home/avakimov_am/job/CXXCTP/"
+    }
+]

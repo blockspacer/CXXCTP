@@ -2,6 +2,9 @@
 
 namespace cling_utils {
 
+std::vector<std::string>
+  InterpreterModule::extra_args;
+
 /// \note module loading order is important
 std::map<std::string, std::vector<std::string>>
   InterpreterModule::moduleToSources {
@@ -106,6 +109,11 @@ void add_default_cling_args(std::vector<string> &args) {
     //args.push_back("-I/usr/include/c++/7/");
 
     //args.push_back("-I/usr/include/x86_64-linux-gnu/");
+
+    for(const auto& it: InterpreterModule::extra_args) {
+      args.push_back(it);
+      llvm::outs() << "InterpreterModule::extra_args = " << it << '\n';
+    }
 }
 
 void InterpreterModule::createInterpreter() {
