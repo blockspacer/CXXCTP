@@ -1,7 +1,12 @@
 ﻿cmake_minimum_required( VERSION 3.10.0 FATAL_ERROR )
 
+set(PROJECT_NAME CXXCTP_tool)
+set(PROJECT_VERSION 1.0.1)
+
 # Building as separate project.
-project(CXXCTP_tool)
+project(${PROJECT_NAME}
+  VERSION ${PROJECT_VERSION}
+  LANGUAGES CXX)
 
 # Keep symbols for JIT resolution
 set(LLVM_NO_DEAD_STRIP 1)
@@ -96,5 +101,16 @@ if(ENABLE_CLING)
                 /EXPORT:cling_runtime_internal_throwIfInvalidPointer")
   endif()
 endif(ENABLE_CLING)
+
+target_include_directories(CXXCTP_tool PUBLIC
+  ${PROJECT_BINARY_DIR} # path to version.hpp
+)
+
+set(PDOLLAR "$") # Hack for nested vars in configure_file
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/includes/version.hpp.in
+  ${PROJECT_BINARY_DIR}/version.hpp)
+
+set_source_files_properties(${PROJECT_BINARY_DIR}/version.hpp
+  PROPERTIES GENERATED 1)
 
 install(TARGETS CXXCTP_tool DESTINATION bin)

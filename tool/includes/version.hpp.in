@@ -1,0 +1,8 @@
+#ifndef __VERSION_HPP__
+#define __VERSION_HPP__
+
+// version variable that will be substituted by cmake
+// This shows an example using the $ variable type
+#define ${PROJECT_NAME}_VERSION "${${PROJECT_NAME}_VERSION_MAJOR}.${${PROJECT_NAME}_VERSION_MINOR}.${${PROJECT_NAME}_VERSION_PATCH}"
+
+#endif

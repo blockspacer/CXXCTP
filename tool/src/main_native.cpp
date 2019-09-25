@@ -68,6 +68,8 @@
 #include "ctp_registry.hpp"
 #endif // CLING_IS_ON
 
+#include "version.hpp"
+
 namespace po = boost::program_options;
 
 #if __has_include(<filesystem>)
@@ -287,11 +289,13 @@ int main(int argc, char* argv[]) {
     const char* log_arg_name = "log,L";
     const char* srcdir_arg_name = "srcdir,S";
     const char* resdir_arg_name = "resdir,R";
+    const char* version_arg_name = "version,V";
 
     po::options_description desc("Allowed options");
 
     desc.add_options()
       (help_arg_name, "produce help message")
+      (version_arg_name, "produce version message")
       (resdir_arg_name, po::value(&resdir_arg)->default_value(boost::none, ""), "change output directory path (where to place generated files)")
       (srcdir_arg_name, po::value(&srcdir_arg)->default_value(boost::none, ""), "change current working directory path (path to template files)")
       (log_arg_name, po::value(&log_config)->
@@ -345,6 +349,11 @@ int main(int argc, char* argv[]) {
       XLOG(INFO) << desc;
       args_storage.push_back("-help");
       /// \note continue to forward help to clang libtooling
+    }
+
+    if (vm.count(version_arg_name)) {
+      XLOG(INFO) << CXXCTP_tool_VERSION;
+      return EXIT_SUCCESS;
     }
   }
   catch(std::exception& e) {

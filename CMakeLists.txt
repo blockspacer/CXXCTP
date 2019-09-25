@@ -1,7 +1,13 @@
 ﻿cmake_minimum_required( VERSION 3.10.0 FATAL_ERROR )
 
+set(PROJECT_NAME CXXCTP_core)
+set(PROJECT_VERSION 1.0.1)
+
 # Building as separate project.
-project(CXXCTP_core)
+project(
+  ${PROJECT_NAME}
+  VERSION ${PROJECT_VERSION}
+  LANGUAGES CXX)
 
 set(CLING_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cling-build/" CACHE STRING "CLING DIR")
 
