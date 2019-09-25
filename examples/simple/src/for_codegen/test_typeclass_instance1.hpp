@@ -4,11 +4,12 @@
 #include <string>
 #include <iostream>
 
-#include "cling_common.hpp"
+#include "cxxctp_macros.hpp"
+
+    //$apply(typeclass_instance(Spell))
 
 // Print the text in forward order.
-struct
-    $apply(typeclass_instance(Spell))
+struct __attribute__((annotate("{gen};{funccall};typeclass_instance(Spell)")))
         SpellBook {
     std::string title = "MySpellBook";
     std::string description = "spell book full of spells";

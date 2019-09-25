@@ -180,17 +180,20 @@ cmake -E remove_directory build
 cmake -E make_directory build
 cmake -E remove_directory resources/cxtpl/generated
 cmake -E make_directory resources/cxtpl/generated
-cmake -E chdir build cmake -E time cmake -DENABLE_CLING=FALSE -DBUILD_SHARED_LIBS=FALSE -DCMAKE_BUILD_TYPE=Debug -DENABLE_CXXCTP=TRUE ..
+cmake -E chdir build cmake -E time cmake -DENABLE_CLING=FALSE -DBUILD_SHARED_LIBS=FALSE -DBUILD_EXAMPLES=FALSE -DCMAKE_BUILD_TYPE=Debug -DENABLE_CXXCTP=TRUE ..
 cmake -E chdir build cmake -E time cmake --build . -- -j6
 
-# NOTE: you can install CXXCTP_tool:
-# sudo cmake -E chdir build make install
+# you can install CXXCTP_tool:
+sudo cmake -E chdir build make install
 
 # NOTE: You can also use the “-p” flag with CMAKE_EXPORT_COMPILE_COMMANDS. See https://variousburglarious.com/2018/02/18/include-paths-for-clang-tools/
 # cmake -E chdir build ./tool/CXXCTP_tool -p=../example_compile_commands/
 
 # NOTE: runs CXXCTP_tool on multiple files and adds include paths by `-extra-arg=-I`
-cmake -E chdir build ./tool/CXXCTP_tool -L .=DBG9 -extra-arg=-I$PWD/include -extra-arg=-I../resources ../resources/ReflShapeKind.hpp ../resources/test_typeclass_base1.hpp ../resources/test_typeclass_instance1.hpp ../resources/test.cpp
+cmake -E chdir build ./tool/CXXCTP_tool -L .=DBG9 -extra-arg=-I$PWD/include -extra-arg=-I../resources ../examples/built_in/for_codegen/example_make_reflect.cpp
+
+# check generator output
+file build/example_make_reflect.cpp.generated.cpp
 ```
 
 OR under gdb:
@@ -211,16 +214,28 @@ cmake -E remove_directory build
 cmake -E make_directory build
 cmake -E remove_directory resources/cxtpl/generated
 cmake -E make_directory resources/cxtpl/generated
-cmake -E chdir build cmake -E time cmake -DENABLE_CLING=TRUE -DBUILD_SHARED_LIBS=TRUE -DCMAKE_BUILD_TYPE=Debug -DENABLE_CXXCTP=TRUE ..
+cmake -E chdir build cmake -E time cmake -DENABLE_CLING=TRUE -DBUILD_SHARED_LIBS=TRUE -DBUILD_EXAMPLES=FALSE -DCMAKE_BUILD_TYPE=Debug -DENABLE_CXXCTP=TRUE ..
+cmake -E chdir build cmake -E time cmake --build . -- -j6
+# you can install CXXCTP_tool:
+sudo cmake -E chdir build make install
+```
+
+If you installed CXXCTP_tool - you can run examples:
+```
+# requires CXXCTP_tool
+sudo cmake -E chdir build make install
+
+# use -DBUILD_EXAMPLES=TRUE
+cmake -E chdir build cmake -E time cmake -DENABLE_CLING=TRUE -DBUILD_SHARED_LIBS=TRUE -DBUILD_EXAMPLES=TRUE -DCMAKE_BUILD_TYPE=Debug -DENABLE_CXXCTP=TRUE ..
 cmake -E chdir build cmake -E time cmake --build . -- -j6
 ```
 
-Don`t forget to set include paths by `-extra-arg=-I$PWD/include` and library paths by `-extra-arg=-L$PWD/build` and .so/.dll libs by `-extra-arg=-lCXXCTP_core`:
+Don`t forget to set Cling include paths by `-extra-arg=-I$PWD/include` and library paths by `-extra-arg=-L$PWD/build` and .so/.dll libs by `-extra-arg=-lCXXCTP_core`:
 
 ```
 
 # NOTE: runs CXXCTP_tool on multiple files and adds include paths by `-extra-arg=-I`
-cmake -E chdir build ./tool/CXXCTP_tool -L .=DBG9 -extra-arg=-I$PWD/include -extra-arg=-L$PWD/build -extra-arg=-lCXXCTP_core -extra-arg=-I../resources ../resources/ReflShapeKind.hpp ../resources/test_typeclass_base1.hpp ../resources/test_typeclass_instance1.hpp ../resources/test.cpp
+cmake -E chdir build ./tool/CXXCTP_tool --ctp_scripts_paths=$PWD -L .=DBG9 -extra-arg=-I$PWD/include -extra-arg=-L$PWD/build -extra-arg=-lCXXCTP_core -extra-arg=-I../resources ../resources/ReflShapeKind.hpp ../resources/test_typeclass_base1.hpp ../resources/test_typeclass_instance1.hpp ../resources/test.cpp
 ```
 
 ## How to add include paths or definitions for Cling
@@ -232,7 +247,7 @@ Use `-extra-arg` option of `CXXCTP_tool`:
 
 Example:
 ```
-cmake -E chdir build ./tool/CXXCTP_tool -L .=DBG9 -extra-arg=-I$PWD/include -extra-arg=-I../resources ../resources/ReflShapeKind.hpp ../resources/test_typeclass_base1.hpp ../resources/test_typeclass_instance1.hpp ../resources/test.cpp
+cmake -E chdir build ./tool/CXXCTP_tool --ctp_scripts_paths=$PWD -L .=DBG9 -extra-arg=-I$PWD/include -extra-arg=-I../resources ../resources/ReflShapeKind.hpp ../resources/test_typeclass_base1.hpp ../resources/test_typeclass_instance1.hpp ../resources/test.cpp
 ```
 
 ## Motivation
@@ -545,6 +560,10 @@ Use override options:
 
 Options related to CXTPL_tool (type --help, not -help):
 
+`ctp_scripts_paths` - list of paths where toll will search for ctp_scripts subfolder
+
+NOTE: `ctp_scripts_paths` require `-DENABLE_CLING=TRUE`
+
 `-L .=DBG9` is log configuration in format https://github.com/facebook/folly/blob/master/folly/logging/docs/Config.md
 
 Example of log configuration which writes both into the file and console stream:
@@ -562,9 +581,13 @@ Example (custom output dir):
 rm -rf gen
 rm -rf build/*generated*
 
+`--version` to get tool version
+
+`-version` to get clang version
+
 # Build files to `gen/out` dir
 mkdir -p gen/out
-cmake -E chdir gen ../build/tool/CXXCTP_tool --resdir=$PWD/gen/out -L .=DBG9 -extra-arg=-I$PWD/include -extra-arg=-I../resources ../resources/ReflShapeKind.hpp ../resources/test_typeclass_base1.hpp ../resources/test_typeclass_instance1.hpp ../resources/test.cpp
+cmake -E chdir gen ../build/tool/CXXCTP_tool --resdir=$PWD/gen/out --ctp_scripts_paths=$PWD -L .=DBG9 -extra-arg=-I$PWD/include -extra-arg=-I../resources ../resources/ReflShapeKind.hpp ../resources/test_typeclass_base1.hpp ../resources/test_typeclass_instance1.hpp ../resources/test.cpp
 ```
 
 ## About libtooling

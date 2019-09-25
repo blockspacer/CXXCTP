@@ -1,8 +1,11 @@
-﻿#include "../../build/Spell.typeclass.generated.hpp"
+﻿#if 0
+#include "../../build/Spell.typeclass.generated.hpp"
 #include "../../build/SpellBook.typeclass_instance.generated.hpp"
+#endif
 
 #include <vector>
 
+#if 0
 namespace cxxctp {
 namespace generated {
 
@@ -40,8 +43,10 @@ void set_spell_power<Spell, SpellBook>
 
 } // namespace cxxctp
 } // namespace generated
+#endif
 
 int main(int /*argc*/, const char* const* /*argv*/) {
+#if 0
     using namespace cxxctp::generated;
 
     // TODO: better example https://blog.rust-lang.org/2015/05/11/traits.html
@@ -62,6 +67,7 @@ int main(int /*argc*/, const char* const* /*argv*/) {
 
     /*_tc_impl_t<SpellBook, Spell> myspellbook{SpellBook{"title1", "description1"}};
     _tc_combined_t<Spell> myspellbookref = std::ref(myspellbook);*/
+#endif
 
     return 0;
 }

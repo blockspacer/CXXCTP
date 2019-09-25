@@ -1,13 +1,5 @@
-﻿# How to build
-generate files by CXXCTP_tool, than run:
+﻿# About
+Example project that uses custom `ctp_scripts` that can be changed at runtime (Uses Cling as C++ code interpreter).
 
-```
-export CC=gcc
-export CXX=g++
-rm -rf build
-mkdir build
-cd build
-cmake -DENABLE_CLING=TRUE -DCMAKE_BUILD_TYPE=Debug ..
-cmake --build . -- -j6
-./CXXCTP_example
-```
+# NOTE
+You can copy `ctp_scripts` into `CXXCTP_tool` sources (see README) to gain better performance.

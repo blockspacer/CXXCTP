@@ -8,6 +8,8 @@
 
 #include <boost/algorithm/string/replace.hpp>
 
+#include <folly/logging/xlog.h>
+
 namespace reflection
 {
 
@@ -418,7 +420,8 @@ MethodInfoPtr AstReflector::ReflectMethod(const FunctionDecl* decl, NamespacesTr
     if (defDecl != nullptr)
         methodInfo->defLocation = GetLocation(defDecl, m_astContext);
 
-    llvm::outs() << "MethodParamInfo:" << methodInfo->name << decl->parameters().size() << "\n";
+    XLOG(DBG9) << "MethodParamInfo:"
+      << methodInfo->name << decl->parameters().size();
     for (const clang::ParmVarDecl* param: decl->parameters())
     {
         MethodParamInfo paramInfo;
@@ -426,8 +429,8 @@ MethodInfoPtr AstReflector::ReflectMethod(const FunctionDecl* decl, NamespacesTr
         paramInfo.type = TypeInfo::Create(param->getType(), m_astContext);
         paramInfo.fullDecl = EntityToString(param, m_astContext);
         paramInfo.decl = param;
-        llvm::outs() << "MethodParamInfo" << paramInfo.name << "\n";
-        llvm::outs() << "MethodParamInfo" << paramInfo.fullDecl << "\n";
+        XLOG(DBG9) << "MethodParamInfo" << paramInfo.name;
+        XLOG(DBG9) << "MethodParamInfo" << paramInfo.fullDecl;
         methodInfo->params.push_back(std::move(paramInfo));
     }
 

@@ -11,7 +11,7 @@ void foo() {
 //#pragma annotate my {gen};{funccall};make_interface
 
 #include "test.hpp"
-#include "cling_common.hpp"
+#include "cxxctp_macros.hpp"
 
 #include <vector>
 #include <string>

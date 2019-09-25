@@ -15,6 +15,8 @@ namespace fs = std::filesystem;
 namespace fs = std::experimental::filesystem;
 #endif
 
+#include "options/ctp/options.hpp"
+
 namespace cling_utils {
 
 std::vector<std::string>
@@ -217,57 +219,12 @@ void reloadClingModule(const std::string &module_id, const std::vector<std::stri
     InterpreterModule::interpMap[module_id]->run();
 }
 
-void reloadAllCling() {
-    /// \note remove all old modules and create new modules
-    for(const auto& it : InterpreterModule::interpMap) {
-        //printf("erased module %s\n", it.first.c_str());
-        InterpreterModule::interpMap.erase(it.first);
-    }
-
-    XLOG(DBG9) << "LLVMDIR is " << LLVMDIR;
-
-    fs::path abs_cur_path = fs::absolute(fs::current_path());
-
-    XLOG(DBG9) << "fs::current_path() is " << abs_cur_path.string();
-
+static void process_ctp_scripts_dir(const std::string& ctp_scripts_path) {
 #if defined(CLING_IS_ON)
     // Init InterpreterModule files
     if(const auto Interp_it = InterpreterModule::moduleToSources.find("main_module")
        ; Interp_it == InterpreterModule::moduleToSources.end())
     {
-      /*const std::string cxtpl_scripts_path
-        = abs_cur_path / ".." / "resources" / "cxtpl";
-
-      XLOG(DBG9) << "cxtpl_scripts_path size is " << cxtpl_scripts_path.size() << '\n';
-
-      std::vector<fs::path> cxtpl_scripts_paths(
-        fs::recursive_directory_iterator(cxtpl_scripts_path), fs::recursive_directory_iterator{}
-      );
-
-      /// \note we must be able to change loading order
-      /// by file naming (0_file, 1_file)
-      std::sort(cxtpl_scripts_paths.begin(), cxtpl_scripts_paths.end());
-
-      for (const auto & file_entry : cxtpl_scripts_paths) {
-        //XLOG(DBG9) << "file_entry.filename() = " << file_entry.filename();
-        if(file_entry.filename() != "CXTPL_STD.cpp"){
-          continue; // TODO
-        }
-
-        fs::path full_path = fs::absolute(file_entry);
-
-        XLOG(DBG9) << "full_path.extension() = " << full_path.extension();
-
-        if(full_path.extension() == ".cpp")
-        {
-          InterpreterModule::moduleToSources["main_module"].push_back(full_path.string());
-          XLOG(DBG9) << "added to InterpreterModule file " << full_path.string();
-        }
-      }*/
-
-      const std::string ctp_scripts_path
-        = abs_cur_path / ".." / "resources" / "ctp_scripts";
-
       std::vector<fs::path> ctp_scripts_paths(
         fs::recursive_directory_iterator(ctp_scripts_path), fs::recursive_directory_iterator{}
       );
@@ -279,6 +236,7 @@ void reloadAllCling() {
       for (const auto & file_entry : ctp_scripts_paths) {
         fs::path full_path = fs::absolute(file_entry);
         if(full_path.extension() == ".cpp"
+           /// \note skip path containing `generated` as substr
            && full_path.string().find("generated") == std::string::npos)
         {
           InterpreterModule::moduleToSources["main_module"].push_back(full_path.string());
@@ -292,6 +250,48 @@ void reloadAllCling() {
         XLOG(DBG9) << "reloaded module " << it.first;
     }
 #endif // CLING_IS_ON
+}
+
+static std::vector<fs::path> find_ctp_scripts_dirs(
+  std::vector<fs::path> ctp_scripts_search_paths) {
+  std::vector<fs::path> res;
+  for(const fs::path& it: ctp_scripts_search_paths) {
+    const fs::path ctp_scripts_path = it / "ctp_scripts";
+    if(fs::exists(ctp_scripts_path) && fs::is_directory(ctp_scripts_path)) {
+      res.push_back(ctp_scripts_path);
+    }
+  }
+  return res;
+}
+
+void reloadAllCling() {
+    /// \note remove all old modules and create new modules
+    for(const auto& it : InterpreterModule::interpMap) {
+        //printf("erased module %s\n", it.first.c_str());
+        InterpreterModule::interpMap.erase(it.first);
+    }
+
+    XLOG(DBG9) << "LLVMDIR is " << LLVMDIR;
+
+    fs::path abs_cur_path = fs::absolute(fs::current_path());
+
+    XLOG(DBG9) << "fs::current_path() is " << abs_cur_path.string();
+
+    //const std::string ctp_scripts_path
+    //  = abs_cur_path / ".." / "resources" / "ctp_scripts";
+
+    //std::vector<fs::path> ctp_scripts_search_paths; // << TODO
+
+#if defined(CLING_IS_ON)
+    std::vector<fs::path> ctp_scripts_paths =
+      find_ctp_scripts_dirs(ctp::Options::ctp_scripts_search_paths);
+    if(ctp_scripts_paths.empty()) {
+      XLOG(WARNING) << "can`t find ctp_scripts folder in ctp_search_paths";
+    }
+    for(const fs::path& it: ctp_scripts_paths) {
+      process_ctp_scripts_dir(it);
+    }
+#endif // CLING_IS_ON
 
     cling::Value res; // Will hold the result of the expression evaluation.
 }
@@ -301,7 +301,7 @@ void reloadAllCling() {
             std::make_shared<cxxctp::utils::DispatchQueue>(std::string{"Cling Dispatch Queue"}, 0);
 
     InterpreterModule::receivedMessagesQueue_->dispatch([] {
-        XLOG(DBG9) << "dispatch reloadAllCling 1!... ";
+        XLOG(DBG9) << "dispatched reloadAllCling event!... ";
         reloadAllCling();
         {
             std::unique_lock<std::mutex> lk(InterpreterModule::clingReadyMutex);

@@ -113,4 +113,4 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/includes/version.hpp.in
 set_source_files_properties(${PROJECT_BINARY_DIR}/version.hpp
   PROPERTIES GENERATED 1)
 
-install(TARGETS CXXCTP_tool DESTINATION bin)
+install(TARGETS CXXCTP_tool DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")

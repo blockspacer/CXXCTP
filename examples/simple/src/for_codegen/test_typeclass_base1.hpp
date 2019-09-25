@@ -1,13 +1,18 @@
 ﻿#pragma once
 
-#include "cling_common.hpp"
+#include "cxxctp_macros.hpp"
 
 #include <vector>
 #include <string>
 #include <iostream>
 
-struct
-    $apply(typeclass)
+/*  $export (
+static int resultSomeInt = 2345;
+  )*/
+
+    //$apply(typeclass)
+
+struct __attribute__((annotate("{gen};{funccall};typeclass")))
         Spell {
     virtual void cast(const char* spellname, const int spellpower,
                       const char* target) const noexcept = 0;

@@ -3,6 +3,21 @@
 #include <string>
 #include <fstream>
 
+// __has_include is currently supported by GCC and Clang. However GCC 4.9 may have issues and
+// returns 1 for 'defined( __has_include )', while '__has_include' is actually not supported:
+// https://gcc.gnu.org/bugzilla/show_bug.cgi?id=63662
+#if __has_include(<filesystem>)
+#include <filesystem>
+#else
+#include <experimental/filesystem>
+#endif // __has_include
+
+#if __has_include(<filesystem>)
+namespace fs = std::filesystem;
+#else
+namespace fs = std::experimental::filesystem;
+#endif // __has_include
+
 namespace cxxctp {
 
 namespace utils {
@@ -22,6 +37,8 @@ getFileContent(const std::string& path)
 }
 
 void writeToFile(const std::string& str, const std::string& file_path) {
+    fs::create_directories(fs::path(file_path).parent_path());
+
     std::ofstream ofs(file_path);
     if(!ofs) {
         // TODO: better error reporting

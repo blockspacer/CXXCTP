@@ -23,6 +23,8 @@ struct Options {
 
   // output files dir
   static fs::path res_path;
+
+  static std::vector<fs::path> ctp_scripts_search_paths;
 };
 
 }

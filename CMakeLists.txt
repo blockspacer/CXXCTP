@@ -33,22 +33,35 @@ option(USE_RANG "Use RANG for coloring terminal" ON)
 
 option(BUILD_SHARED_LIBS "Use .so/.dll" OFF)
 
+option(BUILD_EXAMPLES "Use built-in examples" OFF)
+
 if(BUILD_SHARED_LIBS)
   set(CORE_LIB_TYPE SHARED)
 else()
   set(CORE_LIB_TYPE STATIC)
 endif(BUILD_SHARED_LIBS)
 
-
 include( Dependencies.cmake )
 
-# NOTE: disable CLING by default,
-# so you can see sources in IDE and use tab-complete
-set(ENABLE_CLING FALSE CACHE BOOL "ENABLE_CLING")
+set(ENABLE_CLING TRUE CACHE BOOL "ENABLE_CLING")
+
+set(INSTALL_CLING TRUE CACHE BOOL "INSTALL_CLING")
 
 set(ENABLE_CXXCTP TRUE CACHE BOOL "ENABLE_CXXCTP")
 
 include(Utils.cmake)
+
+# scripts placed here will be bundled with CXXCTP_tool
+# (will become built-in C++ plugins)
+list(APPEND BUILT_IN_PUGINS
+  ${CMAKE_CURRENT_SOURCE_DIR}/ctp_scripts/2_scripts/make_reflect/make_reflect.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/ctp_scripts/2_scripts/make_reflect/make_reflect.hpp
+  # NOTE: we control loading order by file/folder names (0_file, 1_file, ...)
+  ${CMAKE_CURRENT_SOURCE_DIR}/ctp_scripts/1_utils/CXTPL_STD/CXTPL_STD.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/ctp_scripts/1_utils/CXTPL_STD/CXTPL_STD.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/ctp_scripts/1_utils/CXXCTP_STD/CXXCTP_STD.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/ctp_scripts/1_utils/CXXCTP_STD/CXXCTP_STD.hpp
+)
 
 list(APPEND COMMON_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/options/ctp/options.cpp
@@ -84,6 +97,9 @@ list(APPEND COMMON_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/integrations/outcome/error_macros.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/errors/errors_CodegenError.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/core/errors/errors.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/ctp_registry.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/ctp_registry.hpp
+  ${BUILT_IN_PUGINS}
 )
 
 if(ENABLE_CLING)
@@ -111,25 +127,18 @@ else(ENABLE_CLING)
     add_library(CXXCTP_core ${CORE_LIB_TYPE}
      ${COMMON_FILES}
      #${CMAKE_CURRENT_SOURCE_DIR}/src/main_cling.cpp
-     ${CMAKE_CURRENT_SOURCE_DIR}/src/ctp_registry.cpp
-     ${CMAKE_CURRENT_SOURCE_DIR}/include/ctp_registry.hpp
-     # NOTE: we control loading order by file names (0_file, 1_file, ...)
-     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/1_utils/CXTPL_STD/CXTPL_STD.cpp
-     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/1_utils/CXTPL_STD/CXTPL_STD.hpp
-     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/1_utils/CXXCTP_STD/CXXCTP_STD.cpp
-     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/1_utils/CXXCTP_STD/CXXCTP_STD.hpp
-     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/2_scripts/make_interface/make_interface.cpp
-     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/2_scripts/make_interface/make_interface.hpp
-     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/2_scripts/make_reflect/make_reflect.cpp
-     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/2_scripts/make_reflect/make_reflect.hpp
-     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/2_scripts/typeclass_instance/typeclass_instance.cpp
-     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/2_scripts/typeclass_instance/typeclass_instance.hpp
-     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/2_scripts/typeclass/typeclass.cpp
-     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/2_scripts/typeclass/typeclass.hpp
-     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/2_scripts/make_removefuncbody/make_removefuncbody.cpp
-     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/2_scripts/make_removefuncbody/make_removefuncbody.hpp
-     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/2_scripts/reflect_enum/reflect_enum.cpp
-     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/2_scripts/reflect_enum/reflect_enum.hpp
+     #${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/2_scripts/make_interface/make_interface.cpp
+     #${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/2_scripts/make_interface/make_interface.hpp
+     #${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/2_scripts/make_reflect/make_reflect.cpp
+     #${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/2_scripts/make_reflect/make_reflect.hpp
+     #${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/2_scripts/typeclass_instance/typeclass_instance.cpp
+     #${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/2_scripts/typeclass_instance/typeclass_instance.hpp
+     #${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/2_scripts/typeclass/typeclass.cpp
+     #${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/2_scripts/typeclass/typeclass.hpp
+     #${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/2_scripts/make_removefuncbody/make_removefuncbody.cpp
+     #${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/2_scripts/make_removefuncbody/make_removefuncbody.hpp
+     #${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/2_scripts/reflect_enum/reflect_enum.cpp
+     #${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/2_scripts/reflect_enum/reflect_enum.hpp
     )
   endif(ENABLE_CXXCTP)
 endif(ENABLE_CLING)
@@ -293,10 +302,55 @@ if(ENABLE_CXXCTP)
   endif(ENABLE_CLING)
 endif(ENABLE_CXXCTP)
 
-install(TARGETS CXXCTP_core DESTINATION lib)
-
 include(Codegen_files.cmake)
 
 add_subdirectory(tool)
 
-#add_subdirectory(examples)
+if(BUILD_EXAMPLES)
+  add_subdirectory(examples)
+endif(BUILD_EXAMPLES)
+
+if(ENABLE_CLING AND INSTALL_CLING)
+  list(APPEND CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+
+  install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/" # source directory
+          DESTINATION "${CMAKE_INSTALL_PREFIX}/lib" # target directory
+          FILES_MATCHING # install only matched files
+          PATTERN "*.so"
+          PATTERN "*.dll"
+          PATTERN "*.a"
+          PATTERN "CMake" EXCLUDE
+          PATTERN "cmake" EXCLUDE
+          PATTERN "CMakeFiles" EXCLUDE
+          PATTERN "ToolDrivers" EXCLUDE
+          PATTERN "ProfileData" EXCLUDE
+          PATTERN "Linker" EXCLUDE
+          PATTERN "LTO" EXCLUDE
+          PATTERN "IR" EXCLUDE
+          PATTERN "Option" EXCLUDE
+          PATTERN "ObjectYAML" EXCLUDE
+          PATTERN "DebugInfo" EXCLUDE
+          PATTERN "LineEditor" EXCLUDE
+          PATTERN "Target" EXCLUDE
+          PATTERN "Demangle" EXCLUDE
+          PATTERN "Passes" EXCLUDE
+          PATTERN "Object" EXCLUDE
+          PATTERN "XRay" EXCLUDE
+          PATTERN "Fuzzer" EXCLUDE
+          PATTERN "Support" EXCLUDE
+          PATTERN "Bitcode" EXCLUDE
+          PATTERN "CodeGen" EXCLUDE
+          PATTERN "MC" EXCLUDE
+          PATTERN "IRReader" EXCLUDE
+          PATTERN "TableGen" EXCLUDE
+          PATTERN "Analysis" EXCLUDE
+          PATTERN "Testing" EXCLUDE
+          PATTERN "AsmParser" EXCLUDE
+          PATTERN "clang" EXCLUDE
+          PATTERN "Transforms" EXCLUDE
+          PATTERN "BinaryFormat" EXCLUDE
+          PATTERN "ExecutionEngine" EXCLUDE
+  )
+endif(ENABLE_CLING AND INSTALL_CLING)
+
+install(TARGETS CXXCTP_core DESTINATION "${CMAKE_INSTALL_PREFIX}/lib")

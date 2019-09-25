@@ -90,6 +90,11 @@ cxxctp_callback get_cxxctp_callback(const std::string& id) {
     }
     return cxxctp_callbacks[id];
 }
+
+std::map<std::string, cxxctp_callback> get_cxxctp_callbacks() {
+  return cxxctp_callbacks;
+}
+
 /*OPTIONS:
 
 Generic Options:
@@ -143,13 +148,42 @@ void add_default_clang_args(std::vector<std::string> &args)
     //args.push_back("-help");
 }
 
-#if defined(CLING_IS_ON)
-
-void callModuleFunc(const UseOverride::Checker::MatchResult& Result,
+bool nativeCallModuleFunc(const UseOverride::Checker::MatchResult& Result,
                     clang::Rewriter &rewriter_,
                     const clang::Decl* decl,
                     const std::string& func_to_call,
                     const std::vector<cxxctp::parsed_func>& parsedFuncs) {
+    clang_utils::cxxctp_callback func_cxxctp =
+      clang_utils::get_cxxctp_callback(func_to_call);
+    if(!func_cxxctp) {
+        return false;
+    }
+
+    XLOG(DBG9) << "found native callback for: "
+                 << func_to_call;
+
+    func_cxxctp(Result, rewriter_, decl, parsedFuncs);
+    return true;
+}
+
+#if defined(CLING_IS_ON)
+
+void clingCallModuleFunc(const UseOverride::Checker::MatchResult& Result,
+                    clang::Rewriter &rewriter_,
+                    const clang::Decl* decl,
+                    const std::string& func_to_call,
+                    const std::vector<cxxctp::parsed_func>& parsedFuncs) {
+    bool calledNativeCallback = nativeCallModuleFunc(Result, rewriter_,
+      decl, func_to_call, parsedFuncs);
+    if(calledNativeCallback) {
+      XLOG(DBG9) << "found native callback for: "
+                   << func_to_call;
+      return;
+    }
+
+    XLOG(DBG9) << "can`t find native callback for: "
+                 << func_to_call << "; fallback to cling";
+
     std::ostringstream sstr;
     // scope begin
     sstr << "[](){";
@@ -188,26 +222,11 @@ void callModuleFunc(const UseOverride::Checker::MatchResult& Result,
     }
 }
 
-#else
-
-void callModuleFunc(const UseOverride::Checker::MatchResult& Result,
-                    clang::Rewriter &rewriter_,
-                    const clang::Decl* decl,
-                    const std::string& func_to_call,
-                    const std::vector<cxxctp::parsed_func>& parsedFuncs) {
-    printf("callModuleFunc %s\n", func_to_call.c_str());
-    /*XLOG(DBG9) << "!callModuleFunc: "
-                 << func_to_call;*/
-    auto func_cxxctp = get_cxxctp_callback(func_to_call);
-    if(func_cxxctp) {
-        func_cxxctp(Result, rewriter_, decl, parsedFuncs);
-    }
-}
-
 #endif // CLING_IS_ON
 
 void UseOverride::Checker::run(const UseOverride::Checker::MatchResult& Result) {
     //XLOG(DBG9) << "match1 = ";
+    XLOG(DBG9) << "UseOverride::Checker::run...";
 
     /*auto any_decl = Result.Nodes.getNodeAs<clang::NamedDecl>( "any_decl" );
     if(any_decl && !any_decl->isInvalidDecl()
@@ -234,6 +253,7 @@ void UseOverride::Checker::run(const UseOverride::Checker::MatchResult& Result) 
 
     if ( const clang::Decl* decl = Result.Nodes.getNodeAs<clang::Decl>( "bind_gen" ) )
     {
+        XLOG(DBG9) << "Matched bind_gen";
         if ( decl && !decl->isInvalidDecl())
             if (auto annotate = decl->getAttr<clang::AnnotateAttr>()) {
                 XLOG(DBG9) << "annotate->getAnnotation()"
@@ -315,7 +335,7 @@ void UseOverride::Checker::run(const UseOverride::Checker::MatchResult& Result) 
                                 XLOG(DBG9) << "        " << val;
                             }
                         }
-                        XLOG(DBG9);
+                        XLOG(DBG9) << "\n";
                     }
                     isFuncCall = true;
                     /*std::string delimiter = ";";
@@ -506,7 +526,11 @@ void UseOverride::Checker::run(const UseOverride::Checker::MatchResult& Result) 
                     //receivedMessagesQueue_->dispatch([] {
                     for (const std::string& func_to_call : funcs_to_call) {
                         XLOG(DBG9) << "main_module task " << func_to_call << "!... " << '\n';
-                        callModuleFunc(Result, rewriter_, decl, func_to_call, parsedFuncs);
+#if defined(CLING_IS_ON)
+                        clingCallModuleFunc(Result, rewriter_, decl, func_to_call, parsedFuncs);
+#else
+                        nativeCallModuleFunc(Result, rewriter_, decl, func_to_call, parsedFuncs);
+#endif // CLING_IS_ON
                     }
                 }
             }
@@ -576,17 +600,19 @@ typedef internal::Matcher<CXXCtorInitializer> CXXCtorInitializerMatcher;*/
 }
 
 void UseOverride::Consumer::HandleTranslationUnit(clang::ASTContext &Context) {
+    XLOG(DBG9) << "Started AST matcher...";
     Finder_.matchAST(Context);
 }
 
 UseOverride::Action::ASTConsumerPointer UseOverride::Action::CreateASTConsumer(
   clang::CompilerInstance &Compiler, StringRef) {
+    XLOG(DBG9) << "Created AST consumer...";
     Rewriter.setSourceMgr(Compiler.getSourceManager(), Compiler.getLangOpts());
     return std::make_unique<Consumer>(Rewriter);
 }
 
 bool UseOverride::Action::BeginSourceFileAction(clang::CompilerInstance &) {
-    llvm::errs() << "Processing " << getCurrentFile() << "\n\n";
+    XLOG(DBG9) << "Processing " << getCurrentFile().str();
     return true;
 }
 

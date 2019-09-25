@@ -8,6 +8,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti")
 
+set(CXXCTP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../..")
+list(APPEND CMAKE_MODULE_PATH ${CXXCTP_DIR}/cmake/exports)
 
 #
 # If you have built boost statically you will need to set the Boost_USE_STATIC_LIBS CMake variable to ON
@@ -57,5 +59,62 @@ target_link_libraries(CXXCTP_example PUBLIC
   ${USED_SYSTEM_LIBS}
 )
 
+target_include_directories(CXXCTP_example PUBLIC
+  ${CMAKE_CURRENT_SOURCE_DIR}
+  ${CMAKE_CURRENT_SOURCE_DIR}/src
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/for_codegen
+  ${CMAKE_CURRENT_SOURCE_DIR}/include
+  ${CMAKE_CURRENT_SOURCE_DIR}/ctp_scripts
+  ${CMAKE_CURRENT_SOURCE_DIR}/generated
+)
+
+
 set_target_properties(CXXCTP_example
   PROPERTIES ENABLE_EXPORTS 1)
+
+# generate cxtpl
+add_subdirectory(ctp_scripts/2_scripts/typeclass_instance)
+add_subdirectory(ctp_scripts/2_scripts/typeclass)
+add_subdirectory(ctp_scripts/2_scripts/reflect_enum)
+add_subdirectory(ctp_scripts/2_scripts/make_removefuncbody)
+add_subdirectory(ctp_scripts/2_scripts/make_interface)
+
+find_package(CXXCTP_tool REQUIRED)
+
+list(APPEND CXXCTP_inputs "${CMAKE_CURRENT_SOURCE_DIR}/src/for_codegen/test.cpp")
+list(APPEND CXXCTP_inputs "${CMAKE_CURRENT_SOURCE_DIR}/src/for_codegen/ReflShapeKind.hpp")
+list(APPEND CXXCTP_inputs "${CMAKE_CURRENT_SOURCE_DIR}/src/for_codegen/test_typeclass_base1.hpp")
+list(APPEND CXXCTP_inputs "${CMAKE_CURRENT_SOURCE_DIR}/src/for_codegen/test_typeclass_instance1.hpp")
+
+# dir to generated files
+list(APPEND CXXCTP_outdir "${CMAKE_CURRENT_SOURCE_DIR}/generated")
+
+add_dependencies(CXXCTP_example CXXCTP_tool)
+
+set(CXXCTP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../..")
+
+set(CLING_BUILD_DIR "${CXXCTP_DIR}/cling-build")
+
+# create new codegen files for TARGET_NAME_HERE based on CXXCTP_inputs and CXXCTP_outdir
+set(CXXCTP_tool_HINTS "${CXXCTP_DIR}/build/tool")
+
+macro(append_absolute_path_to_extras PATH OUT_VAR)
+  get_filename_component(TMP_PATH_TO_ABSOLUTE
+                         "${PATH}"
+                         ABSOLUTE)
+  list(APPEND ${OUT_VAR} "-extra-arg=-I${TMP_PATH_TO_ABSOLUTE}")
+endmacro(append_absolute_path_to_extras)
+
+# EXTRA_ARGS for CXXCTP_tool: clang paths for cling
+append_absolute_path_to_extras("${CXXCTP_DIR}/include" EXTRA_ARGS)
+append_absolute_path_to_extras("${CLING_BUILD_DIR}/build/include" EXTRA_ARGS)
+append_absolute_path_to_extras("${CLING_BUILD_DIR}/build/lib/clang/5.0.0/include" EXTRA_ARGS)
+append_absolute_path_to_extras("${CLING_BUILD_DIR}/src/include" EXTRA_ARGS)
+append_absolute_path_to_extras("${CLING_BUILD_DIR}/src/tools/clang/include/" EXTRA_ARGS)
+append_absolute_path_to_extras("${CLING_BUILD_DIR}/build/tools/clang/include/" EXTRA_ARGS)
+append_absolute_path_to_extras("${CLING_BUILD_DIR}/src/tools/cling/include/" EXTRA_ARGS)
+
+# run CXXCTP_tool
+target_add_CXXCTP_tool(CXXCTP_example
+  "CXXCTP_example_simple" "${CXXCTP_inputs}" "${CXXCTP_outdir}" "${EXTRA_ARGS}")
+

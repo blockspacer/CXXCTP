@@ -1,6 +1,6 @@
 #pragma once
 
-#include "cling_common.hpp"
+#include "cxxctp_macros.hpp"
 
 #include <cstdint>
 

@@ -7,6 +7,8 @@
 #include <cmath>
 #include <memory>
 #include <vector>
+#include <iomanip>
+#include <sstream>
 
 // __has_include is currently supported by GCC and Clang. However GCC 4.9 may have issues and
 // returns 1 for 'defined( __has_include )', while '__has_include' is actually not supported:
@@ -64,9 +66,9 @@
 
 #if defined(CLING_IS_ON)
 #include "ClingInterpreterModule.hpp"
-#else
-#include "ctp_registry.hpp"
 #endif // CLING_IS_ON
+
+#include "ctp_registry.hpp"
 
 #include "version.hpp"
 
@@ -83,6 +85,8 @@ static boost::optional<std::string> log_config;
 static boost::optional<std::string> srcdir_arg;
 
 static boost::optional<std::string> resdir_arg;
+
+static std::vector<std::string> ctp_scripts_search_paths;
 
 #if 0 // TODO: custom logger format
 namespace {
@@ -290,12 +294,16 @@ int main(int argc, char* argv[]) {
     const char* srcdir_arg_name = "srcdir,S";
     const char* resdir_arg_name = "resdir,R";
     const char* version_arg_name = "version,V";
+    const char* plugins_arg_name = "plugins,P";
+    const char* ctp_scripts_paths_arg_name = "ctp_scripts_paths,C";
 
     po::options_description desc("Allowed options");
 
     desc.add_options()
       (help_arg_name, "produce help message")
       (version_arg_name, "produce version message")
+      (plugins_arg_name, "get list of loaded ctp scripts")
+      (ctp_scripts_paths_arg_name, po::value(&ctp_scripts_search_paths)->multitoken(), "list of paths where toll will search for ctp_scripts subfolder")
       (resdir_arg_name, po::value(&resdir_arg)->default_value(boost::none, ""), "change output directory path (where to place generated files)")
       (srcdir_arg_name, po::value(&srcdir_arg)->default_value(boost::none, ""), "change current working directory path (path to template files)")
       (log_arg_name, po::value(&log_config)->
@@ -351,10 +359,61 @@ int main(int argc, char* argv[]) {
       /// \note continue to forward help to clang libtooling
     }
 
-    if (vm.count(version_arg_name)) {
+    if (vm.count("version") || vm.count("V")) {
       XLOG(INFO) << CXXCTP_tool_VERSION;
       return EXIT_SUCCESS;
     }
+
+    /// \note that function may be usefull if Cling is turned off
+    /// because functions may be called by name in Cling
+    ctp_utils::add_modulecallbacks();
+
+    /// \note must be after add_modulecallbacks()
+    if (vm.count(plugins_arg_name)) {
+      XLOG(INFO) << "loaded plugins (ctp scripts):";
+      for(const auto& it : clang_utils::get_cxxctp_callbacks()) {
+        XLOG(INFO) << "  + " << it.first;
+      }
+      return EXIT_SUCCESS;
+    }
+
+#if defined(CLING_IS_ON)
+    if (ctp_scripts_search_paths.empty()) {
+      if (clang_utils::get_cxxctp_callbacks().empty()) {
+        XLOG(ERR) << "ERROR: ctp_scripts_paths not set "
+                     "and no built-in scripts/plugins available.";
+        return EXIT_FAILURE;
+      }
+      XLOG(WARNING) << "WARNING: ctp_scripts_paths not set.";
+    }
+
+    auto fix_search_paths = [](std::vector<std::string>& inout) {
+      std::vector<std::string> v;
+      for(const auto& it: inout) {
+        XLOG(DBG9) << "before: " << it;
+        // split a string by blank spaces unless it is in quotes
+        std::istringstream iss(it);
+          std::string s;
+          while (iss >> std::quoted(s)) {
+              if(!s.empty()) {
+                /// \note made path absolute
+                v.push_back(fs::absolute(s));
+                XLOG(DBG9) << "after: " << s;
+              }
+          }
+      }
+      inout = v;
+    };
+
+    fix_search_paths(ctp_scripts_search_paths);
+#else
+  if(ctp_scripts_search_paths.size() > 0) {
+    XLOG(ERR) << "ERROR: `ctp_scripts_paths` option "
+                 "require cling support! "
+                 "Build tool with DENABLE_CLING=TRUE";
+    return EXIT_FAILURE;
+  }
+#endif // CLING_IS_ON
   }
   catch(std::exception& e) {
     XLOG(ERR) << "ERROR: " << e.what();
@@ -367,6 +426,7 @@ int main(int argc, char* argv[]) {
 
   ctp::Options::src_path = fs::absolute(fs::current_path());
   if(srcdir_arg.is_initialized() && !srcdir_arg.value().empty()) {
+    XLOG(DBG9) << "srcdir_arg " << srcdir_arg.value();
     ctp::Options::src_path = fs::absolute(fs::path(srcdir_arg.value()));
     if(!fs::is_directory(ctp::Options::src_path)) {
       XLOG(ERR) << srcdir_arg.value() << " must be directory";
@@ -376,13 +436,23 @@ int main(int argc, char* argv[]) {
   }
 
   ctp::Options::res_path = fs::absolute(fs::current_path());
+
   if(resdir_arg.is_initialized() && !resdir_arg.value().empty()) {
+    XLOG(DBG9) << "resdir_arg " << resdir_arg.value();
     ctp::Options::res_path = fs::absolute(fs::path(resdir_arg.value()));
     if(!fs::is_directory(ctp::Options::res_path)) {
-      XLOG(ERR) << resdir_arg.value() << " must be directory";
-      return EXIT_FAILURE;
+      XLOG(WARNING) << "created directory " << resdir_arg.value();
+      fs::create_directories(ctp::Options::res_path);
     }
   }
+
+#if defined(CLING_IS_ON)
+  XLOG(DBG9) << "ctp_scripts_search_paths (" << ctp_scripts_search_paths.size() << "): ";
+  for(const std::string& it: ctp_scripts_search_paths) {
+    ctp::Options::ctp_scripts_search_paths.push_back(it);
+    XLOG(DBG9) << " + " << it;
+  }
+#endif // CLING_IS_ON
 
   XLOG(DBG9) << "Current path is " << fs::current_path();
   XLOG(DBG9) << "srcdir: Local path is " << srcdir_arg.get_value_or("");
@@ -391,12 +461,6 @@ int main(int argc, char* argv[]) {
   XLOG(DBG9) << "resdir: Absolute path is " << ctp::Options::res_path;
 
   auto chrono_then = std::chrono::steady_clock::now();
-
-/// \note that function may be usefull only if Cling is turned off
-/// because functions may be called by name in Cling
-#if !defined(CLING_IS_ON)
-    add_modulecallbacks();
-#endif // CLING_IS_ON
 
 #if defined(CLING_IS_ON)
     // cling thread used as C++ interpreter
@@ -442,7 +506,7 @@ int main(int argc, char* argv[]) {
       return AbsolutePath;
   };
   for(const auto& it: op.getSourcePathList()) {
-      llvm::outs() << "added source path = " << MakeAbsolute(it) << '\n';
+      XLOG(DBG9) << "added source path = " << MakeAbsolute(it).str().str();
   }
 
   clang::tooling::ClangTool Tool(op.getCompilations(),

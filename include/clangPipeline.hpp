@@ -140,6 +140,8 @@ void add_cxxctp_callback(const std::string& id, const cxxctp_callback& func);
 
 cxxctp_callback get_cxxctp_callback(const std::string& id);
 
+std::map<std::string, cxxctp_callback> get_cxxctp_callbacks();
+
 /*typedef const char* make_removefuncbody(
     const clang::ast_matchers::MatchFinder::MatchResult& matchResult,
     clang::Rewriter& rewriter,
