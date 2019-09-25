@@ -34,71 +34,19 @@
 #include <folly/Singleton.h>
 #include <folly/Random.h>
 
-/*#include <folly/io/async/ScopedEventBaseThread.h>
-#include <folly/executors/CPUThreadPoolExecutor.h>
-#include <folly/executors/GlobalExecutor.h>
-#include <folly/Executor.h>
-#include <folly/Try.h>
-#include <folly/executors/Async.h>
-#include <folly/executors/GlobalExecutor.h>
-#include <folly/futures/Future.h>
-#include <folly/futures/Promise.h>
-#include <folly/String.h>
-#include <folly/FileUtil.h>
-#include <folly/File.h>
-#include <folly/io/IOBufQueue.h>
-#include <folly/Optional.h>
-#include <folly/Memory.h>
-#include <folly/executors/GlobalExecutor.h>
-#include <folly/io/async/EventBaseManager.h>
-#include <folly/init/Init.h>
-#include <folly/logging/Init.h>
-#include <folly/logging/xlog.h>
-#include <folly/logging/RateLimiter.h>
-#include <folly/init/Init.h>
-#include <folly/Singleton.h>
-#include <folly/logging/Init.h>
-#include <folly/portability/Config.h>
-#include <folly/logging/StandardLogHandler.h>
-#include <folly/Conv.h>
-#include <folly/logging/Init.h>
-#include <folly/logging/LogConfigParser.h>
-#include <folly/logging/LogFormatter.h>
-#include <folly/logging/FileHandlerFactory.h>
-#include <folly/logging/StreamHandlerFactory.h>
-#include <folly/logging/LogHandlerFactory.h>
-#include <folly/logging/LogWriter.h>
-#include <folly/logging/LoggerDB.h>
-#include <folly/logging/StandardLogHandler.h>
-#include <folly/logging/StandardLogHandlerFactory.h>
-#include <folly/logging/xlog.h>
-#include <folly/FileUtil.h>
-#include <folly/Random.h>
-#include <folly/ScopeGuard.h>
-#include <folly/hash/SpookyHashV2.h>
-#include <folly/json.h>
-#include <folly/experimental/TimerFDTimeoutManager.h>
-#include <folly/experimental/STTimerFDTimeoutManager.h>
-#include <folly/io/async/test/Util.h>
-//#include <folly/Benchmark.h>
-#include <folly/experimental/STTimerFDTimeoutManager.h>
-#include <folly/experimental/TimerFDTimeoutManager.h>
-#include <folly/io/async/test/UndelayedDestruction.h>
-#include <folly/executors/TimedDrivableExecutor.h>
-#include <folly/Conv.h>
-#include <folly/portability/GFlags.h>
-#include <folly/ssl/Init.h>
-
-#include <glog/logging.h>
-
 #if FOLLY_USE_SYMBOLIZER
 #include <folly/experimental/symbolizer/SignalHandler.h> // @manual
 #endif
 #include <folly/portability/GFlags.h>
 
+#include <glog/logging.h>
+
 // boost log or
 // #include <glog/logging.h>
-#include <glog/logging.h>*/
+#include <glog/logging.h>
+
+#include <clang/Tooling/CommonOptionsParser.h>
+#include <clang/Tooling/Tooling.h>
 
 #include "core/errors/errors.hpp"
 
@@ -107,8 +55,12 @@
 
 #include "funcParser.hpp"
 #include "inputThread.hpp"
+
 #include "clangUtils.hpp"
+
 #include "clangPipeline.hpp"
+
+#include "options/ctp/options.hpp"
 
 #if defined(CLING_IS_ON)
 #include "ClingInterpreterModule.hpp"
@@ -125,6 +77,10 @@ namespace fs = std::experimental::filesystem;
 #endif // __has_include
 
 static boost::optional<std::string> log_config;
+
+static boost::optional<std::string> srcdir_arg;
+
+static boost::optional<std::string> resdir_arg;
 
 #if 0 // TODO: custom logger format
 namespace {
@@ -241,7 +197,7 @@ std::ostream& operator<<(std::ostream& os, const std::vector<T>& v)
 class Init {
  public:
   // Force ctor & dtor out of line for better stack traces even with LTO.
-  FOLLY_NOINLINE Init(int argc, char* argv[], boost::optional<std::string> log_config, bool removeFlags = true);
+  FOLLY_NOINLINE Init(int argc, char* argv[], boost::optional<std::string> log_config);
   FOLLY_NOINLINE ~Init();
 
   Init(Init const&) = delete;
@@ -251,7 +207,7 @@ class Init {
 };
 
 Init::Init(int argc, char* argv[],
-    boost::optional<std::string> log_config, bool removeFlags) {
+    boost::optional<std::string> log_config) {
 #if FOLLY_USE_SYMBOLIZER
   // Install the handler now, to trap errors received during startup.
   // The callbacks, if any, can be installed later
@@ -297,86 +253,6 @@ Init::~Init() {
   folly::SingletonVault::singleton()->destroyInstances();
 }
 
-namespace {
-static bool writeToFile(
-    folly::StringPiece contents,
-    const std::string& path,
-    int flags) {
-  int fd = folly::openNoInt(path.data(), flags, 0664);
-  if (fd == -1) {
-    return false;
-  }
-
-  // TODO: file timeout https://github.com/connorlarkin1/react-native/blob/master/third-party/folly-2018.10.22.00/folly/logging/test/AsyncFileWriterTest.cpp#L583
-  auto written = folly::writeFull(fd, contents.data(), contents.size());
-  if (folly::closeNoInt(fd) != 0) {
-    return false;
-  }
-
-  return written >= 0 && size_t(written) == contents.size();
-}
-
-static std::string randomString(size_t minLen, size_t maxLen,
-    folly::StringPiece range = "abcdefghijklmnopqrstuvwxyz"
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789") {
-  assert(minLen <= maxLen);
-  assert(!range.empty());
-
-  std::string result(folly::Random::rand32(minLen, maxLen + 1), '\0');
-  for (char& c : result) {
-    c = range[folly::Random::rand32(range.size())];
-  }
-  return result;
-}
-
-} // anonymous
-
-static bool writeStringToFile(folly::StringPiece contents, const std::string& path) {
-  return writeToFile(contents, path, O_CREAT | O_WRONLY | O_TRUNC);
-}
-
-static bool appendStringToFile(folly::StringPiece contents, const std::string& path) {
-  return writeToFile(contents, path, O_CREAT | O_WRONLY | O_APPEND);
-}
-
-static bool atomicallyWriteFileToDisk(
-    folly::StringPiece contents,
-    const std::string& absFilename) {
-  fs::path tempFilePath;
-  auto tempFileGuard = folly::makeGuard([&tempFilePath]() {
-    if (!tempFilePath.empty()) {
-      std::error_code ec;
-      fs::remove(tempFilePath.c_str(), ec);
-    }
-  });
-
-  try {
-    const fs::path filePath(absFilename);
-    auto fileDir = filePath.parent_path();
-    if (fileDir.empty()) {
-      return false;
-    }
-    auto tempFileName = filePath.filename().string() + ".temp-" +
-        randomString(/* minLen */ 10, /* maxLen */ 10);
-    tempFilePath = fileDir / tempFileName;
-
-    fs::create_directories(fileDir);
-
-    if (!writeStringToFile(contents, tempFilePath.string())) {
-      return false;
-    }
-
-    fs::rename(tempFilePath, filePath);
-    return true;
-  } catch (const fs::filesystem_error& e) {
-    // TODO: outcome error details
-    return false;
-  } catch (const std::system_error& e) {
-    // TODO: outcome error details
-    return false;
-  }
-}
-
 /*struct CPUTask : public folly::CPUThreadPoolExecutor::Task {
   // Must be noexcept move constructible so it can be used in MPMCQueue
   explicit CPUTask(
@@ -409,16 +285,22 @@ int main(int argc, char* argv[]) {
   try {
     const char* help_arg_name = "help";
     const char* log_arg_name = "log,L";
+    const char* srcdir_arg_name = "srcdir,S";
+    const char* resdir_arg_name = "resdir,R";
 
     po::options_description desc("Allowed options");
 
     desc.add_options()
       (help_arg_name, "produce help message")
-      (log_arg_name, po::value(&log_config)->default_value(boost::none, ""), "log configuration")
+      (resdir_arg_name, po::value(&resdir_arg)->default_value(boost::none, ""), "change output directory path (where to place generated files)")
+      (srcdir_arg_name, po::value(&srcdir_arg)->default_value(boost::none, ""), "change current working directory path (path to template files)")
+      (log_arg_name, po::value(&log_config)->
+        default_value(boost::none, ""), "log configuration")
       ;
 
     po::variables_map vm;
-    auto parsed_options = po::command_line_parser(argc, argv).options(desc).allow_unregistered().run();
+    auto parsed_options = po::command_line_parser(argc, argv).
+      options(desc).allow_unregistered().run();
     po::store(parsed_options, vm);
 
     po::notify(vm);
@@ -474,6 +356,31 @@ int main(int argc, char* argv[]) {
     return EXIT_FAILURE;
   }
 
+  ctp::Options::src_path = fs::absolute(fs::current_path());
+  if(srcdir_arg.is_initialized() && !srcdir_arg.value().empty()) {
+    ctp::Options::src_path = fs::absolute(fs::path(srcdir_arg.value()));
+    if(!fs::is_directory(ctp::Options::src_path)) {
+      XLOG(ERR) << srcdir_arg.value() << " must be directory";
+      return EXIT_FAILURE;
+    }
+    fs::current_path(srcdir_arg.value());
+  }
+
+  ctp::Options::res_path = fs::absolute(fs::current_path());
+  if(resdir_arg.is_initialized() && !resdir_arg.value().empty()) {
+    ctp::Options::res_path = fs::absolute(fs::path(resdir_arg.value()));
+    if(!fs::is_directory(ctp::Options::res_path)) {
+      XLOG(ERR) << resdir_arg.value() << " must be directory";
+      return EXIT_FAILURE;
+    }
+  }
+
+  XLOG(DBG9) << "Current path is " << fs::current_path();
+  XLOG(DBG9) << "srcdir: Local path is " << srcdir_arg.get_value_or("");
+  XLOG(DBG9) << "srcdir: Absolute path is " << ctp::Options::src_path;
+  XLOG(DBG9) << "resdir: Local path is " << resdir_arg.get_value_or("");
+  XLOG(DBG9) << "resdir: Absolute path is " << ctp::Options::res_path;
+
   auto chrono_then = std::chrono::steady_clock::now();
 
 /// \note that function may be usefull only if Cling is turned off
@@ -503,16 +410,22 @@ int main(int argc, char* argv[]) {
           args_vec.push_back(iarg->c_str());
       }
   }
+
   int args_arc = args_vec.size();
+
   const char **args_argv = &(args_vec[0]);
+
   llvm::cl::OptionCategory UseOverrideCategory("Use override options");
-  CommonOptionsParser op(args_arc, args_argv, UseOverrideCategory);
+
+  clang::tooling::CommonOptionsParser op(args_arc, args_argv,
+    UseOverrideCategory);
+
   // TODO: https://github.com/mlomb/MetaCPP/blob/8eddde5e1bf4809ad70a68a385b9cbcc8e237370/MetaCPP-CLI/ScraperTool.cpp#L19
 
-  auto MakeAbsolute = [](const std::string &Input) -> SmallString<256> {
+  auto MakeAbsolute = [](const std::string &Input) -> clang::SmallString<256> {
       if (Input.empty())
           return {};
-      SmallString<256> AbsolutePath(Input);
+      clang::SmallString<256> AbsolutePath(Input);
       if (std::error_code EC = llvm::sys::fs::make_absolute(AbsolutePath)) {
           llvm::errs() << "Can't make absolute path from " << Input << ": "
                        << EC.message() << "\n";
@@ -523,7 +436,8 @@ int main(int argc, char* argv[]) {
       llvm::outs() << "added source path = " << MakeAbsolute(it) << '\n';
   }
 
-  ClangTool Tool(op.getCompilations(), op.getSourcePathList());
+  clang::tooling::ClangTool Tool(op.getCompilations(),
+    op.getSourcePathList());
 
   Tool.run(new clang_utils::ToolFactory(/*new UseOverride::Action()*/));
 

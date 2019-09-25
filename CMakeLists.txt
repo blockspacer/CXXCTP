@@ -25,6 +25,15 @@ option(USE_FOLLY "Use facebook/folly library (Apache License 2.0)" ON)
 
 option(USE_RANG "Use RANG for coloring terminal" ON)
 
+option(BUILD_SHARED_LIBS "Use .so/.dll" OFF)
+
+if(BUILD_SHARED_LIBS)
+  set(CORE_LIB_TYPE SHARED)
+else()
+  set(CORE_LIB_TYPE STATIC)
+endif(BUILD_SHARED_LIBS)
+
+
 include( Dependencies.cmake )
 
 # NOTE: disable CLING by default,
@@ -36,6 +45,8 @@ set(ENABLE_CXXCTP TRUE CACHE BOOL "ENABLE_CXXCTP")
 include(Utils.cmake)
 
 list(APPEND COMMON_FILES
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/options/ctp/options.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/options/ctp/options.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/clangUtils.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/clangUtils.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/funcParser.hpp
@@ -69,16 +80,17 @@ list(APPEND COMMON_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/core/errors/errors.hpp
 )
 
-include(Codegen_files.cmake)
-
 if(ENABLE_CLING)
-  #add_library(simple_lib SHARED #STATIC
+  #add_library(simple_lib SHARED
   #  ${CMAKE_CURRENT_SOURCE_DIR}/src/simplelib.cpp
   #)
 
   list(APPEND CLING_DEFINITIONS CLING_IS_ON=1)
   if(ENABLE_CXXCTP)
-    add_library(CXXCTP_core
+    # NOTE: cling does not support static libs, so we use SHARED
+    # https://github.com/root-project/cling/issues/280
+    # https://gitlab.kitware.com/cmake/cmake/issues/16473
+    add_library(CXXCTP_core ${CORE_LIB_TYPE}
      ${COMMON_FILES}
      #${CMAKE_CURRENT_SOURCE_DIR}/src/main_cling.cpp
      # TODO: DEPENDS ${cxtpl_outputs}
@@ -87,45 +99,34 @@ if(ENABLE_CLING)
 else(ENABLE_CLING)
   #message(FATAL_ERROR "Only Cling interpreter is supported for now")
   if(ENABLE_CXXCTP)
-    add_library(CXXCTP_core
+    # NOTE: cling does not support static libs, so we use SHARED
+    # https://github.com/root-project/cling/issues/280
+    # https://gitlab.kitware.com/cmake/cmake/issues/16473
+    add_library(CXXCTP_core ${CORE_LIB_TYPE}
      ${COMMON_FILES}
      #${CMAKE_CURRENT_SOURCE_DIR}/src/main_cling.cpp
      ${CMAKE_CURRENT_SOURCE_DIR}/src/ctp_registry.cpp
      ${CMAKE_CURRENT_SOURCE_DIR}/include/ctp_registry.hpp
      # NOTE: we control loading order by file names (0_file, 1_file, ...)
-     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/0_CXTPL_STD.cpp
-     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/CXTPL_STD.hpp
-     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/1_CXXCTP_STD.cpp
-     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/CXXCTP_STD.hpp
-     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/2_make_interface.cpp
-     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/make_interface.hpp
-     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/2_make_reflect.cpp
-     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/make_reflect.hpp
-     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/2_typeclass_instance.cpp
-     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/typeclass_instance.hpp
-     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/2_typeclass.cpp
-     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/typeclass.hpp
-     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/2_make_removefuncbody.cpp
-     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/make_removefuncbody.hpp
-     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/2_reflect_enum.cpp
-     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/reflect_enum.hpp
+     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/1_utils/CXTPL_STD/CXTPL_STD.cpp
+     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/1_utils/CXTPL_STD/CXTPL_STD.hpp
+     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/1_utils/CXXCTP_STD/CXXCTP_STD.cpp
+     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/1_utils/CXXCTP_STD/CXXCTP_STD.hpp
+     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/2_scripts/make_interface/make_interface.cpp
+     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/2_scripts/make_interface/make_interface.hpp
+     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/2_scripts/make_reflect/make_reflect.cpp
+     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/2_scripts/make_reflect/make_reflect.hpp
+     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/2_scripts/typeclass_instance/typeclass_instance.cpp
+     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/2_scripts/typeclass_instance/typeclass_instance.hpp
+     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/2_scripts/typeclass/typeclass.cpp
+     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/2_scripts/typeclass/typeclass.hpp
+     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/2_scripts/make_removefuncbody/make_removefuncbody.cpp
+     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/2_scripts/make_removefuncbody/make_removefuncbody.hpp
+     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/2_scripts/reflect_enum/reflect_enum.cpp
+     ${CMAKE_CURRENT_SOURCE_DIR}/resources/ctp_scripts/2_scripts/reflect_enum/reflect_enum.hpp
     )
   endif(ENABLE_CXXCTP)
 endif(ENABLE_CLING)
-
-set( USED_SYSTEM_LIBS
-  Cling::Cling
-  Cling::ClingInterpreter
-  Cling::clingUtils
-  Cling::clingMetaProcessor
-  Threads::Threads # pthread, https://cmake.org/cmake/help/v3.13/module/FindThreads.html
-  ${X11_LIBRARIES} # https://cmake.org/cmake/help/v3.13/module/FindX11.html
-  ${CMAKE_DL_LIBS} # https://cmake.org/cmake/help/v3.13/variable/CMAKE_DL_LIBS.html
-  EXPAT::EXPAT # https://cmake.org/cmake/help/v3.13/module/FindEXPAT.html
-  ZLIB::ZLIB # https://cmake.org/cmake/help/v3.13/module/FindZLIB.html
-  # Custom libs
-  stdc++fs # C++17 std::filesystem
-  CACHE INTERNAL "USED_SYSTEM_LIBS" )
 
 set( USED_BOOST_LIBS
   Boost::boost
@@ -199,18 +200,42 @@ list(APPEND CLING_LIBS
 # ...which links against clingInterpreter (and its dependencies).
 if(ENABLE_CXXCTP)
   target_link_libraries(CXXCTP_core PUBLIC
+    ${FOLLY_LIBRARIES}
     # system libs
-    ${USED_SYSTEM_LIBS}
+    Threads::Threads # pthread, https://cmake.org/cmake/help/v3.13/module/FindThreads.html
+    ${X11_LIBRARIES} # https://cmake.org/cmake/help/v3.13/module/FindX11.html
+    ${CMAKE_DL_LIBS} # https://cmake.org/cmake/help/v3.13/variable/CMAKE_DL_LIBS.html
+    EXPAT::EXPAT # https://cmake.org/cmake/help/v3.13/module/FindEXPAT.html
+    ZLIB::ZLIB # https://cmake.org/cmake/help/v3.13/module/FindZLIB.html
+    # Custom libs
+    stdc++fs # C++17 std::filesystem
     # boost libs
     ${USED_BOOST_LIBS}
     boost_outcome
     microsoft_gsl
     double-conversion
-  )
-
-  target_link_libraries(CXXCTP_core PRIVATE
+    # @note: Order matters https://stackoverflow.com/a/10269201/10904212
+    ${LIBIBERTY_LIBRARY} # used by folly
+    ${LIBEVENT_LIB} # used by folly
+    ${LZ4_LIBRARY} # used by folly
+    ${LIBGFLAGS_LIBRARY} # used by folly
+    ${G3LOG_LIBRARIES} # used by folly
+    glog
+    gflags
+    Cling::Cling
+    Cling::ClingInterpreter
+    Cling::clingUtils
+    Cling::clingMetaProcessor
     ${CLING_LIBS}
   )
+
+  #target_link_libraries(CXXCTP_core PRIVATE
+  #  Cling::Cling
+  #  Cling::ClingInterpreter
+  #  Cling::clingUtils
+  #  Cling::clingMetaProcessor
+  #  ${CLING_LIBS}
+  #)
 
   target_include_directories(CXXCTP_core PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
@@ -219,6 +244,13 @@ if(ENABLE_CXXCTP)
 
   target_include_directories(CXXCTP_core PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/resources # path to ctp_scripts
+    ${LIBIBERTY_INCLUDE_DIR} # used by folly
+    ${G3LOG_INCLUDE_DIR} # used by folly
+    ${LIBEVENT_INCLUDE_DIR} # used by folly
+    ${LZ4_INCLUDE_DIR} # used by folly
+    ${LIBGFLAGS_INCLUDE_DIR} # used by folly
+    ${FOLLY_INCLUDE_DIR}
   )
 
   target_compile_options(CXXCTP_core PRIVATE
@@ -241,6 +273,9 @@ if(ENABLE_CXXCTP)
   set_target_properties(CXXCTP_core
     PROPERTIES ENABLE_EXPORTS 1)
 
+  # POSITION_INDEPENDENT_CODE for -fPIC
+  set_property(TARGET CXXCTP_core PROPERTY POSITION_INDEPENDENT_CODE ON)
+
   if(ENABLE_CLING)
     if(MSVC)
      set_target_properties(CXXCTP_tool PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS 1)
@@ -252,13 +287,9 @@ if(ENABLE_CXXCTP)
   endif(ENABLE_CLING)
 endif(ENABLE_CXXCTP)
 
-# remove old codegen files
-conditional_remove(TRUE ${cxtpl_out_dir} ${CMAKE_CURRENT_SOURCE_DIR})
-
-# create new codegen files
-target_add_CXTPL_tool(CXXCTP_core "${cxtpl_inputs}" "${cxtpl_outputs}")
-
 install(TARGETS CXXCTP_core DESTINATION lib)
+
+include(Codegen_files.cmake)
 
 add_subdirectory(tool)
 

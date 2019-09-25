@@ -1,10 +1,14 @@
 ﻿#include "inputThread.hpp"
 
+#include "clangUtils.hpp"
+
 #if defined(CLING_IS_ON)
 #include "ClingInterpreterModule.hpp"
 #endif // CLING_IS_ON
 
 #include "utils.hpp"
+
+#include <iostream>
 
 namespace cxxctp {
 

@@ -2,9 +2,13 @@
 
 #include "template_engine/I_Dict.hpp"
 
+#include "utils.hpp"
+
+#include <iostream>
+
 namespace cxtpl_util {
 
-void Dict<AnyDict>::interpretToFile(const string &path,
+void Dict<AnyDict>::interpretToFile(const std::string &path,
                                      const std::map<std::string, std::any>& cxtpl_params,
                                      const std::string &includes_code) {
     printf("interpretToFile: with cxtpl_params = %lu\n", cxtpl_params.size());
@@ -71,7 +75,7 @@ std::string Dict<AnyDict>::loadClingArgs(const std::string& appende, const std::
 }
 
 void Dict<AnyDict>::runInInterpreter(
-    const interp_callback& callback, const string &inStr,
+    const interp_callback& callback, const std::string &inStr,
     const std::map<std::string, std::any>& cxtpl_params,
     const std::string &includes_code) {
     if(inStr.empty()) {

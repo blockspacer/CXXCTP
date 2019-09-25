@@ -2,7 +2,7 @@
 
 #include "ReflTypes.hpp"
 #include "ReflectAST.hpp"
-#include "../clangPipeline.hpp"
+#include "clangPipeline.hpp"
 
 namespace reflection {
 

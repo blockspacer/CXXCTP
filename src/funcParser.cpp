@@ -1,5 +1,10 @@
 #include "funcParser.hpp"
 
+#include <cassert>
+#include <sstream>
+#include <iomanip>
+//#include <iostream>
+
 namespace cxxctp {
 
 func_arg extract_func_arg(std::string const& inStr) {
@@ -32,7 +37,7 @@ std::vector<cxxctp::parsed_func> split_to_funcs(std::string const& inStr) {
       if (ss.peek() == '"') { // TODO: inner "
           std::string quoted;
           ss >> std::quoted(quoted);
-          std::cout << "quoted " << quoted << "\n";
+          //std::cout << "quoted " << quoted << "\n";
           func_with_args_ += '"' + quoted + '"';
           if(is_in_args) {
             func_arg_as_str += '"' + quoted + '"';

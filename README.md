@@ -180,7 +180,7 @@ cmake -E remove_directory build
 cmake -E make_directory build
 cmake -E remove_directory resources/cxtpl/generated
 cmake -E make_directory resources/cxtpl/generated
-cmake -E chdir build cmake -E time cmake -DENABLE_CLING=FALSE -DCMAKE_BUILD_TYPE=Debug -DENABLE_CXXCTP=TRUE ..
+cmake -E chdir build cmake -E time cmake -DENABLE_CLING=FALSE -DBUILD_SHARED_LIBS=FALSE -DCMAKE_BUILD_TYPE=Debug -DENABLE_CXXCTP=TRUE ..
 cmake -E chdir build cmake -E time cmake --build . -- -j6
 
 # NOTE: you can install CXXCTP_tool:
@@ -190,7 +190,7 @@ cmake -E chdir build cmake -E time cmake --build . -- -j6
 # cmake -E chdir build ./tool/CXXCTP_tool -p=../example_compile_commands/
 
 # NOTE: runs CXXCTP_tool on multiple files and adds include paths by `-extra-arg=-I`
-cmake -E chdir build ./tool/CXXCTP_tool -extra-arg=-I$PWD/include -extra-arg=-I../resources ../resources/ReflShapeKind.hpp ../resources/test_typeclass_base1.hpp ../resources/test_typeclass_instance1.hpp ../resources/test.cpp
+cmake -E chdir build ./tool/CXXCTP_tool -L .=DBG9 -extra-arg=-I$PWD/include -extra-arg=-I../resources ../resources/ReflShapeKind.hpp ../resources/test_typeclass_base1.hpp ../resources/test_typeclass_instance1.hpp ../resources/test.cpp
 ```
 
 OR under gdb:
@@ -199,9 +199,11 @@ rm -rf *generated* ; clear && clear ; gdb ./CXXCTP -ex "run" -ex "bt" -ex "q"
 ```
 
 ## How to build with Cling support
+Use shared CXXCTP_core as SHARED library `-DBUILD_SHARED_LIBS=TRUE`.
+
 Run bash scripts/install_folly.sh from https://github.com/blockspacer/CXTPL or patch folly manually for clang support (replace FOLLY_USE_JEMALLOC with FOLLY_ASSUME_NO_JEMALLOC) https://github.com/facebook/folly/issues/976
 
-Use clang (NOT GCC!) before build:
+Use clang (NOT GCC!) before build and `-DENABLE_CLING=TRUE`:
 ```
 export CC=clang
 export CXX=clang++
@@ -209,14 +211,16 @@ cmake -E remove_directory build
 cmake -E make_directory build
 cmake -E remove_directory resources/cxtpl/generated
 cmake -E make_directory resources/cxtpl/generated
-cmake -E chdir build cmake -E time cmake -DENABLE_CLING=FALSE -DCMAKE_BUILD_TYPE=Debug -DENABLE_CXXCTP=TRUE ..
+cmake -E chdir build cmake -E time cmake -DENABLE_CLING=TRUE -DBUILD_SHARED_LIBS=TRUE -DCMAKE_BUILD_TYPE=Debug -DENABLE_CXXCTP=TRUE ..
 cmake -E chdir build cmake -E time cmake --build . -- -j6
 ```
 
-And `-DENABLE_CLING=TRUE`:
+Don`t forget to set include paths by `-extra-arg=-I$PWD/include` and library paths by `-extra-arg=-L$PWD/build` and .so/.dll libs by `-extra-arg=-lCXXCTP_core`:
 
 ```
-cmake -E chdir build cmake -E time cmake -DENABLE_CLING=TRUE -DCMAKE_BUILD_TYPE=Debug -DENABLE_CXXCTP=TRUE ..
+
+# NOTE: runs CXXCTP_tool on multiple files and adds include paths by `-extra-arg=-I`
+cmake -E chdir build ./tool/CXXCTP_tool -L .=DBG9 -extra-arg=-I$PWD/include -extra-arg=-L$PWD/build -extra-arg=-lCXXCTP_core -extra-arg=-I../resources ../resources/ReflShapeKind.hpp ../resources/test_typeclass_base1.hpp ../resources/test_typeclass_instance1.hpp ../resources/test.cpp
 ```
 
 ## How to add include paths or definitions for Cling
@@ -228,7 +232,7 @@ Use `-extra-arg` option of `CXXCTP_tool`:
 
 Example:
 ```
-cmake -E chdir build ./tool/CXXCTP_tool -extra-arg=-I$PWD/include -extra-arg=-I../resources ../resources/ReflShapeKind.hpp ../resources/test_typeclass_base1.hpp ../resources/test_typeclass_instance1.hpp ../resources/test.cpp -L .=DBG9
+cmake -E chdir build ./tool/CXXCTP_tool -L .=DBG9 -extra-arg=-I$PWD/include -extra-arg=-I../resources ../resources/ReflShapeKind.hpp ../resources/test_typeclass_base1.hpp ../resources/test_typeclass_instance1.hpp ../resources/test.cpp
 ```
 
 ## Motivation
@@ -248,6 +252,24 @@ CXXCTP allows you to create and share scripts for
 You can write custom C++ scripts for source code transformation or use existing ones.
 
 CXXCTP loads all C++ scripts from ctp_scripts folder in lexicographical order.
+
+Example contents of ctp_scripts:
+  + 1_utils
+    + CXTPL_STD
+      + CXTPL_STD.hpp
+      + CXTPL_STD.cpp
+    + CXXCTP_STD
+      + CXXCTP_STD.hpp
+      + CXXCTP_STD.cpp
+  + 2_scripts
+    + make_interface
+      + make_interface.hpp
+      + make_interface.cpp
+    + typeclass
+      + typeclass.hpp
+      + typeclass.cpp
+
+Utils must load before scripts (Cling related), so we added `1_`, `2_`, ... before folder names (see above).
 
 You can use `#include`, use filesystem, access internet, e.t.c. in C++ scripts.
 
@@ -528,6 +550,21 @@ Options related to CXTPL_tool (type --help, not -help):
 Example of log configuration which writes both into the file and console stream:
 ```
 ./build/tool/CXTPL_tool -L ".:=INFO:default:console; default=file:path=y.log,async=true,sync_level=DBG9;console=stream:stream=stderr"
+```
+
+`--srcdir` to change current filesystem path for input files.
+
+`--resdir` to change current filesystem path for output files.
+
+Example (custom output dir):
+```
+# Remove old generated files
+rm -rf gen
+rm -rf build/*generated*
+
+# Build files to `gen/out` dir
+mkdir -p gen/out
+cmake -E chdir gen ../build/tool/CXXCTP_tool --resdir=$PWD/gen/out -L .=DBG9 -extra-arg=-I$PWD/include -extra-arg=-I../resources ../resources/ReflShapeKind.hpp ../resources/test_typeclass_base1.hpp ../resources/test_typeclass_instance1.hpp ../resources/test.cpp
 ```
 
 ## About libtooling

@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#if 0
 #include <iostream>
 #include <string>
 #include <sstream>
@@ -62,7 +63,6 @@
 
 namespace fs = std::experimental::filesystem;
 
-#include "I_Dict.hpp"
 #include "../utils.hpp"
 #include "../DispatchQueue.hpp"
 
@@ -70,6 +70,18 @@ namespace fs = std::experimental::filesystem;
 #include "../inputThread.hpp"
 #include "../clangUtils.hpp"
 #include "../clangPipeline.hpp"
+
+#if defined(CLING_IS_ON)
+#include "../ClingInterpreterModule.hpp"
+#endif // CLING_IS_ON
+
+#endif // 0
+
+#include <map>
+#include <string>
+#include <any>
+
+#include "I_Dict.hpp"
 
 #if defined(CLING_IS_ON)
 #include "../ClingInterpreterModule.hpp"
@@ -91,7 +103,7 @@ class Dict<AnyDict> : public I_Dict {
   /*std::unique_ptr<std::string> interpretToString(
     bool& bVar, bool& cVar, std::vector<std::string>& carNames);*/
 
-  void interpretToFile(const string &path,
+  void interpretToFile(const std::string &path,
                        const std::map<std::string, std::any>& cxtpl_params,
                        const std::string &includes_code);
 

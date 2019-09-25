@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#if 0
 #include <cling/Interpreter/Interpreter.h>
 #include <cling/Interpreter/Value.h>
 #include "cling/Interpreter/CIFactory.h"
@@ -513,24 +514,28 @@
 #include <vector>
 
 #include <experimental/filesystem>
+#endif
 
-using namespace std;
-using namespace clang;
-using namespace clang::driver;
-using namespace clang::tooling;
-using namespace llvm;
-using namespace clang::ast_matchers;
-using clang::tooling::CommonOptionsParser;
-using clang::tooling::Replacement;
-using llvm::StringRef;
+#include <clang/AST/Decl.h>
+#include <clang/AST/DeclCXX.h>
+#include <clang/Rewrite/Core/Rewriter.h>
 
 namespace clang_utils {
 
-std::string printMethodDecl(const clang::Decl* decl,
-  clang::CXXRecordDecl const * node, CXXMethodDecl* fct);
+//using namespace clang;
+//using namespace clang::driver;
+//using namespace clang::tooling;
+//using namespace llvm;
+//using namespace clang::ast_matchers;
+//using clang::tooling::CommonOptionsParser;
+//using clang::tooling::Replacement;
+//using llvm::StringRef;
 
-void expandLocations(SourceLocation& startLoc,
-      SourceLocation& endLoc,
-      Rewriter& rewriter_);
+std::string printMethodDecl(const clang::Decl* decl,
+  clang::CXXRecordDecl const * node, clang::CXXMethodDecl* fct);
+
+void expandLocations(clang::SourceLocation& startLoc,
+      clang::SourceLocation& endLoc,
+      clang::Rewriter& rewriter_);
 
 } // namespace clang_utils

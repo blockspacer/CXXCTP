@@ -1,16 +1,9 @@
 #pragma once
 
-#include <algorithm>
-#include <iomanip>
-#include <iostream>
-#include <sstream>
-#include <string>
-#include <stdexcept>
 #include <string>
 #include <vector>
-#include <iostream>
 #include <map>
-#include <assert.h>
+
 /*#include <boost/spirit/home/x3/core.hpp>
 #include <boost/spirit/home/x3/operator.hpp>
 #include <boost/spirit/home/x3/char.hpp>*/

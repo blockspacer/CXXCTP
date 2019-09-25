@@ -1,11 +1,11 @@
 ﻿#include "ctp_registry.hpp"
 
-#include "resources/ctp_scripts/make_interface.hpp"
-#include "resources/ctp_scripts/make_reflect.hpp"
-#include "resources/ctp_scripts/typeclass_instance.hpp"
-#include "resources/ctp_scripts/typeclass.hpp"
-#include "resources/ctp_scripts/reflect_enum.hpp"
-#include "resources/ctp_scripts/make_removefuncbody.hpp"
+#include "ctp_scripts/2_scripts/make_interface/make_interface.hpp"
+#include "ctp_scripts/2_scripts/make_reflect/make_reflect.hpp"
+#include "ctp_scripts/2_scripts/typeclass_instance/typeclass_instance.hpp"
+#include "ctp_scripts/2_scripts/typeclass/typeclass.hpp"
+#include "ctp_scripts/2_scripts/reflect_enum/reflect_enum.hpp"
+#include "ctp_scripts/2_scripts/make_removefuncbody/make_removefuncbody.hpp"
 
 #include "clangPipeline.hpp"
 

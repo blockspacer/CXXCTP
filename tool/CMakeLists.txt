@@ -37,7 +37,10 @@ add_executable(CXXCTP_tool
   ${CMAKE_CURRENT_SOURCE_DIR}/src/main_native.cpp
 )
 
-set( USED_SYSTEM_LIBS
+target_link_libraries(CXXCTP_tool PUBLIC
+  ${FOLLY_LIBRARIES}
+  CXXCTP_core
+  # system libs
   Threads::Threads # pthread, https://cmake.org/cmake/help/v3.13/module/FindThreads.html
   ${X11_LIBRARIES} # https://cmake.org/cmake/help/v3.13/module/FindX11.html
   ${CMAKE_DL_LIBS} # https://cmake.org/cmake/help/v3.13/variable/CMAKE_DL_LIBS.html
@@ -45,19 +48,12 @@ set( USED_SYSTEM_LIBS
   ZLIB::ZLIB # https://cmake.org/cmake/help/v3.13/module/FindZLIB.html
   # Custom libs
   stdc++fs # C++17 std::filesystem
-  CACHE INTERNAL "USED_SYSTEM_LIBS" )
-
-target_link_libraries(CXXCTP_tool PUBLIC
-  # system libs
-  ${USED_SYSTEM_LIBS}
   # boost libs
   ${USED_BOOST_LIBS}
   boost_outcome
   microsoft_gsl
   double-conversion
   # CXXCTP
-  CXXCTP_core
-  ${FOLLY_LIBRARIES}
   # @note: Order matters https://stackoverflow.com/a/10269201/10904212
   ${LIBIBERTY_LIBRARY} # used by folly
   ${LIBEVENT_LIB} # used by folly
@@ -68,18 +64,15 @@ target_link_libraries(CXXCTP_tool PUBLIC
   gflags
 )
 
-#target_link_libraries(CXXCTP_core PRIVATE
+# NOTE: don`t link twice to clang or you will get
+# `LLVM ERROR: inconsistency in registered CommandLine options`
+#target_link_libraries(CXXCTP_tool PRIVATE
 #  ${CLING_LIBS}
+#  Cling::Cling
+#  Cling::ClingInterpreter
+#  Cling::clingUtils
+#  Cling::clingMetaProcessor
 #)
-
-target_include_directories(CXXCTP_tool PUBLIC
-  ${LIBIBERTY_INCLUDE_DIR} # used by folly
-  ${G3LOG_INCLUDE_DIR} # used by folly
-  ${LIBEVENT_INCLUDE_DIR} # used by folly
-  ${LZ4_INCLUDE_DIR} # used by folly
-  ${LIBGFLAGS_INCLUDE_DIR} # used by folly
-  ${FOLLY_INCLUDE_DIR}
-)
 
 target_compile_options(CXXCTP_tool PRIVATE
   -frtti)
@@ -90,6 +83,9 @@ target_compile_definitions(CXXCTP_tool PUBLIC
 
 set_target_properties(CXXCTP_tool
   PROPERTIES ENABLE_EXPORTS 1)
+
+# POSITION_INDEPENDENT_CODE for -fPIC
+set_property(TARGET CXXCTP_tool PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 if(ENABLE_CLING)
   if(MSVC)

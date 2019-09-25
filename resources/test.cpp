@@ -91,11 +91,11 @@ void foozoo() {
     [&clangMatchResult, &clangRewriter, &clangDecl]() {
       printf("embed2001\n");
       printf("embed2002\n");
-      SourceLocation startLoc = clangDecl->getLocStart();
-      SourceLocation endLoc = clangDecl->getLocEnd();
+      clang::SourceLocation startLoc = clangDecl->getLocStart();
+      clang::SourceLocation endLoc = clangDecl->getLocEnd();
       if( startLoc.isMacroID() ) {
           // Get the start/end expansion locations
-          std::pair< SourceLocation, SourceLocation > expansionRange =
+          std::pair< clang::SourceLocation, clang::SourceLocation > expansionRange =
                    clangRewriter.getSourceMgr().getImmediateExpansionRange( startLoc );
 
           // We're just interested in the start location

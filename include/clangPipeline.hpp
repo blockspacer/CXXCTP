@@ -2,13 +2,76 @@
 
 #include "clangUtils.hpp"
 
+#include "funcParser.hpp"
+
 #if defined(CLING_IS_ON)
 #include "ClingInterpreterModule.hpp"
 #endif // CLING_IS_ON
 
 #include "utils.hpp"
 
-#include "funcParser.hpp"
+/*#include "clang/Rewrite/Core/RewriteBuffer.h"
+#include "clang/Rewrite/Core/Rewriter.h"
+#include "clang/ASTMatchers/ASTMatchers.h"
+#include "clang/AST/ASTContext.h"
+#include "clang/ASTMatchers/ASTMatchFinder.h"
+#include "clang/ASTMatchers/ASTMatchersMacros.h"
+#include "clang/AST/Type.h"
+#include "clang/Frontend/CompilerInstance.h"
+#include "clang/Sema/Sema.h"
+#include "clang/Basic/FileManager.h"
+#include "clang/Basic/LangOptions.h"
+#include "clang/Basic/SourceManager.h"
+#include "clang/Frontend/CompilerInstance.h"
+#include "clang/Sema/Sema.h"
+#include <clang/Lex/Lexer.h>
+#include <clang/Frontend/FrontendAction.h>
+#include <clang/Frontend/ASTConsumers.h>
+#include <clang/Frontend/CompilerInstance.h>
+#include <clang/Tooling/Tooling.h>
+#include <clang/Rewrite/Core/Rewriter.h>
+#include "clang/Driver/Options.h"
+#include "clang/AST/AST.h"
+#include "clang/AST/ASTContext.h"
+#include "clang/AST/ASTConsumer.h"
+#include "clang/AST/RecursiveASTVisitor.h"
+#include "clang/Frontend/ASTConsumers.h"
+#include "clang/Frontend/FrontendActions.h"
+#include "clang/Frontend/CompilerInstance.h"
+#include "clang/Tooling/CommonOptionsParser.h"
+#include "clang/Tooling/Tooling.h"
+#include "clang/Rewrite/Core/Rewriter.h"
+#include "clang/Frontend/CompilerInstance.h"
+#include "clang/Sema/Sema.h"
+#include <clang/Lex/Lexer.h>
+#include <clang/Frontend/FrontendAction.h>
+#include <clang/Frontend/ASTConsumers.h>
+#include <clang/Frontend/CompilerInstance.h>
+#include <clang/Tooling/Tooling.h>
+#include <clang/Rewrite/Core/Rewriter.h>
+#include "clang/Driver/Options.h"
+#include "clang/AST/AST.h"
+#include "clang/AST/ASTContext.h"
+#include "clang/AST/ASTConsumer.h"
+#include "clang/AST/RecursiveASTVisitor.h"
+#include "clang/Frontend/ASTConsumers.h"
+#include "clang/Frontend/FrontendActions.h"
+#include "clang/Frontend/CompilerInstance.h"
+#include "clang/Tooling/CommonOptionsParser.h"
+#include "clang/Tooling/Tooling.h"
+#include "clang/Rewrite/Core/Rewriter.h"*/
+
+#include <clang/Rewrite/Core/Rewriter.h>
+#include <clang/ASTMatchers/ASTMatchers.h>
+#include <clang/AST/ASTContext.h>
+#include <clang/ASTMatchers/ASTMatchFinder.h>
+#include <clang/ASTMatchers/ASTMatchersMacros.h>
+#include <clang/Frontend/CompilerInstance.h>
+#include <clang/Frontend/ASTConsumers.h>
+#include <clang/Frontend/FrontendActions.h>
+#include <clang/Basic/SourceManager.h>
+#include <clang/Tooling/Tooling.h>
+#include <clang/Rewrite/Core/Rewriter.h>
 
 namespace clang_utils {
 

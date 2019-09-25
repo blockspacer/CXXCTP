@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include <variant>
+
 #include <clang/AST/DeclCXX.h>
 
 namespace reflection

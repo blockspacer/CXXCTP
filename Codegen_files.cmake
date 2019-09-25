@@ -1,21 +1,5 @@
-set(cxtpl_in_dir "${CMAKE_CURRENT_SOURCE_DIR}/resources/cxtpl")
-set(cxtpl_out_dir "${CMAKE_CURRENT_SOURCE_DIR}/resources/cxtpl/generated")
+# files for codegen
 
-list(APPEND cxtpl_inputs "${cxtpl_in_dir}/enum_gen_hpp.cxtpl")
-list(APPEND cxtpl_inputs "${cxtpl_in_dir}/enum_gen_cpp.cxtpl")
-
-list(APPEND cxtpl_inputs "${cxtpl_in_dir}/typeclass_gen_cpp.cxtpl")
-list(APPEND cxtpl_inputs "${cxtpl_in_dir}/typeclass_gen_hpp.cxtpl")
-
-list(APPEND cxtpl_inputs "${cxtpl_in_dir}/typeclass_instance_gen_cpp.cxtpl")
-list(APPEND cxtpl_inputs "${cxtpl_in_dir}/typeclass_instance_gen_hpp.cxtpl")
-
-list(APPEND cxtpl_outputs "${cxtpl_out_dir}/enum_gen_hpp.cxtpl.cpp")
-list(APPEND cxtpl_outputs "${cxtpl_out_dir}/enum_gen_cpp.cxtpl.cpp")
-
-list(APPEND cxtpl_outputs "${cxtpl_out_dir}/typeclass_gen_cpp.cxtpl.cpp")
-list(APPEND cxtpl_outputs "${cxtpl_out_dir}/typeclass_gen_hpp.cxtpl.cpp")
-
-list(APPEND cxtpl_outputs "${cxtpl_out_dir}/typeclass_instance_gen_cpp.cxtpl.cpp")
-list(APPEND cxtpl_outputs "${cxtpl_out_dir}/typeclass_instance_gen_hpp.cxtpl.cpp")
-
+add_subdirectory(resources/ctp_scripts/2_scripts/typeclass_instance)
+add_subdirectory(resources/ctp_scripts/2_scripts/typeclass)
+add_subdirectory(resources/ctp_scripts/2_scripts/reflect_enum)

@@ -1,5 +1,6 @@
 #pragma once
 
+#if 0
 #include <iostream>
 #include <string>
 #include <sstream>
@@ -57,12 +58,21 @@
 #include <thread>
 #include <vector>
 #include <any>
+#endif // 0
+
+
+#include <functional>
+#include <memory>
+#include <string>
+#include <sstream>
 
 namespace cxtpl_util {
 
 class I_Dict {
 public:
-    typedef std::function<void(std::unique_ptr<std::string> res)> interp_callback;
+    typedef std::function<void(std::unique_ptr<std::string> res)>
+      interp_callback;
+
     virtual ~I_Dict();
 
     void createFromFile(const std::string& path);
@@ -116,7 +126,8 @@ protected:
     // http://www.wilxoft.com/
     // https://github.com/djc/askama
     // https://www.reddit.com/r/rust/comments/b06z9m/cuach_a_compiletime_html_template_system/
-    std::string prepareForCling(const std::string& input/*, const std::string& clinja_args*/);
+    std::string prepareForCling(const std::string& input
+      /*, const std::string& clinja_args*/);
 
     std::string code_before_build_;
     std::string code_after_build_;

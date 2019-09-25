@@ -2,9 +2,9 @@
 
 namespace clang_utils {
 
-std::string printMethodDecl(const clang::Decl* decl, clang::CXXRecordDecl const * node, CXXMethodDecl* fct) {
+std::string printMethodDecl(const clang::Decl* decl, clang::CXXRecordDecl const * node, clang::CXXMethodDecl* fct) {
     std::string methodDecl;
-    FunctionDecl *D = fct->getAsFunction();
+    clang::FunctionDecl *D = fct->getAsFunction();
 
     bool isCtor = llvm::dyn_cast_or_null<const clang::CXXConstructorDecl>(fct) != nullptr;
     bool isDtor = llvm::dyn_cast_or_null<const clang::CXXDestructorDecl>(fct) != nullptr;
@@ -67,8 +67,8 @@ std::string printMethodDecl(const clang::Decl* decl, clang::CXXRecordDecl const 
 
     unsigned Indentation = 0;
     //bool PrintInstantiation = false;
-    LangOptions LO;
-    PrintingPolicy PrintPolicy(LO);
+    clang::LangOptions LO;
+    clang::PrintingPolicy PrintPolicy(LO);
     //PrintPolicy.AnonymousTagLocations = false;
     //PrintPolicy.SuppressTagKeyword = true;
 
@@ -113,14 +113,14 @@ std::string printMethodDecl(const clang::Decl* decl, clang::CXXRecordDecl const 
     }
 
     // see https://github.com/flexferrum/autoprogrammer/blob/db902121dd492a2df2b7287e0dafd7173062bcc7/src/ast_reflector.cpp#L386
-    QualType fnQualType = fct->getType();
+    clang::QualType fnQualType = fct->getType();
 
-    const FunctionProtoType* fnProtoType = nullptr;
+    const clang::FunctionProtoType* fnProtoType = nullptr;
     if (const clang::FunctionType *fnType =
             fnQualType->getAs<clang::FunctionType>())
     {
         if (D->hasWrittenPrototype())
-            fnProtoType = llvm::dyn_cast<FunctionProtoType>(fnType);
+            fnProtoType = llvm::dyn_cast<clang::FunctionProtoType>(fnType);
     }
 
     // see https://github.com/FunkMonkey/libClang/blob/ab4702febef82409773f7c80ec02d53ddbb4d80e/lib/AST/DeclPrinter.cpp#L468
@@ -155,12 +155,12 @@ std::string printMethodDecl(const clang::Decl* decl, clang::CXXRecordDecl const 
     return methodDecl;
 }
 
-void expandLocations(SourceLocation& startLoc,
-                     SourceLocation& endLoc,
-                     Rewriter& rewriter_) {
+void expandLocations(clang::SourceLocation& startLoc,
+                     clang::SourceLocation& endLoc,
+                     clang::Rewriter& rewriter_) {
     if( startLoc.isMacroID() ) {
         // Get the start/end expansion locations
-        std::pair< SourceLocation, SourceLocation > expansionRange =
+        std::pair< clang::SourceLocation, clang::SourceLocation > expansionRange =
             rewriter_.getSourceMgr().getImmediateExpansionRange( startLoc );
 
         // We're just interested in the start location

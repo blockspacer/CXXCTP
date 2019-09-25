@@ -1,14 +1,15 @@
 ﻿#pragma once
 
-#include "ReflTypes.hpp"
-
 #include <clang/Basic/SourceManager.h>
 #include <clang/AST/PrettyPrinter.h>
 #include <clang/AST/ASTContext.h>
+
 #include <llvm/ADT/APSInt.h>
 
 #include <string>
 #include <type_traits>
+
+#include "ReflTypes.hpp"
 
 namespace reflection
 {
