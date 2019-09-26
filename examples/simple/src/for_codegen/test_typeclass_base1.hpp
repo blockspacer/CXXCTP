@@ -10,9 +10,7 @@
 static int resultSomeInt = 2345;
   )*/
 
-    //$apply(typeclass)
-
-struct __attribute__((annotate("{gen};{funccall};typeclass")))
+struct $apply(typeclass)
         Spell {
     virtual void cast(const char* spellname, const int spellpower,
                       const char* target) const noexcept = 0;

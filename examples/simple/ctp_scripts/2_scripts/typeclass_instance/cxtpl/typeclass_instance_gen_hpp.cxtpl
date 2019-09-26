@@ -1,4 +1,4 @@
-﻿<CX=> // parameters begin
+﻿[[~ // parameters begin
 
 using namespace cxtpl_utils;
 
@@ -25,15 +25,15 @@ std::string BaseTypeclassName
       (cxtpl_params, "BaseTypeclassName", "");
 
 // parameters end
-/* no newline */ <=CX><CX=l>
+/* no newline */ ~]][[~]]
 // This is generated file. Do not modify directly.
-// Path to the code generator: <CX=r> generator_path <=CX>.
+// Path to the code generator: [[+ generator_path +]].
 
-<CX=r> startHeaderGuard(headerGuard) /* no newline */ <=CX><CX=l>
+[[+ startHeaderGuard(headerGuard) /* no newline */ +]][[~]]
 
-<CX=l> for(const auto& fileName: generator_includes) {
-<CX=r> fileName <=CX>
-<CX=l> } // end for
+[[~]] for(const auto& fileName: generator_includes) {
+[[+ fileName +]]
+[[~]] } // end for
 
 #include <array>
 #include <functional>
@@ -42,117 +42,117 @@ std::string BaseTypeclassName
 namespace cxxctp {
 namespace generated {
 
-<CX=l>  { // startscope
-<CX=l>    for(const auto& method: ReflectedBaseTypeclass->methods) {
-<CX=l>      const size_t methodParamsSize = method->params.size();
-<CX=l>      const bool needPrint = !method->isImplicit
-<CX=l>          && !method->isOperator
-<CX=l>          && !method->isCtor
-<CX=l>          && !method->isDtor;
-<CX=l>      if(needPrint) {
+[[~]]  { // startscope
+[[~]]    for(const auto& method: ReflectedBaseTypeclass->methods) {
+[[~]]      const size_t methodParamsSize = method->params.size();
+[[~]]      const bool needPrint = !method->isImplicit
+[[~]]          && !method->isOperator
+[[~]]          && !method->isCtor
+[[~]]          && !method->isDtor;
+[[~]]      if(needPrint) {
   template<>
-<CX=r> method->isExplicitCtor ? "explicit " : "" <=CX><CX=l> /* no newline */
-<CX=r> method->isConstexpr ? "constexpr " : "" <=CX><CX=l> /* no newline */
-<CX=r> method->isStatic ? "static " : "" <=CX><CX=l> /* no newline */
-<CX=r> method->returnType->getPrintedName() <=CX><CX=l> /* no newline */
-<CX=r> " " <=CX><CX=l> /* no newline */
-<CX=r> method->name <=CX><CX=l> /* no newline */
-< <CX=r> BaseTypeclassName <=CX>, <CX=r> ImplTypeclassName <=CX> >
-(const <CX=r> ImplTypeclassName <=CX>& data<CX=l> /* no newline */
-<CX=l> if(methodParamsSize) {
-<CX=r>   ", " <=CX><CX=l> /* no newline */
-<CX=r> paramsFullDecls(method->params) <=CX><CX=l> /* no newline */
-<CX=l> } // methodParamsSize
-) <CX=l> /* no newline */
-<CX=r> method->isNoExcept ? "noexcept " : "" <=CX><CX=l> /* no newline */
+[[+ method->isExplicitCtor ? "explicit " : "" +]][[~]] /* no newline */
+[[+ method->isConstexpr ? "constexpr " : "" +]][[~]] /* no newline */
+[[+ method->isStatic ? "static " : "" +]][[~]] /* no newline */
+[[+ method->returnType->getPrintedName() +]][[~]] /* no newline */
+[[+ " " +]][[~]] /* no newline */
+[[+ method->name +]][[~]] /* no newline */
+< [[+ BaseTypeclassName +]], [[+ ImplTypeclassName +]] >
+(const [[+ ImplTypeclassName +]]& data[[~]] /* no newline */
+[[~]] if(methodParamsSize) {
+[[+   ", " +]][[~]] /* no newline */
+[[+ paramsFullDecls(method->params) +]][[~]] /* no newline */
+[[~]] } // methodParamsSize
+) [[~]] /* no newline */
+[[+ method->isNoExcept ? "noexcept " : "" +]][[~]] /* no newline */
 ;
-<CX=> /* newline */ <=CX>
-<CX=l>      } // needPrint
-<CX=l>    } // methods endfor
-<CX=l>  } // endscope
+[[~ /* newline */ ~]]
+[[~]]      } // needPrint
+[[~]]    } // methods endfor
+[[~]]  } // endscope
 
 /*template <>
-<CX=r> ImplTypeclassName <=CX>& _tc_model_t<<CX=r> BaseTypeclassName <=CX>>::ref_concrete<<CX=r> ImplTypeclassName <=CX>>() noexcept;
+[[+ ImplTypeclassName +]]& _tc_model_t<[[+ BaseTypeclassName +]]>::ref_concrete<[[+ ImplTypeclassName +]]>() noexcept;
 */
 
 template<>
-struct _tc_impl_t<<CX=r> ImplTypeclassName <=CX>, <CX=r> BaseTypeclassName <=CX>>
-    : public _tc_model_t<<CX=r> BaseTypeclassName <=CX>> {
-    typedef <CX=r> ImplTypeclassName <=CX> val_type_t;
+struct _tc_impl_t<[[+ ImplTypeclassName +]], [[+ BaseTypeclassName +]]>
+    : public _tc_model_t<[[+ BaseTypeclassName +]]> {
+    typedef [[+ ImplTypeclassName +]] val_type_t;
 
     // Construct the embedded concrete type.
     template<typename... args_t>
     _tc_impl_t(args_t&&... args) noexcept : concrete(std::forward<args_t>(args)...) { }
 
-    explicit _tc_impl_t(const <CX=r> ImplTypeclassName <=CX>& concrete_arg) noexcept
+    explicit _tc_impl_t(const [[+ ImplTypeclassName +]]& concrete_arg) noexcept
       : concrete(concrete_arg) {}
 
     /*const size_t getModelTypeIndex() const noexcept override final {
-        return _tc_registry<<CX=r> BaseTypeclassName <=CX>>::
-            getTypeIndex<<CX=r> ImplTypeclassName <=CX>>();
+        return _tc_registry<[[+ BaseTypeclassName +]]>::
+            getTypeIndex<[[+ ImplTypeclassName +]]>();
     }*/
 
 
-<CX=l>  { // startscope
-<CX=l>    for(const auto& method: ReflectedBaseTypeclass->methods) {
-<CX=l>      const size_t methodParamsSize = method->params.size();
-<CX=l>      const bool needPrint = !method->isImplicit
-<CX=l>          && !method->isOperator
-<CX=l>          && !method->isCtor
-<CX=l>          && !method->isDtor;
-<CX=l>      if(method->isTemplate()) {
-template< <CX=r> templateParamsFullDecls(method->tplParams) <=CX> >
-<CX=l>      } // method->isTemplate
-<CX=l>      if(needPrint) {
-<CX=r> method->isExplicitCtor ? "explicit " : "" <=CX><CX=l> /* no newline */
-<CX=r> method->isConstexpr ? "constexpr " : "" <=CX><CX=l> /* no newline */
-<CX=r> method->isStatic ? "static " : "" <=CX><CX=l> /* no newline */
-<CX=r> method->returnType->getPrintedName() <=CX><CX=l> /* no newline */
-<CX=r> " __" <=CX><CX=l> /* no newline */
-<CX=r> method->name <=CX><CX=l> /* no newline */
+[[~]]  { // startscope
+[[~]]    for(const auto& method: ReflectedBaseTypeclass->methods) {
+[[~]]      const size_t methodParamsSize = method->params.size();
+[[~]]      const bool needPrint = !method->isImplicit
+[[~]]          && !method->isOperator
+[[~]]          && !method->isCtor
+[[~]]          && !method->isDtor;
+[[~]]      if(method->isTemplate()) {
+template< [[+ templateParamsFullDecls(method->tplParams) +]] >
+[[~]]      } // method->isTemplate
+[[~]]      if(needPrint) {
+[[+ method->isExplicitCtor ? "explicit " : "" +]][[~]] /* no newline */
+[[+ method->isConstexpr ? "constexpr " : "" +]][[~]] /* no newline */
+[[+ method->isStatic ? "static " : "" +]][[~]] /* no newline */
+[[+ method->returnType->getPrintedName() +]][[~]] /* no newline */
+[[+ " __" +]][[~]] /* no newline */
+[[+ method->name +]][[~]] /* no newline */
 (
-<CX=r> paramsFullDecls(method->params) <=CX><CX=l> /* no newline */
-) <CX=l> /* no newline */
-<CX=r> method->isConst ? "const " : "" <=CX><CX=l> /* no newline */
-<CX=r> method->isNoExcept ? "noexcept " : "" <=CX><CX=l> /* no newline */
+[[+ paramsFullDecls(method->params) +]][[~]] /* no newline */
+) [[~]] /* no newline */
+[[+ method->isConst ? "const " : "" +]][[~]] /* no newline */
+[[+ method->isNoExcept ? "noexcept " : "" +]][[~]] /* no newline */
 override final
   {
     /// \note passes data, not ref
-    return <CX=r> method->name <=CX><CX=l> /* no newline */
-< <CX=r> BaseTypeclassName <=CX> ><CX=l> /* no newline */
-(<CX=l> /* no newline */
-concrete<CX=l> /* no newline */
-<CX=r> methodParamsSize ? ", " : "" <=CX><CX=l> /* no newline */
-<CX=r> paramsCallDecls(method->params) <=CX><CX=l> /* no newline */
+    return [[+ method->name +]][[~]] /* no newline */
+< [[+ BaseTypeclassName +]] >[[~]] /* no newline */
+([[~]] /* no newline */
+concrete[[~]] /* no newline */
+[[+ methodParamsSize ? ", " : "" +]][[~]] /* no newline */
+[[+ paramsCallDecls(method->params) +]][[~]] /* no newline */
 );
   }
-<CX=> /* newline */ <=CX>
-<CX=l>      } // needPrint
-<CX=l>    } // methods endfor
-<CX=l>  } // endscope
+[[~ /* newline */ ~]]
+[[~]]      } // needPrint
+[[~]]    } // methods endfor
+[[~]]  } // endscope
 
     std::unique_ptr<
-        _tc_model_t<<CX=r> BaseTypeclassName <=CX>>>
+        _tc_model_t<[[+ BaseTypeclassName +]]>>
     clone() noexcept override final {
         // Copy-construct a new instance of _tc_impl_t on the heap.
         return std::make_unique<_tc_impl_t>(concrete);
     }
 
     std::unique_ptr<
-        _tc_model_t<<CX=r> BaseTypeclassName <=CX>>>
+        _tc_model_t<[[+ BaseTypeclassName +]]>>
     move_clone() noexcept override final {
         return std::make_unique<_tc_impl_t>(std::move(concrete));
     }
 
-    <CX=r> ImplTypeclassName <=CX>* operator->() {
+    [[+ ImplTypeclassName +]]* operator->() {
         return &concrete;
     }
 
   // Our actual data.
-  <CX=r> ImplTypeclassName <=CX> concrete;
+  [[+ ImplTypeclassName +]] concrete;
 };
 
 } // namespace cxxctp
 } // namespace generated
 
-<CX=r> endHeaderGuard(headerGuard) /* no newline */ <=CX><CX=l>
+[[+ endHeaderGuard(headerGuard) /* no newline */ +]][[~]]

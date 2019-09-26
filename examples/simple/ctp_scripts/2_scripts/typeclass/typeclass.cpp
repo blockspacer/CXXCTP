@@ -92,7 +92,7 @@ const char* typeclass(
         cxtpl_params.emplace("generator_includes",
                              std::make_any<std::vector<std::string>>(
                                  std::vector<std::string>{
-                                     wrapLocalInclude(R"raw(../resources/type_erasure_common.hpp)raw")
+                                     wrapLocalInclude(R"raw(type_erasure_common.hpp)raw")
                                  })
                              );
 

@@ -369,7 +369,7 @@ int main(int argc, char* argv[]) {
     ctp_utils::add_modulecallbacks();
 
     /// \note must be after add_modulecallbacks()
-    if (vm.count(plugins_arg_name)) {
+    if (vm.count("plugins") || vm.count("P")) {
       XLOG(INFO) << "loaded plugins (ctp scripts):";
       for(const auto& it : clang_utils::get_cxxctp_callbacks()) {
         XLOG(INFO) << "  + " << it.first;

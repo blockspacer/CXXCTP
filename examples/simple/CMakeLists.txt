@@ -42,6 +42,8 @@ message(STATUS "CMAKE_DL_LIBS = ${CMAKE_DL_LIBS}")
 # The project has one binary:
 add_executable(CXXCTP_example
   ${CMAKE_CURRENT_SOURCE_DIR}/src/main_app.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Spell_WaterSpell.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Spell_FireSpell.cpp
 )
 
 set( USED_SYSTEM_LIBS
@@ -63,6 +65,7 @@ target_include_directories(CXXCTP_example PUBLIC
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${CMAKE_CURRENT_SOURCE_DIR}/src
   ${CMAKE_CURRENT_SOURCE_DIR}/src/for_codegen
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/codegen_helpers # path to type_erasure_common.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include
   ${CMAKE_CURRENT_SOURCE_DIR}/ctp_scripts
   ${CMAKE_CURRENT_SOURCE_DIR}/generated

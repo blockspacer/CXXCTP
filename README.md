@@ -120,7 +120,7 @@ Note: this project is provided as is, without any warranty (see License).
 + Ability to compile scripts (rules for code transformations) for maximum performance, not only interpret them in Cling.
 
 ## Project status
-In development, see test.cpp and app_loop.cpp for usage examples
+In development, see examples
 
 Currently supports only linux.
 
@@ -228,6 +228,9 @@ sudo cmake -E chdir build make install
 # use -DBUILD_EXAMPLES=TRUE
 cmake -E chdir build cmake -E time cmake -DENABLE_CLING=TRUE -DBUILD_SHARED_LIBS=TRUE -DBUILD_EXAMPLES=TRUE -DCMAKE_BUILD_TYPE=Debug -DENABLE_CXXCTP=TRUE ..
 cmake -E chdir build cmake -E time cmake --build . -- -j6
+
+# run examples
+build/examples/simple/CXXCTP_example
 ```
 
 Don`t forget to set Cling include paths by `-extra-arg=-I$PWD/include` and library paths by `-extra-arg=-L$PWD/build` and .so/.dll libs by `-extra-arg=-lCXXCTP_core`:
@@ -352,7 +355,7 @@ SomeInterfaceName {
 Using similar approach you can apply multiple soure code transformation steps to same `class` / `struct` / e.t.c.
 
 ## How to add custom code transformation rules
-Add your function to `resources/ctp_scripts/app_loop.cpp`
+Create files with your function in `ctp_scripts`
 
 Add your function name into `ctp_registry.cpp` (may be skipped in Cling / dev-mode)
 
@@ -397,10 +400,10 @@ If you need code generation:
 Example (more below):
 ```
 <div> some template string here </div>
-<CX=> int valid_cpp_code_block_here = 0; <=CX>
-<CX=l> int and_valid_cpp_code_line_here = 0;
+[[~ int valid_cpp_code_block_here = 0; ~]]
+[[~]] int and_valid_cpp_code_line_here = 0;
 <div> another template string here </div>
-<div> and_valid_cpp_code_line_here = <CX=s> valid_cpp_code_block_here <=CX> </div>
+<div> and_valid_cpp_code_line_here = [[* valid_cpp_code_block_here *]] </div>
 ```
 
 You can pass C++ variables by pointers into cxtpl, that is very usefull if you want to use complex data structures as template parameters.
@@ -434,28 +437,28 @@ You need to `#include` all headers used by template generator in your app code. 
 
 cxtpl uses approach similar to `How to write a template engine in less than 30 lines of code` from https://bits.theorem.co/how-to-write-a-template-library/
 
-+ `<CX=>` means `start execution of C++ code while parsing template`. Requires `<=CX>` as closing tag.
-+ `<=CX>` means `end execution of C++ code while parsing template`
-+ `<CX=l>` means `start execution of C++ code while parsing template`. Requires newline (`\n`) as closing tag.
-+ `<CX=r>` means `add result of execution of C++ code to output while parsing template`. Result must be string. Requires `<=CX>` as closing tag.
-+ `<CX=s>` means `add result of execution of C++ code to output while parsing template`. Result will be converted to string (just wrapped in std::to_string). Requires `<=CX>` as closing tag.
++ `[[~` means `start execution of C++ code while parsing template`. Requires `~]]` as closing tag.
++ `~]]` means `end execution of C++ code while parsing template`
++ `[[~]]` means `start execution of C++ code while parsing template`. Requires newline (`\n`) as closing tag.
++ `[[+` means `add result of execution of C++ code to output while parsing template`. Result must be string. Requires `+]]` as closing tag.
++ `[[*` means `add result of execution of C++ code to output while parsing template`. Result will be converted to string (just wrapped in std::to_string). Requires `*]]` as closing tag.
 
 Example before template parsing/transpiling:
 ```
-<CX=> // parameters begin
+[[~ // parameters begin
 
 const std::string generator_path = "somepath";
 
 std::vector<std::string> generator_includes{"someinclude"};
 
 // parameters end
-/* no newline, see CX=l */ <=CX><CX=l>
+/* no newline, see CX=l */ ~]][[~]]
 // This is generated file. Do not modify directly.
-// Path to the code generator: <CX=r> generator_path <=CX>.
+// Path to the code generator: [[+ generator_path +]].
 
-<CX=l> for(const auto& fileName: generator_includes) {
-<CX=r> fileName /* CX=r used to append to cxtpl_output */ <=CX>
-<CX=l> } // end for
+[[~]] for(const auto& fileName: generator_includes) {
+[[+ fileName /* CX=r used to append to cxtpl_output */ +]]
+[[~]] } // end for
 ```
 
 Example after template parsing/transpiling:

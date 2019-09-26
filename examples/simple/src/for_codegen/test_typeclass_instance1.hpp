@@ -6,11 +6,14 @@
 
 #include "cxxctp_macros.hpp"
 
-    //$apply(typeclass_instance(Spell))
+struct $apply(typeclass_instance(Spell))
+        FireSpell {
+    std::string title = "FireSpell";
+    std::string description = "FireSpell";
+};
 
-// Print the text in forward order.
-struct __attribute__((annotate("{gen};{funccall};typeclass_instance(Spell)")))
-        SpellBook {
-    std::string title = "MySpellBook";
-    std::string description = "spell book full of spells";
+struct $apply(typeclass_instance(Spell))
+        WaterSpell {
+    std::string title = "WaterSpell";
+    std::string description = "WaterSpell";
 };

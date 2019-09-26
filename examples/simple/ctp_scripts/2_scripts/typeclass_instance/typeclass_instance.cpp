@@ -76,7 +76,7 @@ const char* typeclass_instance(
                              std::make_any<std::vector<std::string>>(
                                  std::vector<std::string>{
                                      /// \TODO
-                                     R"raw(#include "../resources/type_erasure_common.hpp")raw",
+                                     R"raw(#include "type_erasure_common.hpp")raw",
                                      wrapLocalInclude(gen_base_typeclass_hpp_name).c_str(),
                                      wrapLocalInclude(original_full_file_path).c_str()
                                  })
