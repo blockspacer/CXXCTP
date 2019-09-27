@@ -228,6 +228,8 @@ void clingCallModuleFunc(const UseOverride::Checker::MatchResult& Result,
             != cling::Interpreter::Interpreter::kSuccess) {
           XLOG(ERR) << "ERROR while running cling code:\n" << sstr.str();
         }
+    } else {
+      XLOG(WARN) << "Main Cling module not registered!\n" << sstr.str();
     }
 }
 
@@ -407,6 +409,8 @@ void UseOverride::Checker::run(const UseOverride::Checker::MatchResult& Result) 
                             != cling::Interpreter::Interpreter::kSuccess) {
                           XLOG(ERR) << "ERROR while running cling code:\n" << sstr.str();
                         }
+                    } else {
+                      XLOG(WARN) << "Main Cling module not registered!\n" << sstr.str();
                     }
                     clang::SourceLocation startLoc = decl->getLocStart();
                     clang::SourceLocation endLoc = decl->getLocEnd();
@@ -427,16 +431,24 @@ void UseOverride::Checker::run(const UseOverride::Checker::MatchResult& Result) 
 
                     clang_utils::expandLocations(startLoc, endLoc, rewriter_);
 
-                    void* resOptionVoid = result.getAs<void*>();
-                    auto resOption =
-                      static_cast<llvm::Optional<std::string>*>(resOptionVoid);
-                    if(resOption) {
-                      if(resOption->hasValue()) {
-                          rewriter_.ReplaceText(
-                                      clang::SourceRange(startLoc, endLoc),
-                                      resOption->getValue());
+                    if(result.hasValue() && result.isValid()
+                        && !result.isVoid()) {
+                      void* resOptionVoid = result.getAs<void*>();
+                      auto resOption =
+                        static_cast<llvm::Optional<std::string>*>(resOptionVoid);
+                      if(resOption) {
+                        if(resOption->hasValue() && !resOption->getValue().empty()) {
+                            rewriter_.ReplaceText(
+                                        clang::SourceRange(startLoc, endLoc),
+                                        resOption->getValue());
+                        }
+                        delete resOption; /// \note frees resOptionVoid memory
                       }
-                      delete resOption; /// \note frees resOptionVoid memory
+                    } else {
+                      XLOG(DBG9) << "ignored invalid "
+                                    "Cling result "
+                                    "for code: "
+                                    << sstr.str();
                     }
 #endif // CLING_IS_ON
                 } else if(isEval) {
@@ -453,6 +465,8 @@ void UseOverride::Checker::run(const UseOverride::Checker::MatchResult& Result) 
                             != cling::Interpreter::Interpreter::kSuccess) {
                           XLOG(ERR) << "ERROR while running cling code:\n" << sstr.str();
                         }
+                    } else {
+                      XLOG(WARN) << "Main Cling module not registered!\n" << sstr.str();
                     }
                     clang::SourceLocation startLoc = decl->getLocStart();
                     clang::SourceLocation endLoc = decl->getLocEnd();
@@ -494,6 +508,8 @@ void UseOverride::Checker::run(const UseOverride::Checker::MatchResult& Result) 
                             != cling::Interpreter::Interpreter::kSuccess) {
                           XLOG(ERR) << "ERROR while running cling code:\n" << sstr.str();
                         }
+                    } else {
+                      XLOG(WARN) << "Main Cling module not registered!\n" << sstr.str();
                     }
                     clang::SourceLocation startLoc = decl->getLocStart();
                     clang::SourceLocation endLoc = decl->getLocEnd();

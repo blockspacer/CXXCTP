@@ -69,6 +69,9 @@ target_include_directories(CXXCTP_example PUBLIC
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${CMAKE_CURRENT_SOURCE_DIR}/src
   ${CMAKE_CURRENT_SOURCE_DIR}/src/for_codegen
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/for_codegen/1_typeclasses
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/for_codegen/2_typeclass_instances
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/for_codegen/3_typeclass_combinations
   ${CMAKE_CURRENT_SOURCE_DIR}/src/codegen_helpers # path to type_erasure_common.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include
   ${CMAKE_CURRENT_SOURCE_DIR}/ctp_scripts
@@ -96,12 +99,22 @@ list(APPEND CXXCTP_inputs
   "${CMAKE_CURRENT_SOURCE_DIR}/src/for_codegen/test.cpp")
 list(APPEND CXXCTP_inputs
   "${CMAKE_CURRENT_SOURCE_DIR}/src/for_codegen/ReflShapeKind.hpp")
+
+# NOTE: `typeclasses` must load before `typeclass_instances`
+# and `typeclass_combinations`,
+# so we added `1_`, `2_`, ... before folder names.
 list(APPEND CXXCTP_inputs
-  "${CMAKE_CURRENT_SOURCE_DIR}/src/for_codegen/test_typeclass_base1.hpp")
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/for_codegen/1_typeclasses/MagicItem_typeclass.hpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/for_codegen/1_typeclasses/Printable_typeclass.hpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/for_codegen/1_typeclasses/Spell_typeclass.hpp"
+)
 list(APPEND CXXCTP_inputs
-  "${CMAKE_CURRENT_SOURCE_DIR}/src/for_codegen/test_typeclass_instance1.hpp")
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/for_codegen/2_typeclass_instances/FireSpell_typeclass_instances.hpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/for_codegen/2_typeclass_instances/WaterSpell_typeclass_instances.hpp"
+)
 list(APPEND CXXCTP_inputs
-  "${CMAKE_CURRENT_SOURCE_DIR}/src/for_codegen/test_typeclass_combo1.hpp")
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/for_codegen/3_typeclass_combinations/Spell_MagicItem_typeclass_combo.hpp"
+)
 
 # dir to generated files
 list(APPEND CXXCTP_outdir "${CMAKE_CURRENT_SOURCE_DIR}/generated")
@@ -121,6 +134,18 @@ macro(append_absolute_path_to_extras PATH OUT_VAR)
                          ABSOLUTE)
   list(APPEND ${OUT_VAR} "-extra-arg=-I${TMP_PATH_TO_ABSOLUTE}")
 endmacro(append_absolute_path_to_extras)
+
+# make include files from project dirs visible to Clang/Cling
+append_absolute_path_to_extras("${CMAKE_CURRENT_SOURCE_DIR}" EXTRA_ARGS)
+append_absolute_path_to_extras("${CMAKE_CURRENT_SOURCE_DIR}/src" EXTRA_ARGS)
+append_absolute_path_to_extras("${CMAKE_CURRENT_SOURCE_DIR}/src/for_codegen" EXTRA_ARGS)
+append_absolute_path_to_extras("${CMAKE_CURRENT_SOURCE_DIR}/src/for_codegen/1_typeclasses" EXTRA_ARGS)
+append_absolute_path_to_extras("${CMAKE_CURRENT_SOURCE_DIR}/src/for_codegen/2_typeclass_instances" EXTRA_ARGS)
+append_absolute_path_to_extras("${CMAKE_CURRENT_SOURCE_DIR}/src/for_codegen/3_typeclass_combinations" EXTRA_ARGS)
+append_absolute_path_to_extras("${CMAKE_CURRENT_SOURCE_DIR}/src/codegen_helpers" EXTRA_ARGS) # path to type_erasure_common.hpp
+append_absolute_path_to_extras("${CMAKE_CURRENT_SOURCE_DIR}/include" EXTRA_ARGS)
+append_absolute_path_to_extras("${CMAKE_CURRENT_SOURCE_DIR}/ctp_scripts" EXTRA_ARGS)
+append_absolute_path_to_extras("${CMAKE_CURRENT_SOURCE_DIR}/generated" EXTRA_ARGS)
 
 # EXTRA_ARGS for CXXCTP_tool: clang paths for cling
 append_absolute_path_to_extras("${CXXCTP_DIR}/include" EXTRA_ARGS)

@@ -20,11 +20,34 @@ const char* typeclass_instance(
     cxxctp::args typeclassBaseNames =
       func_with_args.parsed_func_.args_;
 
+    const clang::CXXRecordDecl *node =
+        matchResult.Nodes.getNodeAs<clang::CXXRecordDecl>("bind_gen");
+
+    if (!node) {
+        XLOG(ERR) << "CXXRecordDecl not found ";
+        return "";
+    }
+
+    std::string targetName = node->getNameAsString();
+
     for(const auto& tit : typeclassBaseNames.as_vec_) {
+      if(tit.name_ =="target") {
+        targetName = tit.value_;
+      }
+    }
+
+    for(const auto& tit : typeclassBaseNames.as_vec_) {
+      if(tit.name_ =="target") {
+        continue;
+      }
+
       std::map<std::string, std::any> cxtpl_params;
 
       const std::string typeclassBaseName = tit.value_;
+
       XLOG(DBG9) << "typeclassBaseName = " << typeclassBaseName;
+      XLOG(DBG9) << "target = " << targetName;
+
       if(typeclassBaseName.empty()) {
           return "";
       }
@@ -44,15 +67,6 @@ const char* typeclass_instance(
           reflection::ReflectionRegistry::getInstance()->
             reflectionCXXRecordRegistry[typeclassBaseName].get();
 
-      const clang::CXXRecordDecl *node =
-          matchResult.Nodes.getNodeAs<clang::CXXRecordDecl>("bind_gen");
-
-      if (!node) {
-          XLOG(ERR) << "CXXRecordDecl not found "
-                        "for typeclassBaseNode " << typeclassBaseName;
-          return "";
-      }
-
       /*XLOG(DBG9) << "ReflectedBaseTypeclass->classInfoPtr_->name = "
         << ReflectedBaseTypeclass->classInfoPtr_->name;
       XLOG(DBG9) << "typeclassBaseName = "
@@ -60,17 +74,17 @@ const char* typeclass_instance(
 
       XLOG(DBG9) << "reflect is record = " << node->getNameAsString();
 
-      cxtpl_params.emplace("ReflectedBaseTypeclass",
-                           std::make_any<reflection::ClassInfoPtr>(
-                            ReflectedBaseTypeclass->classInfoPtr_));
-
       cxtpl_params.emplace("ImplTypeclassName",
                            std::make_any<std::string>(
-                            node->getNameAsString()));
+                            targetName));
 
       cxtpl_params.emplace("BaseTypeclassName",
                            std::make_any<std::string>(
                             ReflectedBaseTypeclass->classInfoPtr_->name));
+
+        cxtpl_params.emplace("ReflectedBaseTypeclass",
+                             std::make_any<reflection::ClassInfoPtr>(
+                              ReflectedBaseTypeclass->classInfoPtr_));
 
       clang::SourceManager &SM = rewriter.getSourceMgr();
       const auto fileID = SM.getMainFileID();
@@ -82,7 +96,7 @@ const char* typeclass_instance(
 
       {
           fs::path gen_hpp_name = fs::absolute(ctp::Options::res_path
-            / (node->getNameAsString() + "_" + typeclassBaseName
+            / (targetName + "_" + typeclassBaseName
               + ".typeclass_instance.generated.hpp"));
 
           fs::path gen_base_typeclass_hpp_name =

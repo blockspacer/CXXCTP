@@ -4,11 +4,6 @@
 
 #include <vector>
 #include <string>
-#include <iostream>
-
-/*  $export (
-static int resultSomeInt = 2345;
-  )*/
 
 // like `trait`
 //template<typename S, typename A>
@@ -32,27 +27,5 @@ Spell {
   /// \note same for all types
   // @gen(inject_to_all)
   //S interface_data;
-};
-
-// like `trait`
-struct
-  $apply(
-    typeclass
-  )
-MagicItem {
-  virtual void has_enough_mana(const char* spellname) const noexcept = 0;
-
-  /// \note same for all types
-  // @gen(inject_to_all)
-  //S interface_data;
-};
-
-// like `trait`
-struct
-  $apply(
-    typeclass
-  )
-Printable {
-    virtual void print() const noexcept = 0;
 };
 

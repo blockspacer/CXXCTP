@@ -180,7 +180,7 @@ cmake -E remove_directory build
 cmake -E make_directory build
 cmake -E remove_directory resources/cxtpl/generated
 cmake -E make_directory resources/cxtpl/generated
-cmake -E chdir build cmake -E time cmake -DENABLE_CLING=FALSE -DBUILD_SHARED_LIBS=FALSE -DBUILD_EXAMPLES=FALSE -DBUNDLE_EXAMPLE_SCRIPTS=FALSE -DCMAKE_BUILD_TYPE=Debug -DENABLE_CXXCTP=TRUE ..
+cmake -E chdir build cmake -E time cmake -DENABLE_CLING=FALSE -DBUILD_SHARED_LIBS=FALSE -DBUILD_EXAMPLES=FALSE -DALLOW_PER_PROJECT_CTP_SCRIPTS=TRUE  -DBUNDLE_EXAMPLE_SCRIPTS=FALSE -DCMAKE_BUILD_TYPE=Debug -DENABLE_CXXCTP=TRUE ..
 cmake -E chdir build cmake -E time cmake --build . -- -j6
 
 # you can install CXXCTP_tool:
@@ -210,11 +210,12 @@ Use clang (NOT GCC!) before build and `-DENABLE_CLING=TRUE`:
 ```
 export CC=clang
 export CXX=clang++
+sudo rm -rf examples/*/ctp_scripts/*/*/generated/
 cmake -E remove_directory build
 cmake -E make_directory build
 cmake -E remove_directory resources/cxtpl/generated
 cmake -E make_directory resources/cxtpl/generated
-cmake -E chdir build cmake -E time cmake -DENABLE_CLING=TRUE -DBUILD_SHARED_LIBS=TRUE -DBUILD_EXAMPLES=FALSE -DBUNDLE_EXAMPLE_SCRIPTS=TRUE -DCMAKE_BUILD_TYPE=Debug -DENABLE_CXXCTP=TRUE ..
+cmake -E chdir build cmake -E time cmake -DENABLE_CLING=TRUE -DBUILD_SHARED_LIBS=TRUE -DALLOW_PER_PROJECT_CTP_SCRIPTS=TRUE -DBUILD_EXAMPLES=FALSE -DBUNDLE_EXAMPLE_SCRIPTS=FALSE -DCMAKE_BUILD_TYPE=Debug -DENABLE_CXXCTP=TRUE ..
 cmake -E chdir build cmake -E time cmake --build . -- -j6
 # you can install CXXCTP_tool:
 sudo cmake -E chdir build make install
@@ -229,7 +230,7 @@ sudo cmake -E chdir build make install
 
 # use -DBUILD_EXAMPLES=TRUE
 rm ./build/examples/simple/CXXCTP_tool_for_CXXCTP_example.log
-cmake -E chdir build cmake -E time cmake -DENABLE_CLING=TRUE -DBUILD_SHARED_LIBS=TRUE -DBUILD_EXAMPLES=TRUE -DBUNDLE_EXAMPLE_SCRIPTS=FALSE -DCMAKE_BUILD_TYPE=Debug -DENABLE_CXXCTP=TRUE ..
+cmake -E chdir build cmake -E time cmake -DENABLE_CLING=TRUE -DBUILD_SHARED_LIBS=TRUE -DBUILD_EXAMPLES=TRUE -DBUNDLE_EXAMPLE_SCRIPTS=FALSE -DALLOW_PER_PROJECT_CTP_SCRIPTS=TRUE -DCMAKE_BUILD_TYPE=Debug -DENABLE_CXXCTP=TRUE ..
 cmake -E chdir build cmake -E time cmake --build . -- -j6
 cat ./build/examples/simple/CXXCTP_tool_for_CXXCTP_example.log
 
@@ -616,6 +617,28 @@ rm -rf build/*generated*
 mkdir -p gen/out
 cmake -E chdir gen ../build/tool/CXXCTP_tool --resdir=$PWD/gen/out --ctp_scripts_paths=$PWD -L .=DBG9 -extra-arg=-I$PWD/include -extra-arg=-I../resources ../resources/ReflShapeKind.hpp ../resources/test_typeclass_base1.hpp ../resources/test_typeclass_instance1.hpp ../resources/test.cpp
 ```
+
+## How to debug `ctp_scripts`
+Remove old build artifacts and generated files.
+
+Bundle your scripts with `CXXCTP_tool` via `-DBUNDLE_EXAMPLE_SCRIPTS=TRUE`.
+
+Make sure that your scripts (plugins) added to `CXXCTP_tool` via `custom_plugins.cmake.example`.
+
+Disable per-project scripts `-DALLOW_PER_PROJECT_CTP_SCRIPTS=FALSE`.
+
+Check that your scripts (plugins) are in `build/tool/CXXCTP_tool --plugins`
+
+Check that installed in system version of `CXXCTP_tool` same as `build/tool/CXXCTP_tool` (by date/file hash)
+
+Run `CXXCTP_tool` by hand under `gdb`:
+```
+gdb -ex "r" -ex "bt" --args build/tool/CXXCTP_tool .........
+```
+
+Check that all needed paths are in `-extra-arg=`.
+
+Make log to file in `DBG9` mode and check `.log` files.
 
 ## About libtooling
 CXXCTP uses LibTooling to parse and modify C++.

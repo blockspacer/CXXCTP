@@ -18,8 +18,6 @@
 
 #include "generated/FireSpell_Printable.typeclass_instance.generated.hpp"
 
-//#include "for_codegen/test_typeclass_instance1.hpp"
-
 #include <vector>
 
 int main(int /*argc*/, const char* const* /*argv*/) {

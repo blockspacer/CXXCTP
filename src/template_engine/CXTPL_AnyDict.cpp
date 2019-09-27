@@ -106,18 +106,28 @@ void Dict<AnyDict>::runInInterpreter(
                                                 &clingResult, true);
                 if(compilationResult
                     != cling::Interpreter::Interpreter::kSuccess) {
-                  XLOG(ERR) << "ERROR while running cling code:\n" << inStrWithArgs;
+                  XLOG(ERR) << "ERROR while running "
+                               "cling code:\n" << inStrWithArgs;
                 }
-                void* resOptionVoid = clingResult.getAs<void*>();
-                /// \note free memory by unique_ptr
-                auto resOption = std::unique_ptr<std::string>(
-                    static_cast<std::string*>(resOptionVoid));
-                if(!resOption) {
-                    return /*nullptr*/;
+                if(clingResult.hasValue()
+                    && clingResult.isValid()
+                    && !clingResult.isVoid()) {
+                  void* resOptionVoid = clingResult.getAs<void*>();
+                  /// \note free memory by unique_ptr
+                  auto resOption = std::unique_ptr<std::string>(
+                      static_cast<std::string*>(resOptionVoid));
+                  if(!resOption) {
+                      return /*nullptr*/;
+                  }
+                  std::cout << "processed = " << *resOption << std::endl;
+                  //////////////return std::move(resOption);
+                  callback(std::move(resOption));
+                } else {
+                  XLOG(DBG9) << "ignored invalid "
+                                "Cling result "
+                                "for code: "
+                                << inStrWithArgs;
                 }
-                std::cout << "processed = " << *resOption << std::endl;
-                //////////////return std::move(resOption);
-                callback(std::move(resOption));
             }
         });
 #endif // CLING_IS_ON

@@ -40,3 +40,5 @@ generated/
 # Custom
 custom_plugins\.cmake
 src/ctp_registry\.cpp
+
+*.log

@@ -61,9 +61,9 @@ void removeClingModule(const std::string& module_id) {
         //printf("erased module %s\n", module_id.c_str());
         InterpreterModule::interpMap.erase(module_id);
     } else {
-        printf("module not found! %s\n", module_id.c_str());
+        XLOG(WARN) << "module not found!" << module_id.c_str();
         for(const auto& it : InterpreterModule::interpMap) {
-            printf("maybe you wanted to type %s?\n", it.first.c_str());
+            XLOG(WARN) << "maybe you wanted to type " << it.first.c_str();
         }
     }
 }
@@ -233,6 +233,7 @@ void reloadClingModule(const std::string &module_id, const std::vector<std::stri
 
 static void process_ctp_scripts_dir(const std::string& ctp_scripts_path) {
 #if defined(CLING_IS_ON)
+#if defined(ALLOW_PER_PROJECT_CTP_SCRIPTS)
     // Init InterpreterModule files
     if(const auto Interp_it = InterpreterModule::moduleToSources.find("main_module")
        ; Interp_it == InterpreterModule::moduleToSources.end())
@@ -261,6 +262,12 @@ static void process_ctp_scripts_dir(const std::string& ctp_scripts_path) {
         reloadClingModule(it.first, it.second);
         XLOG(DBG9) << "reloaded module " << it.first;
     }
+#else
+      InterpreterModule::interpMap["main_module"] = std::make_unique<InterpreterModule>(
+                "main_module",
+                std::vector<std::string>{});
+#endif // ALLOW_PER_PROJECT_CTP_SCRIPTS
+
 #endif // CLING_IS_ON
 }
 

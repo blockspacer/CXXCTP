@@ -48,6 +48,9 @@ include( Dependencies.cmake )
 
 set(ENABLE_CLING TRUE CACHE BOOL "ENABLE_CLING")
 
+option(ALLOW_PER_PROJECT_CTP_SCRIPTS
+  "Use per-project ctp_scripts (requires Cling)" ON)
+
 set(INSTALL_CLING TRUE CACHE BOOL "INSTALL_CLING")
 
 set(ENABLE_CXXCTP TRUE CACHE BOOL "ENABLE_CXXCTP")
@@ -406,6 +409,12 @@ if(ENABLE_CXXCTP)
       BUNDLE_EXAMPLE_SCRIPTS=1
     )
   endif(BUNDLE_EXAMPLE_SCRIPTS)
+
+  if(ALLOW_PER_PROJECT_CTP_SCRIPTS)
+    target_compile_definitions(CXXCTP_core PUBLIC
+      ALLOW_PER_PROJECT_CTP_SCRIPTS=1
+    )
+  endif(ALLOW_PER_PROJECT_CTP_SCRIPTS)
 endif(ENABLE_CXXCTP)
 
 include(Codegen_files.cmake)
