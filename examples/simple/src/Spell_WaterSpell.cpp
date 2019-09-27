@@ -1,5 +1,5 @@
 #include "generated/Spell.typeclass.generated.hpp"
-#include "generated/WaterSpell.typeclass_instance.generated.hpp"
+#include "generated/WaterSpell_Spell.typeclass_instance.generated.hpp"
 
 #include <vector>
 

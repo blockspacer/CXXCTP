@@ -106,7 +106,6 @@ target_include_directories(CXXCTP_tool PUBLIC
   ${PROJECT_BINARY_DIR} # path to version.hpp
 )
 
-set(PDOLLAR "$") # Hack for nested vars in configure_file
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/includes/version.hpp.in
   ${PROJECT_BINARY_DIR}/version.hpp)
 

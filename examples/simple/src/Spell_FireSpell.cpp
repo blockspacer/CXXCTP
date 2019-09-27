@@ -1,5 +1,5 @@
 #include "generated/Spell.typeclass.generated.hpp"
-#include "generated/FireSpell.typeclass_instance.generated.hpp"
+#include "generated/FireSpell_Spell.typeclass_instance.generated.hpp"
 
 #include <vector>
 

@@ -14,10 +14,11 @@
 // see https://github.com/tlatkdgus1/llvm-code_obfuscate/blob/c4d0641f95704fb9909e2ac09500df1b6bc5d017/tools/clang/lib/AST/DeclPrinter.cpp#L447
 // see https://github.com/root-project/root/blob/331efa4c00fefc38980eaaf7b41b8e95fcd1a23b/interpreter/llvm/src/tools/clang/lib/AST/DeclPrinter.cpp#L474
 const char* typeclass(
+    const cxxctp::parsed_func& func_with_args,
     const clang::ast_matchers::MatchFinder::MatchResult& matchResult,
     clang::Rewriter& rewriter,
     const clang::Decl* decl,
-    const std::vector<cxxctp::parsed_func>& args) {
+    const std::vector<cxxctp::parsed_func>& all_func_with_args) {
 
   reflection::NamespacesTree m_namespaces; // TODO
 
@@ -49,17 +50,20 @@ const char* typeclass(
         XLOG(DBG9) << "methods count: " << structInfo->methods.size();
 
         for(auto mit : structInfo->methods){
-            std::cout << "methods: " << mit->name;
+            XLOG(DBG9) << "methods: " << mit->name;
             for(auto it : mit->params){
                 XLOG(DBG9) << "methods params: "
                   << it.name << it.fullDecl;
             }
         }
 
-        XLOG(DBG9) << "ReflectionRegistry... for record" <<
+        XLOG(DBG9) << "ReflectionRegistry... for record " <<
           node->getNameAsString();
 
-        reflection::ReflectionRegistry::getInstance()->reflectionCXXRecordRegistry[node->getNameAsString()] = std::make_unique<reflection::ReflectionCXXRecordRegistry>(node->getNameAsString(), /*node,*/ structInfo);
+        reflection::ReflectionRegistry::getInstance()->
+          reflectionCXXRecordRegistry[node->getNameAsString()]
+            = std::make_unique<reflection::ReflectionCXXRecordRegistry>(
+              node->getNameAsString(), /*node,*/ structInfo);
 
       // see https://github.com/asutton/clang/blob/master/lib/AST/DeclPrinter.cpp#L502
 

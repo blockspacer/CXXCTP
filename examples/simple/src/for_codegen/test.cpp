@@ -123,7 +123,10 @@ void foozoo() {
 //#pragma clang attribute pop
 
 class
-$apply(make_interface;make_removefuncbody;make_reflect)
+  $apply(
+    make_interface;
+    make_removefuncbody;make_reflect
+  )
 SomeInterfaceName {
   virtual ~SomeInterfaceName() = 0;
   /*int    f   (   )   {     // {}
@@ -142,7 +145,9 @@ SomeInterfaceName {
 };
 
 struct
-$apply(make_reflect)
+  $apply(
+    make_reflect
+  )
 SomeStructName {
  public:
   SomeStructName() {

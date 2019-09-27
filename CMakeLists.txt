@@ -35,6 +35,9 @@ option(BUILD_SHARED_LIBS "Use .so/.dll" OFF)
 
 option(BUILD_EXAMPLES "Use built-in examples" OFF)
 
+option(BUNDLE_EXAMPLE_SCRIPTS
+  "Use built-in scripts from examples" OFF)
+
 if(BUILD_SHARED_LIBS)
   set(CORE_LIB_TYPE SHARED)
 else()
@@ -51,17 +54,39 @@ set(ENABLE_CXXCTP TRUE CACHE BOOL "ENABLE_CXXCTP")
 
 include(Utils.cmake)
 
-# scripts placed here will be bundled with CXXCTP_tool
-# (will become built-in C++ plugins)
-list(APPEND BUILT_IN_PUGINS
-  ${CMAKE_CURRENT_SOURCE_DIR}/ctp_scripts/2_scripts/make_reflect/make_reflect.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/ctp_scripts/2_scripts/make_reflect/make_reflect.hpp
-  # NOTE: we control loading order by file/folder names (0_file, 1_file, ...)
-  ${CMAKE_CURRENT_SOURCE_DIR}/ctp_scripts/1_utils/CXTPL_STD/CXTPL_STD.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/ctp_scripts/1_utils/CXTPL_STD/CXTPL_STD.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/ctp_scripts/1_utils/CXXCTP_STD/CXXCTP_STD.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/ctp_scripts/1_utils/CXXCTP_STD/CXXCTP_STD.hpp
-)
+if(BUNDLE_EXAMPLE_SCRIPTS)
+  # scripts placed here will be bundled with CXXCTP_tool
+  # (will become built-in C++ plugins)
+  list(APPEND BUILT_IN_PUGINS
+    ${CMAKE_CURRENT_SOURCE_DIR}/ctp_scripts/2_scripts/make_reflect/make_reflect.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/ctp_scripts/2_scripts/make_reflect/make_reflect.hpp
+    # NOTE: we control loading order by file/folder names (0_file, 1_file, ...)
+    #${CMAKE_CURRENT_SOURCE_DIR}/ctp_scripts/1_utils/CXTPL_STD/CXTPL_STD.cpp
+    #${CMAKE_CURRENT_SOURCE_DIR}/ctp_scripts/1_utils/CXTPL_STD/CXTPL_STD.hpp
+    #${CMAKE_CURRENT_SOURCE_DIR}/ctp_scripts/1_utils/CXXCTP_STD/CXXCTP_STD.cpp
+    #${CMAKE_CURRENT_SOURCE_DIR}/ctp_scripts/1_utils/CXXCTP_STD/CXXCTP_STD.hpp
+  )
+
+  list(APPEND BUILT_IN_PUGINS
+    ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple/ctp_scripts/2_scripts/make_interface/make_interface.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple/ctp_scripts/2_scripts/make_interface/make_interface.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple/ctp_scripts/2_scripts/make_removefuncbody/make_removefuncbody.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple/ctp_scripts/2_scripts/make_removefuncbody/make_removefuncbody.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple/ctp_scripts/2_scripts/reflect_enum/reflect_enum.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple/ctp_scripts/2_scripts/reflect_enum/reflect_enum.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple/ctp_scripts/2_scripts/typeclass/typeclass.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple/ctp_scripts/2_scripts/typeclass/typeclass.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple/ctp_scripts/2_scripts/typeclass_combo/typeclass_combo.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple/ctp_scripts/2_scripts/typeclass_combo/typeclass_combo.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple/ctp_scripts/2_scripts/typeclass_instance/typeclass_instance.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple/ctp_scripts/2_scripts/typeclass_instance/typeclass_instance.hpp
+    # NOTE: we control loading order by file/folder names (0_file, 1_file, ...)
+    ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple/ctp_scripts/1_utils/CXTPL_STD/CXTPL_STD.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple/ctp_scripts/1_utils/CXTPL_STD/CXTPL_STD.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple/ctp_scripts/1_utils/CXXCTP_STD/CXXCTP_STD.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple/ctp_scripts/1_utils/CXXCTP_STD/CXXCTP_STD.hpp
+  )
+endif(BUNDLE_EXAMPLE_SCRIPTS)
 
 list(APPEND COMMON_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/options/ctp/options.cpp
@@ -259,7 +284,8 @@ if(ENABLE_CXXCTP)
 
   target_include_directories(CXXCTP_core PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/resources # path to ctp_scripts
+    ${CMAKE_CURRENT_SOURCE_DIR}/ # path to ctp_scripts
+    ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple # path to ctp_scripts
     ${LIBIBERTY_INCLUDE_DIR} # used by folly
     ${G3LOG_INCLUDE_DIR} # used by folly
     ${LIBEVENT_INCLUDE_DIR} # used by folly
@@ -267,6 +293,12 @@ if(ENABLE_CXXCTP)
     ${LIBGFLAGS_INCLUDE_DIR} # used by folly
     ${FOLLY_INCLUDE_DIR}
   )
+
+  if(BUNDLE_EXAMPLE_SCRIPTS)
+    target_include_directories(CXXCTP_core PUBLIC
+      ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple # path to ctp_scripts
+    )
+  endif(BUNDLE_EXAMPLE_SCRIPTS)
 
   target_compile_options(CXXCTP_core PRIVATE
     -fno-rtti)
@@ -299,7 +331,17 @@ if(ENABLE_CXXCTP)
                   /EXPORT:?setValueNoAlloc@internal@runtime@cling@@YAXPEAX00DM@Z
                   /EXPORT:cling_runtime_internal_throwIfInvalidPointer")
     endif()
+
+    target_compile_definitions( CXXCTP_core PRIVATE
+      CLING_IS_ON=1
+    )
   endif(ENABLE_CLING)
+
+  if(BUNDLE_EXAMPLE_SCRIPTS)
+    target_compile_definitions(CXXCTP_core PRIVATE
+      BUNDLE_EXAMPLE_SCRIPTS=1
+    )
+  endif(BUNDLE_EXAMPLE_SCRIPTS)
 endif(ENABLE_CXXCTP)
 
 include(Codegen_files.cmake)
@@ -354,3 +396,6 @@ if(ENABLE_CLING AND INSTALL_CLING)
 endif(ENABLE_CLING AND INSTALL_CLING)
 
 install(TARGETS CXXCTP_core DESTINATION "${CMAKE_INSTALL_PREFIX}/lib")
+
+#configure_file(${CMAKE_CURRENT_SOURCE_DIR}/templates/ctp_registry.cpp.in
+#  ${CMAKE_CURRENT_SOURCE_DIR}/)

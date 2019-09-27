@@ -7,6 +7,8 @@ message(STATUS "input_files (for ${CXXCTP_tool_PROGRAM}) = ${INPUTS}")
 message(STATUS "output dir (for ${CXXCTP_tool_PROGRAM}) = ${OUTDIR}")
 message(STATUS "CXXCTP_tool_LOG_CONFIG (for ${CXXCTP_tool_PROGRAM}) = ${CXXCTP_tool_LOG_CONFIG}")
 
+file(REMOVE_RECURSE ${OUTDIR})
+
 separate_arguments(EXTRA_ARGS)
 separate_arguments(INPUTS)
 
@@ -17,18 +19,19 @@ execute_process(COMMAND
     --srcdir=${SRCDIR}
     --resdir=${OUTDIR}
     ${EXTRA_ARGS}
-    #-extra-arg=-I/home/avakimov_am/job/CXXCTP/include
-    #-extra-arg=-I/home/avakimov_am/job/CXXCTP/cling-build/build/lib/clang/5.0.0/include
-    #-extra-arg=-I/home/avakimov_am/job/CXXCTP/cling-build/src/include/
-    #-extra-arg=-I/home/avakimov_am/job/CXXCTP/cling-build/build/include/
-    #-extra-arg=-I/home/avakimov_am/job/CXXCTP/cling-build/src/tools/clang/include/
-    #-extra-arg=-I/home/avakimov_am/job/CXXCTP/cling-build/build/tools/clang/include/
-    #-extra-arg=-I/home/avakimov_am/job/CXXCTP/cling-build/src/tools/cling/include/
+    #-extra-arg=-I~/job/CXXCTP/include
+    #-extra-arg=-I~/job/CXXCTP/cling-build/build/lib/clang/5.0.0/include
+    #-extra-arg=-I~/job/CXXCTP/cling-build/src/include/
+    #-extra-arg=-I~/job/CXXCTP/cling-build/build/include/
+    #-extra-arg=-I~/job/CXXCTP/cling-build/src/tools/clang/include/
+    #-extra-arg=-I~/job/CXXCTP/cling-build/build/tools/clang/include/
+    #-extra-arg=-I~/job/CXXCTP/cling-build/src/tools/cling/include/
     ${INPUTS}
-    #/home/avakimov_am/job/CXXCTP/examples/simple/src/for_codegen/test.cpp
-    #/home/avakimov_am/job/CXXCTP/examples/simple/src/for_codegen/ReflShapeKind.hpp
-    #/home/avakimov_am/job/CXXCTP/examples/simple/src/for_codegen/test_typeclass_base1.hpp
-    #/home/avakimov_am/job/CXXCTP/examples/simple/src/for_codegen/test_typeclass_instance1.hpp
+    #~/job/CXXCTP/examples/simple/src/for_codegen/test.cpp
+    #~/job/CXXCTP/examples/simple/src/for_codegen/ReflShapeKind.hpp
+    #~/job/CXXCTP/examples/simple/src/for_codegen/test_typeclass_base1.hpp
+    #~/job/CXXCTP/examples/simple/src/for_codegen/test_typeclass_instance1.hpp
+    #~/job/CXXCTP/examples/simple/src/for_codegen/test_typeclass_combo1.hpp
   #TIMEOUT 7200 # sec
   RESULT_VARIABLE retcode
   ERROR_VARIABLE _ERROR_VARIABLE

@@ -38,3 +38,5 @@ const bool isReflectable(clang::DeclaratorDecl* decl);
 std::string wrapLocalInclude(const std::string& inStr);
 
 std::string get_func_arg(const std::vector<cxxctp::parsed_func>& args, const std::string& funcName, const int index);
+
+cxxctp::args get_func_args(const std::vector<cxxctp::parsed_func>& args, const std::string& funcName);

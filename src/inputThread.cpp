@@ -8,6 +8,8 @@
 
 #include "utils.hpp"
 
+#include "folly/logging/xlog.h"
+
 #include <iostream>
 
 namespace cxxctp {
@@ -46,7 +48,12 @@ namespace cxxctp {
                 cling_utils::InterpreterModule::receivedMessagesQueue_->dispatch([command_param1, command_param2] {
                     llvm::outs() << "dispatch reload_file 1!... " << '\n';
                     cling::Interpreter::CompilationResult compilationResult;
-                    cling_utils::InterpreterModule::InterpreterModule::interpMap[command_param1.c_str()]->metaProcessor_->process(".x " + command_param2, compilationResult, nullptr, true);
+                    cling_utils::InterpreterModule::InterpreterModule::interpMap[command_param1.c_str()]
+                      ->metaProcessor_->process(".x " + command_param2, compilationResult, nullptr, true);
+                    if(compilationResult
+                        != cling::Interpreter::Interpreter::kSuccess) {
+                      XLOG(ERR) << "ERROR while running cling code:\n" << command_param2;
+                    }
                 });
             }
 #endif // CLING_IS_ON

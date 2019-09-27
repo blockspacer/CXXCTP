@@ -1,10 +1,12 @@
 ﻿#include "template_engine/CXTPL_AnyDict.hpp"
 
+#include <iostream>
+
+#include <folly/logging/xlog.h>
+
 #include "template_engine/I_Dict.hpp"
 
 #include "utils.hpp"
-
-#include <iostream>
 
 namespace cxtpl_util {
 
@@ -93,12 +95,19 @@ void Dict<AnyDict>::runInInterpreter(
                 cling::Interpreter::CompilationResult compilationResult;
                 interp->metaProcessor_->process(includes_code, compilationResult,
                                                 nullptr, true);
+                if(compilationResult
+                    != cling::Interpreter::Interpreter::kSuccess) {
+                  XLOG(ERR) << "ERROR while running cling code:\n" << includes_code;
+                }
             }
             {
                 cling::Interpreter::CompilationResult compilationResult;
                 interp->metaProcessor_->process(inStrWithArgs, compilationResult,
                                                 &clingResult, true);
-
+                if(compilationResult
+                    != cling::Interpreter::Interpreter::kSuccess) {
+                  XLOG(ERR) << "ERROR while running cling code:\n" << inStrWithArgs;
+                }
                 void* resOptionVoid = clingResult.getAs<void*>();
                 /// \note free memory by unique_ptr
                 auto resOption = std::unique_ptr<std::string>(

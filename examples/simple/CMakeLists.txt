@@ -44,6 +44,10 @@ add_executable(CXXCTP_example
   ${CMAKE_CURRENT_SOURCE_DIR}/src/main_app.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Spell_WaterSpell.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Spell_FireSpell.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/MagicItem_WaterSpell.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/MagicItem_FireSpell.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Printable_WaterSpell.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Printable_FireSpell.cpp
 )
 
 set( USED_SYSTEM_LIBS
@@ -75,19 +79,29 @@ target_include_directories(CXXCTP_example PUBLIC
 set_target_properties(CXXCTP_example
   PROPERTIES ENABLE_EXPORTS 1)
 
-# generate cxtpl
-add_subdirectory(ctp_scripts/2_scripts/typeclass_instance)
-add_subdirectory(ctp_scripts/2_scripts/typeclass)
-add_subdirectory(ctp_scripts/2_scripts/reflect_enum)
-add_subdirectory(ctp_scripts/2_scripts/make_removefuncbody)
-add_subdirectory(ctp_scripts/2_scripts/make_interface)
+
+if(NOT BUNDLE_EXAMPLE_SCRIPTS)
+  # generate cxtpl
+  add_subdirectory(ctp_scripts/2_scripts/typeclass_instance)
+  add_subdirectory(ctp_scripts/2_scripts/typeclass)
+  add_subdirectory(ctp_scripts/2_scripts/typeclass_combo)
+  add_subdirectory(ctp_scripts/2_scripts/reflect_enum)
+  add_subdirectory(ctp_scripts/2_scripts/make_removefuncbody)
+  add_subdirectory(ctp_scripts/2_scripts/make_interface)
+endif(NOT BUNDLE_EXAMPLE_SCRIPTS)
 
 find_package(CXXCTP_tool REQUIRED)
 
-list(APPEND CXXCTP_inputs "${CMAKE_CURRENT_SOURCE_DIR}/src/for_codegen/test.cpp")
-list(APPEND CXXCTP_inputs "${CMAKE_CURRENT_SOURCE_DIR}/src/for_codegen/ReflShapeKind.hpp")
-list(APPEND CXXCTP_inputs "${CMAKE_CURRENT_SOURCE_DIR}/src/for_codegen/test_typeclass_base1.hpp")
-list(APPEND CXXCTP_inputs "${CMAKE_CURRENT_SOURCE_DIR}/src/for_codegen/test_typeclass_instance1.hpp")
+list(APPEND CXXCTP_inputs
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/for_codegen/test.cpp")
+list(APPEND CXXCTP_inputs
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/for_codegen/ReflShapeKind.hpp")
+list(APPEND CXXCTP_inputs
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/for_codegen/test_typeclass_base1.hpp")
+list(APPEND CXXCTP_inputs
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/for_codegen/test_typeclass_instance1.hpp")
+list(APPEND CXXCTP_inputs
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/for_codegen/test_typeclass_combo1.hpp")
 
 # dir to generated files
 list(APPEND CXXCTP_outdir "${CMAKE_CURRENT_SOURCE_DIR}/generated")

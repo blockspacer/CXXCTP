@@ -1,5 +1,24 @@
 ﻿#include "generated/Spell.typeclass.generated.hpp"
-#include "generated/FireSpell.typeclass_instance.generated.hpp"
+
+#include "generated/MagicItem.typeclass.generated.hpp"
+
+#include "generated/Printable.typeclass.generated.hpp"
+
+#include "generated/Spell_MagicItem.typeclass_combo.generated.hpp"
+
+#include "generated/FireSpell_MagicItem.typeclass_instance.generated.hpp"
+
+#include "generated/FireSpell_Spell.typeclass_instance.generated.hpp"
+
+#include "generated/WaterSpell_MagicItem.typeclass_instance.generated.hpp"
+
+#include "generated/WaterSpell_Spell.typeclass_instance.generated.hpp"
+
+#include "generated/WaterSpell_Printable.typeclass_instance.generated.hpp"
+
+#include "generated/FireSpell_Printable.typeclass_instance.generated.hpp"
+
+//#include "for_codegen/test_typeclass_instance1.hpp"
 
 #include <vector>
 
@@ -33,6 +52,97 @@ int main(int /*argc*/, const char* const* /*argv*/) {
 
     for(const _tc_combined_t<Spell>& it : spells) {
       it.cast("", 1, "");
+    }
+
+    std::vector<_tc_combined_t<MagicItem>> magicItems;
+    magicItems.push_back(FireSpell{"FireSpelltitle1", "description1"});
+    magicItems.push_back(WaterSpell{"WaterSpelltitle1", "description1"});
+
+    for(const _tc_combined_t<MagicItem>& it : magicItems) {
+      it.has_enough_mana("");
+    }
+
+    std::vector<_tc_combined_t<Spell, MagicItem>> spellMagicItems;
+    {
+      _tc_combined_t<Spell, MagicItem> pushed{};
+      pushed = magicItems.at(0); // copy
+      spellMagicItems.push_back(std::move(pushed));
+    }
+    {
+      _tc_combined_t<Spell, MagicItem> pushed{};
+      _tc_combined_t<Spell> someTmpSpell{
+        FireSpell{"someTmpSpell", "someTmpSpell"}};
+      pushed = std::move(someTmpSpell); // move
+      spellMagicItems.push_back(std::move(pushed));
+    }
+    //spellMagicItems.push_back(someFireSpell.raw_model());
+    //spellMagicItems.push_back(
+    //  someFireSpell.ref_model()); // shared data
+    //spellMagicItems.push_back(someFireSpell.clone_model());
+
+    for(const _tc_combined_t<Spell, MagicItem>& it : spellMagicItems) {
+      if(it.has_model<Spell>()) {
+        it.cast("", 1, "");
+      }
+      if(it.has_model<MagicItem>()) {
+        it.has_enough_mana("");
+      }
+    }
+
+    /*_tc_combined_t<Spell, MagicItem> combined1 {
+        _tc_combined_t<Spell>{FireSpell{"someFireSpellTitle", "someFireSpelldescription1"}}
+    };*/
+
+    _tc_combined_t<Spell, MagicItem> combined1 {
+        FireSpell{"someFireSpellTitle", "someFireSpelldescription1"}
+    };
+
+    if(combined1.has_model<MagicItem>()) {
+      combined1.has_enough_mana("");
+    }
+
+    //combined1 = WaterSpell{"WaterSpell", "WaterSpell"};
+
+    if(combined1.has_model<MagicItem>()) {
+      combined1.has_enough_mana("");
+    }
+
+    if(combined1.has_model<Spell>()) {
+      combined1.add_spell("");
+    }
+
+    combined1 = magicItems.at(0);
+
+    if(combined1.has_model<MagicItem>()) {
+      combined1.has_enough_mana("");
+    }
+
+    if(combined1.has_model<Spell>()) {
+      combined1.add_spell("");
+    }
+
+    /*combined1 = _tc_combined_t<Spell>{
+      FireSpell{"someFireSpellTitle", "someFireSpelldescription1"}
+    };*/
+
+    _tc_combined_t<Spell, MagicItem> combined2 {
+        FireSpell{"someFireSpellTitle", "someFireSpelldescription1"}
+    };
+
+    if(combined2.has_model<MagicItem>()) {
+      combined1.has_enough_mana("");
+    }
+
+    if(combined2.has_model<Spell>()) {
+      combined1.add_spell("");
+    }
+
+    std::vector<_tc_combined_t<Printable>> printables;
+    printables.push_back(FireSpell{"someFireSpellTitle", "someFireSpelldescription1"});
+    printables.push_back(WaterSpell{"WaterSpell", "WaterSpell"});
+
+    for(const _tc_combined_t<Printable>& it : printables) {
+      it.print();
     }
 
     return 0;

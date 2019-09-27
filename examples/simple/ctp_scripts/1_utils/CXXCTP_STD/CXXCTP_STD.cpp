@@ -112,3 +112,12 @@ std::string get_func_arg(const std::vector<cxxctp::parsed_func>& args, const std
     }
     return result;
 }
+
+cxxctp::args get_func_args(const std::vector<cxxctp::parsed_func>& args, const std::string& funcName) {
+    for (auto const& seg : args) {
+        if(!seg.parsed_func_.func_name_.empty() && seg.parsed_func_.func_name_ == funcName) {
+            return seg.parsed_func_.args_;
+        }
+    }
+    return cxxctp::args{};
+}

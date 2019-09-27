@@ -84,6 +84,10 @@ InterpreterModule::~InterpreterModule() {
     /*if(!moduleFiles_.empty()) {
         cling::Interpreter::CompilationResult compilationResult;
         metaProcessor_->process(id_ + "_cling_shutdown();", compilationResult, nullptr, true);
+        if(compilationResult
+            != cling::Interpreter::Interpreter::kSuccess) {
+          XLOG(ERR) << "ERROR while running cling code:\n" << sstr.str();
+        }
     }*/
 }
 
@@ -195,6 +199,10 @@ void InterpreterModule::prepare() {
             //metaProcessor_->process(".L CXXCTP_core", compilationResult, nullptr, true);
 
             metaProcessor_->process(".L " + it, compilationResult, nullptr, true);
+            if(compilationResult
+                != cling::Interpreter::Interpreter::kSuccess) {
+              XLOG(ERR) << "ERROR while running cling code:\n" << it;
+            }
         }
 
         //metaProcessor_->process(id_ + "_cling_prepare();", compilationResult, nullptr);
@@ -206,6 +214,10 @@ void InterpreterModule::run() {
         std::thread module_main([this](){
             cling::Interpreter::CompilationResult compilationResult;
             metaProcessor_->process(id_ + "_cling_run();", compilationResult, nullptr, true);
+            if(compilationResult
+                != cling::Interpreter::Interpreter::kSuccess) {
+              XLOG(ERR) << "ERROR while running cling code:\n" << sstr.str();
+            }
         });
         module_main.detach();
     }*/

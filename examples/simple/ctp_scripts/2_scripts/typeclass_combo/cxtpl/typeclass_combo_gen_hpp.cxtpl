@@ -1,0 +1,483 @@
+﻿[[~ // parameters begin
+
+using namespace cxtpl_utils;
+
+const auto headerGuard
+  = GetWithDefault<std::string>(cxtpl_params, "headerGuard", "");
+
+const auto generator_path
+  = GetWithDefault<std::string>(cxtpl_params, "generator_path", "");
+
+std::vector<std::string> generator_includes
+  = GetWithDefault<std::vector<std::string>>
+      (cxtpl_params, "generator_includes", std::vector<std::string>{});
+
+std::vector<std::string> typeclassNames
+  = GetWithDefault<std::vector<std::string>>
+      (cxtpl_params, "typeclassNames", std::vector<std::string>{});
+
+std::vector<reflection::ClassInfoPtr> ReflectedTypeclasses
+  = GetWithDefault<std::vector<reflection::ClassInfoPtr>>
+      (cxtpl_params, "ReflectedTypeclasses", std::vector<reflection::ClassInfoPtr>{});
+
+const size_t ReflectedTypeclassesSize =
+    ReflectedTypeclasses.size();
+
+if(ReflectedTypeclassesSize != typeclassNames.size()) {
+  std::cerr << "WARNING: ReflectedTypeclassesSize != typeclassNames.size() "
+               "at typeclass_combo_gen_hpp.cxtpl" << std::endl;
+}
+
+// parameters end
+/* no newline */ ~]][[~]]
+// This is generated file. Do not modify directly.
+// Path to the code generator: [[+ generator_path +]].
+
+[[+ startHeaderGuard(headerGuard) /* no newline */ +]][[~]]
+
+[[~]] for(const auto& fileName: generator_includes) {
+[[+ fileName +]]
+[[~]] } // end for
+
+#include <array>
+#include <functional>
+#include <memory>
+
+namespace cxxctp {
+namespace generated {
+
+template<>
+struct _tc_combined_t<[[~]] /* no newline */
+  [[+ typeclassComboDecls(typeclassNames) +]][[~]] /* no newline */
+> {
+    // Default initializer creates an empty _tc_combined_t.
+    _tc_combined_t() = default;
+
+    /*_tc_combined_t(std::reference_wrapper<
+      _tc_combined_t<[[+ typeclassComboDecls(typeclassNames) +]]>>&& rhs) noexcept {
+        //puts("_tc_combined_t<[[+ typeclassComboDecls(typeclassNames) +]]> ref copy ctor");
+        if(rhs.get())
+            my_interface_model = rhs.get().my_interface_model;
+    }*/
+
+    /*/// \note moves passed argument
+    template <
+        class T,
+        typename = IsNotReference<T>,
+        typename std::enable_if<!std::is_same<_tc_combined_t, T>::value>::type* = nullptr
+        >
+    _tc_combined_t(std::shared_ptr<T>&& u) noexcept :
+                                                      my_interface_model(std::move(u)) {
+        static_assert(!std::is_const<typename std::remove_reference<T>::type>::value,
+                      "You've attempted a cast to a const rvalue reference. "
+                      "Make sure you're not trying to move a const object, "
+                      "as this would likely result in a copy not a move. "
+                      "If you need it for real, call std::move(...) instead.");
+        //puts("_tc_combined_t<[[+ typeclassComboDecls(typeclassNames) +]]> called, moves passed argument");
+    }
+
+    template <
+        class T,
+        typename = IsNotReference<T>,
+        typename std::enable_if<!std::is_same<_tc_combined_t, T>::value>::type* = nullptr
+        >
+    _tc_combined_t(const std::shared_ptr<T>& u) noexcept :
+                                                           my_interface_model(u) {
+        //puts("_tc_combined_t<[[+ typeclassComboDecls(typeclassNames) +]]> called, shares passed argument");
+    }*/
+
+    /*template <
+        class T,
+        typename std::enable_if<!std::is_same<_tc_combined_t, T>::value>::type* = nullptr
+        >
+    _tc_combined_t(const std::reference_wrapper<T>& u) noexcept :
+                                                                  my_interface_model(
+                                                                      std::make_shared<
+                                                                          _tc_impl_t<std::reference_wrapper<T>, GeneratedTypeclassName >>
+                                                                      (std::forward<const std::reference_wrapper<std::decay_t<T>>>(u))) {
+        //puts("_tc_combined_t{T} reference_wrapper called");
+    }*/
+
+    template<
+        typename T,
+        typename = IsNotReference<T>,
+        typename std::enable_if<
+          !std::is_same<_tc_combined_t, T>::value>::type* = nullptr
+        >
+    _tc_combined_t(const T&& u) noexcept :
+[[~]]  { // startscope
+[[~]]    for(size_t index = 0; index < ReflectedTypeclassesSize; index++) {
+[[~]]      const std::string delimiter =
+[[~]]       index < (ReflectedTypeclassesSize - 1) ? "," : "";
+[[~]]      const auto typeclassName = typeclassNames.at(index);
+[[~]]
+         [[+ typeclassModelName(typeclassName) +]](
+             std::make_shared<
+                 _tc_impl_t<T, [[+ typeclassName +]] >>
+             (std::forward<const std::decay_t<T>>(u)))
+             [[+ delimiter +]]
+[[~]]
+[[~]]    } // endfor
+[[~]]  } // endscope
+    {
+        //puts("_tc_combined_t{T} called");
+    }
+
+    // Call clone for copy ctor/assign.
+    explicit _tc_combined_t(const _tc_combined_t& rhs) noexcept {
+        //puts("_tc_combined_t<[[+ typeclassComboDecls(typeclassNames) +]]> copy ctor");
+        if(rhs) {
+[[~]]  { // startscope
+[[~]]    for(size_t index = 0; index < ReflectedTypeclassesSize; index++) {
+[[~]]      const auto typeclassName = typeclassNames.at(index);
+[[~]]
+            [[+ typeclassModelName(typeclassName) +]] =
+              rhs.[[+ typeclassModelName(typeclassName) +]]->clone();
+[[~]]
+[[~]]    } // endfor
+[[~]]  } // endscope
+        } // if(rhs)
+    }
+
+    // Call move_clone for move ctor/assign.
+    explicit _tc_combined_t(_tc_combined_t&& rhs) noexcept {
+        if(rhs) {
+[[~]]  { // startscope
+[[~]]    for(size_t index = 0; index < ReflectedTypeclassesSize; index++) {
+[[~]]      const auto typeclassName = typeclassNames.at(index);
+[[~]]
+          [[+ typeclassModelName(typeclassName) +]] =
+            rhs.[[+ typeclassModelName(typeclassName) +]]->move_clone();
+[[~]]
+[[~]]    } // endfor
+[[~]]  } // endscope
+        } // if(rhs)
+    }
+
+  explicit operator bool() const noexcept {
+    return
+[[~]]  { // startscope
+[[~]]    for(size_t index = 0; index < ReflectedTypeclassesSize; index++) {
+[[~]]      const std::string delimiter =
+[[~]]       index < (ReflectedTypeclassesSize - 1) ? "&&" : "";
+[[~]]      const auto typeclassName = typeclassNames.at(index);
+[[~]]
+      (bool)[[+ typeclassModelName(typeclassName) +]] [[+ delimiter +]]
+[[~]]
+[[~]]    } // endfor
+[[~]]  } // endscope
+      ;
+  }
+
+    _tc_combined_t& operator=(_tc_combined_t&& rhs) noexcept {
+        if(rhs) {
+[[~]]  { // startscope
+[[~]]    for(size_t index = 0; index < ReflectedTypeclassesSize; index++) {
+[[~]]      const auto typeclassName = typeclassNames.at(index);
+[[~]]
+            [[+ typeclassModelName(typeclassName) +]].reset();
+            [[+ typeclassModelName(typeclassName) +]]
+              = rhs.[[+ typeclassModelName(typeclassName) +]]->move_clone();
+[[~]]
+[[~]]    } // endfor
+[[~]]  } // endscope
+        } // if(rhs)
+        return *this;
+    }
+
+    _tc_combined_t& operator=(const _tc_combined_t& rhs) noexcept {
+        if(rhs) {
+[[~]]  { // startscope
+[[~]]    for(size_t index = 0; index < ReflectedTypeclassesSize; index++) {
+[[~]]      const auto typeclassName = typeclassNames.at(index);
+[[~]]
+            [[+ typeclassModelName(typeclassName) +]].reset();
+            [[+ typeclassModelName(typeclassName) +]]
+              = rhs.[[+ typeclassModelName(typeclassName) +]]->clone();
+[[~]]
+[[~]]    } // endfor
+[[~]]  } // endscope
+        } // if(rhs)
+        return *this;
+    }
+
+[[~]]  { // startscope
+[[~]]    for(size_t index = 0; index < ReflectedTypeclassesSize; index++) {
+[[~]]      const auto typeclassName = typeclassNames.at(index);
+[[~]]
+  _tc_combined_t& operator=(
+      const _tc_combined_t<
+        [[+ typeclassName +]]>& rhs) noexcept {
+    if(rhs) {
+      [[+ typeclassModelName(typeclassName) +]].reset();
+      [[+ typeclassModelName(typeclassName) +]]
+        = rhs.clone_model();
+    }
+    return *this;
+  }
+[[~]]
+[[~]]    } // endfor
+[[~]]  } // endscope
+
+    void reset() noexcept {
+[[~]]  { // startscope
+[[~]]    for(size_t index = 0; index < ReflectedTypeclassesSize; index++) {
+[[~]]      const auto typeclassName = typeclassNames.at(index);
+[[~]]
+      [[+ typeclassModelName(typeclassName) +]].reset();
+[[~]]
+[[~]]    } // endfor
+[[~]]  } // endscope
+    }
+
+    template <class T>
+    void set_common_model(const T&& u) noexcept {
+[[~]]  { // startscope
+[[~]]    for(size_t index = 0; index < ReflectedTypeclassesSize; index++) {
+[[~]]      const auto typeclassName = typeclassNames.at(index);
+[[~]]
+      create_model<[[+ typeclassName +]]>(std::forward<const std::decay_t<T>>(u));
+[[~]]
+[[~]]    } // endfor
+[[~]]  } // endscope
+      //puts("set_common_model{T} called");
+    }
+
+[[~]]  { // startscope
+[[~]]    for(size_t index = 0; index < ReflectedTypeclassesSize; index++) {
+[[~]]      const auto typeclassName = typeclassNames.at(index);
+[[~]]
+  template<
+  typename T,
+  typename U,
+  typename std::enable_if<
+    std::is_same<[[+ typeclassName +]], T>::value>::type* = nullptr
+  >
+  void create_model(const U&& u) noexcept {
+    [[+ typeclassModelName(typeclassName) +]] = std::make_shared<
+      _tc_impl_t<U, [[+ typeclassName +]]>>
+        (std::forward<const std::decay_t<U>>(u));
+    //puts("create_model{[[+ typeclassName +]]} called");
+  }
+[[~]]
+[[~]]    } // endfor
+[[~]]  } // endscope
+
+[[~]]  { // startscope
+[[~]]    for(size_t index = 0; index < ReflectedTypeclassesSize; index++) {
+[[~]]      const auto typeclassName = typeclassNames.at(index);
+[[~]]
+  template<
+  typename T,
+  typename std::enable_if<
+    std::is_same<[[+ typeclassName +]], T>::value>::type* = nullptr
+  >
+  bool has_model() const noexcept {
+    return (bool)[[+ typeclassModelName(typeclassName) +]];
+  }
+[[~]]
+[[~]]    } // endfor
+[[~]]  } // endscope
+
+[[~]]  { // startscope
+[[~]]    for(size_t index = 0; index < ReflectedTypeclassesSize; index++) {
+[[~]]      const auto typeclassName = typeclassNames.at(index);
+[[~]]
+  template<
+  typename T,
+  typename std::enable_if<
+    std::is_same<[[+ typeclassName +]], T>::value>::type* = nullptr
+  >
+  std::unique_ptr<
+    _tc_model_t<[[+ typeclassName +]]>>
+  clone_model() const noexcept {
+    if(![[+ typeclassModelName(typeclassName) +]]) {
+      //throw std::runtime_error("[[+ typeclassModelName(typeclassName) +]] not set");
+      std::terminate();
+    }
+    return [[+ typeclassModelName(typeclassName) +]]
+      ->clone();
+  }
+[[~]]
+[[~]]    } // endfor
+[[~]]  } // endscope
+
+[[~]]  { // startscope
+[[~]]    for(size_t index = 0; index < ReflectedTypeclassesSize; index++) {
+[[~]]      const auto typeclassName = typeclassNames.at(index);
+[[~]]
+  template<
+  typename T,
+  typename std::enable_if<
+    std::is_same<[[+ typeclassName +]], T>::value>::type* = nullptr
+  >
+  void replace_model(
+    const std::shared_ptr<
+      _tc_model_t<[[+ typeclassName +]]>> rhs) noexcept {
+    [[+ typeclassModelName(typeclassName) +]]
+      = rhs;
+  }
+[[~]]
+[[~]]    } // endfor
+[[~]]  } // endscope
+
+[[~]]  { // startscope
+[[~]]    for(size_t index = 0; index < ReflectedTypeclassesSize; index++) {
+[[~]]      const auto typeclassName = typeclassNames.at(index);
+[[~]]
+  operator const _tc_combined_t<
+    [[+ typeclassName +]]>() const noexcept {
+      return _tc_combined_t<
+        [[+ typeclassName +]]>{
+          [[+ typeclassModelName(typeclassName) +]] };
+  }
+[[~]]
+[[~]]    } // endfor
+[[~]]  } // endscope
+
+    // A virtual dtor triggers the dtor in the impl.
+    virtual ~_tc_combined_t() noexcept { }
+
+    /*
+
+  _tc_combined_t& operator=(const _tc_combined_t<template_interface<int, const std::string&>>& rhs) noexcept {
+    my_interface_model.reset();
+    if(rhs) {
+      my_interface_model = rhs.ref_model()->clone();
+    } // if(rhs)
+    return *this;
+  }
+
+  _tc_combined_t& operator=(const _tc_combined_t<my_interface2>& rhs) noexcept {
+    my_interface2_model.reset();
+    if(rhs) {
+      my_interface2_model = rhs.ref_model()->clone();
+    } // if(rhs)
+    return *this;
+  }
+
+  template<
+  typename T,
+  typename C,
+  typename std::enable_if<std::is_same<my_interface2, T>::value>::type* = nullptr
+  >
+  T& ref_concrete() noexcept {
+    if(!my_interface2_model) {
+      //throw std::runtime_error("my_interface_model2 not set");
+      std::terminate();
+    }
+    return my_interface2_model->ref_concrete<C>();
+  }
+
+  template<
+  typename T,
+  typename C,
+  typename std::enable_if<std::is_same<template_interface<int, const std::string&>, T>::value>::type* = nullptr
+  >
+  T& ref_concrete() noexcept {
+    if(!my_interface_model) {
+      //throw std::runtime_error("my_interface_model2 not set");
+      std::terminate();
+    }
+    return my_interface_model->ref_concrete<C>();
+  }
+
+  template<typename T>
+  std::shared_ptr<_tc_model_t<T>> ref_model() const noexcept {
+    return nullptr;
+  }
+    */
+
+    /*const size_t getModelTypeIndex() {
+        if(!my_interface_model) {
+            std::terminate();
+        }
+        return my_interface_model->getModelTypeIndex();
+    }
+
+    template <typename T>
+    static const size_t getGlobalTypeIndex() {
+        return _tc_registry< GeneratedTypeclassName >
+            ::getTypeIndex<T>();
+    }
+
+    template <typename T>
+    T& ref_concrete() noexcept {
+        if(!my_interface_model || my_interface_model->getModelTypeIndex()
+                != getGlobalTypeIndex<T>()) {
+            std::terminate();
+        }
+        return my_interface_model->ref_concrete<T>();
+    }*/
+
+    template <typename U>
+    bool can_convert() const
+    {
+        return false;
+    }
+
+[[~]]  { // startscope
+[[~]]    for(const auto& ReflectedBaseTypeclass: ReflectedTypeclasses) {
+[[~]]      const std::string TypeclassName = ReflectedBaseTypeclass->name;
+[[~]]  { // startscope
+[[~]]    for(const auto& method: ReflectedBaseTypeclass->methods) {
+[[~]]      const size_t methodParamsSize = method->params.size();
+[[~]]      const bool needPrint = !method->isImplicit
+[[~]]          && !method->isOperator
+[[~]]          && !method->isCtor
+[[~]]          && !method->isDtor;
+[[~]]      if(method->isTemplate()) {
+template< [[+ templateParamsFullDecls(method->tplParams) +]] >
+[[~]]      } // method->isTemplate
+[[~]]      if(needPrint) {
+[[+ method->isExplicitCtor ? "explicit " : "" +]][[~]] /* no newline */
+[[+ method->isConstexpr ? "constexpr " : "" +]][[~]] /* no newline */
+[[+ method->isStatic ? "static " : "" +]][[~]] /* no newline */
+[[+ method->returnType->getPrintedName() +]][[~]] /* no newline */
+[[+ " " +]][[~]] /* no newline */
+[[+ method->name +]][[~]] /* no newline */
+(
+[[+ paramsFullDecls(method->params) +]][[~]] /* no newline */
+) [[~]] /* no newline */
+[[+ method->isConst ? "const " : "" +]][[~]] /* no newline */
+[[+ method->isNoExcept ? "noexcept " : "" +]][[~]] /* no newline */
+  {
+    if(![[+ typeclassModelName(TypeclassName) +]]) {
+      //throw std::runtime_error("my_interface_model not set");
+      std::terminate();
+    }
+    return [[+ typeclassModelName(TypeclassName) +]]->
+      __[[+ method->name +]]([[+ paramsCallDecls(method->params) +]]);
+  }
+[[~ /* newline */ ~]]
+[[~]]      } // needPrint
+[[~]]    } // methods endfor
+[[~]]  } // endscope
+[[~]]    } // ReflectedBaseTypeclass endfor
+[[~]]  } // endscope
+
+    // This is actually a unique_ptr to an impl type. We store a pointer to
+    // the base type and rely on _tc_model_t's virtual dtor to free the object.
+private:
+    [[+ typeclassModelsDecls(typeclassNames) +]]
+};
+
+[[~]]  { // startscope
+[[~]]    for(size_t index = 0; index < ReflectedTypeclassesSize; index++) {
+[[~]]      const auto typeclassName = typeclassNames.at(index);
+[[~]]
+template <>
+bool _tc_combined_t<
+    [[+ typeclassComboDecls(typeclassNames) +]] >::
+  can_convert<
+      [[+ typeclassName +]]>() const {
+    return true;
+  }
+[[~]]
+[[~]]    } // endfor
+[[~]]  } // endscope
+
+} // namespace cxxctp
+} // namespace generated
+
+[[+ endHeaderGuard(headerGuard) /* no newline */ +]][[~]]

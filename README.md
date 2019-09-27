@@ -180,7 +180,7 @@ cmake -E remove_directory build
 cmake -E make_directory build
 cmake -E remove_directory resources/cxtpl/generated
 cmake -E make_directory resources/cxtpl/generated
-cmake -E chdir build cmake -E time cmake -DENABLE_CLING=FALSE -DBUILD_SHARED_LIBS=FALSE -DBUILD_EXAMPLES=FALSE -DCMAKE_BUILD_TYPE=Debug -DENABLE_CXXCTP=TRUE ..
+cmake -E chdir build cmake -E time cmake -DENABLE_CLING=FALSE -DBUILD_SHARED_LIBS=FALSE -DBUILD_EXAMPLES=FALSE -DBUNDLE_EXAMPLE_SCRIPTS=FALSE -DCMAKE_BUILD_TYPE=Debug -DENABLE_CXXCTP=TRUE ..
 cmake -E chdir build cmake -E time cmake --build . -- -j6
 
 # you can install CXXCTP_tool:
@@ -214,7 +214,7 @@ cmake -E remove_directory build
 cmake -E make_directory build
 cmake -E remove_directory resources/cxtpl/generated
 cmake -E make_directory resources/cxtpl/generated
-cmake -E chdir build cmake -E time cmake -DENABLE_CLING=TRUE -DBUILD_SHARED_LIBS=TRUE -DBUILD_EXAMPLES=FALSE -DCMAKE_BUILD_TYPE=Debug -DENABLE_CXXCTP=TRUE ..
+cmake -E chdir build cmake -E time cmake -DENABLE_CLING=TRUE -DBUILD_SHARED_LIBS=TRUE -DBUILD_EXAMPLES=FALSE -DBUNDLE_EXAMPLE_SCRIPTS=FALSE -DCMAKE_BUILD_TYPE=Debug -DENABLE_CXXCTP=TRUE ..
 cmake -E chdir build cmake -E time cmake --build . -- -j6
 # you can install CXXCTP_tool:
 sudo cmake -E chdir build make install
@@ -226,7 +226,7 @@ If you installed CXXCTP_tool - you can run examples:
 sudo cmake -E chdir build make install
 
 # use -DBUILD_EXAMPLES=TRUE
-cmake -E chdir build cmake -E time cmake -DENABLE_CLING=TRUE -DBUILD_SHARED_LIBS=TRUE -DBUILD_EXAMPLES=TRUE -DCMAKE_BUILD_TYPE=Debug -DENABLE_CXXCTP=TRUE ..
+cmake -E chdir build cmake -E time cmake -DENABLE_CLING=TRUE -DBUILD_SHARED_LIBS=TRUE -DBUILD_EXAMPLES=TRUE -DBUNDLE_EXAMPLE_SCRIPTS=FALSE -DCMAKE_BUILD_TYPE=Debug -DENABLE_CXXCTP=TRUE ..
 cmake -E chdir build cmake -E time cmake --build . -- -j6
 
 # run examples

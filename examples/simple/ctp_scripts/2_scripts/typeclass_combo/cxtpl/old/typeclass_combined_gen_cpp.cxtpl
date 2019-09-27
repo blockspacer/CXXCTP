@@ -1,0 +1,31 @@
+﻿[[~ // parameters begin
+
+using namespace cxtpl_utils;
+
+const auto generator_path
+  = GetWithDefault<std::string>(cxtpl_params, "generator_path", "");
+
+std::vector<std::string> generator_includes
+  = GetWithDefault<std::vector<std::string>>
+      (cxtpl_params, "generator_includes", std::vector<std::string>{});
+
+// parameters end
+/* no newline */ ~]][[~]]
+// This is generated file. Do not modify directly.
+// Path to the code generator: [[+ generator_path +]].
+
+[[~]] for(const auto& fileName: generator_includes) {
+[[+ fileName /* no newline */ +]][[~]]
+[[~]] } // end for
+
+#include <iostream>
+#include <cstring>
+#include <type_traits>
+
+namespace cxxctp {
+namespace generated {
+
+// TODO
+
+} // namespace cxxctp
+} // namespace generated

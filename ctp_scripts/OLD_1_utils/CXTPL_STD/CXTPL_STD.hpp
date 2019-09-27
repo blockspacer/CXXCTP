@@ -30,4 +30,10 @@ std::string paramsCallDecls(const std::vector<reflection::MethodParamInfo>& para
 
 std::string templateParamsFullDecls(const std::vector<reflection::TemplateParamInfo>& params);
 
+std::string typeclassComboDecls(const std::vector<std::string>& params);
+
+std::string typeclassModelsDecls(const std::vector<std::string>& params);
+
+std::string typeclassReplaceModelsDecls(const std::vector<std::string>& params);
+
 } // namespace cxtpl_utils

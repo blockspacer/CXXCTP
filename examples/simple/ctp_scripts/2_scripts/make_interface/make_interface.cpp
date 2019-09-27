@@ -6,10 +6,11 @@
 // see https://herbsutter.com/2017/07/26/metaclasses-thoughts-on-generative-c/
 // see https://www.fluentcpp.com/2018/03/09/c-metaclasses-proposal-less-5-minutes/
 const char* make_interface(
+    const cxxctp::parsed_func& func_with_args,
     const clang::ast_matchers::MatchFinder::MatchResult& matchResult,
     clang::Rewriter& rewriter,
     const clang::Decl* decl,
-    const std::vector<cxxctp::parsed_func>& args) {
+    const std::vector<cxxctp::parsed_func>& all_func_with_args) {
   XLOG(DBG9) << "make_interface called...";
 
   clang::CXXRecordDecl const *record =

@@ -151,18 +151,18 @@ void add_default_clang_args(std::vector<std::string> &args)
 bool nativeCallModuleFunc(const UseOverride::Checker::MatchResult& Result,
                     clang::Rewriter &rewriter_,
                     const clang::Decl* decl,
-                    const std::string& func_to_call,
+                    const cxxctp::parsed_func& func_to_call,
                     const std::vector<cxxctp::parsed_func>& parsedFuncs) {
-    clang_utils::cxxctp_callback func_cxxctp =
-      clang_utils::get_cxxctp_callback(func_to_call);
-    if(!func_cxxctp) {
+    clang_utils::cxxctp_callback callback_cxxctp =
+      clang_utils::get_cxxctp_callback(func_to_call.parsed_func_.func_name_);
+    if(!callback_cxxctp) {
         return false;
     }
 
     XLOG(DBG9) << "found native callback for: "
-                 << func_to_call;
+                 << func_to_call.parsed_func_.func_name_;
 
-    func_cxxctp(Result, rewriter_, decl, parsedFuncs);
+    callback_cxxctp(func_to_call, Result, rewriter_, decl, parsedFuncs);
     return true;
 }
 
@@ -171,26 +171,31 @@ bool nativeCallModuleFunc(const UseOverride::Checker::MatchResult& Result,
 void clingCallModuleFunc(const UseOverride::Checker::MatchResult& Result,
                     clang::Rewriter &rewriter_,
                     const clang::Decl* decl,
-                    const std::string& func_to_call,
+                    const cxxctp::parsed_func& func_to_call,
                     const std::vector<cxxctp::parsed_func>& parsedFuncs) {
     bool calledNativeCallback = nativeCallModuleFunc(Result, rewriter_,
       decl, func_to_call, parsedFuncs);
     if(calledNativeCallback) {
       XLOG(DBG9) << "found native callback for: "
-                   << func_to_call;
+                   << func_to_call.func_with_args_as_string_;
       return;
     }
 
     XLOG(DBG9) << "can`t find native callback for: "
-                 << func_to_call << "; fallback to cling";
+                 << func_to_call.func_with_args_as_string_ << "; fallback to cling";
 
     std::ostringstream sstr;
     // scope begin
     sstr << "[](){";
     sstr << "return ";
     // func begin
-    sstr << func_to_call << "( ";
+    sstr << func_to_call.parsed_func_.func_name_ << "( ";
     // func arguments
+    sstr << "*(const cxxctp::parsed_func*)("
+         // Pass a pointer into cling as a string.
+         << std::hex << std::showbase
+         << reinterpret_cast<size_t>(&func_to_call) << ')';
+    sstr << " , "; // next argument
     sstr << "*(const clang::ast_matchers::MatchFinder::MatchResult*)("
          // Pass a pointer into cling as a string.
          << std::hex << std::showbase
@@ -219,6 +224,10 @@ void clingCallModuleFunc(const UseOverride::Checker::MatchResult& Result,
         cling::Interpreter::CompilationResult compilationResult;
         cling_utils::InterpreterModule::interpMap["main_module"]->metaProcessor_->process(
             sstr.str(), compilationResult, nullptr, true);
+        if(compilationResult
+            != cling::Interpreter::Interpreter::kSuccess) {
+          XLOG(ERR) << "ERROR while running cling code:\n" << sstr.str();
+        }
     }
 }
 
@@ -301,11 +310,18 @@ void UseOverride::Checker::run(const UseOverride::Checker::MatchResult& Result) 
                 const bool startsWithCodegen =
                         code.rfind(codegen_token, 0) == 0;
                 bool isFuncCall = false;
-                std::vector<std::string> funcs_to_call;
+                std::vector<cxxctp::parsed_func> funcs_to_call;
                 if (startsWithGen && startsWithCodegen) {
                     code.erase(0, codegen_token.size());
                     isFuncCall = true;
-                    funcs_to_call.push_back("call_codegen");
+                    funcs_to_call.push_back(
+                      cxxctp::parsed_func{
+                        "call_codegen",
+                        cxxctp::parsed_func_detail{
+                          "call_codegen",
+                          cxxctp::args{}
+                        }
+                      });
                 }
 
                 const std::string funccall_token = "{funccall};";
@@ -316,12 +332,13 @@ void UseOverride::Checker::run(const UseOverride::Checker::MatchResult& Result) 
                 if (startsWithGen && startsWithFunccall) {
                     code.erase(0, funccall_token.size());
                     parsedFuncs = cxxctp::split_to_funcs(code);
-                    for (auto const& seg : parsedFuncs) {
+                    for (const cxxctp::parsed_func & seg : parsedFuncs) {
                         XLOG(DBG9) << "segment: " << seg.func_with_args_as_string_;
                         XLOG(DBG9) << "funcs_to_call1  func_name_: " << seg.parsed_func_.func_name_;
 
                         if(!seg.parsed_func_.func_name_.empty()) {
-                            funcs_to_call.push_back(seg.parsed_func_.func_name_);
+                            funcs_to_call.push_back(seg);
+                            //funcs_to_call.push_back(seg.parsed_func_.func_name_);
                         }
 
                         for (auto const& arg : seg.parsed_func_.args_.as_vec_) {
@@ -386,6 +403,10 @@ void UseOverride::Checker::run(const UseOverride::Checker::MatchResult& Result) 
                         cling::Interpreter::CompilationResult compilationResult;
                         cling_utils::InterpreterModule::interpMap["main_module"]->metaProcessor_->process(
                                     sstr.str(), compilationResult, &result, true);
+                        if(compilationResult
+                            != cling::Interpreter::Interpreter::kSuccess) {
+                          XLOG(ERR) << "ERROR while running cling code:\n" << sstr.str();
+                        }
                     }
                     clang::SourceLocation startLoc = decl->getLocStart();
                     clang::SourceLocation endLoc = decl->getLocEnd();
@@ -428,6 +449,10 @@ void UseOverride::Checker::run(const UseOverride::Checker::MatchResult& Result) 
                         cling::Interpreter::CompilationResult compilationResult;
                         cling_utils::InterpreterModule::interpMap["main_module"]->metaProcessor_->process(
                                     sstr.str(), compilationResult, nullptr, true);
+                        if(compilationResult
+                            != cling::Interpreter::Interpreter::kSuccess) {
+                          XLOG(ERR) << "ERROR while running cling code:\n" << sstr.str();
+                        }
                     }
                     clang::SourceLocation startLoc = decl->getLocStart();
                     clang::SourceLocation endLoc = decl->getLocEnd();
@@ -465,6 +490,10 @@ void UseOverride::Checker::run(const UseOverride::Checker::MatchResult& Result) 
                         cling::Interpreter::CompilationResult compilationResult;
                         cling_utils::InterpreterModule::interpMap["main_module"]->metaProcessor_->process(
                                     sstr.str(), compilationResult, nullptr, true);
+                        if(compilationResult
+                            != cling::Interpreter::Interpreter::kSuccess) {
+                          XLOG(ERR) << "ERROR while running cling code:\n" << sstr.str();
+                        }
                     }
                     clang::SourceLocation startLoc = decl->getLocStart();
                     clang::SourceLocation endLoc = decl->getLocEnd();
@@ -524,8 +553,8 @@ void UseOverride::Checker::run(const UseOverride::Checker::MatchResult& Result) 
                                  << code;
 
                     //receivedMessagesQueue_->dispatch([] {
-                    for (const std::string& func_to_call : funcs_to_call) {
-                        XLOG(DBG9) << "main_module task " << func_to_call << "!... " << '\n';
+                    for (const cxxctp::parsed_func& func_to_call : funcs_to_call) {
+                        XLOG(DBG9) << "main_module task " << func_to_call.func_with_args_as_string_ << "... " << '\n';
 #if defined(CLING_IS_ON)
                         clingCallModuleFunc(Result, rewriter_, decl, func_to_call, parsedFuncs);
 #else

@@ -131,6 +131,7 @@ struct ToolFactory : public clang::tooling::FrontendActionFactory {
 void add_default_clang_args(std::vector<std::string>& args);
 
 typedef std::function<const char*(
+    const cxxctp::parsed_func& func_with_args,
     const clang::ast_matchers::MatchFinder::MatchResult& matchResult,
     clang::Rewriter& rewriter,
     const clang::Decl* decl,
