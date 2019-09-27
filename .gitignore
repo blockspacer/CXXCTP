@@ -27,6 +27,8 @@
 *.out
 *.app
 
+.directory
+
 build/
 
 cling-build/
@@ -34,3 +36,7 @@ cling-build/
 CMakeLists\.txt\.user
 
 generated/
+
+# Custom
+custom_plugins\.cmake
+src/ctp_registry\.cpp

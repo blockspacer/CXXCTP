@@ -54,39 +54,24 @@ set(ENABLE_CXXCTP TRUE CACHE BOOL "ENABLE_CXXCTP")
 
 include(Utils.cmake)
 
-if(BUNDLE_EXAMPLE_SCRIPTS)
-  # scripts placed here will be bundled with CXXCTP_tool
-  # (will become built-in C++ plugins)
-  list(APPEND BUILT_IN_PUGINS
-    ${CMAKE_CURRENT_SOURCE_DIR}/ctp_scripts/2_scripts/make_reflect/make_reflect.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/ctp_scripts/2_scripts/make_reflect/make_reflect.hpp
-    # NOTE: we control loading order by file/folder names (0_file, 1_file, ...)
-    #${CMAKE_CURRENT_SOURCE_DIR}/ctp_scripts/1_utils/CXTPL_STD/CXTPL_STD.cpp
-    #${CMAKE_CURRENT_SOURCE_DIR}/ctp_scripts/1_utils/CXTPL_STD/CXTPL_STD.hpp
-    #${CMAKE_CURRENT_SOURCE_DIR}/ctp_scripts/1_utils/CXXCTP_STD/CXXCTP_STD.cpp
-    #${CMAKE_CURRENT_SOURCE_DIR}/ctp_scripts/1_utils/CXXCTP_STD/CXXCTP_STD.hpp
+macro(add_ctp_plugin CALLBACK_NAME HEADER_FILE SOURCE_FILE CMAKELISTS_DIR)
+
+  list(APPEND ADD_CALLBACKS_FOR_BUNDLED_SCRIPTS
+    "clang_utils::add_cxxctp_callback(\"${CALLBACK_NAME}\", &${CALLBACK_NAME}){{SEMICOLON}}\n"
+  )
+  list(APPEND ADD_INCLUDES_FOR_BUNDLED_SCRIPTS
+    "#include \"${HEADER_FILE}\"\n"
   )
 
-  list(APPEND BUILT_IN_PUGINS
-    ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple/ctp_scripts/2_scripts/make_interface/make_interface.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple/ctp_scripts/2_scripts/make_interface/make_interface.hpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple/ctp_scripts/2_scripts/make_removefuncbody/make_removefuncbody.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple/ctp_scripts/2_scripts/make_removefuncbody/make_removefuncbody.hpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple/ctp_scripts/2_scripts/reflect_enum/reflect_enum.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple/ctp_scripts/2_scripts/reflect_enum/reflect_enum.hpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple/ctp_scripts/2_scripts/typeclass/typeclass.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple/ctp_scripts/2_scripts/typeclass/typeclass.hpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple/ctp_scripts/2_scripts/typeclass_combo/typeclass_combo.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple/ctp_scripts/2_scripts/typeclass_combo/typeclass_combo.hpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple/ctp_scripts/2_scripts/typeclass_instance/typeclass_instance.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple/ctp_scripts/2_scripts/typeclass_instance/typeclass_instance.hpp
-    # NOTE: we control loading order by file/folder names (0_file, 1_file, ...)
-    ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple/ctp_scripts/1_utils/CXTPL_STD/CXTPL_STD.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple/ctp_scripts/1_utils/CXTPL_STD/CXTPL_STD.hpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple/ctp_scripts/1_utils/CXXCTP_STD/CXXCTP_STD.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple/ctp_scripts/1_utils/CXXCTP_STD/CXXCTP_STD.hpp
+  if(EXISTS ${CMAKELISTS_DIR} AND EXISTS "${CMAKELISTS_DIR}/CMakeLists.txt")
+    add_subdirectory(${CMAKELISTS_DIR})
+  endif()
+
+  target_sources(CXXCTP_core PRIVATE
+    ${SOURCE_FILE}
+    ${HEADER_FILE}
   )
-endif(BUNDLE_EXAMPLE_SCRIPTS)
+endmacro(add_ctp_plugin)
 
 list(APPEND COMMON_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/options/ctp/options.cpp
@@ -124,8 +109,11 @@ list(APPEND COMMON_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/core/errors/errors.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/ctp_registry.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/ctp_registry.hpp
-  ${BUILT_IN_PUGINS}
 )
+
+set_source_files_properties(
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/ctp_registry.cpp
+  PROPERTIES GENERATED 1)
 
 if(ENABLE_CLING)
   #add_library(simple_lib SHARED
@@ -167,6 +155,82 @@ else(ENABLE_CLING)
     )
   endif(ENABLE_CXXCTP)
 endif(ENABLE_CLING)
+
+
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/custom_plugins.cmake")
+  include(${CMAKE_CURRENT_SOURCE_DIR}/custom_plugins.cmake)
+endif()
+
+if(BUNDLE_EXAMPLE_SCRIPTS)
+  # scripts placed here will be bundled with CXXCTP_tool
+  # (will become built-in C++ plugins)
+  #list(APPEND BUILT_IN_PUGINS
+  #  ${CMAKE_CURRENT_SOURCE_DIR}/ctp_scripts/2_scripts/make_reflect/make_reflect.cpp
+  #  #${CMAKE_CURRENT_SOURCE_DIR}/ctp_scripts/2_scripts/make_reflect/make_reflect.hpp
+  #  # NOTE: we control loading order by file/folder names (0_file, 1_file, ...)
+  #  #${CMAKE_CURRENT_SOURCE_DIR}/ctp_scripts/1_utils/CXTPL_STD/CXTPL_STD.cpp
+  #  #${CMAKE_CURRENT_SOURCE_DIR}/ctp_scripts/1_utils/CXTPL_STD/CXTPL_STD.hpp
+  #  #${CMAKE_CURRENT_SOURCE_DIR}/ctp_scripts/1_utils/CXXCTP_STD/CXXCTP_STD.cpp
+  #  #${CMAKE_CURRENT_SOURCE_DIR}/ctp_scripts/1_utils/CXXCTP_STD/CXXCTP_STD.hpp
+  #)
+  add_ctp_plugin(
+    "make_reflect"
+    ${CMAKE_CURRENT_SOURCE_DIR}/ctp_scripts/2_scripts/make_reflect/make_reflect.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/ctp_scripts/2_scripts/make_reflect/make_reflect.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/ctp_scripts/2_scripts/make_reflect
+  )
+  add_ctp_plugin(
+    "make_interface"
+    ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple/ctp_scripts/2_scripts/make_interface/make_interface.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple/ctp_scripts/2_scripts/make_interface/make_interface.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple/ctp_scripts/2_scripts/make_interface
+  )
+  add_ctp_plugin(
+    "make_removefuncbody"
+    ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple/ctp_scripts/2_scripts/make_removefuncbody/make_removefuncbody.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple/ctp_scripts/2_scripts/make_removefuncbody/make_removefuncbody.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple/ctp_scripts/2_scripts/make_removefuncbody
+  )
+  add_ctp_plugin(
+    "reflect_enum"
+    ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple/ctp_scripts/2_scripts/reflect_enum/reflect_enum.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple/ctp_scripts/2_scripts/reflect_enum/reflect_enum.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple/ctp_scripts/2_scripts/reflect_enum
+  )
+  add_ctp_plugin(
+    "typeclass"
+    ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple/ctp_scripts/2_scripts/typeclass/typeclass.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple/ctp_scripts/2_scripts/typeclass/typeclass.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple/ctp_scripts/2_scripts/typeclass
+  )
+  add_ctp_plugin(
+    "typeclass_combo"
+    ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple/ctp_scripts/2_scripts/typeclass_combo/typeclass_combo.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple/ctp_scripts/2_scripts/typeclass_combo/typeclass_combo.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple/ctp_scripts/2_scripts/typeclass_combo
+  )
+  add_ctp_plugin(
+    "typeclass_instance"
+    ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple/ctp_scripts/2_scripts/typeclass_instance/typeclass_instance.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple/ctp_scripts/2_scripts/typeclass_instance/typeclass_instance.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple/ctp_scripts/2_scripts/typeclass_instance
+  )
+  target_sources(CXXCTP_core PRIVATE
+    # NOTE: we control loading order by file/folder names (0_file, 1_file, ...)
+    ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple/ctp_scripts/1_utils/CXTPL_STD/CXTPL_STD.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple/ctp_scripts/1_utils/CXTPL_STD/CXTPL_STD.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple/ctp_scripts/1_utils/CXXCTP_STD/CXXCTP_STD.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple/ctp_scripts/1_utils/CXXCTP_STD/CXXCTP_STD.hpp
+  )
+endif(BUNDLE_EXAMPLE_SCRIPTS)
+
+string(REPLACE ";" "\n" ADD_CALLBACKS_FOR_BUNDLED_SCRIPTS "${ADD_CALLBACKS_FOR_BUNDLED_SCRIPTS}")
+string(REPLACE ";" "\n" ADD_INCLUDES_FOR_BUNDLED_SCRIPTS "${ADD_INCLUDES_FOR_BUNDLED_SCRIPTS}")
+# SEMICOLON hack to add ";" symbol to configure_file
+string(REPLACE "{{SEMICOLON}}" ";" ADD_CALLBACKS_FOR_BUNDLED_SCRIPTS "${ADD_CALLBACKS_FOR_BUNDLED_SCRIPTS}")
+configure_file(
+  ${CMAKE_CURRENT_SOURCE_DIR}/templates/ctp_registry.cpp.in
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/ctp_registry.cpp)
 
 set( USED_BOOST_LIBS
   Boost::boost
@@ -396,6 +460,3 @@ if(ENABLE_CLING AND INSTALL_CLING)
 endif(ENABLE_CLING AND INSTALL_CLING)
 
 install(TARGETS CXXCTP_core DESTINATION "${CMAKE_INSTALL_PREFIX}/lib")
-
-#configure_file(${CMAKE_CURRENT_SOURCE_DIR}/templates/ctp_registry.cpp.in
-#  ${CMAKE_CURRENT_SOURCE_DIR}/)

@@ -214,10 +214,12 @@ cmake -E remove_directory build
 cmake -E make_directory build
 cmake -E remove_directory resources/cxtpl/generated
 cmake -E make_directory resources/cxtpl/generated
-cmake -E chdir build cmake -E time cmake -DENABLE_CLING=TRUE -DBUILD_SHARED_LIBS=TRUE -DBUILD_EXAMPLES=FALSE -DBUNDLE_EXAMPLE_SCRIPTS=FALSE -DCMAKE_BUILD_TYPE=Debug -DENABLE_CXXCTP=TRUE ..
+cmake -E chdir build cmake -E time cmake -DENABLE_CLING=TRUE -DBUILD_SHARED_LIBS=TRUE -DBUILD_EXAMPLES=FALSE -DBUNDLE_EXAMPLE_SCRIPTS=TRUE -DCMAKE_BUILD_TYPE=Debug -DENABLE_CXXCTP=TRUE ..
 cmake -E chdir build cmake -E time cmake --build . -- -j6
 # you can install CXXCTP_tool:
 sudo cmake -E chdir build make install
+# check supported plugins
+/usr/local/bin/CXXCTP_tool --plugins
 ```
 
 If you installed CXXCTP_tool - you can run examples:
@@ -226,8 +228,12 @@ If you installed CXXCTP_tool - you can run examples:
 sudo cmake -E chdir build make install
 
 # use -DBUILD_EXAMPLES=TRUE
+rm ./build/examples/simple/CXXCTP_tool_for_CXXCTP_example.log
 cmake -E chdir build cmake -E time cmake -DENABLE_CLING=TRUE -DBUILD_SHARED_LIBS=TRUE -DBUILD_EXAMPLES=TRUE -DBUNDLE_EXAMPLE_SCRIPTS=FALSE -DCMAKE_BUILD_TYPE=Debug -DENABLE_CXXCTP=TRUE ..
 cmake -E chdir build cmake -E time cmake --build . -- -j6
+cat ./build/examples/simple/CXXCTP_tool_for_CXXCTP_example.log
+
+Check that `.log` find doesn`t contain errors
 
 # run examples
 build/examples/simple/CXXCTP_example
@@ -357,23 +363,41 @@ Using similar approach you can apply multiple soure code transformation steps to
 ## How to add custom code transformation rules
 Create files with your function in `ctp_scripts`
 
-Add your function name into `ctp_registry.cpp` (may be skipped in Cling / dev-mode)
+Copy `custom_plugins.cmake.example` as `custom_plugins.cmake`
 
-function signature must be compatable with:
+Append your script paths to `custom_plugins.cmake` via `add_ctp_plugin`:
+```
+# first arg - typeclass_instance - script function name
+# second arg - script source file
+# third arg - script header file
+# last arg - path to CMakeLists.txt used to generate script-related files
+add_ctp_plugin(
+  "typeclass_instance"
+  ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple/ctp_scripts/2_scripts/typeclass_instance/typeclass_instance.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple/ctp_scripts/2_scripts/typeclass_instance/typeclass_instance.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple/ctp_scripts/2_scripts/typeclass_instance
+)
+```
+
+Check that your function name exists in generated file `ctp_registry.cpp` (may be skipped in Cling / dev-mode)
+
+Function signature for code transformation must be compatable with `cxxctp_callback`:
 ```
 typedef std::function<const char*(
+    const cxxctp::parsed_func& func_with_args,
     const clang::ast_matchers::MatchFinder::MatchResult& matchResult,
     clang::Rewriter& rewriter,
     const clang::Decl* decl,
-    const std::vector<parsed_func>& args)> cxxctp_callback;
+    const std::vector<cxxctp::parsed_func>& all_funcs_with_args)> cxxctp_callback;
 ```
 
 Detailed function signature:
 + return value (const char*) - used to replace original code, if needed.
++ func_with_args - currently executed function from list `all_funcs_with_args` (see below)
 + clang::ast_matchers::MatchFinder::MatchResult - see https://xinhuang.github.io/posts/2015-02-08-clang-tutorial-the-ast-matcher.html
 + clang::Rewriter - see https://devblogs.microsoft.com/cppblog/exploring-clang-tooling-part-3-rewriting-code-with-clang-tidy/
 + clang::Decl - found by MatchFinder, see https://devblogs.microsoft.com/cppblog/exploring-clang-tooling-part-2-examining-the-clang-ast-with-clang-query/
-+ std::vector<parsed_func> - arguments extracted from attribute. Example: $apply(interface, foo_with_args(1, "2")) becomes two `parsed_func` - `interface` and `foo_with_args`.
++ std::vector<parsed_func> - all arguments extracted from attribute. Example: $apply(interface, foo_with_args(1, "2")) becomes two `parsed_func` - `interface` and `foo_with_args`.
 
 Think about function name as one of `__VA_ARGS__` from
 

@@ -10,57 +10,6 @@
 
 #include "utils.hpp"
 
-/*#include "clang/Rewrite/Core/RewriteBuffer.h"
-#include "clang/Rewrite/Core/Rewriter.h"
-#include "clang/ASTMatchers/ASTMatchers.h"
-#include "clang/AST/ASTContext.h"
-#include "clang/ASTMatchers/ASTMatchFinder.h"
-#include "clang/ASTMatchers/ASTMatchersMacros.h"
-#include "clang/AST/Type.h"
-#include "clang/Frontend/CompilerInstance.h"
-#include "clang/Sema/Sema.h"
-#include "clang/Basic/FileManager.h"
-#include "clang/Basic/LangOptions.h"
-#include "clang/Basic/SourceManager.h"
-#include "clang/Frontend/CompilerInstance.h"
-#include "clang/Sema/Sema.h"
-#include <clang/Lex/Lexer.h>
-#include <clang/Frontend/FrontendAction.h>
-#include <clang/Frontend/ASTConsumers.h>
-#include <clang/Frontend/CompilerInstance.h>
-#include <clang/Tooling/Tooling.h>
-#include <clang/Rewrite/Core/Rewriter.h>
-#include "clang/Driver/Options.h"
-#include "clang/AST/AST.h"
-#include "clang/AST/ASTContext.h"
-#include "clang/AST/ASTConsumer.h"
-#include "clang/AST/RecursiveASTVisitor.h"
-#include "clang/Frontend/ASTConsumers.h"
-#include "clang/Frontend/FrontendActions.h"
-#include "clang/Frontend/CompilerInstance.h"
-#include "clang/Tooling/CommonOptionsParser.h"
-#include "clang/Tooling/Tooling.h"
-#include "clang/Rewrite/Core/Rewriter.h"
-#include "clang/Frontend/CompilerInstance.h"
-#include "clang/Sema/Sema.h"
-#include <clang/Lex/Lexer.h>
-#include <clang/Frontend/FrontendAction.h>
-#include <clang/Frontend/ASTConsumers.h>
-#include <clang/Frontend/CompilerInstance.h>
-#include <clang/Tooling/Tooling.h>
-#include <clang/Rewrite/Core/Rewriter.h>
-#include "clang/Driver/Options.h"
-#include "clang/AST/AST.h"
-#include "clang/AST/ASTContext.h"
-#include "clang/AST/ASTConsumer.h"
-#include "clang/AST/RecursiveASTVisitor.h"
-#include "clang/Frontend/ASTConsumers.h"
-#include "clang/Frontend/FrontendActions.h"
-#include "clang/Frontend/CompilerInstance.h"
-#include "clang/Tooling/CommonOptionsParser.h"
-#include "clang/Tooling/Tooling.h"
-#include "clang/Rewrite/Core/Rewriter.h"*/
-
 #include <clang/Rewrite/Core/Rewriter.h>
 #include <clang/ASTMatchers/ASTMatchers.h>
 #include <clang/AST/ASTContext.h>
@@ -130,12 +79,24 @@ struct ToolFactory : public clang::tooling::FrontendActionFactory {
 
 void add_default_clang_args(std::vector<std::string>& args);
 
+/**
+  * \brief callback that will be called then parser
+  * found custom attribute.
+  * Used only in compile-mode, because in Cling-mode
+  * we can call and interpret functions by name.
+  * \arg return value (const char*) - used to replace original code, if needed.
+  * \arg func_with_args - currently executed function from list `all_funcs_with_args` (see below)
+  * \arg clang::ast_matchers::MatchFinder::MatchResult - see https://xinhuang.github.io/posts/2015-02-08-clang-tutorial-the-ast-matcher.html
+  * \arg clang::Rewriter - see https://devblogs.microsoft.com/cppblog/exploring-clang-tooling-part-3-rewriting-code-with-clang-tidy/
+  * \arg clang::Decl - found by MatchFinder, see https://devblogs.microsoft.com/cppblog/exploring-clang-tooling-part-2-examining-the-clang-ast-with-clang-query/
+  * \arg std::vector<parsed_func> - all arguments extracted from attribute. Example: $apply(interface, foo_with_args(1, "2")) becomes two `parsed_func` - `interface` and `foo_with_args`.
+**/
 typedef std::function<const char*(
     const cxxctp::parsed_func& func_with_args,
     const clang::ast_matchers::MatchFinder::MatchResult& matchResult,
     clang::Rewriter& rewriter,
     const clang::Decl* decl,
-    const std::vector<cxxctp::parsed_func>& args)> cxxctp_callback;
+    const std::vector<cxxctp::parsed_func>& all_funcs_with_args)> cxxctp_callback;
 
 void add_cxxctp_callback(const std::string& id, const cxxctp_callback& func);
 

@@ -1,0 +1,26 @@
+# That file must be renamed to custom_plugins.cmake
+# Add here your custom plugins (ctp scripts)
+
+# EXAMPLE:
+#  > first arg - typeclass_instance - script function name
+#  > second arg - script source file
+#  > third arg - script header file
+#  > last arg - path to CMakeLists.txt used to generate script-related files
+#
+#  add_ctp_plugin(
+#    "typeclass_instance"
+#    ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple/ctp_scripts/2_scripts/typeclass_instance/typeclass_instance.cpp
+#    ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple/ctp_scripts/2_scripts/typeclass_instance/typeclass_instance.hpp
+#    ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple/ctp_scripts/2_scripts/typeclass_instance
+#  )
+
+# NOTE:
+#  > you can also add custom sources to `CXXCTP_core` here:
+#
+#  target_sources(CXXCTP_core PRIVATE
+#    # NOTE: we control loading order by file/folder names (0_file, 1_file, ...)
+#    ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple/ctp_scripts/1_utils/CXTPL_STD/CXTPL_STD.cpp
+#    ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple/ctp_scripts/1_utils/CXTPL_STD/CXTPL_STD.hpp
+#    ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple/ctp_scripts/1_utils/CXXCTP_STD/CXXCTP_STD.cpp
+#    ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple/ctp_scripts/1_utils/CXXCTP_STD/CXXCTP_STD.hpp
+#  )

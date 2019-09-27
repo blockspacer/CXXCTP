@@ -1,0 +1,19 @@
+﻿#include "ctp_registry.hpp"
+
+${ADD_INCLUDES_FOR_BUNDLED_SCRIPTS}
+
+#include "clangPipeline.hpp"
+
+namespace ctp_utils {
+
+/// \brief scripts placed here will be bundled with CXXCTP_tool
+/// (will become built-in C++ plugins)
+/// \note that function may be usefull only if Cling is turned off
+/// because functions may be called by name in Cling
+void add_modulecallbacks() {
+
+  ${ADD_CALLBACKS_FOR_BUNDLED_SCRIPTS}
+
+}
+
+} // namespace ctp_utils
