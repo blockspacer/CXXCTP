@@ -8,7 +8,11 @@
 
 #include "options/ctp/options.hpp"
 
+#if __has_include(<filesystem>)
+#include <filesystem>
+#else
 #include <experimental/filesystem>
+#endif // __has_include
 
 #include <clang/Rewrite/Core/RewriteBuffer.h>
 #include <clang/Rewrite/Core/Rewriter.h>
@@ -73,7 +77,11 @@ using clang::tooling::CommonOptionsParser;
 //using clang::tooling::Replacement;
 using llvm::StringRef;*/
 
+#if __has_include(<filesystem>)
+namespace fs = std::filesystem;
+#else
 namespace fs = std::experimental::filesystem;
+#endif // __has_include
 
 namespace clang_utils {
 
