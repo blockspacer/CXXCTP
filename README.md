@@ -157,10 +157,10 @@ Install CXTPL_tool https://github.com/blockspacer/CXTPL#how-to-build
 ```
 BEFORE install_cling.sh:
 sudo apt-get update && sudo apt-get upgrade
-sudo apt-get install clang libstdc++6
+sudo apt-get install clang libstdc++6 libstdc++-6-dev
 sudo update-alternatives --config c++
 sudo update-alternatives --config cc
-ldconfig
+sudo ldconfig
 export CC=clang
 export CXX=clang++
 ```

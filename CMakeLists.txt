@@ -235,18 +235,23 @@ configure_file(
   ${CMAKE_CURRENT_SOURCE_DIR}/templates/ctp_registry.cpp.in
   ${CMAKE_CURRENT_SOURCE_DIR}/src/ctp_registry.cpp)
 
+set( USED_SYSTEM_LIBS
+  Threads::Threads # pthread, https://cmake.org/cmake/help/v3.13/module/FindThreads.html
+  ${X11_LIBRARIES} # https://cmake.org/cmake/help/v3.13/module/FindX11.html
+  ${CMAKE_DL_LIBS} # https://cmake.org/cmake/help/v3.13/variable/CMAKE_DL_LIBS.html
+  EXPAT::EXPAT # https://cmake.org/cmake/help/v3.13/module/FindEXPAT.html
+  ZLIB::ZLIB # https://cmake.org/cmake/help/v3.13/module/FindZLIB.html
+  # Custom libs
+  stdc++fs # C++17 std::filesystem
+  CACHE INTERNAL "USED_SYSTEM_LIBS" )
+
 set( USED_BOOST_LIBS
   Boost::boost
-  Boost::atomic
-  Boost::chrono
-  Boost::date_time
+  Boost::context
   Boost::filesystem
-  Boost::graph
-  Boost::log
   Boost::program_options
   Boost::regex
   Boost::system
-  Boost::thread
   CACHE INTERNAL "USED_BOOST_LIBS" )
 
 list(APPEND CLING_LIBS
@@ -306,23 +311,14 @@ list(APPEND CLING_LIBS
 
 # ...which links against clingInterpreter (and its dependencies).
 if(ENABLE_CXXCTP)
+
   target_link_libraries(CXXCTP_core PUBLIC
     ${FOLLY_LIBRARIES}
     # system libs
-    Threads::Threads # pthread, https://cmake.org/cmake/help/v3.13/module/FindThreads.html
-    ${X11_LIBRARIES} # https://cmake.org/cmake/help/v3.13/module/FindX11.html
-    ${CMAKE_DL_LIBS} # https://cmake.org/cmake/help/v3.13/variable/CMAKE_DL_LIBS.html
-    EXPAT::EXPAT # https://cmake.org/cmake/help/v3.13/module/FindEXPAT.html
-    ZLIB::ZLIB # https://cmake.org/cmake/help/v3.13/module/FindZLIB.html
-    # Custom libs
-    stdc++fs # C++17 std::filesystem
-    # boost libs
-    ${USED_BOOST_LIBS}
-    boost_outcome
-    microsoft_gsl
+    ${USED_SYSTEM_LIBS}
     # @note: Order matters https://stackoverflow.com/a/10269201/10904212
-    ${DOUBLE_CONVERSION_LIBRARY} # used by folly
     ${LIBIBERTY_LIBRARY} # used by folly
+    ${DOUBLE_CONVERSION_LIBRARY} # used by folly
     ${LIBEVENT_LIB} # used by folly
     ${LZ4_LIBRARY} # used by folly
     ${LIBUNWIND_LIBRARIES} # used by folly
@@ -331,6 +327,10 @@ if(ENABLE_CXXCTP)
     ${G3LOG_LIBRARIES} # used by folly
     glog
     gflags
+    # boost libs
+    ${USED_BOOST_LIBS}
+    boost_outcome
+    microsoft_gsl
     Cling::Cling
     Cling::ClingInterpreter
     Cling::clingUtils

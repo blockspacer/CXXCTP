@@ -2,6 +2,9 @@
 # Distributed under the MIT License.
 # See accompanying file LICENSE.md or copy at http://opensource.org/licenses/MIT
 
+find_package( Threads REQUIRED )
+message(STATUS "CMAKE_THREAD_LIBS_INIT = ${CMAKE_THREAD_LIBS_INIT}")
+
 # This project needs cling.
 find_package(Cling REQUIRED)
 find_package(CXTPL_tool REQUIRED)
@@ -16,8 +19,15 @@ set( BOOST_ROOT CACHE STRING /usr )
 set( Boost_ADDITIONAL_VERSIONS "1.62 1.63 1.64 1.65 1.66 1.67 1.68 1.69" )
 set( BOOST_LIBS CACHE STRING ${BOOST_ROOT}/lib )
 # set( Boost_COMPILER "-gcc" )
+
 find_package( Boost
-  COMPONENTS program_options filesystem regex date_time system thread graph log
+  COMPONENTS
+  context
+  filesystem
+  program_options
+  regex
+  system
+  thread
   REQUIRED )
 
 add_library( boost_outcome INTERFACE )
@@ -29,9 +39,6 @@ add_library(microsoft_gsl INTERFACE)
 target_include_directories(microsoft_gsl SYSTEM INTERFACE "submodules/GSL/include")
 get_target_property (microsoft_gsl_IMPORTED_LOCATION microsoft_gsl INTERFACE_INCLUDE_DIRECTORIES)
 message( STATUS "microsoft_gsl=${microsoft_gsl_IMPORTED_LOCATION}" )
-
-find_package( Threads REQUIRED )
-message(STATUS "CMAKE_THREAD_LIBS_INIT = ${CMAKE_THREAD_LIBS_INIT}")
 
 if(USE_FOLLY)
   find_package( Folly REQUIRED )
