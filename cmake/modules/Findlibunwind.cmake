@@ -1,4 +1,4 @@
-# Find the libunwind library
+﻿# Find the libunwind library
 #
 #  LIBUNWIND_FOUND       - True if libunwind was found.
 #  LIBUNWIND_LIBRARIES   - The libraries needed to use libunwind
@@ -9,6 +9,7 @@
 FIND_PATH(LIBUNWIND_INCLUDE_DIR libunwind.h
           HINTS
           /usr/
+          /usr/local/
           PATH_SUFFIXES include
           PATHS "${LIBUNWIND_ROOT}/include"
 )
@@ -16,6 +17,7 @@ FIND_PATH(LIBUNWIND_INCLUDE_DIR libunwind.h
 FIND_LIBRARY(LIBUNWIND_GENERIC_LIBRARY libunwind.a unwind
              HINTS
              /usr/
+             /usr/local/
              PATH_SUFFIXES lib 
              PATHS "${LIBUNWIND_ROOT}/lib"
 )
