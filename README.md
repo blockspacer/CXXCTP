@@ -155,7 +155,7 @@ Install CXTPL_tool https://github.com/blockspacer/CXTPL#how-to-build
 
 ## How to build
 ```
-BEFORE setup_cling.sh:
+BEFORE install_cling.sh:
 sudo apt-get update && sudo apt-get upgrade
 sudo apt-get install clang libstdc++6
 sudo update-alternatives --config c++
@@ -168,7 +168,7 @@ export CXX=clang++
 ```
 # Build Cling into `cling-build` folder
 cd scripts
-bash setup_cling.sh
+bash install_cling.sh
 ```
 
 Install deps as in CXTPL https://github.com/blockspacer/CXTPL#how-to-build
