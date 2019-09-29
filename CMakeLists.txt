@@ -320,11 +320,13 @@ if(ENABLE_CXXCTP)
     ${USED_BOOST_LIBS}
     boost_outcome
     microsoft_gsl
-    double-conversion
     # @note: Order matters https://stackoverflow.com/a/10269201/10904212
+    ${DOUBLE_CONVERSION_LIBRARY} # used by folly
     ${LIBIBERTY_LIBRARY} # used by folly
     ${LIBEVENT_LIB} # used by folly
     ${LZ4_LIBRARY} # used by folly
+    ${LIBUNWIND_LIBRARIES} # used by folly
+    ${LIBLZMA_LIBRARIES} # used by folly
     ${LIBGFLAGS_LIBRARY} # used by folly
     ${G3LOG_LIBRARIES} # used by folly
     glog

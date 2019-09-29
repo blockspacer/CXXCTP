@@ -43,30 +43,7 @@ add_executable(CXXCTP_tool
 )
 
 target_link_libraries(CXXCTP_tool PUBLIC
-  ${FOLLY_LIBRARIES}
   CXXCTP_core
-  # system libs
-  Threads::Threads # pthread, https://cmake.org/cmake/help/v3.13/module/FindThreads.html
-  ${X11_LIBRARIES} # https://cmake.org/cmake/help/v3.13/module/FindX11.html
-  ${CMAKE_DL_LIBS} # https://cmake.org/cmake/help/v3.13/variable/CMAKE_DL_LIBS.html
-  EXPAT::EXPAT # https://cmake.org/cmake/help/v3.13/module/FindEXPAT.html
-  ZLIB::ZLIB # https://cmake.org/cmake/help/v3.13/module/FindZLIB.html
-  # Custom libs
-  stdc++fs # C++17 std::filesystem
-  # boost libs
-  ${USED_BOOST_LIBS}
-  boost_outcome
-  microsoft_gsl
-  double-conversion
-  # CXXCTP
-  # @note: Order matters https://stackoverflow.com/a/10269201/10904212
-  ${LIBIBERTY_LIBRARY} # used by folly
-  ${LIBEVENT_LIB} # used by folly
-  ${LZ4_LIBRARY} # used by folly
-  ${LIBGFLAGS_LIBRARY} # used by folly
-  ${G3LOG_LIBRARIES} # used by folly
-  glog
-  gflags
 )
 
 # NOTE: don`t link twice to clang or you will get
