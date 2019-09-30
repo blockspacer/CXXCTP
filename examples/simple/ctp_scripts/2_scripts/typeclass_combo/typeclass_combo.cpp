@@ -22,14 +22,6 @@ const char* typeclass_combo(
 
   XLOG(DBG9) << "typeclass_combo called...";
 
-  const clang::CXXRecordDecl *node =
-      matchResult.Nodes.getNodeAs<clang::CXXRecordDecl>("bind_gen");
-
-  if (!node) {
-      XLOG(ERR) << "CXXRecordDecl not found ";
-      return "";
-  }
-
   cxxctp::args typeclassBaseNames =
     func_with_args.parsed_func_.args_;
 
@@ -81,8 +73,6 @@ const char* typeclass_combo(
 
       XLOG(DBG9) << "ReflectedBaseTypeclass is record = "
         << ReflectedBaseTypeclass->classInfoPtr_->name;
-      XLOG(DBG9) << "reflect is record = "
-        << node->getNameAsString();
 
       if(reflection::ReflectionRegistry::getInstance()->
         reflectionCXXRecordRegistry.find(typeclassBaseName)

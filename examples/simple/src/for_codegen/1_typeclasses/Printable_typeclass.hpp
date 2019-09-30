@@ -8,9 +8,4 @@
 #include <string>
 
 // like `trait`
-struct
-  $apply(
-    typeclass
-  )
-__TC_Printable_1 : public Printable {
-};
+$typeclass(Printable)

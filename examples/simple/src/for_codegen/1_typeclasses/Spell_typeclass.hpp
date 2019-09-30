@@ -8,10 +8,4 @@
 #include <string>
 
 // like `trait`
-struct
-  $apply(
-    typeclass
-  )
-__tc_Spell_1 : public Spell {
-};
-
+$typeclass(Spell)

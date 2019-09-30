@@ -7,9 +7,6 @@
 #include <iostream>
 
 // just wraps multiple `traits`, forwards calls
-struct
-  $apply(
-    typeclass_combo(Spell, MagicItem)
-  )
-__tc_combo_Spell_MagicItem_1 {
-};
+$typeclass_combo(
+  typeclass_combo(Spell, MagicItem)
+)

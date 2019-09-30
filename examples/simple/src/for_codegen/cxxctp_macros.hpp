@@ -15,14 +15,14 @@
 #define $eval(...) \
   /* generate definition required to use __attribute__ */ \
   __attribute__((annotate("{gen};{eval};" __VA_ARGS__))) \
-  int GEN_UNIQUE_NAME(__gen_tmp);
+  int GEN_UNIQUE_NAME(__gen_tmp__eval);
 
 // embed executes code and
 // returns (optional) source code modification
 #define $embed(...) \
   /* generate definition required to use __attribute__ */ \
   __attribute__((annotate("{gen};{embed};" #__VA_ARGS__))) \
-  int GEN_UNIQUE_NAME(__gen_tmp);
+  int GEN_UNIQUE_NAME(__gen_tmp__embed);
 
 // shortened embed syntax
 // param1 - returns (optional) source code modification
@@ -37,7 +37,7 @@
           "};" \
       "}();" \
     ))) \
-  int GEN_UNIQUE_NAME(__gen_tmp);
+  int GEN_UNIQUE_NAME(__gen_tmp__set_embed);
 
 #ifdef CLANG_ENABLED
 // eval that
@@ -45,7 +45,7 @@
 #define $export(...) \
   __VA_ARGS__ \
   __attribute__((annotate("{gen};{export};" #__VA_ARGS__ ))) \
-  int GEN_UNIQUE_NAME(__gen_tmp);
+  int GEN_UNIQUE_NAME(__gen_tmp__export);
 #else
 #define $export(...) __VA_ARGS__
 #endif
@@ -68,7 +68,7 @@ $genonly()*/
         "return new llvm::Optional<std::string>{\"\"};" \
       "}();" \
     ))) \
-  int GEN_UNIQUE_NAME(__gen_tmp);
+  int GEN_UNIQUE_NAME(__gen_tmp__exec);
 
 //#define eval_code1 \
 //  printf("evalgfgbfbgbfgb\n"); \
@@ -86,3 +86,25 @@ $genonly()*/
 
 #define $apply(...) \
   __attribute__((annotate("{gen};{funccall};" #__VA_ARGS__)))
+
+#define $typeclass(...) \
+  /* generate definition required to use __attribute__ */ \
+  struct \
+  __attribute__((annotate("{gen};{funccall};typeclass" ))) \
+  GEN_UNIQUE_NAME(__gen_tmp__typeclass) \
+  : public __VA_ARGS__ \
+  {};
+
+#define $typeclass_impl(...) \
+  /* generate definition required to use __attribute__ */ \
+  struct \
+    __attribute__((annotate("{gen};{funccall};" #__VA_ARGS__))) \
+    GEN_UNIQUE_NAME(__gen_tmp__typeclass_impl) \
+    ;
+
+#define $typeclass_combo(...) \
+  /* generate definition required to use __attribute__ */ \
+  struct \
+    __attribute__((annotate("{gen};{funccall};" #__VA_ARGS__))) \
+    GEN_UNIQUE_NAME(__gen_tmp__typeclass_combo) \
+    ;

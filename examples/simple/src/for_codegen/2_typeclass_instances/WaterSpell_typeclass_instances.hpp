@@ -10,18 +10,12 @@
 #include "WaterSpell.hpp"
 
 // like impl for trait
-struct
-  $apply(
-    typeclass_instance(target = "WaterSpell", "Spell", "MagicItem");
-    typeclass_instance(target = "WaterSpell", "Printable")
-  )
-__tc_impl_WaterSpell_1 {
-};
+$typeclass_impl(
+  typeclass_instance(target = "WaterSpell", "Spell", "MagicItem");
+  typeclass_instance(target = "WaterSpell", "Printable")
+)
 
 // like impl for trait
-struct
-  $apply(
-    typeclass_instance(target = "WaterSpell", "MagicTemplated<std::string, int>")
-  )
-__tc_impl_WaterSpell_2 {
-};
+$typeclass_impl(
+  typeclass_instance(target = "WaterSpell", "MagicTemplated<std::string, int>")
+)

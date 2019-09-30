@@ -23,21 +23,25 @@ const char* typeclass_instance(
     cxxctp::args typeclassBaseNames =
       func_with_args.parsed_func_.args_;
 
+    std::string targetName;
+
     const clang::CXXRecordDecl *node =
         matchResult.Nodes.getNodeAs<clang::CXXRecordDecl>("bind_gen");
 
-    if (!node) {
-        XLOG(ERR) << "CXXRecordDecl not found ";
-        return "";
+    if (node) {
+        targetName = node->getNameAsString();
     }
-
-    std::string targetName = node->getNameAsString();
 
     for(const auto& tit : typeclassBaseNames.as_vec_) {
       if(tit.name_ =="target") {
         targetName = tit.value_;
         prepareTplArg(targetName);
       }
+    }
+
+    if (targetName.empty()) {
+        XLOG(ERR) << "target for typeclass instance not found ";
+        return "";
     }
 
     for(const auto& tit : typeclassBaseNames.as_vec_) {
@@ -76,12 +80,6 @@ const char* typeclass_instance(
         << ReflectedBaseTypeclass->classInfoPtr_->name;
       XLOG(DBG9) << "typeclassBaseName = "
         << typeclassBaseName;*/
-
-      XLOG(DBG9) << "reflect is record = "
-        << node->getNameAsString();
-
-      XLOG(DBG9) << "reflect1 is record = "
-        << node->getNameAsString();
 
       cxtpl_params.emplace("ImplTypeclassName",
                            std::make_any<std::string>(
