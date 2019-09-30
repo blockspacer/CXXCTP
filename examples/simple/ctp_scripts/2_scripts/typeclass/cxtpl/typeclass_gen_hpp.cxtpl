@@ -8,17 +8,36 @@ const auto headerGuard
 const auto generator_path
   = GetWithDefault<std::string>(cxtpl_params, "generator_path", "");
 
+const auto fullBaseType
+  = GetWithDefault<std::string>(cxtpl_params, "fullBaseType", "");
+
 std::vector<std::string> generator_includes
   = GetWithDefault<std::vector<std::string>>
       (cxtpl_params, "generator_includes", std::vector<std::string>{});
 
-std::string OriginalTypeclassBaseCode
+/*std::string OriginalTypeclassBaseCode
   = GetWithDefault<std::string>
       (cxtpl_params, "OriginalTypeclassBaseCode", std::string{});
 
 std::string GeneratedTypeclassName
   = GetWithDefault<std::string>
-      (cxtpl_params, "GeneratedTypeclassName", std::string{});
+      (cxtpl_params, "GeneratedTypeclassName", std::string{});*/
+
+/*std::string structTemplateParams
+  = templateParamsFullDecls(structInfo->templateParams);
+
+std::string GeneratedTypeclassName =
+  structInfo->GetFullQualifiedName();
+  //structInfo->decl->getNameAsString();
+
+if(!structTemplateParams.empty())
+{
+  GeneratedTypeclassName =
+    structInfo->decl->getNameAsString()
+    + "<" + structTemplateParams + ">";
+}*/
+
+//templateParams
 
 reflection::ClassInfoPtr ReflectedStructInfo
   = GetWithDefault<reflection::ClassInfoPtr>
@@ -45,8 +64,6 @@ const size_t ReflectedStructInfoMethodsSize =
 namespace cxxctp {
 namespace generated {
 
-[[+ OriginalTypeclassBaseCode +]];
-
 [[~]]  { // startscope
 [[~]]    for(const auto& method: ReflectedStructInfo->methods) {
 [[~]]      const size_t methodParamsSize = method->params.size();
@@ -54,11 +71,13 @@ namespace generated {
 [[~]]          && !method->isOperator
 [[~]]          && !method->isCtor
 [[~]]          && !method->isDtor;
+[[~]]      const std::string tplTypenames = typenameParamsFullDecls(method->params);
 [[~]]      if(needPrint) {
   template<
+    [[+ tplTypenames +]][[+ tplTypenames.empty() ? "" : "," +]]
     typename T,
     typename V,
-    typename std::enable_if<std::is_same<[[+ GeneratedTypeclassName +]], T>::value>::type* = nullptr
+    typename std::enable_if<std::is_same<[[+ fullBaseType +]], T>::value>::type* = nullptr
   >
 [[+ method->isExplicitCtor ? "explicit " : "" +]][[~]] /* no newline */
 [[+ method->isConstexpr ? "constexpr " : "" +]][[~]] /* no newline */
@@ -79,8 +98,10 @@ namespace generated {
 [[~]]    } // methods endfor
 [[~]]  } // endscope
 
+[[~]] if(structInfo->templateParams.empty()) {
+
 template<>
-struct _tc_model_t<[[+ GeneratedTypeclassName +]]> {
+struct _tc_model_t<[[+ fullBaseType +]]> {
   virtual ~_tc_model_t() noexcept { }
 
   virtual std::unique_ptr<_tc_model_t> clone() noexcept = 0;
@@ -129,19 +150,19 @@ template< [[+ templateParamsFullDecls(method->tplParams) +]] >
   T& ref_concrete() noexcept;
 
   template <typename U>
-  _tc_impl_t<U, [[+ GeneratedTypeclassName +]]>* as() noexcept
+  _tc_impl_t<U, [[+ fullBaseType +]]>* as() noexcept
   {
     return nullptr;
   }*/
 };
 
 template<>
-struct _tc_combined_t<[[+ GeneratedTypeclassName +]]> {
+struct _tc_combined_t<[[+ fullBaseType +]]> {
     // Default initializer creates an empty _tc_combined_t.
     _tc_combined_t() = default;
 
-    _tc_combined_t(std::reference_wrapper<_tc_combined_t<[[+ GeneratedTypeclassName +]]>>&& rhs) noexcept {
-        //puts("_tc_combined_t<[[+ GeneratedTypeclassName +]]> ref copy ctor");
+    _tc_combined_t(std::reference_wrapper<_tc_combined_t<[[+ fullBaseType +]]>>&& rhs) noexcept {
+        //puts("_tc_combined_t<[[+ fullBaseType +]]> ref copy ctor");
         if(rhs.get())
             my_interface_model = rhs.get().my_interface_model;
     }
@@ -159,7 +180,7 @@ struct _tc_combined_t<[[+ GeneratedTypeclassName +]]> {
                       "Make sure you're not trying to move a const object, "
                       "as this would likely result in a copy not a move. "
                       "If you need it for real, call std::move(...) instead.");
-        //puts("_tc_combined_t<[[+ GeneratedTypeclassName +]]> called, moves passed argument");
+        //puts("_tc_combined_t<[[+ fullBaseType +]]> called, moves passed argument");
     }
 
     template <
@@ -169,7 +190,7 @@ struct _tc_combined_t<[[+ GeneratedTypeclassName +]]> {
         >
     _tc_combined_t(const std::shared_ptr<T>& u) noexcept :
                                                            my_interface_model(u) {
-        //puts("_tc_combined_t<[[+ GeneratedTypeclassName +]]> called, shares passed argument");
+        //puts("_tc_combined_t<[[+ fullBaseType +]]> called, shares passed argument");
     }
 
     template <
@@ -179,7 +200,7 @@ struct _tc_combined_t<[[+ GeneratedTypeclassName +]]> {
     _tc_combined_t(const std::reference_wrapper<T>& u) noexcept :
                                                                   my_interface_model(
                                                                       std::make_shared<
-                                                                          _tc_impl_t<std::reference_wrapper<T>, [[+ GeneratedTypeclassName +]]>>
+                                                                          _tc_impl_t<std::reference_wrapper<T>, [[+ fullBaseType +]]>>
                                                                       (std::forward<const std::reference_wrapper<std::decay_t<T>>>(u))) {
         //puts("_tc_combined_t{T} reference_wrapper called");
     }
@@ -192,14 +213,14 @@ struct _tc_combined_t<[[+ GeneratedTypeclassName +]]> {
     _tc_combined_t(const T&& u) noexcept :
                                            my_interface_model(
                                                std::make_shared<
-                                                   _tc_impl_t<T, [[+ GeneratedTypeclassName +]]>>
+                                                   _tc_impl_t<T, [[+ fullBaseType +]]>>
                                                (std::forward<const std::decay_t<T>>(u))) {
         //puts("_tc_combined_t{T} called");
     }
 
     // Call clone for copy ctor/assign.
     explicit _tc_combined_t(const _tc_combined_t& rhs) noexcept {
-        //puts("_tc_combined_t<[[+ GeneratedTypeclassName +]]> copy ctor");
+        //puts("_tc_combined_t<[[+ fullBaseType +]]> copy ctor");
         if(rhs)
             my_interface_model = rhs.my_interface_model->clone();
     }
@@ -218,7 +239,7 @@ struct _tc_combined_t<[[+ GeneratedTypeclassName +]]> {
         typename = IsNotReference<type_t>
         >
     static _tc_combined_t construct(args_t&&... args) noexcept {
-        return _tc_combined_t(std::make_shared<_tc_impl_t<type_t, [[+ GeneratedTypeclassName +]]> >(
+        return _tc_combined_t(std::make_shared<_tc_impl_t<type_t, [[+ fullBaseType +]]> >(
             std::forward<args_t>(args)...
             ));
     }
@@ -281,23 +302,23 @@ template< [[+ templateParamsFullDecls(method->tplParams) +]] >
         return (bool)my_interface_model;
     }
 
-    std::shared_ptr<_tc_model_t<[[+ GeneratedTypeclassName +]]>> ref_model() const noexcept {
+    std::shared_ptr<_tc_model_t<[[+ fullBaseType +]]>> ref_model() const noexcept {
         return my_interface_model;
     }
 
-    std::unique_ptr<_tc_model_t<[[+ GeneratedTypeclassName +]]>> clone_model() const noexcept {
+    std::unique_ptr<_tc_model_t<[[+ fullBaseType +]]>> clone_model() const noexcept {
         if(!my_interface_model) {
             std::terminate();
         }
         return my_interface_model->clone();
     }
 
-    const _tc_model_t<[[+ GeneratedTypeclassName +]]>* raw_model() const noexcept {
+    const _tc_model_t<[[+ fullBaseType +]]>* raw_model() const noexcept {
         return my_interface_model.get();
     }
 
     void replace_model(
-        const std::shared_ptr<_tc_model_t<[[+ GeneratedTypeclassName +]]>> rhs) noexcept {
+        const std::shared_ptr<_tc_model_t<[[+ fullBaseType +]]>> rhs) noexcept {
         my_interface_model = rhs;
     }
 
@@ -310,7 +331,7 @@ template< [[+ templateParamsFullDecls(method->tplParams) +]] >
 
     template <typename T>
     static const size_t getGlobalTypeIndex() {
-        return _tc_registry<[[+ GeneratedTypeclassName +]]>
+        return _tc_registry<[[+ fullBaseType +]]>
             ::getTypeIndex<T>();
     }
 
@@ -332,8 +353,10 @@ template< [[+ templateParamsFullDecls(method->tplParams) +]] >
     // This is actually a unique_ptr to an impl type. We store a pointer to
     // the base type and rely on _tc_model_t's virtual dtor to free the object.
 private:
-    std::shared_ptr<_tc_model_t<[[+ GeneratedTypeclassName +]]>> my_interface_model;
+    std::shared_ptr<_tc_model_t<[[+ fullBaseType +]]>> my_interface_model;
 };
+
+[[~]] } // if(structInfo->templateParams.empty())
 
 } // namespace cxxctp
 } // namespace generated

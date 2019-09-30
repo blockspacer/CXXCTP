@@ -48,6 +48,8 @@ add_executable(CXXCTP_example
   ${CMAKE_CURRENT_SOURCE_DIR}/src/MagicItem_FireSpell.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Printable_WaterSpell.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Printable_FireSpell.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/MagicTemplated_WaterSpell.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/MagicTemplated_FireSpell.cpp
 )
 
 set( USED_SYSTEM_LIBS

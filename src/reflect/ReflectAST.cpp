@@ -1,6 +1,7 @@
 ﻿#include "reflect/ReflectAST.hpp"
 
 #include <clang/AST/ASTContext.h>
+#include <clang/AST/DeclTemplate.h>
 
 #include <iostream>
 
@@ -118,7 +119,7 @@ TypedefInfoPtr AstReflector::ReflectTypedef(const TypedefNameDecl* decl, Namespa
     return typedefInfo;
 }
 
-ClassInfoPtr AstReflector::ReflectClass(const CXXRecordDecl* decl, NamespacesTree* nsTree)
+ClassInfoPtr AstReflector::ReflectClass(const CXXRecordDecl* decl, NamespacesTree* nsTree, bool recursive)
 {
     const DeclContext* nsContext = decl->getEnclosingNamespaceContext();
 
@@ -143,6 +144,22 @@ ClassInfoPtr AstReflector::ReflectClass(const CXXRecordDecl* decl, NamespacesTre
     SetupNamedDeclInfo(decl, classInfo.get(), m_astContext);
     classInfo->isUnion = decl->isUnion();
     classInfo->location = GetLocation(decl, m_astContext);
+
+    // see https://github.com/goto40/rpp/blob/ec8a4c4a3ac32dccee8c4e8ba97be8c2ba1c8f88/src/parser/struct_parser.cpp#L113
+    if(decl->getDescribedClassTemplate()) {
+      clang::TemplateDecl* templateDecl =
+        decl->getDescribedClassTemplate();
+      clang::TemplateParameterList *tp =
+        templateDecl->getTemplateParameters();
+      for(clang::NamedDecl *p: *tp) {
+          classInfo->templateParams.push_back(
+            TemplateParamInfo{
+              p->getNameAsString(),
+              p->getQualifiedNameAsString(),
+            }
+          );
+      }
+    }
 
     if (decl->hasDefinition())
     {
@@ -184,8 +201,10 @@ ClassInfoPtr AstReflector::ReflectClass(const CXXRecordDecl* decl, NamespacesTre
             }
             else if ((innerRec = llvm::dyn_cast_or_null<CXXRecordDecl>(tagDecl)))
             {
-                auto ci = ReflectClass(innerRec, nullptr);
-                declInfo.innerDecl = ci;
+                if(recursive) {
+                  auto ci = ReflectClass(innerRec, nullptr);
+                  declInfo.innerDecl = ci;
+                }
             }
             else if ((typeAliasDecl = llvm::dyn_cast_or_null<TypedefNameDecl>(namedDecl)))
             {

@@ -12,8 +12,16 @@
 // like impl for trait
 struct
   $apply(
-    typeclass_instance(target = WaterSpell, Spell, MagicItem);
-    typeclass_instance(target = WaterSpell, Printable)
+    typeclass_instance(target = "WaterSpell", "Spell", "MagicItem");
+    typeclass_instance(target = "WaterSpell", "Printable")
   )
-__tc_Impl3 {
+__tc_impl_WaterSpell_1 {
+};
+
+// like impl for trait
+struct
+  $apply(
+    typeclass_instance(target = "WaterSpell", "MagicTemplated<std::string, int>")
+  )
+__tc_impl_WaterSpell_2 {
 };

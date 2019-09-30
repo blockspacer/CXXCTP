@@ -12,13 +12,21 @@
 // like impl for trait
 struct
   $apply(
-    typeclass_instance(target = FireSpell, Spell, MagicItem)
+    typeclass_instance(target = "FireSpell", "Spell", "MagicItem")
   )
-__tc_Impl1 {};
+__tc_impl_FireSpell_1 {};
 
 // like impl for trait
 struct
   $apply(
-    typeclass_instance(target = FireSpell, Printable)
+    typeclass_instance(target = "FireSpell", "Printable")
   )
-__tc_Impl2 {};
+__tc_impl_FireSpell_2 {};
+
+// like impl for trait
+struct
+  $apply(
+    typeclass_instance(target = "FireSpell", "MagicTemplated<std::string, int>")
+  )
+__tc_impl_FireSpell_3 {
+};

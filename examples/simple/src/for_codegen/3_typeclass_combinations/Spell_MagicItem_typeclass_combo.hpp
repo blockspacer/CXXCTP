@@ -11,5 +11,5 @@ struct
   $apply(
     typeclass_combo(Spell, MagicItem)
   )
-Spell_MagicItem {
+__tc_combo_Spell_MagicItem_1 {
 };

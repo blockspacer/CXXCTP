@@ -36,6 +36,11 @@ std::string typeclassComboDecls(const std::vector<std::string>& params);
 
 std::string typeclassModelsDecls(const std::vector<std::string>& params);
 
-//std::string typeclassReplaceModelsDecls(const std::vector<std::string>& params);
+std::string typenameParamsFullDecls(
+  const std::vector<reflection::MethodParamInfo>& params);
+
+void prepareFileName(std::string& in);
+
+void prepareTypeName(std::string& in);
 
 } // namespace cxtpl_utils

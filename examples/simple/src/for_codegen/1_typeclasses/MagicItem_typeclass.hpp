@@ -5,15 +5,23 @@
 #include <vector>
 #include <string>
 
+/// \note include here all required data structs
+#include "MagicItem.hpp"
+
 // like `trait`
 struct
   $apply(
     typeclass
   )
-MagicItem {
-  virtual void has_enough_mana(const char* spellname) const noexcept = 0;
+__tc_MagicItem_1 : public MagicItem {
+};
 
-  /// \note same for all types
-  // @gen(inject_to_all)
-  //S interface_data;
+//typedef MagicTemplated<std::string, int> MagicTemplated1;
+
+// like `trait`
+struct
+  $apply(
+    typeclass
+  )
+__tc_MagicTemplated_1 : public MagicTemplated<std::string, int> {
 };

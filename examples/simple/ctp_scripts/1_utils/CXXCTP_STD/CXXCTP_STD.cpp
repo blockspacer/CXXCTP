@@ -4,6 +4,9 @@
 
 #include <folly/logging/xlog.h>
 
+#include <algorithm>
+#include <string>
+
 clang::SourceLocation
 findPureInsertionPoint(clang::CXXMethodDecl *MethodDecl,
                    const clang::ASTContext &Context) {
@@ -120,4 +123,12 @@ cxxctp::args get_func_args(const std::vector<cxxctp::parsed_func>& args, const s
         }
     }
     return cxxctp::args{};
+}
+
+void prepareTplArg(std::string &in)
+{
+  // remove quotes
+  in.erase(
+    std::remove( in.begin(), in.end(), '\"' ),
+    in.end());
 }

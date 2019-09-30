@@ -2,7 +2,21 @@
 
 #include <folly/logging/xlog.h>
 
+#include <clang/AST/DeclTemplate.h>
+
+#include <string_view>
+
 namespace cxtpl_utils {
+
+static bool startsWith(const std::string_view& in,
+    const std::string& prefix) {
+  return !in.compare(0, prefix.size(), prefix);
+};
+
+static std::string_view removePrefix(const std::string_view& from,
+    const std::string& prefix) {
+  return from.substr( prefix.size(), from.size() - prefix.size());
+};
 
 std::string startHeaderGuard(const std::string& guardName) {
     std::string out;
@@ -35,6 +49,27 @@ void CXTPL_STD() {
 }
 #endif // CLING_IS_ON
 
+std::string typenameParamsFullDecls(
+  const std::vector<reflection::MethodParamInfo>& params)
+{
+    std::string out;
+    size_t paramIter = 0;
+    const size_t methodParamsSize = params.size();
+    for(const auto& param: params) {
+      paramIter++;
+      if(param.type->getAsTemplateParamType()) {
+        out += "typename ";
+        //out += param.type->getPrintedName();
+        out += param.type
+          ->getAsTemplateParamType()->decl->getName();
+        if(paramIter != methodParamsSize) {
+            out += ", ";
+        } // paramIter != methodParamsSize
+      }
+    } // params endfor
+    return out;
+}
+
 std::string paramsFullDecls(
   const std::vector<reflection::MethodParamInfo>& params)
 {
@@ -43,6 +78,10 @@ std::string paramsFullDecls(
     const size_t methodParamsSize = params.size();
     for(const auto& param: params) {
       out += param.fullDecl;
+      /*if(param.type->getAsTemplate()
+        || param.type->getAsTemplateParamType()) {
+        out += " typename ";
+      }*/
       paramIter++;
       if(paramIter != methodParamsSize) {
           out += ", ";
@@ -105,36 +144,6 @@ std::string typeclassModelsDecls(
     return out;
 }
 
-#if 0
-std::string typeclassReplaceModelsDecls(
-  const std::vector<std::string>& params)
-{
-    /*const std::string comboType =
-      typeclassComboDecls(params);*/
-    std::string out;
-    for(const auto& param: params) {
-          out += R"raw(
-template<
-typename T,
-typename std::enable_if<std::is_same<
-          )raw";
-          out += param;
-          out += R"raw(, T>::value>::type* = nullptr
->
-void replace_model(
-  const std::shared_ptr<_tc_model_t<)raw";
-          out += param;
-          out += R"raw(>> rhs) noexcept {
-)raw";
-          out += typeclassModelName(param);
-          out += R"raw( = rhs;
-}
-          )raw";
-    } // params endfor
-    return out;
-}
-#endif
-
 std::string typeclassComboDecls(const std::vector<std::string>& params)
 {
     std::string out;
@@ -148,6 +157,28 @@ std::string typeclassComboDecls(const std::vector<std::string>& params)
         } // paramIter != methodParamsSize
     } // params endfor
     return out;
+}
+
+void prepareFileName(std::string &in)
+{
+  std::replace_if(in.begin(), in.end(), ::ispunct, '_');
+  std::replace_if(in.begin(), in.end(), ::isspace, '_');
+}
+
+void prepareTypeName(std::string &in)
+{
+  {
+    const std::string prefix = "struct ";
+    if(startsWith(in, prefix)) {
+      in = removePrefix(in, prefix);
+    }
+  }
+  {
+    const std::string prefix = "record ";
+    if(startsWith(in, prefix)) {
+      in = removePrefix(in, prefix);
+    }
+  }
 }
 
 } // namespace cxtpl_utils

@@ -9,6 +9,9 @@
 
 #include "options/ctp/options.hpp"
 
+#include <algorithm>
+#include <string>
+
 const char* typeclass_instance(
     const cxxctp::parsed_func& func_with_args,
     const clang::ast_matchers::MatchFinder::MatchResult& matchResult,
@@ -33,6 +36,7 @@ const char* typeclass_instance(
     for(const auto& tit : typeclassBaseNames.as_vec_) {
       if(tit.name_ =="target") {
         targetName = tit.value_;
+        prepareTplArg(targetName);
       }
     }
 
@@ -43,7 +47,8 @@ const char* typeclass_instance(
 
       std::map<std::string, std::any> cxtpl_params;
 
-      const std::string typeclassBaseName = tit.value_;
+      std::string typeclassBaseName = tit.value_;
+      prepareTplArg(typeclassBaseName);
 
       XLOG(DBG9) << "typeclassBaseName = " << typeclassBaseName;
       XLOG(DBG9) << "target = " << targetName;
@@ -57,7 +62,7 @@ const char* typeclass_instance(
           == reflection::ReflectionRegistry::getInstance()->
             reflectionCXXRecordRegistry.end())
       {
-          XLOG(ERR) << "typeclassBaseName = "
+          XLOG(ERR) << "ERROR: typeclassBaseName = "
             << typeclassBaseName << " not found!";
           return "";
       }
@@ -72,7 +77,11 @@ const char* typeclass_instance(
       XLOG(DBG9) << "typeclassBaseName = "
         << typeclassBaseName;*/
 
-      XLOG(DBG9) << "reflect is record = " << node->getNameAsString();
+      XLOG(DBG9) << "reflect is record = "
+        << node->getNameAsString();
+
+      XLOG(DBG9) << "reflect1 is record = "
+        << node->getNameAsString();
 
       cxtpl_params.emplace("ImplTypeclassName",
                            std::make_any<std::string>(
@@ -80,7 +89,7 @@ const char* typeclass_instance(
 
       cxtpl_params.emplace("BaseTypeclassName",
                            std::make_any<std::string>(
-                            ReflectedBaseTypeclass->classInfoPtr_->name));
+                            typeclassBaseName));
 
         cxtpl_params.emplace("ReflectedBaseTypeclass",
                              std::make_any<reflection::ClassInfoPtr>(
@@ -95,13 +104,16 @@ const char* typeclass_instance(
         << original_full_file_path;
 
       {
+          std::string fileTypeclassBaseName = typeclassBaseName;
+          cxtpl_utils::prepareFileName(fileTypeclassBaseName);
+
           fs::path gen_hpp_name = fs::absolute(ctp::Options::res_path
-            / (targetName + "_" + typeclassBaseName
+            / (targetName + "_" + fileTypeclassBaseName
               + ".typeclass_instance.generated.hpp"));
 
           fs::path gen_base_typeclass_hpp_name =
             fs::absolute(ctp::Options::res_path
-              / (ReflectedBaseTypeclass->classInfoPtr_->name
+              / (fileTypeclassBaseName
                 + ".typeclass.generated.hpp"));
 
           cxtpl_params.emplace("generator_path",

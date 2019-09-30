@@ -18,6 +18,12 @@
 
 #include "generated/FireSpell_Printable.typeclass_instance.generated.hpp"
 
+#include "generated/MagicTemplated_std__string__int_.typeclass.generated.hpp"
+
+#include "generated/WaterSpell_MagicTemplated_std__string__int_.typeclass_instance.generated.hpp"
+
+#include "generated/FireSpell_MagicTemplated_std__string__int_.typeclass_instance.generated.hpp"
+
 #include <vector>
 
 int main(int /*argc*/, const char* const* /*argv*/) {
@@ -141,6 +147,19 @@ int main(int /*argc*/, const char* const* /*argv*/) {
 
     for(const _tc_combined_t<Printable>& it : printables) {
       it.print();
+    }
+
+    std::vector<_tc_combined_t<MagicTemplated<std::string, int>>> tpls;
+    tpls.push_back({
+        WaterSpell{"WaterSpell", "WaterSpell"}
+    });
+    tpls.push_back({
+        FireSpell{"FireSpell", "FireSpell"}
+    });
+
+    int idx = 0;
+    for(const _tc_combined_t<MagicTemplated<std::string, int>>& it : tpls) {
+      it.has_T("name1", idx++);
     }
 
     return 0;

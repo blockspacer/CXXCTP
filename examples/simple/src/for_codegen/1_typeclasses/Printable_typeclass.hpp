@@ -2,6 +2,8 @@
 
 #include "cxxctp_macros.hpp"
 
+#include "Printable.hpp"
+
 #include <vector>
 #include <string>
 
@@ -10,7 +12,5 @@ struct
   $apply(
     typeclass
   )
-Printable {
-    virtual void print() const noexcept = 0;
+__TC_Printable_1 : public Printable {
 };
-

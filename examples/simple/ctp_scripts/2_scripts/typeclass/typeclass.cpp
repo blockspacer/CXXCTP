@@ -20,17 +20,55 @@ const char* typeclass(
     const clang::Decl* decl,
     const std::vector<cxxctp::parsed_func>& all_func_with_args) {
 
-  reflection::NamespacesTree m_namespaces; // TODO
-
   XLOG(DBG9) << "typeclass called...";
 
-  const clang::CXXRecordDecl *node =
+  cxxctp::args typeclassBaseNames =
+    func_with_args.parsed_func_.args_;
+
+  const clang::CXXRecordDecl *node1 =
       matchResult.Nodes.getNodeAs<clang::CXXRecordDecl>("bind_gen");
 
-  if (node) {
-    XLOG(DBG9) << "reflect is record = "
-      << node->getNameAsString();
+  if (!node1) {
+      XLOG(ERR) << "CXXRecordDecl not found ";
+      return "";
+  }
 
+  /*std::string targetName = node1->getNameAsString();
+
+  for(const auto& tit : typeclassBaseNames.as_vec_) {
+    if(tit.name_ =="target") {
+      targetName = tit.value_;
+    }
+  }*/
+
+  reflection::NamespacesTree m_namespaces; // TODO
+
+  std::string fullBaseType;
+
+  if (node1) {
+
+      const clang::CXXRecordDecl *node;
+      for(const auto& it : node1->bases()) {
+        node = it.getType()->getAsCXXRecordDecl();//<clang::RecordDecl>();
+
+        if(node) {
+          fullBaseType = it.getType().
+            getAsString();
+          cxtpl_utils::prepareTypeName(fullBaseType);
+          break;
+        }
+
+
+      }
+
+      if(!node) {
+        return "";
+      }
+
+/*if(node1->getDescribedClassTemplate())
+    XLOG(DBG9) << "reflectTpl is record = "
+      << node->getDescribedClassTemplate()->getDeclName().getAsString();
+*/
     std::map<std::string, std::any> cxtpl_params;
 
     {
@@ -40,7 +78,8 @@ const char* typeclass(
 
         XLOG(DBG9) << "ClassInfoPtr... for record"
           << node->getNameAsString();
-        reflection::ClassInfoPtr structInfo = reflector.ReflectClass(node, &m_namespaces);
+        reflection::ClassInfoPtr structInfo
+          = reflector.ReflectClass(node, &m_namespaces, false);
 
         XLOG(DBG9) << "reflectClassInfoPtr... for record"
           << node->getNameAsString();
@@ -48,6 +87,9 @@ const char* typeclass(
         cxtpl_params.emplace("ReflectedStructInfo",
                        std::make_any<reflection::ClassInfoPtr>(structInfo));
         XLOG(DBG9) << "methods count: " << structInfo->methods.size();
+
+        cxtpl_params.emplace("fullBaseType",
+                       std::make_any<std::string>(fullBaseType));
 
         for(auto mit : structInfo->methods){
             XLOG(DBG9) << "methods: " << mit->name;
@@ -58,16 +100,82 @@ const char* typeclass(
         }
 
         XLOG(DBG9) << "ReflectionRegistry... for record " <<
-          node->getNameAsString();
+          fullBaseType;
 
         reflection::ReflectionRegistry::getInstance()->
-          reflectionCXXRecordRegistry[node->getNameAsString()]
+          reflectionCXXRecordRegistry[fullBaseType]
             = std::make_unique<reflection::ReflectionCXXRecordRegistry>(
-              node->getNameAsString(), /*node,*/ structInfo);
+              fullBaseType, /*node,*/ structInfo);
+
+        XLOG(DBG9) << "templateParams.size"
+          << structInfo->templateParams.size();
+        XLOG(DBG9) << "genericParts.size"
+          << structInfo->genericParts.size();
+#if 0
+        /*XLOG(DBG9) << "getDepth"
+          << structInfo->
+          decl->getTypeForDecl()->
+          getAs<clang::TemplateTypeParmType>()->getDepth();*/
+       //XLOG(DBG9) << "getDepth" << TemplateParameterList(0).;
+
+        XLOG(DBG9) << "getDeclName"
+          << structInfo->decl->
+            getQualifiedNameAsString();
+
+
+        if(structInfo->decl->getDescribedClassTemplate()) {
+
+          XLOG(DBG9) << "getDescribedClassTemplate"
+            << structInfo->decl->
+              getQualifiedNameAsString();
+          clang::TemplateDecl* templateDecl =
+            structInfo->decl->getDescribedClassTemplate();
+          std::string tmpl="<";
+          clang::TemplateParameterList *tp =
+            templateDecl->getTemplateParameters();
+          for(clang::NamedDecl *p: *tp) {
+              //cout << "  TMPL " << get_template_type(p) << " " << get_template_name(p) << endl;
+              if (tmpl.size()>1) tmpl = tmpl+",";
+              tmpl = tmpl+"TMPL_"+p->getNameAsString();
+          XLOG(DBG9) << "p->getNameAsString() "
+            << p->getNameAsString();
+              //if (templateCodeTemp.size()>0) templateCodeTemp = templateCodeTemp+", ";
+              //templateCodeTemp = templateCodeTemp+get_template_type(p)+" TMPL_"+get_template_name(p);
+          }
+          tmpl = tmpl+">";
+        }
+#endif
+ /* clang::TypeAliasDecl const *TemplateType =
+      structInfo->decl->getTypeForDecl()
+      ->getAs<clang::TypeAliasDecl>();
+  if (TemplateType) {
+    XLOG(DBG9) << "TemplateType";
+  }*/
+
+
+       /*if(!structInfo->decl->isCompleteDefinition()) {
+          for (clang::CXXRecordDecl::base_class_const_iterator I
+                = structInfo->decl->bases_begin(),
+            E = structInfo->decl->bases_end(); I != E; ++I) {
+            const clang::CXXBaseSpecifier *BS = I;
+            const clang::Type *Ty = BS->getType().getTypePtr();
+            const clang::TemplateTypeParmType *ParmTy
+              = Ty->getAs<clang::TemplateTypeParmType>();
+            if (!ParmTy)
+              continue;
+            const clang::TemplateTypeParmDecl *ParmD =
+              ParmTy->getDecl();
+            XLOG(DBG9) << "Parameters"
+              << ParmD->getNameAsString();
+          }
+       }*/
+
+       /*TypeInfo::Create(structInfo->decl->getTypeForDecl(),
+        m_astContext);*/
 
       // see https://github.com/asutton/clang/blob/master/lib/AST/DeclPrinter.cpp#L502
 
-      clang::SourceLocation startLoc = decl->getLocStart();
+      /*clang::SourceLocation startLoc = decl->getLocStart();
       clang::SourceLocation endLoc = decl->getLocEnd();
       clang_utils::expandLocations(startLoc, endLoc, rewriter);
 
@@ -85,17 +193,27 @@ const char* typeclass(
                            std::make_any<std::string>(CleanOriginalTypeclassBaseCode));
 
       cxtpl_params.emplace("GeneratedTypeclassName",
-                     std::make_any<std::string>(node->getNameAsString()));
+                     std::make_any<std::string>(node->getNameAsString()));*/
 
       {
+        std::string fileTargetName = fullBaseType;
+        cxtpl_utils::prepareFileName(fileTargetName);
+
         fs::path gen_hpp_name = fs::absolute(ctp::Options::res_path
-          / (node->getNameAsString() + ".typeclass.generated.hpp"));
+          / (fileTargetName + ".typeclass.generated.hpp"));
+
+        clang::SourceManager &SM = rewriter.getSourceMgr();
+        const auto fileID = SM.getMainFileID();
+        const auto fileEntry = SM.getFileEntryForID(SM.getMainFileID());
+        std::string full_file_path = fileEntry->getName();
+        XLOG(DBG9) << "full_file_path is " << full_file_path;
 
         cxtpl_params.emplace("generator_path",
                        std::make_any<std::string>("typeclass_gen_hpp.cxtpl"));
         cxtpl_params.emplace("generator_includes",
                              std::make_any<std::vector<std::string>>(
                                  std::vector<std::string>{
+                                     wrapLocalInclude(full_file_path),
                                      wrapLocalInclude(R"raw(type_erasure_common.hpp)raw")
                                  })
                              );
