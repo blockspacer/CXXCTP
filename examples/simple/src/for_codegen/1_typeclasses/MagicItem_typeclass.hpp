@@ -9,7 +9,12 @@
 #include "MagicItem.hpp"
 
 // like `trait`
-$typeclass(MagicItem)
+$typeclass(public MagicItem)
 
 // like `trait`
-$typeclass(MagicTemplated<std::string, int>)
+/// \note example of merged typeclasses
+/// \note in most cases prefer combined typeclasses to merged
+$typeclass(
+    public MagicTemplated<std::string, int>
+    , public ParentTemplated_1<const char *>
+    , public ParentTemplated_2<const int &>)

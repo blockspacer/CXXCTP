@@ -46,22 +46,57 @@ const char* typeclass(
   std::string fullBaseType;
 
   if (node1) {
+      reflection::AstReflector reflector(matchResult.Context);
 
-      const clang::CXXRecordDecl *node;
+      std::vector<clang::CXXRecordDecl *> nodes;
+      std::vector<reflection::ClassInfoPtr> structInfos;
+      reflection::ClassInfoPtr structInfo;
+
       for(const auto& it : node1->bases()) {
-        node = it.getType()->getAsCXXRecordDecl();//<clang::RecordDecl>();
+        //node = it.getType()->getAsCXXRecordDecl();//<clang::RecordDecl>();
 
-        if(node) {
-          fullBaseType = it.getType().
-            getAsString();
-          cxtpl_utils::prepareTypeName(fullBaseType);
-          break;
+        if(it.getType()->getAsCXXRecordDecl()) {
+          nodes.push_back(it.getType()->getAsCXXRecordDecl());
+
+          const auto refled
+            = reflector.ReflectClass(
+              it.getType()->getAsCXXRecordDecl(),
+              &m_namespaces, false);
+
+          structInfos.push_back(refled);
+
+          if(!structInfo) {
+            structInfo = refled;
+          } else {
+            for(const auto& it : refled->members) {
+              structInfo->members.push_back(it);
+            }
+            for(const auto& it : refled->methods) {
+              structInfo->methods.push_back(it);
+            }
+            for(const auto& it : refled->innerDecls) {
+              structInfo->innerDecls.push_back(it);
+            }
+          }
+
+          std::string preparedFullBaseType
+            = it.getType().getAsString();
+          cxtpl_utils::prepareTypeName(preparedFullBaseType);
+
+          structInfo->compoundId.push_back(preparedFullBaseType);
+
+          fullBaseType += preparedFullBaseType;
+          fullBaseType += ",";
+          //break;
         }
-
-
       }
 
-      if(!node) {
+      // remove last comma
+      if (!fullBaseType.empty()) {
+        fullBaseType.pop_back();
+      }
+
+      if(nodes.empty() || structInfos.empty() || !structInfo) {
         return "";
       }
 
@@ -72,32 +107,29 @@ const char* typeclass(
     std::map<std::string, std::any> cxtpl_params;
 
     {
-        XLOG(DBG9) << "reflector... for record "
+        /*XLOG(DBG9) << "reflector... for record "
           << node->getNameAsString();
-        reflection::AstReflector reflector(matchResult.Context);
 
         XLOG(DBG9) << "ClassInfoPtr... for record"
           << node->getNameAsString();
-        reflection::ClassInfoPtr structInfo
-          = reflector.ReflectClass(node, &m_namespaces, false);
 
         XLOG(DBG9) << "reflectClassInfoPtr... for record"
-          << node->getNameAsString();
+          << node->getNameAsString();*/
 
         cxtpl_params.emplace("ReflectedStructInfo",
                        std::make_any<reflection::ClassInfoPtr>(structInfo));
-        XLOG(DBG9) << "methods count: " << structInfo->methods.size();
+        //XLOG(DBG9) << "methods count: " << structInfo->methods.size();
 
         cxtpl_params.emplace("fullBaseType",
                        std::make_any<std::string>(fullBaseType));
 
-        for(auto mit : structInfo->methods){
+        /*for(auto mit : structInfo->methods){
             XLOG(DBG9) << "methods: " << mit->name;
             for(auto it : mit->params){
                 XLOG(DBG9) << "methods params: "
                   << it.name << it.fullDecl;
             }
-        }
+        }*/
 
         XLOG(DBG9) << "ReflectionRegistry... for record " <<
           fullBaseType;

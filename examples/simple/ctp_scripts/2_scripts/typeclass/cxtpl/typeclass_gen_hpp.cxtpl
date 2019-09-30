@@ -46,6 +46,9 @@ reflection::ClassInfoPtr ReflectedStructInfo
 const size_t ReflectedStructInfoMethodsSize =
     ReflectedStructInfo->methods.size();
 
+const size_t ReflectedStructInfoCompoundIdSize =
+    ReflectedStructInfo->compoundId.size();
+
 // parameters end
 /* no newline */ ~]][[~]]
 // This is generated file. Do not modify directly.
@@ -75,9 +78,19 @@ namespace generated {
 [[~]]      if(needPrint) {
   template<
     [[+ tplTypenames +]][[+ tplTypenames.empty() ? "" : "," +]]
-    typename T,
+[[~]]    int index_compoundId1 = 0;
+[[~]]    for(const auto& compoundId: ReflectedStructInfo->compoundId) {
+    typename T[[* index_compoundId1 *]],
+[[~]]      index_compoundId1++;
+[[~]]    } // end for
     typename V,
-    typename std::enable_if<std::is_same<[[+ fullBaseType +]], T>::value>::type* = nullptr
+[[~]]    int index_compoundId2 = 0;
+[[~]]    for(const auto& compoundId: ReflectedStructInfo->compoundId) {
+[[~]]      const std::string delimiter =
+[[~]]       index_compoundId2 < (ReflectedStructInfoCompoundIdSize - 1) ? "," : "";
+    typename std::enable_if<std::is_same<[[+ compoundId +]], T[[* index_compoundId2 *]]>::value>::type* = nullptr[[+ delimiter +]]
+[[~]]      index_compoundId2++;
+[[~]]    } // end for
   >
 [[+ method->isExplicitCtor ? "explicit " : "" +]][[~]] /* no newline */
 [[+ method->isConstexpr ? "constexpr " : "" +]][[~]] /* no newline */

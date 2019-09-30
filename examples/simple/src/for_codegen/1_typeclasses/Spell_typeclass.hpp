@@ -8,4 +8,4 @@
 #include <string>
 
 // like `trait`
-$typeclass(Spell)
+$typeclass(public Spell)

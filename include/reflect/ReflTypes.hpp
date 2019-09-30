@@ -221,6 +221,8 @@ struct ClassInfo : public NamedDeclInfo, public LocationInfo
         AccessType acessType;
     };
 
+    std::vector<std::string> compoundId;
+
     std::vector<BaseInfo> baseClasses;
     std::vector<MemberInfoPtr> members;
     std::vector<MethodInfoPtr> methods;

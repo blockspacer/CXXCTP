@@ -179,6 +179,11 @@ void prepareTypeName(std::string &in)
       in = removePrefix(in, prefix);
     }
   }
+
+  // remove space
+  /*in.erase(
+    std::remove( in.begin(), in.end(), ' ' ),
+    in.end());*/
 }
 
 } // namespace cxtpl_utils

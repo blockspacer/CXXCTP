@@ -13,6 +13,18 @@ MagicItem {
   //S interface_data;
 };
 
+template<typename T1>
+struct
+ParentTemplated_1 {
+  virtual void has_P1(T1 name1) const noexcept = 0;
+};
+
+template<typename T1>
+struct
+ParentTemplated_2 {
+  virtual void has_P2(T1 name1) const noexcept = 0;
+};
+
 // like `trait`
 template<typename T1, typename T2>
 struct

@@ -131,4 +131,9 @@ void prepareTplArg(std::string &in)
   in.erase(
     std::remove( in.begin(), in.end(), '\"' ),
     in.end());
+
+  // remove space
+  /*in.erase(
+    std::remove( in.begin(), in.end(), ' ' ),
+    in.end());*/
 }

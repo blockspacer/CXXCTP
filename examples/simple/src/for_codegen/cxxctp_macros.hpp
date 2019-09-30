@@ -92,7 +92,7 @@ $genonly()*/
   struct \
   __attribute__((annotate("{gen};{funccall};typeclass" ))) \
   GEN_UNIQUE_NAME(__gen_tmp__typeclass) \
-  : public __VA_ARGS__ \
+  : __VA_ARGS__ \
   {};
 
 #define $typeclass_impl(...) \
