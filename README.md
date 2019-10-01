@@ -134,6 +134,47 @@ git submodule update --init --recursive --depth 50
 git submodule update --force --recursive --init --remote
 ```
 
+## Install & use under Docker
+Install and configure Docker https://medium.com/@saniaky/configure-docker-to-use-a-host-proxy-e88bd988c0aa
+
+Clone code (as above) and `cd` into cloned dir.
+
+NOTE: You may want to build Docker image with `--build-arg NO_SSL="False"`. Read comments in Dockerfile.
+
+```
+# Give docker the rights to access X-server
+sudo -E xhost +local:docker
+
+# build Dockerfile
+sudo -E docker build --no-cache -t cpp-docker-cxxctp .
+
+# Now let’s check if our image has been created.
+sudo -E docker images
+
+# Run in container without leaving host terminal
+sudo -E docker run -v "$PWD":/home/u/cxxctp -w /home/u/cxxctp cpp-docker-cxxctp CXTPL_tool -version --version
+
+# Run a terminal in container
+sudo -E docker run --rm -v "$PWD":/home/u/cxxctp -w /home/u/cxxctp  -it  -e DISPLAY         -v /tmp/.X11-unix:/tmp/.X11-unix  cpp-docker-cxxctp
+
+# type in container terminal
+CXTPL_tool -version --version
+```
+
+## Develop under Docker
+```
+# Run a terminal in container
+sudo -E docker run --rm -v "$PWD":/home/u/cxxctp -w /home/u/cxxctp  -it  -e DISPLAY         -v /tmp/.X11-unix:/tmp/.X11-unix  cpp-docker-cxxctp
+
+# An example of how to build (with Makefile generated from cmake) inside the container
+# Mounts $PWD to /home/u/cxxctp and runs command
+mkdir build
+sudo -E docker run --rm -v "$PWD":/home/u/cxxctp -w /home/u/cxxctp/build cpp-docker-cxxctp cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..
+
+# Run resulting app in host OS:
+# ./build/<app>
+```
+
 ## DEPENDENCIES
 ```
 # Boost
