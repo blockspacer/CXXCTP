@@ -7,7 +7,9 @@ message(STATUS "input_files (for ${CXXCTP_tool_PROGRAM}) = ${INPUTS}")
 message(STATUS "output dir (for ${CXXCTP_tool_PROGRAM}) = ${OUTDIR}")
 message(STATUS "CXXCTP_tool_LOG_CONFIG (for ${CXXCTP_tool_PROGRAM}) = ${CXXCTP_tool_LOG_CONFIG}")
 
-file(REMOVE_RECURSE ${OUTDIR})
+if(CXXCTP_tool_CLEAN)
+  file(REMOVE_RECURSE ${OUTDIR})
+endif(CXXCTP_tool_CLEAN)
 
 separate_arguments(EXTRA_ARGS)
 separate_arguments(INPUTS)

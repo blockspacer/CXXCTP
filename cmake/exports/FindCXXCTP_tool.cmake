@@ -33,7 +33,7 @@ if(CXXCTP_tool)
     # makes this redundant, as it enables it for all targets already. This
     # could be used in combination with custom target commands or by
     # overriding the add_* commands with custom implementation.
-    function(target_add_CXXCTP_tool TARGET GUID INPUTS OUTDIR EXTRA_ARGS)
+    function(target_add_CXXCTP_tool TARGET GUID INPUTS OUTDIR EXTRA_ARGS CLEAN_GEN)
       if(NOT CXXCTP_tool_PROGRAM)
           message(FATAL_ERROR "Program 'CXXCTP_tool' not found, unable to run 'CXXCTP_tool'.")
       endif(NOT CXXCTP_tool_PROGRAM)
@@ -46,6 +46,7 @@ if(CXXCTP_tool)
       add_custom_target(CXXCTP_tool_target_for_${TARGET}_${GUID} ALL
         COMMAND ${CMAKE_COMMAND}
                 -DCXXCTP_tool_PROGRAM=${CXXCTP_tool_PROGRAM}
+                -DCXXCTP_tool_CLEAN=${CLEAN_GEN}
                 -DSRCDIR="${CMAKE_CURRENT_SOURCE_DIR}"
                 -DINPUTS="${INPUTS}"
                 -DOUTDIR="${OUTDIR}"
