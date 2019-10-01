@@ -12,21 +12,18 @@
 #include <algorithm>
 #include <string>
 
-const char* typeclass_instance(
-    const cxxctp::parsed_func& func_with_args,
-    const clang::ast_matchers::MatchFinder::MatchResult& matchResult,
-    clang::Rewriter& rewriter,
-    const clang::Decl* decl,
-    const std::vector<cxxctp::parsed_func>& all_func_with_args) {
+cxxctp_callback_result typeclass_instance(
+  const cxxctp_callback_args& callback_args) {
     XLOG(DBG9) << "typeclass_instance called...";
 
     cxxctp::args typeclassBaseNames =
-      func_with_args.parsed_func_.args_;
+      callback_args.func_with_args.parsed_func_.args_;
 
     std::string targetName;
 
     const clang::CXXRecordDecl *node =
-        matchResult.Nodes.getNodeAs<clang::CXXRecordDecl>("bind_gen");
+      callback_args.matchResult.Nodes.getNodeAs<
+        clang::CXXRecordDecl>("bind_gen");
 
     if (node) {
         targetName = node->getNameAsString();
@@ -41,7 +38,7 @@ const char* typeclass_instance(
 
     if (targetName.empty()) {
         XLOG(ERR) << "target for typeclass instance not found ";
-        return "";
+        return cxxctp_callback_result{""};
     }
 
     for(const auto& tit : typeclassBaseNames.as_vec_) {
@@ -56,7 +53,7 @@ const char* typeclass_instance(
       XLOG(DBG9) << "target = " << targetName;
 
       if(typeclassBaseName.empty()) {
-          return "";
+          return cxxctp_callback_result{""};
       }
 
       if(reflection::ReflectionRegistry::getInstance()->
@@ -66,7 +63,7 @@ const char* typeclass_instance(
       {
           XLOG(ERR) << "ERROR: typeclassBaseName = "
             << typeclassBaseName << " not found!";
-          return "";
+          return cxxctp_callback_result{""};
       }
 
       const reflection::ReflectionCXXRecordRegistry*
@@ -79,10 +76,13 @@ const char* typeclass_instance(
       XLOG(DBG9) << "typeclassBaseName = "
         << typeclassBaseName;*/
 
-      clang::SourceManager &SM = rewriter.getSourceMgr();
+      clang::SourceManager &SM
+        = callback_args.rewriter.getSourceMgr();
       const auto fileID = SM.getMainFileID();
-      const auto fileEntry = SM.getFileEntryForID(SM.getMainFileID());
-      std::string original_full_file_path = fileEntry->getName();
+      const auto fileEntry = SM.getFileEntryForID(
+        SM.getMainFileID());
+      std::string original_full_file_path
+        = fileEntry->getName();
 
       XLOG(DBG9) << "original_full_file_path = "
         << original_full_file_path;
@@ -138,5 +138,5 @@ const char* typeclass_instance(
       }
     }
 
-  return ""; // TODO
+  return cxxctp_callback_result{""}; // TODO
 }

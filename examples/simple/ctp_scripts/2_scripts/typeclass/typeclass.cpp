@@ -13,24 +13,21 @@
 
 // see https://github.com/tlatkdgus1/llvm-code_obfuscate/blob/c4d0641f95704fb9909e2ac09500df1b6bc5d017/tools/clang/lib/AST/DeclPrinter.cpp#L447
 // see https://github.com/root-project/root/blob/331efa4c00fefc38980eaaf7b41b8e95fcd1a23b/interpreter/llvm/src/tools/clang/lib/AST/DeclPrinter.cpp#L474
-const char* typeclass(
-    const cxxctp::parsed_func& func_with_args,
-    const clang::ast_matchers::MatchFinder::MatchResult& matchResult,
-    clang::Rewriter& rewriter,
-    const clang::Decl* decl,
-    const std::vector<cxxctp::parsed_func>& all_func_with_args) {
+cxxctp_callback_result typeclass(
+  const cxxctp_callback_args& callback_args) {
 
   XLOG(DBG9) << "typeclass called...";
 
   cxxctp::args typeclassBaseNames =
-    func_with_args.parsed_func_.args_;
+    callback_args.func_with_args.parsed_func_.args_;
 
   const clang::CXXRecordDecl *node1 =
-      matchResult.Nodes.getNodeAs<clang::CXXRecordDecl>("bind_gen");
+    callback_args.matchResult.Nodes.getNodeAs<
+      clang::CXXRecordDecl>("bind_gen");
 
   if (!node1) {
       XLOG(ERR) << "CXXRecordDecl not found ";
-      return "";
+      return cxxctp_callback_result{""};
   }
 
   /*std::string targetName = node1->getNameAsString();
@@ -46,7 +43,8 @@ const char* typeclass(
   std::string fullBaseType;
 
   if (node1) {
-      reflection::AstReflector reflector(matchResult.Context);
+      reflection::AstReflector reflector(
+        callback_args.matchResult.Context);
 
       std::vector<clang::CXXRecordDecl *> nodes;
       std::vector<reflection::ClassInfoPtr> structInfos;
@@ -56,7 +54,8 @@ const char* typeclass(
         //node = it.getType()->getAsCXXRecordDecl();//<clang::RecordDecl>();
 
         if(it.getType()->getAsCXXRecordDecl()) {
-          nodes.push_back(it.getType()->getAsCXXRecordDecl());
+          nodes.push_back(
+            it.getType()->getAsCXXRecordDecl());
 
           const auto refled
             = reflector.ReflectClass(
@@ -81,9 +80,11 @@ const char* typeclass(
 
           std::string preparedFullBaseType
             = it.getType().getAsString();
-          cxtpl_utils::prepareTypeName(preparedFullBaseType);
+          cxtpl_utils::prepareTypeName(
+            preparedFullBaseType);
 
-          structInfo->compoundId.push_back(preparedFullBaseType);
+          structInfo->compoundId.push_back(
+            preparedFullBaseType);
 
           fullBaseType += preparedFullBaseType;
           fullBaseType += ",";
@@ -96,8 +97,9 @@ const char* typeclass(
         fullBaseType.pop_back();
       }
 
-      if(nodes.empty() || structInfos.empty() || !structInfo) {
-        return "";
+      if(nodes.empty() || structInfos.empty()
+         || !structInfo) {
+        return cxxctp_callback_result{""};
       }
 
 /*if(node1->getDescribedClassTemplate())
@@ -127,8 +129,9 @@ const char* typeclass(
 
         reflection::ReflectionRegistry::getInstance()->
           reflectionCXXRecordRegistry[fullBaseType]
-            = std::make_unique<reflection::ReflectionCXXRecordRegistry>(
-              fullBaseType, /*node,*/ structInfo);
+            = std::make_unique<
+                reflection::ReflectionCXXRecordRegistry>(
+                  fullBaseType, /*node,*/ structInfo);
 
         XLOG(DBG9) << "templateParams.size"
           << structInfo->templateParams.size();
@@ -221,35 +224,46 @@ const char* typeclass(
       std::string fileTargetName = fullBaseType;
       cxtpl_utils::prepareFileName(fileTargetName);
 
-      fs::path gen_hpp_name = fs::absolute(ctp::Options::res_path
+      fs::path gen_hpp_name = fs::absolute(
+        ctp::Options::res_path
         / (fileTargetName + ".typeclass.generated.hpp"));
 
-      fs::path gen_cpp_name = fs::absolute(ctp::Options::res_path
+      fs::path gen_cpp_name = fs::absolute(
+        ctp::Options::res_path
         / (fileTargetName + ".typeclass.generated.cpp"));
 
       {
-        clang::SourceManager &SM = rewriter.getSourceMgr();
+        clang::SourceManager &SM
+          = callback_args.rewriter.getSourceMgr();
         const auto fileID = SM.getMainFileID();
-        const auto fileEntry = SM.getFileEntryForID(SM.getMainFileID());
+        const auto fileEntry = SM.getFileEntryForID(
+          SM.getMainFileID());
         std::string full_file_path = fileEntry->getName();
-        XLOG(DBG9) << "full_file_path is " << full_file_path;
+        XLOG(DBG9) << "full_file_path is "
+          << full_file_path;
 
         std::map<std::string, std::any> cxtpl_params;
 
         cxtpl_params.emplace("ReflectedStructInfo",
-                       std::make_any<reflection::ClassInfoPtr>(structInfo));
+                       std::make_any<
+                        reflection::ClassInfoPtr>(structInfo));
         //XLOG(DBG9) << "methods count: " << structInfo->methods.size();
 
         cxtpl_params.emplace("fullBaseType",
-                       std::make_any<std::string>(fullBaseType));
+                       std::make_any<std::string>(
+                        fullBaseType));
 
         cxtpl_params.emplace("generator_path",
-                       std::make_any<std::string>("typeclass_gen_hpp.cxtpl"));
+                       std::make_any<std::string>(
+                        "typeclass_gen_hpp.cxtpl"));
         cxtpl_params.emplace("generator_includes",
-                             std::make_any<std::vector<std::string>>(
+                             std::make_any<
+                               std::vector<std::string>>(
                                  std::vector<std::string>{
-                                     wrapLocalInclude(full_file_path),
-                                     wrapLocalInclude(R"raw(type_erasure_common.hpp)raw")
+                                     wrapLocalInclude(
+                                      full_file_path),
+                                     wrapLocalInclude(
+                                      R"raw(type_erasure_common.hpp)raw")
                                  })
                              );
 
@@ -265,19 +279,25 @@ const char* typeclass(
         std::map<std::string, std::any> cxtpl_params;
 
         cxtpl_params.emplace("ReflectedStructInfo",
-                       std::make_any<reflection::ClassInfoPtr>(structInfo));
+                       std::make_any<
+                        reflection::ClassInfoPtr>(structInfo));
         //XLOG(DBG9) << "methods count: " << structInfo->methods.size();
 
         cxtpl_params.emplace("fullBaseType",
-                       std::make_any<std::string>(fullBaseType));
+                       std::make_any<
+                        std::string>(fullBaseType));
 
         cxtpl_params.emplace("generator_path",
-                       std::make_any<std::string>("typeclass_gen_cpp.cxtpl"));
+                       std::make_any<
+                        std::string>("typeclass_gen_cpp.cxtpl"));
         cxtpl_params.emplace("generator_includes",
-                             std::make_any<std::vector<std::string>>(
+                             std::make_any<
+                               std::vector<std::string>>(
                                  std::vector<std::string>{
-                                     wrapLocalInclude(gen_hpp_name),
-                                     wrapLocalInclude(R"raw(type_erasure_common.hpp)raw")
+                                     wrapLocalInclude(
+                                      gen_hpp_name),
+                                     wrapLocalInclude(
+                                      R"raw(type_erasure_common.hpp)raw")
                                  })
                              );
 
@@ -291,5 +311,5 @@ const char* typeclass(
     }
   }
 
-  return "";
+  return cxxctp_callback_result{""};
 }

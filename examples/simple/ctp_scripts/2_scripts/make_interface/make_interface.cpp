@@ -5,16 +5,15 @@
 // see https://blog.jetbrains.com/clion/2017/11/towards-a-more-powerful-and-simpler-cpp-with-herb-sutter/
 // see https://herbsutter.com/2017/07/26/metaclasses-thoughts-on-generative-c/
 // see https://www.fluentcpp.com/2018/03/09/c-metaclasses-proposal-less-5-minutes/
-const char* make_interface(
-    const cxxctp::parsed_func& func_with_args,
-    const clang::ast_matchers::MatchFinder::MatchResult& matchResult,
-    clang::Rewriter& rewriter,
-    const clang::Decl* decl,
-    const std::vector<cxxctp::parsed_func>& all_func_with_args) {
+cxxctp_callback_result make_interface(
+  const cxxctp_callback_args& callback_args) {
+
   XLOG(DBG9) << "make_interface called...";
 
   clang::CXXRecordDecl const *record =
-      matchResult.Nodes.getNodeAs<clang::CXXRecordDecl>("bind_gen");
+    callback_args.matchResult.Nodes.getNodeAs<
+      clang::CXXRecordDecl>("bind_gen");
+
   if (record) {
     XLOG(DBG9) << "is record " << record->getNameAsString();
 
@@ -70,8 +69,8 @@ const char* make_interface(
             << record->getNameAsString();
 
           clang::SourceLocation PureInsertionPoint =
-              findPureInsertionPoint(*fct, *matchResult.Context);
-          rewriter.InsertText(PureInsertionPoint, " = 0");
+              findPureInsertionPoint(*fct, *callback_args.matchResult.Context);
+          callback_args.rewriter.InsertText(PureInsertionPoint, " = 0");
         }
 
         // modify
@@ -82,24 +81,26 @@ const char* make_interface(
             << record->getNameAsString();
 
           clang::SourceLocation VirtualInsertionPoint =
-              findVirtualInsertionPoint(*fct, *matchResult.Context);
-          rewriter.InsertText(VirtualInsertionPoint, "virtual ");
+              findVirtualInsertionPoint(*fct, *callback_args.matchResult.Context);
+          callback_args.rewriter.InsertText(VirtualInsertionPoint, "virtual ");
         }
       }
     }
   }
 
   clang::FieldDecl const *field =
-    matchResult.Nodes.getNodeAs<clang::FieldDecl>("bind_gen");
+    callback_args.matchResult.Nodes.getNodeAs<
+      clang::FieldDecl>("bind_gen");
   if (field) {
     XLOG(DBG9) << "is field";
   }
 
   clang::FunctionDecl const *function =
-      matchResult.Nodes.getNodeAs<clang::FunctionDecl>("bind_gen");
+    callback_args.matchResult.Nodes.getNodeAs<
+      clang::FunctionDecl>("bind_gen");
   if (function) {
     XLOG(DBG9) << "is function";
   }
 
-  return "";
+  return cxxctp_callback_result{""};
 }

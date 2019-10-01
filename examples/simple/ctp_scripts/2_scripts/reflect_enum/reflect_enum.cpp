@@ -6,16 +6,14 @@
 
 #include "options/ctp/options.hpp"
 
-const char* reflect_enum(
-    const cxxctp::parsed_func& func_with_args,
-    const clang::ast_matchers::MatchFinder::MatchResult& matchResult,
-    clang::Rewriter& rewriter,
-    const clang::Decl* decl,
-    const std::vector<cxxctp::parsed_func>& all_func_with_args) {
+cxxctp_callback_result reflect_enum(
+  const cxxctp_callback_args& callback_args) {
+
   XLOG(DBG9) << "reflect_enum called...";
 
   clang::EnumDecl const *node =
-      matchResult.Nodes.getNodeAs<clang::EnumDecl>("bind_gen");
+    callback_args.matchResult.Nodes.getNodeAs<
+      clang::EnumDecl>("bind_gen");
 
   if (node) {
     XLOG(DBG9) << "reflect is record" << node->getNameAsString();
@@ -66,13 +64,15 @@ const char* reflect_enum(
         "TOTAL", std::to_string(maxval + 1));
 
       cxtpl_params["GeneratedEnumItems"] =
-        std::make_any<std::unordered_map<std::string, std::string>>(GeneratedEnumItems);
+        std::make_any<std::unordered_map<
+          std::string, std::string>>(GeneratedEnumItems);
       cxtpl_params["GeneratedEnumName"] =
           std::make_any<std::string>(nameString);
       cxtpl_params["GeneratedEnumType"] =
           std::make_any<std::string>(typeString);
 
-    fs::path gen_hpp_name = fs::absolute(ctp::Options::res_path
+    fs::path gen_hpp_name = fs::absolute(
+      ctp::Options::res_path
       / (node->getNameAsString() + ".enum.generated.hpp"));
 
     {
@@ -89,7 +89,8 @@ const char* reflect_enum(
 /// \note generated file
 #include "generated/enum_gen_cpp.cxtpl.cpp"
 
-    fs::path gen_cpp_name = fs::absolute(ctp::Options::res_path
+    fs::path gen_cpp_name = fs::absolute(
+      ctp::Options::res_path
       / (node->getNameAsString() + ".enum.generated.cpp"));
 
       cxxctp::utils::writeToFile(cxtpl_output, gen_cpp_name);
@@ -110,5 +111,5 @@ const char* reflect_enum(
     }
   }
 
-  return "";
+  return cxxctp_callback_result{""};
 }

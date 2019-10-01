@@ -10,6 +10,8 @@
 
 #include "utils.hpp"
 
+#include "ctp_scripts/1_utils/CXXCTP_STD/CXXCTP_STD.hpp"
+
 #include <clang/Rewrite/Core/Rewriter.h>
 #include <clang/ASTMatchers/ASTMatchers.h>
 #include <clang/AST/ASTContext.h>
@@ -91,12 +93,8 @@ void add_default_clang_args(std::vector<std::string>& args);
   * \arg clang::Decl - found by MatchFinder, see https://devblogs.microsoft.com/cppblog/exploring-clang-tooling-part-2-examining-the-clang-ast-with-clang-query/
   * \arg std::vector<parsed_func> - all arguments extracted from attribute. Example: $apply(interface, foo_with_args(1, "2")) becomes two `parsed_func` - `interface` and `foo_with_args`.
 **/
-typedef std::function<const char*(
-    const cxxctp::parsed_func& func_with_args,
-    const clang::ast_matchers::MatchFinder::MatchResult& matchResult,
-    clang::Rewriter& rewriter,
-    const clang::Decl* decl,
-    const std::vector<cxxctp::parsed_func>& all_funcs_with_args)> cxxctp_callback;
+typedef std::function<cxxctp_callback_result(
+      const cxxctp_callback_args& callback_args)> cxxctp_callback;
 
 void add_cxxctp_callback(const std::string& id, const cxxctp_callback& func);
 

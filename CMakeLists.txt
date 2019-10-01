@@ -349,6 +349,8 @@ if(ENABLE_CXXCTP)
   target_include_directories(CXXCTP_core PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/src
+    # path to ctp_scripts/1_utils/CXXCTP_STD/CXXCTP_STD.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple
   )
 
   target_include_directories(CXXCTP_core PUBLIC

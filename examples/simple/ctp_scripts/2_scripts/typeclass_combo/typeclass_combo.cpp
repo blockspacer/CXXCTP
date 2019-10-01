@@ -13,17 +13,13 @@
 
 // see https://github.com/tlatkdgus1/llvm-code_obfuscate/blob/c4d0641f95704fb9909e2ac09500df1b6bc5d017/tools/clang/lib/AST/DeclPrinter.cpp#L447
 // see https://github.com/root-project/root/blob/331efa4c00fefc38980eaaf7b41b8e95fcd1a23b/interpreter/llvm/src/tools/clang/lib/AST/DeclPrinter.cpp#L474
-const char* typeclass_combo(
-    const cxxctp::parsed_func& func_with_args,
-    const clang::ast_matchers::MatchFinder::MatchResult& matchResult,
-    clang::Rewriter& rewriter,
-    const clang::Decl* decl,
-    const std::vector<cxxctp::parsed_func>& all_func_with_args) {
+cxxctp_callback_result typeclass_combo(
+  const cxxctp_callback_args& callback_args) {
 
   XLOG(DBG9) << "typeclass_combo called...";
 
   cxxctp::args typeclassBaseNames =
-    func_with_args.parsed_func_.args_;
+    callback_args.func_with_args.parsed_func_.args_;
 
   std::string combinedTypeclassNames;
   std::vector<std::string> typeclassNames;
@@ -38,7 +34,7 @@ const char* typeclass_combo(
       const std::string typeclassBaseName = tit.value_;
       XLOG(DBG9) << "typeclassBaseName = " << typeclassBaseName;
       if(typeclassBaseName.empty()) {
-          return "";
+          return cxxctp_callback_result{""};
       }
 
       if(reflection::ReflectionRegistry::getInstance()->
@@ -48,7 +44,7 @@ const char* typeclass_combo(
       {
           XLOG(ERR) << "typeclassBaseName = "
             << typeclassBaseName << " not found!";
-          return "";
+          return cxxctp_callback_result{""};
       }
 
       const reflection::ReflectionCXXRecordRegistry*
@@ -79,7 +75,7 @@ const char* typeclass_combo(
       {
           XLOG(ERR) << "typeclassBaseName = "
             << typeclassBaseName << " not found!";
-          return "";
+          return cxxctp_callback_result{""};
       }
 
       ReflectedTypeclasses.push_back(
@@ -90,19 +86,22 @@ const char* typeclass_combo(
 
   if(typeclassNames.empty()) {
     XLOG(ERR) << "typeclassNames = empty!";
-    return "";
+    return cxxctp_callback_result{""};
   }
 
   // see https://github.com/asutton/clang/blob/master/lib/AST/DeclPrinter.cpp#L502
 
-  clang::SourceLocation startLoc = decl->getLocStart();
-  clang::SourceLocation endLoc = decl->getLocEnd();
-  clang_utils::expandLocations(startLoc, endLoc, rewriter);
+  clang::SourceLocation startLoc
+    = callback_args.decl->getLocStart();
+  clang::SourceLocation endLoc
+    = callback_args.decl->getLocEnd();
+  clang_utils::expandLocations(
+    startLoc, endLoc, callback_args.rewriter);
 
   auto codeRange = clang::SourceRange{startLoc, endLoc};
 
   std::string OriginalTypeclassBaseCode =
-    rewriter.getRewrittenText(codeRange);
+    callback_args.rewriter.getRewrittenText(codeRange);
 
   // removes $apply(typeclass, e.t.c.)
   /*std::string CleanOriginalTypeclassBaseCode
@@ -180,5 +179,5 @@ const char* typeclass_combo(
     cxxctp::utils::writeToFile(cxtpl_output, gen_cpp_name);
   }
 
-  return "";
+  return cxxctp_callback_result{""};
 }

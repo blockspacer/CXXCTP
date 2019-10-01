@@ -215,7 +215,8 @@ cmake -E remove_directory build
 cmake -E make_directory build
 cmake -E remove_directory resources/cxtpl/generated
 cmake -E make_directory resources/cxtpl/generated
-cmake -E chdir build cmake -E time cmake -DENABLE_CLING=TRUE -DBUILD_SHARED_LIBS=TRUE -DALLOW_PER_PROJECT_CTP_SCRIPTS=TRUE -DBUILD_EXAMPLES=FALSE -DBUNDLE_EXAMPLE_SCRIPTS=FALSE -DCMAKE_BUILD_TYPE=Debug -DENABLE_CXXCTP=TRUE ..
+cmake -E chdir build cmake -E time cmake -DENABLE_CLING=TRUE -DBUILD_SHARED_LIBS=TRUE -DALLOW_PER_PROJECT_CTP_SCRIPTS=TRUE -DBUILD_EXAMPLES=FALSE -DBUNDLE_EXAMPLE_SCRIPTS=FALSE -DCLEAN_CXXCTP_GEN=TRUE -DCMAKE_BUILD_TYPE=Debug -DENABLE_CXXCTP=TRUE ..
+# OR cmake -E chdir build cmake -E time cmake -DENABLE_CLING=TRUE -DBUILD_SHARED_LIBS=TRUE -DALLOW_PER_PROJECT_CTP_SCRIPTS=FALSE -DBUILD_EXAMPLES=FALSE -DBUNDLE_EXAMPLE_SCRIPTS=TRUE -DCLEAN_CXXCTP_GEN=TRUE -DCMAKE_BUILD_TYPE=Debug -DENABLE_CXXCTP=TRUE ..
 cmake -E chdir build cmake -E time cmake --build . -- -j6
 # you can install CXXCTP_tool:
 sudo cmake -E chdir build make install
@@ -739,11 +740,13 @@ extra libs
  + https://getstudypoint.blogspot.com/2017/07/how-to-work-in-c-from-basic-to-advance.html
 
 modules
+ + https://codeforces.com/blog/entry/70198?locale=en
  + https://github.com/reneeichhorn/extended-cpp
  + https://www.modernescpp.com/index.php/c-20-modules
  + https://github.com/boostcon/cppnow_presentations_2019/blob/master/05-10-2019_friday/The_Rough_Road_Towards_Upgrading_to_Cpp_Modules__Rich%C3%A1rd_Szalay__cppnow_05102019.pdf
 
 c++ modules backwards compatible
+ + https://codeforces.com/blog/entry/70198?locale=en
  + https://github.com/build2/build2/blob/master/doc/manual.cli#L6362
  + #ifndef __cpp_modules https://build2.org/doc/modules-cppcon2017.pdf
  + https://github.com/fdwr/TextLayoutSampler/blob/be81e6dbc95151f51acb1ae5ea30c7863f237387/Common.h#L8

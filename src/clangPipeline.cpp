@@ -8,6 +8,8 @@
 
 #include "options/ctp/options.hpp"
 
+#include "ctp_scripts/1_utils/CXXCTP_STD/CXXCTP_STD.hpp"
+
 #if __has_include(<filesystem>)
 #include <filesystem>
 #else
@@ -170,7 +172,14 @@ bool nativeCallModuleFunc(const UseOverride::Checker::MatchResult& Result,
     XLOG(DBG9) << "found native callback for: "
                  << func_to_call.parsed_func_.func_name_;
 
-    callback_cxxctp(func_to_call, Result, rewriter_, decl, parsedFuncs);
+    cxxctp_callback_args args {
+      func_to_call,
+      Result,
+      rewriter_,
+      decl,
+      parsedFuncs
+    };
+    callback_cxxctp(std::move(args));
     return true;
 }
 
@@ -192,6 +201,13 @@ void clingCallModuleFunc(const UseOverride::Checker::MatchResult& Result,
     XLOG(DBG9) << "can`t find native callback for: "
                  << func_to_call.func_with_args_as_string_ << "; fallback to cling";
 
+    cxxctp_callback_args args {
+      func_to_call,
+      Result,
+      rewriter_,
+      decl,
+      parsedFuncs
+    };
     std::ostringstream sstr;
     // scope begin
     sstr << "[](){";
@@ -199,30 +215,10 @@ void clingCallModuleFunc(const UseOverride::Checker::MatchResult& Result,
     // func begin
     sstr << func_to_call.parsed_func_.func_name_ << "( ";
     // func arguments
-    sstr << "*(const cxxctp::parsed_func*)("
+    sstr << "*(const cxxctp_callback_args*)("
          // Pass a pointer into cling as a string.
          << std::hex << std::showbase
-         << reinterpret_cast<size_t>(&func_to_call) << ')';
-    sstr << " , "; // next argument
-    sstr << "*(const clang::ast_matchers::MatchFinder::MatchResult*)("
-         // Pass a pointer into cling as a string.
-         << std::hex << std::showbase
-         << reinterpret_cast<size_t>(&Result) << ')';
-    sstr << " , "; // next argument
-    sstr << "*(clang::Rewriter*)("
-         // Pass a pointer into cling as a string.
-         << std::hex << std::showbase
-         << reinterpret_cast<size_t>(&rewriter_) << ')';
-    sstr << " , "; // next argument
-    sstr << "(const clang::Decl*)("
-         // Pass a pointer into cling as a string.
-         << std::hex << std::showbase
-         << reinterpret_cast<size_t>(decl) << ')';
-    sstr << " , "; // next argument
-    sstr << "*(std::vector<cxxctp::parsed_func>*)("
-         // Pass a pointer into cling as a string.
-         << std::hex << std::showbase
-         << reinterpret_cast<size_t>(&parsedFuncs) << ')';
+         << reinterpret_cast<size_t>(&args) << ')';
     // func end
     sstr << " );" << ";";
     // scope end

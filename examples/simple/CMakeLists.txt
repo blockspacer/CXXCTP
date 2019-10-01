@@ -45,33 +45,8 @@ message(STATUS "ZLIB_LIBRARIES = ${ZLIB_LIBRARIES}")
 
 message(STATUS "CMAKE_DL_LIBS = ${CMAKE_DL_LIBS}")
 
-macro(addGeneratedFolder dir prefix extra_patterns globType)
-  if (NOT EXISTS "${dir}")
-    message(FATAL_ERROR "${dir} doesn`t exist!")
-  endif()
-
-  set(found_files "")
-
-  # Note: Certain IDEs will only display files that belong to a target, so add .h files too.
-  file(${globType} found_files ABSOLUTE
-      ${extra_patterns}
-  )
-  LIST(APPEND ${prefix} ${found_files})
-endmacro()
-
-addGeneratedFolder(
-  ${CMAKE_CURRENT_SOURCE_DIR}/generated
-  "${PROJECT_NAME}_GENERATED_FILES"
-  "*enum.generated.cpp;*typeclass*.generated.cpp;"
-  GLOB_RECURSE)
-
-set_source_files_properties(
-  "${${PROJECT_NAME}_GENERATED_FILES}"
-  PROPERTIES GENERATED 1)
-
 # The project has one binary:
 add_executable(CXXCTP_example
-  ${${PROJECT_NAME}_GENERATED_FILES}
   ${CMAKE_CURRENT_SOURCE_DIR}/src/main_app.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Spell_WaterSpell.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Spell_FireSpell.cpp
@@ -194,3 +169,31 @@ append_absolute_path_to_extras("${CLING_BUILD_DIR}/src/tools/cling/include/" EXT
 target_add_CXXCTP_tool(CXXCTP_example
   "CXXCTP_example_simple" "${CXXCTP_inputs}" "${CXXCTP_outdir}" "${EXTRA_ARGS}" "${CLEAN_CXXCTP_GEN}")
 
+macro(addGeneratedFolder dir prefix extra_patterns globType)
+  if (NOT EXISTS "${dir}")
+    message(FATAL_ERROR "${dir} doesn`t exist!")
+  endif()
+
+  set(found_files "")
+
+  # Note: Certain IDEs will only display files that belong to a target, so add .h files too.
+  file(${globType} found_files ABSOLUTE
+      ${extra_patterns}
+  )
+  LIST(APPEND ${prefix} ${found_files})
+endmacro()
+
+# run after `target_add_CXXCTP_tool`
+addGeneratedFolder(
+  ${CMAKE_CURRENT_SOURCE_DIR}/generated
+  "${PROJECT_NAME}_GENERATED_FILES"
+  "*enum.generated.cpp;*typeclass*.generated.cpp;"
+  GLOB_RECURSE)
+
+set_source_files_properties(
+  "${${PROJECT_NAME}_GENERATED_FILES}"
+  PROPERTIES GENERATED 1)
+
+target_sources(CXXCTP_example PRIVATE
+  ${${PROJECT_NAME}_GENERATED_FILES}
+)

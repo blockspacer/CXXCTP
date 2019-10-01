@@ -3,12 +3,8 @@
 #include <folly/logging/xlog.h>
 
 /// \note that example used
-const char* make_reflect(
-    const cxxctp::parsed_func& func_with_args,
-    const clang::ast_matchers::MatchFinder::MatchResult& matchResult,
-    clang::Rewriter& rewriter,
-    const clang::Decl* decl,
-    const std::vector<cxxctp::parsed_func>& all_func_with_args) {
+cxxctp_callback_result make_reflect(
+    const cxxctp_callback_args& callback_args) {
   XLOG(DBG9) << "make_removefuncbody called...";
 
   std::string indent = "  ";
@@ -23,7 +19,7 @@ const char* make_reflect(
   std::map<std::string, std::string> methods;
 
   clang::CXXRecordDecl const *record =
-      matchResult.Nodes.getNodeAs<clang::CXXRecordDecl>("bind_gen");
+      callback_args.matchResult.Nodes.getNodeAs<clang::CXXRecordDecl>("bind_gen");
   if (record) {
     XLOG(DBG9) << "reflect is record " << record->getNameAsString().c_str();
 
@@ -97,8 +93,8 @@ const char* make_reflect(
                     "};");
     output.append("\n");
     auto locEnd = record->getLocEnd();
-    rewriter.InsertText(locEnd, output,
+    callback_args.rewriter.InsertText(locEnd, output,
       /*InsertAfter=*/true, /*IndentNewLines*/ false);
   }
-  return "";
+  return cxxctp_callback_result{""};
 }
