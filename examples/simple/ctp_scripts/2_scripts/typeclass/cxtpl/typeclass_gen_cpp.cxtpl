@@ -2,8 +2,14 @@
 
 using namespace cxtpl_utils;
 
+const auto headerGuard
+  = GetWithDefault<std::string>(cxtpl_params, "headerGuard", "");
+
 const auto generator_path
   = GetWithDefault<std::string>(cxtpl_params, "generator_path", "");
+
+const auto fullBaseType
+  = GetWithDefault<std::string>(cxtpl_params, "fullBaseType", "");
 
 std::vector<std::string> generator_includes
   = GetWithDefault<std::vector<std::string>>
@@ -15,7 +21,7 @@ std::vector<std::string> generator_includes
 // Path to the code generator: [[+ generator_path +]].
 
 [[~]] for(const auto& fileName: generator_includes) {
-[[+ fileName /* no newline */ +]][[~]]
+[[+ fileName +]]
 [[~]] } // end for
 
 #include <iostream>
@@ -24,6 +30,17 @@ std::vector<std::string> generator_includes
 
 namespace cxxctp {
 namespace generated {
+
+template <>
+bool _tc_combined_t<
+    [[+ fullBaseType +]]
+  >::
+  can_convert<
+    [[+ fullBaseType +]]
+  >() const
+{
+  return true;
+}
 
 // TODO
 //{{GeneratedTypeclassName}}

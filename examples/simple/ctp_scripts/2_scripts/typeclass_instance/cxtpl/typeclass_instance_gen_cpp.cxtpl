@@ -15,7 +15,7 @@ std::vector<std::string> generator_includes
 // Path to the code generator: [[+ generator_path +]].
 
 [[~]] for(const auto& fileName: generator_includes) {
-[[+ fileName /* no newline */ +]][[~]]
+[[+ fileName +]]
 [[~]] } // end for
 
 #include <iostream>

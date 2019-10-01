@@ -117,9 +117,14 @@ template<>
 struct _tc_model_t<[[+ fullBaseType +]]> {
   virtual ~_tc_model_t() noexcept { }
 
-  virtual std::unique_ptr<_tc_model_t> clone() noexcept = 0;
+  virtual std::unique_ptr<_tc_model_t>
+    clone() noexcept = 0;
 
-  virtual std::unique_ptr<_tc_model_t> move_clone() noexcept = 0;
+  virtual std::unique_ptr<_tc_model_t>
+    move_clone() noexcept = 0;
+
+  virtual std::string
+    get_GUID() const noexcept = 0;
 
   //virtual const size_t getModelTypeIndex() const noexcept = 0;
 
@@ -167,6 +172,9 @@ template< [[+ templateParamsFullDecls(method->tplParams) +]] >
   {
     return nullptr;
   }*/
+
+  //template <typename T>
+  //T& ref_concrete() noexcept;
 };
 
 template<>
@@ -174,10 +182,14 @@ struct _tc_combined_t<[[+ fullBaseType +]]> {
     // Default initializer creates an empty _tc_combined_t.
     _tc_combined_t() = default;
 
-    _tc_combined_t(std::reference_wrapper<_tc_combined_t<[[+ fullBaseType +]]>>&& rhs) noexcept {
+    _tc_combined_t(
+      std::reference_wrapper<
+        _tc_combined_t<[[+ fullBaseType +]]>>&& rhs) noexcept
+    {
         //puts("_tc_combined_t<[[+ fullBaseType +]]> ref copy ctor");
-        if(rhs.get())
-            my_interface_model = rhs.get().my_interface_model;
+        if(rhs.get()) {
+            model_ = rhs.get().model_;
+        }
     }
 
     /// \note moves passed argument
@@ -187,7 +199,7 @@ struct _tc_combined_t<[[+ fullBaseType +]]> {
         typename std::enable_if<!std::is_same<_tc_combined_t, T>::value>::type* = nullptr
         >
     _tc_combined_t(std::shared_ptr<T>&& u) noexcept :
-                                                      my_interface_model(std::move(u)) {
+                                                      model_(std::move(u)) {
         static_assert(!std::is_const<typename std::remove_reference<T>::type>::value,
                       "You've attempted a cast to a const rvalue reference. "
                       "Make sure you're not trying to move a const object, "
@@ -202,7 +214,7 @@ struct _tc_combined_t<[[+ fullBaseType +]]> {
         typename std::enable_if<!std::is_same<_tc_combined_t, T>::value>::type* = nullptr
         >
     _tc_combined_t(const std::shared_ptr<T>& u) noexcept :
-                                                           my_interface_model(u) {
+                                                           model_(u) {
         //puts("_tc_combined_t<[[+ fullBaseType +]]> called, shares passed argument");
     }
 
@@ -211,10 +223,11 @@ struct _tc_combined_t<[[+ fullBaseType +]]> {
         typename std::enable_if<!std::is_same<_tc_combined_t, T>::value>::type* = nullptr
         >
     _tc_combined_t(const std::reference_wrapper<T>& u) noexcept :
-                                                                  my_interface_model(
-                                                                      std::make_shared<
-                                                                          _tc_impl_t<std::reference_wrapper<T>, [[+ fullBaseType +]]>>
-                                                                      (std::forward<const std::reference_wrapper<std::decay_t<T>>>(u))) {
+          model_(
+              std::make_shared<
+                  _tc_impl_t<std::reference_wrapper<T>, [[+ fullBaseType +]]>>
+              (std::forward<const std::reference_wrapper<std::decay_t<T>>>(u)))
+    {
         //puts("_tc_combined_t{T} reference_wrapper called");
     }
 
@@ -224,7 +237,7 @@ struct _tc_combined_t<[[+ fullBaseType +]]> {
         typename std::enable_if<!std::is_same<_tc_combined_t, T>::value>::type* = nullptr
         >
     _tc_combined_t(const T&& u) noexcept :
-                                           my_interface_model(
+                                           model_(
                                                std::make_shared<
                                                    _tc_impl_t<T, [[+ fullBaseType +]]>>
                                                (std::forward<const std::decay_t<T>>(u))) {
@@ -235,13 +248,13 @@ struct _tc_combined_t<[[+ fullBaseType +]]> {
     explicit _tc_combined_t(const _tc_combined_t& rhs) noexcept {
         //puts("_tc_combined_t<[[+ fullBaseType +]]> copy ctor");
         if(rhs)
-            my_interface_model = rhs.my_interface_model->clone();
+            model_ = rhs.model_->clone();
     }
 
     // Call move_clone for move ctor/assign.
     explicit _tc_combined_t(_tc_combined_t&& rhs) noexcept {
         if(rhs)
-            my_interface_model = rhs.my_interface_model->move_clone();
+            model_ = rhs.model_->move_clone();
     }
 
     // The preferred initializer for a _tc_combined_t. This constructs an _tc_impl_t of
@@ -258,21 +271,21 @@ struct _tc_combined_t<[[+ fullBaseType +]]> {
     }
 
     _tc_combined_t& operator=(_tc_combined_t&& rhs) noexcept {
-        my_interface_model.reset();
+        model_.reset();
         if(rhs)
-            my_interface_model = rhs.my_interface_model->move_clone();
+            model_ = rhs.model_->move_clone();
         return *this;
     }
 
     _tc_combined_t& operator=(const _tc_combined_t& rhs) noexcept {
-        my_interface_model.reset();
+        model_.reset();
         if(rhs)
-            my_interface_model = rhs.my_interface_model->clone();
+            model_ = rhs.model_->clone();
         return *this;
     }
 
     void reset() noexcept {
-        my_interface_model.reset();
+        model_.reset();
     }
 
     // A virtual dtor triggers the dtor in the impl.
@@ -301,10 +314,10 @@ template< [[+ templateParamsFullDecls(method->tplParams) +]] >
 [[+ method->isConst ? "const " : "" +]][[~]] /* no newline */
 [[+ method->isNoExcept ? "noexcept " : "" +]][[~]] /* no newline */
   {
-    if(!my_interface_model) {
+    if(!model_) {
         std::terminate();
     }
-    my_interface_model->__[[+ method->name +]]([[+ paramsCallDecls(method->params) +]]);
+    model_->__[[+ method->name +]]([[+ paramsCallDecls(method->params) +]]);
   }
 [[~ /* newline */ ~]]
 [[~]]      } // needPrint
@@ -312,34 +325,39 @@ template< [[+ templateParamsFullDecls(method->tplParams) +]] >
 [[~]]  } // endscope
 
     explicit operator bool() const noexcept {
-        return (bool)my_interface_model;
+        return (bool)model_;
     }
 
     std::shared_ptr<_tc_model_t<[[+ fullBaseType +]]>> ref_model() const noexcept {
-        return my_interface_model;
+        return model_;
     }
 
+    std::string
+      get_GUID() const noexcept {
+      return model_->get_GUID();
+    };
+
     std::unique_ptr<_tc_model_t<[[+ fullBaseType +]]>> clone_model() const noexcept {
-        if(!my_interface_model) {
+        if(!model_) {
             std::terminate();
         }
-        return my_interface_model->clone();
+        return model_->clone();
     }
 
     const _tc_model_t<[[+ fullBaseType +]]>* raw_model() const noexcept {
-        return my_interface_model.get();
+        return model_.get();
     }
 
     void replace_model(
         const std::shared_ptr<_tc_model_t<[[+ fullBaseType +]]>> rhs) noexcept {
-        my_interface_model = rhs;
+        model_ = rhs;
     }
 
     /*const size_t getModelTypeIndex() {
-        if(!my_interface_model) {
+        if(!model_) {
             std::terminate();
         }
-        return my_interface_model->getModelTypeIndex();
+        return model_->getModelTypeIndex();
     }
 
     template <typename T>
@@ -350,14 +368,14 @@ template< [[+ templateParamsFullDecls(method->tplParams) +]] >
 
     template <typename T>
     T& ref_concrete() noexcept {
-        if(!my_interface_model || my_interface_model->getModelTypeIndex()
+        if(!model_ || model_->getModelTypeIndex()
                 != getGlobalTypeIndex<T>()) {
             std::terminate();
         }
-        return my_interface_model->ref_concrete<T>();
+        return model_->ref_concrete<T>();
     }*/
 
-    template <typename U>
+    template <typename... typeclass>
     bool can_convert() const
     {
         return false;
@@ -366,8 +384,16 @@ template< [[+ templateParamsFullDecls(method->tplParams) +]] >
     // This is actually a unique_ptr to an impl type. We store a pointer to
     // the base type and rely on _tc_model_t's virtual dtor to free the object.
 private:
-    std::shared_ptr<_tc_model_t<[[+ fullBaseType +]]>> my_interface_model;
+    std::shared_ptr<_tc_model_t<[[+ fullBaseType +]]>> model_;
 };
+
+template <>
+bool _tc_combined_t<
+    [[+ fullBaseType +]]
+  >::
+  can_convert<
+    [[+ fullBaseType +]]
+  >() const;
 
 [[~]] } // if(structInfo->templateParams.empty())
 

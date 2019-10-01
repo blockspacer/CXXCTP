@@ -57,7 +57,7 @@ struct _tc_combined_t<[[~]] /* no newline */
       _tc_combined_t<[[+ typeclassComboDecls(typeclassNames) +]]>>&& rhs) noexcept {
         //puts("_tc_combined_t<[[+ typeclassComboDecls(typeclassNames) +]]> ref copy ctor");
         if(rhs.get())
-            my_interface_model = rhs.get().my_interface_model;
+            model_ = rhs.get().model_;
     }*/
 
     /*/// \note moves passed argument
@@ -67,7 +67,7 @@ struct _tc_combined_t<[[~]] /* no newline */
         typename std::enable_if<!std::is_same<_tc_combined_t, T>::value>::type* = nullptr
         >
     _tc_combined_t(std::shared_ptr<T>&& u) noexcept :
-                                                      my_interface_model(std::move(u)) {
+                                                      model_(std::move(u)) {
         static_assert(!std::is_const<typename std::remove_reference<T>::type>::value,
                       "You've attempted a cast to a const rvalue reference. "
                       "Make sure you're not trying to move a const object, "
@@ -82,7 +82,7 @@ struct _tc_combined_t<[[~]] /* no newline */
         typename std::enable_if<!std::is_same<_tc_combined_t, T>::value>::type* = nullptr
         >
     _tc_combined_t(const std::shared_ptr<T>& u) noexcept :
-                                                           my_interface_model(u) {
+                                                           model_(u) {
         //puts("_tc_combined_t<[[+ typeclassComboDecls(typeclassNames) +]]> called, shares passed argument");
     }*/
 
@@ -91,7 +91,7 @@ struct _tc_combined_t<[[~]] /* no newline */
         typename std::enable_if<!std::is_same<_tc_combined_t, T>::value>::type* = nullptr
         >
     _tc_combined_t(const std::reference_wrapper<T>& u) noexcept :
-                                                                  my_interface_model(
+                                                                  model_(
                                                                       std::make_shared<
                                                                           _tc_impl_t<std::reference_wrapper<T>, GeneratedTypeclassName >>
                                                                       (std::forward<const std::reference_wrapper<std::decay_t<T>>>(u))) {
@@ -325,6 +325,24 @@ struct _tc_combined_t<[[~]] /* no newline */
 [[~]]    for(size_t index = 0; index < ReflectedTypeclassesSize; index++) {
 [[~]]      const auto typeclassName = typeclassNames.at(index);
 [[~]]
+  template<
+  typename T,
+  typename std::enable_if<
+    std::is_same<[[+ typeclassName +]], T>::value>::type* = nullptr
+  >
+  std::string get_GUID() const noexcept {
+    return
+      [[+ typeclassModelName(typeclassName) +]]
+        ->get_GUID();
+  }
+[[~]]
+[[~]]    } // endfor
+[[~]]  } // endscope
+
+[[~]]  { // startscope
+[[~]]    for(size_t index = 0; index < ReflectedTypeclassesSize; index++) {
+[[~]]      const auto typeclassName = typeclassNames.at(index);
+[[~]]
   operator const _tc_combined_t<
     [[+ typeclassName +]]>() const noexcept {
       return _tc_combined_t<
@@ -341,9 +359,9 @@ struct _tc_combined_t<[[~]] /* no newline */
     /*
 
   _tc_combined_t& operator=(const _tc_combined_t<template_interface<int, const std::string&>>& rhs) noexcept {
-    my_interface_model.reset();
+    model_.reset();
     if(rhs) {
-      my_interface_model = rhs.ref_model()->clone();
+      model_ = rhs.ref_model()->clone();
     } // if(rhs)
     return *this;
   }
@@ -363,7 +381,7 @@ struct _tc_combined_t<[[~]] /* no newline */
   >
   T& ref_concrete() noexcept {
     if(!my_interface2_model) {
-      //throw std::runtime_error("my_interface_model2 not set");
+      //throw std::runtime_error("model_2 not set");
       std::terminate();
     }
     return my_interface2_model->ref_concrete<C>();
@@ -375,11 +393,11 @@ struct _tc_combined_t<[[~]] /* no newline */
   typename std::enable_if<std::is_same<template_interface<int, const std::string&>, T>::value>::type* = nullptr
   >
   T& ref_concrete() noexcept {
-    if(!my_interface_model) {
-      //throw std::runtime_error("my_interface_model2 not set");
+    if(!model_) {
+      //throw std::runtime_error("model_2 not set");
       std::terminate();
     }
-    return my_interface_model->ref_concrete<C>();
+    return model_->ref_concrete<C>();
   }
 
   template<typename T>
@@ -389,28 +407,22 @@ struct _tc_combined_t<[[~]] /* no newline */
     */
 
     /*const size_t getModelTypeIndex() {
-        if(!my_interface_model) {
+        if(!model_) {
             std::terminate();
         }
-        return my_interface_model->getModelTypeIndex();
-    }
-
-    template <typename T>
-    static const size_t getGlobalTypeIndex() {
-        return _tc_registry< GeneratedTypeclassName >
-            ::getTypeIndex<T>();
+        return model_->getModelTypeIndex();
     }
 
     template <typename T>
     T& ref_concrete() noexcept {
-        if(!my_interface_model || my_interface_model->getModelTypeIndex()
+        if(!model_ || model_->getModelTypeIndex()
                 != getGlobalTypeIndex<T>()) {
             std::terminate();
         }
-        return my_interface_model->ref_concrete<T>();
+        return model_->ref_concrete<T>();
     }*/
 
-    template <typename U>
+    template <typename... typeclass>
     bool can_convert() const
     {
         return false;
@@ -443,7 +455,7 @@ template< [[+ templateParamsFullDecls(method->tplParams) +]] >
 [[+ method->isNoExcept ? "noexcept " : "" +]][[~]] /* no newline */
   {
     if(![[+ typeclassModelName(TypeclassName) +]]) {
-      //throw std::runtime_error("my_interface_model not set");
+      //throw std::runtime_error("model_ not set");
       std::terminate();
     }
     return [[+ typeclassModelName(TypeclassName) +]]->
@@ -470,9 +482,7 @@ template <>
 bool _tc_combined_t<
     [[+ typeclassComboDecls(typeclassNames) +]] >::
   can_convert<
-      [[+ typeclassName +]]>() const {
-    return true;
-  }
+      [[+ typeclassName +]]>() const;
 [[~]]
 [[~]]    } // endfor
 [[~]]  } // endscope

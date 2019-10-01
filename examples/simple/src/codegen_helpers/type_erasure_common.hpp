@@ -18,7 +18,14 @@ struct _tc_model_t /*: public common__tc_model_t*/ {
   //typedef typeclass... typeclass_type_t;
   virtual ~_tc_model_t() noexcept { }
 
-  virtual std::unique_ptr<_tc_model_t> clone() noexcept = 0;
+  virtual std::unique_ptr<_tc_model_t>
+    clone() noexcept = 0;
+
+  virtual std::unique_ptr<_tc_model_t>
+    move_clone() noexcept = 0;
+
+  virtual std::string
+    get_GUID() noexcept = 0;
 
   // Loop over each member function on the interface.
   /*@meta for(int i = 0; i < @method_count(typeclass); ++i) {
@@ -182,12 +189,6 @@ size_t constexpr Hash(const char *first)
     }
     return val;
 }*/
-
-template<typename typeclass>
-struct _tc_registry {
-  /*template<typename concrete>
-  static size_t getTypeIndex() noexcept = delete;*/
-};
 
 /*#ifdef COMPILE_DLL
 #define CXXCTP_EXPORT __declspec( dllexport )

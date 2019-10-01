@@ -2,6 +2,9 @@
 
 using namespace cxtpl_utils;
 
+const auto headerGuard
+  = GetWithDefault<std::string>(cxtpl_params, "headerGuard", "");
+
 const auto generator_path
   = GetWithDefault<std::string>(cxtpl_params, "generator_path", "");
 
@@ -9,13 +12,29 @@ std::vector<std::string> generator_includes
   = GetWithDefault<std::vector<std::string>>
       (cxtpl_params, "generator_includes", std::vector<std::string>{});
 
+std::vector<std::string> typeclassNames
+  = GetWithDefault<std::vector<std::string>>
+      (cxtpl_params, "typeclassNames", std::vector<std::string>{});
+
+std::vector<reflection::ClassInfoPtr> ReflectedTypeclasses
+  = GetWithDefault<std::vector<reflection::ClassInfoPtr>>
+      (cxtpl_params, "ReflectedTypeclasses", std::vector<reflection::ClassInfoPtr>{});
+
+const size_t ReflectedTypeclassesSize =
+    ReflectedTypeclasses.size();
+
+if(ReflectedTypeclassesSize != typeclassNames.size()) {
+  std::cerr << "WARNING: ReflectedTypeclassesSize != typeclassNames.size() "
+               "at typeclass_combo_gen_hpp.cxtpl" << std::endl;
+}
+
 // parameters end
 /* no newline */ ~]][[~]]
 // This is generated file. Do not modify directly.
 // Path to the code generator: [[+ generator_path +]].
 
 [[~]] for(const auto& fileName: generator_includes) {
-[[+ fileName /* no newline */ +]][[~]]
+[[+ fileName +]]
 [[~]] } // end for
 
 #include <iostream>
@@ -25,7 +44,20 @@ std::vector<std::string> generator_includes
 namespace cxxctp {
 namespace generated {
 
-// TODO
+[[~]]  { // startscope
+[[~]]    for(size_t index = 0; index < ReflectedTypeclassesSize; index++) {
+[[~]]      const auto typeclassName = typeclassNames.at(index);
+[[~]]
+template <>
+bool _tc_combined_t<
+    [[+ typeclassComboDecls(typeclassNames) +]] >::
+  can_convert<
+      [[+ typeclassName +]]>() const {
+    return true;
+  }
+[[~]]
+[[~]]    } // endfor
+[[~]]  } // endscope
 
 } // namespace cxxctp
 } // namespace generated

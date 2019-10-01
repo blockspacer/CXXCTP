@@ -104,8 +104,6 @@ const char* typeclass(
     XLOG(DBG9) << "reflectTpl is record = "
       << node->getDescribedClassTemplate()->getDeclName().getAsString();
 */
-    std::map<std::string, std::any> cxtpl_params;
-
     {
         /*XLOG(DBG9) << "reflector... for record "
           << node->getNameAsString();
@@ -115,13 +113,6 @@ const char* typeclass(
 
         XLOG(DBG9) << "reflectClassInfoPtr... for record"
           << node->getNameAsString();*/
-
-        cxtpl_params.emplace("ReflectedStructInfo",
-                       std::make_any<reflection::ClassInfoPtr>(structInfo));
-        //XLOG(DBG9) << "methods count: " << structInfo->methods.size();
-
-        cxtpl_params.emplace("fullBaseType",
-                       std::make_any<std::string>(fullBaseType));
 
         /*for(auto mit : structInfo->methods){
             XLOG(DBG9) << "methods: " << mit->name;
@@ -227,18 +218,30 @@ const char* typeclass(
       cxtpl_params.emplace("GeneratedTypeclassName",
                      std::make_any<std::string>(node->getNameAsString()));*/
 
+      std::string fileTargetName = fullBaseType;
+      cxtpl_utils::prepareFileName(fileTargetName);
+
+      fs::path gen_hpp_name = fs::absolute(ctp::Options::res_path
+        / (fileTargetName + ".typeclass.generated.hpp"));
+
+      fs::path gen_cpp_name = fs::absolute(ctp::Options::res_path
+        / (fileTargetName + ".typeclass.generated.cpp"));
+
       {
-        std::string fileTargetName = fullBaseType;
-        cxtpl_utils::prepareFileName(fileTargetName);
-
-        fs::path gen_hpp_name = fs::absolute(ctp::Options::res_path
-          / (fileTargetName + ".typeclass.generated.hpp"));
-
         clang::SourceManager &SM = rewriter.getSourceMgr();
         const auto fileID = SM.getMainFileID();
         const auto fileEntry = SM.getFileEntryForID(SM.getMainFileID());
         std::string full_file_path = fileEntry->getName();
         XLOG(DBG9) << "full_file_path is " << full_file_path;
+
+        std::map<std::string, std::any> cxtpl_params;
+
+        cxtpl_params.emplace("ReflectedStructInfo",
+                       std::make_any<reflection::ClassInfoPtr>(structInfo));
+        //XLOG(DBG9) << "methods count: " << structInfo->methods.size();
+
+        cxtpl_params.emplace("fullBaseType",
+                       std::make_any<std::string>(fullBaseType));
 
         cxtpl_params.emplace("generator_path",
                        std::make_any<std::string>("typeclass_gen_hpp.cxtpl"));
@@ -256,6 +259,34 @@ const char* typeclass(
 #include "generated/typeclass_gen_hpp.cxtpl.cpp"
 
         cxxctp::utils::writeToFile(cxtpl_output, gen_hpp_name);
+      }
+
+      {
+        std::map<std::string, std::any> cxtpl_params;
+
+        cxtpl_params.emplace("ReflectedStructInfo",
+                       std::make_any<reflection::ClassInfoPtr>(structInfo));
+        //XLOG(DBG9) << "methods count: " << structInfo->methods.size();
+
+        cxtpl_params.emplace("fullBaseType",
+                       std::make_any<std::string>(fullBaseType));
+
+        cxtpl_params.emplace("generator_path",
+                       std::make_any<std::string>("typeclass_gen_cpp.cxtpl"));
+        cxtpl_params.emplace("generator_includes",
+                             std::make_any<std::vector<std::string>>(
+                                 std::vector<std::string>{
+                                     wrapLocalInclude(gen_hpp_name),
+                                     wrapLocalInclude(R"raw(type_erasure_common.hpp)raw")
+                                 })
+                             );
+
+        std::string cxtpl_output;
+
+/// \note generated file
+#include "generated/typeclass_gen_cpp.cxtpl.cpp"
+
+        cxxctp::utils::writeToFile(cxtpl_output, gen_cpp_name);
       }
     }
   }

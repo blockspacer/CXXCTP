@@ -144,6 +144,13 @@ concrete[[~]] /* no newline */
         return std::make_unique<_tc_impl_t>(std::move(concrete));
     }
 
+    std::string
+      get_GUID() const noexcept override final
+    {
+      return "[[+ ImplTypeclassName +]], "
+             "[[+ BaseTypeclassName +]]";
+    }
+
     [[+ ImplTypeclassName +]]* operator->() {
         return &concrete;
     }

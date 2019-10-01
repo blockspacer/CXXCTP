@@ -49,8 +49,6 @@ const char* typeclass_instance(
         continue;
       }
 
-      std::map<std::string, std::any> cxtpl_params;
-
       std::string typeclassBaseName = tit.value_;
       prepareTplArg(typeclassBaseName);
 
@@ -81,18 +79,6 @@ const char* typeclass_instance(
       XLOG(DBG9) << "typeclassBaseName = "
         << typeclassBaseName;*/
 
-      cxtpl_params.emplace("ImplTypeclassName",
-                           std::make_any<std::string>(
-                            targetName));
-
-      cxtpl_params.emplace("BaseTypeclassName",
-                           std::make_any<std::string>(
-                            typeclassBaseName));
-
-        cxtpl_params.emplace("ReflectedBaseTypeclass",
-                             std::make_any<reflection::ClassInfoPtr>(
-                              ReflectedBaseTypeclass->classInfoPtr_));
-
       clang::SourceManager &SM = rewriter.getSourceMgr();
       const auto fileID = SM.getMainFileID();
       const auto fileEntry = SM.getFileEntryForID(SM.getMainFileID());
@@ -113,6 +99,20 @@ const char* typeclass_instance(
             fs::absolute(ctp::Options::res_path
               / (fileTypeclassBaseName
                 + ".typeclass.generated.hpp"));
+
+          std::map<std::string, std::any> cxtpl_params;
+
+          cxtpl_params.emplace("ImplTypeclassName",
+                               std::make_any<std::string>(
+                                targetName));
+
+          cxtpl_params.emplace("BaseTypeclassName",
+                               std::make_any<std::string>(
+                                typeclassBaseName));
+
+          cxtpl_params.emplace("ReflectedBaseTypeclass",
+                               std::make_any<reflection::ClassInfoPtr>(
+                                ReflectedBaseTypeclass->classInfoPtr_));
 
           cxtpl_params.emplace("generator_path",
                                std::make_any<std::string>(

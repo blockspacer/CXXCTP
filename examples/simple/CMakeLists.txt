@@ -11,6 +11,10 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti")
 set(CXXCTP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../..")
 list(APPEND CMAKE_MODULE_PATH ${CXXCTP_DIR}/cmake/exports)
 
+set(CXXCTP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../..")
+
+set(CLING_BUILD_DIR "${CXXCTP_DIR}/cling-build")
+
 #
 # If you have built boost statically you will need to set the Boost_USE_STATIC_LIBS CMake variable to ON
 # also don`t forget to set DBOOST_LOG_DYN_LINK https://stackoverflow.com/a/17868918/10904212
@@ -39,8 +43,33 @@ message(STATUS "ZLIB_LIBRARIES = ${ZLIB_LIBRARIES}")
 
 message(STATUS "CMAKE_DL_LIBS = ${CMAKE_DL_LIBS}")
 
+macro(addGeneratedFolder dir prefix extra_patterns globType)
+  if (NOT EXISTS "${dir}")
+    message(FATAL_ERROR "${dir} doesn`t exist!")
+  endif()
+
+  set(found_files "")
+
+  # Note: Certain IDEs will only display files that belong to a target, so add .h files too.
+  file(${globType} found_files ABSOLUTE
+      ${extra_patterns}
+  )
+  LIST(APPEND ${prefix} ${found_files})
+endmacro()
+
+addGeneratedFolder(
+  ${CMAKE_CURRENT_SOURCE_DIR}/generated
+  "${PROJECT_NAME}_GENERATED_FILES"
+  "*enum.generated.cpp;*typeclass*.generated.cpp;"
+  GLOB_RECURSE)
+
+set_source_files_properties(
+  "${${PROJECT_NAME}_GENERATED_FILES}"
+  PROPERTIES GENERATED 1)
+
 # The project has one binary:
 add_executable(CXXCTP_example
+  ${${PROJECT_NAME}_GENERATED_FILES}
   ${CMAKE_CURRENT_SOURCE_DIR}/src/main_app.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Spell_WaterSpell.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Spell_FireSpell.cpp
@@ -80,10 +109,8 @@ target_include_directories(CXXCTP_example PUBLIC
   ${CMAKE_CURRENT_SOURCE_DIR}/generated
 )
 
-
 set_target_properties(CXXCTP_example
   PROPERTIES ENABLE_EXPORTS 1)
-
 
 if(NOT BUNDLE_EXAMPLE_SCRIPTS)
   # generate cxtpl
@@ -122,10 +149,6 @@ list(APPEND CXXCTP_inputs
 list(APPEND CXXCTP_outdir "${CMAKE_CURRENT_SOURCE_DIR}/generated")
 
 add_dependencies(CXXCTP_example CXXCTP_tool)
-
-set(CXXCTP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../..")
-
-set(CLING_BUILD_DIR "${CXXCTP_DIR}/cling-build")
 
 # create new codegen files for TARGET_NAME_HERE based on CXXCTP_inputs and CXXCTP_outdir
 set(CXXCTP_tool_HINTS "${CXXCTP_DIR}/build/tool")

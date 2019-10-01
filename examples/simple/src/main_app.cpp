@@ -56,6 +56,8 @@ int main(int /*argc*/, const char* const* /*argv*/) {
 
     for(const _tc_combined_t<Spell>& it : spells) {
       it.cast("", 1, "");
+      std::cout << "spells: get_GUID "
+        << it.get_GUID() << std::endl;
     }
 
     std::vector<_tc_combined_t<MagicItem>> magicItems;
@@ -133,6 +135,15 @@ int main(int /*argc*/, const char* const* /*argv*/) {
         FireSpell{"someFireSpellTitle", "someFireSpelldescription1"}
     };
 
+    std::cout << "combined2: can_convert to MagicItem: "
+      << combined2.can_convert<Spell>() << std::endl;
+
+    std::cout << "combined2: can_convert to MagicItem: "
+      << combined2.can_convert<MagicItem>() << std::endl;
+
+    std::cout << "combined2: can_convert to int: "
+      << combined2.can_convert<int>() << std::endl;
+
     if(combined2.has_model<MagicItem>()) {
       combined1.has_enough_mana("");
     }
@@ -166,6 +177,8 @@ int main(int /*argc*/, const char* const* /*argv*/) {
       it.has_T("name1", idx++);
       it.has_P1("name~");
       it.has_P2(idx);
+      std::cout << "tpls: get_GUID "
+        << it.get_GUID() << std::endl;
     }
 
     return 0;
