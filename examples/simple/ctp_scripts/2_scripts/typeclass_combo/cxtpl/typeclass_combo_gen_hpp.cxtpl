@@ -321,6 +321,7 @@ struct _tc_combined_t<[[~]] /* no newline */
 [[~]]    } // endfor
 [[~]]  } // endscope
 
+#if defined(ENABLE_TYPECLASS_GUID)
 [[~]]  { // startscope
 [[~]]    for(size_t index = 0; index < ReflectedTypeclassesSize; index++) {
 [[~]]      const auto typeclassName = typeclassNames.at(index);
@@ -338,6 +339,7 @@ struct _tc_combined_t<[[~]] /* no newline */
 [[~]]
 [[~]]    } // endfor
 [[~]]  } // endscope
+#endif // ENABLE_TYPECLASS_GUID
 
 [[~]]  { // startscope
 [[~]]    for(size_t index = 0; index < ReflectedTypeclassesSize; index++) {

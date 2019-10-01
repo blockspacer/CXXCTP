@@ -56,8 +56,10 @@ int main(int /*argc*/, const char* const* /*argv*/) {
 
     for(const _tc_combined_t<Spell>& it : spells) {
       it.cast("", 1, "");
+#if defined(ENABLE_TYPECLASS_GUID)
       std::cout << "spells: get_GUID "
         << it.get_GUID() << std::endl;
+#endif // ENABLE_TYPECLASS_GUID
     }
 
     std::vector<_tc_combined_t<MagicItem>> magicItems;
@@ -177,8 +179,10 @@ int main(int /*argc*/, const char* const* /*argv*/) {
       it.has_T("name1", idx++);
       it.has_P1("name~");
       it.has_P2(idx);
+#if defined(ENABLE_TYPECLASS_GUID)
       std::cout << "tpls: get_GUID "
         << it.get_GUID() << std::endl;
+#endif // ENABLE_TYPECLASS_GUID
     }
 
     return 0;

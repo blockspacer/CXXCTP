@@ -96,6 +96,13 @@ target_link_libraries(CXXCTP_example PUBLIC
   ${USED_SYSTEM_LIBS}
 )
 
+set(ENABLE_TYPECLASS_GUID FALSE)
+if(ENABLE_TYPECLASS_GUID)
+  target_compile_definitions(CXXCTP_example PUBLIC
+    ENABLE_TYPECLASS_GUID=1
+  )
+endif(ENABLE_TYPECLASS_GUID)
+
 target_include_directories(CXXCTP_example PUBLIC
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${CMAKE_CURRENT_SOURCE_DIR}/src

@@ -123,8 +123,10 @@ struct _tc_model_t<[[+ fullBaseType +]]> {
   virtual std::unique_ptr<_tc_model_t>
     move_clone() noexcept = 0;
 
+#if defined(ENABLE_TYPECLASS_GUID)
   virtual std::string
     get_GUID() const noexcept = 0;
+#endif // ENABLE_TYPECLASS_GUID
 
   //virtual const size_t getModelTypeIndex() const noexcept = 0;
 
@@ -332,10 +334,12 @@ template< [[+ templateParamsFullDecls(method->tplParams) +]] >
         return model_;
     }
 
+#if defined(ENABLE_TYPECLASS_GUID)
     std::string
       get_GUID() const noexcept {
       return model_->get_GUID();
     };
+#endif // ENABLE_TYPECLASS_GUID
 
     std::unique_ptr<_tc_model_t<[[+ fullBaseType +]]>> clone_model() const noexcept {
         if(!model_) {
