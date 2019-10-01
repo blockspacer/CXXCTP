@@ -239,10 +239,11 @@ struct _tc_combined_t<[[+ fullBaseType +]]> {
         typename std::enable_if<!std::is_same<_tc_combined_t, T>::value>::type* = nullptr
         >
     _tc_combined_t(const T&& u) noexcept :
-                                           model_(
-                                               std::make_shared<
-                                                   _tc_impl_t<T, [[+ fullBaseType +]]>>
-                                               (std::forward<const std::decay_t<T>>(u))) {
+         model_(
+             std::make_shared<
+                 _tc_impl_t<T, [[+ fullBaseType +]]>>
+             (std::forward<const std::decay_t<T>>(u)))
+    {
         //puts("_tc_combined_t{T} called");
     }
 
@@ -330,7 +331,10 @@ template< [[+ templateParamsFullDecls(method->tplParams) +]] >
         return (bool)model_;
     }
 
-    std::shared_ptr<_tc_model_t<[[+ fullBaseType +]]>> ref_model() const noexcept {
+    std::shared_ptr<
+        _tc_model_t<[[+ fullBaseType +]]>
+      > ref_model() const noexcept {
+        /// \note may be nullptr
         return model_;
     }
 

@@ -53,12 +53,18 @@ struct _tc_combined_t<[[~]] /* no newline */
     // Default initializer creates an empty _tc_combined_t.
     _tc_combined_t() = default;
 
-    /*_tc_combined_t(std::reference_wrapper<
-      _tc_combined_t<[[+ typeclassComboDecls(typeclassNames) +]]>>&& rhs) noexcept {
-        //puts("_tc_combined_t<[[+ typeclassComboDecls(typeclassNames) +]]> ref copy ctor");
+[[~]]  { // startscope
+[[~]]    for(size_t index = 0; index < ReflectedTypeclassesSize; index++) {
+[[~]]      const auto typeclassName = typeclassNames.at(index);
+[[~]]
+    _tc_combined_t(std::reference_wrapper<
+      _tc_combined_t<[[+ typeclassName +]]>>&& rhs) noexcept {
         if(rhs.get())
-            model_ = rhs.get().model_;
-    }*/
+            [[+ typeclassModelName(typeclassName) +]] = rhs.get().ref_model();
+    }
+[[~]]
+[[~]]    } // endfor
+[[~]]  } // endscope
 
     /*/// \note moves passed argument
     template <
@@ -97,6 +103,30 @@ struct _tc_combined_t<[[~]] /* no newline */
                                                                       (std::forward<const std::reference_wrapper<std::decay_t<T>>>(u))) {
         //puts("_tc_combined_t{T} reference_wrapper called");
     }*/
+
+    template<
+        typename T,
+        typename std::enable_if<
+          !std::is_same<_tc_combined_t, T>::value>::type* = nullptr
+        >
+    _tc_combined_t(const std::reference_wrapper<T>&& u) noexcept :
+[[~]]  { // startscope
+[[~]]    for(size_t index = 0; index < ReflectedTypeclassesSize; index++) {
+[[~]]      const std::string delimiter =
+[[~]]       index < (ReflectedTypeclassesSize - 1) ? "," : "";
+[[~]]      const auto typeclassName = typeclassNames.at(index);
+[[~]]
+         [[+ typeclassModelName(typeclassName) +]](
+             std::make_shared<
+                 _tc_impl_t<std::reference_wrapper<T>, [[+ typeclassName +]] >>
+             (std::forward<const std::reference_wrapper<std::decay_t<T>>>(u)))
+             [[+ delimiter +]]
+[[~]]
+[[~]]    } // endfor
+[[~]]  } // endscope
+    {
+        //puts("_tc_combined_t{T} called");
+    }
 
     template<
         typename T,
@@ -302,6 +332,27 @@ struct _tc_combined_t<[[~]] /* no newline */
 [[~]]    } // endfor
 [[~]]  } // endscope
 
+
+
+[[~]]  { // startscope
+[[~]]    for(size_t index = 0; index < ReflectedTypeclassesSize; index++) {
+[[~]]      const auto typeclassName = typeclassNames.at(index);
+[[~]]
+  template<
+  typename T,
+  typename std::enable_if<
+    std::is_same<[[+ typeclassName +]], T>::value>::type* = nullptr
+  >
+  std::shared_ptr<
+    _tc_model_t<[[+ typeclassName +]]>>
+  ref_model() const noexcept {
+    /// \note may be nullptr
+    return [[+ typeclassModelName(typeclassName) +]];
+  }
+[[~]]
+[[~]]    } // endfor
+[[~]]  } // endscope
+
 [[~]]  { // startscope
 [[~]]    for(size_t index = 0; index < ReflectedTypeclassesSize; index++) {
 [[~]]      const auto typeclassName = typeclassNames.at(index);
@@ -400,11 +451,6 @@ struct _tc_combined_t<[[~]] /* no newline */
       std::terminate();
     }
     return model_->ref_concrete<C>();
-  }
-
-  template<typename T>
-  std::shared_ptr<_tc_model_t<T>> ref_model() const noexcept {
-    return nullptr;
   }
     */
 

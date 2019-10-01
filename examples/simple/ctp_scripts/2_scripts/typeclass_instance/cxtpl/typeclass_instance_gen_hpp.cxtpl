@@ -76,7 +76,10 @@ namespace generated {
 */
 
 template<>
-struct _tc_impl_t<[[+ ImplTypeclassName +]], [[+ BaseTypeclassName +]]>
+struct _tc_impl_t<
+      [[+ ImplTypeclassName +]],
+      [[+ BaseTypeclassName +]]
+    >
     : public _tc_model_t<[[+ BaseTypeclassName +]]> {
     typedef [[+ ImplTypeclassName +]] val_type_t;
 
@@ -86,12 +89,6 @@ struct _tc_impl_t<[[+ ImplTypeclassName +]], [[+ BaseTypeclassName +]]>
 
     explicit _tc_impl_t(const [[+ ImplTypeclassName +]]& concrete_arg) noexcept
       : concrete(concrete_arg) {}
-
-    /*const size_t getModelTypeIndex() const noexcept override final {
-        return _tc_registry<[[+ BaseTypeclassName +]]>::
-            getTypeIndex<[[+ ImplTypeclassName +]]>();
-    }*/
-
 
 [[~]]  { // startscope
 [[~]]    for(const auto& method: ReflectedBaseTypeclass->methods) {
@@ -135,13 +132,19 @@ concrete[[~]] /* no newline */
         _tc_model_t<[[+ BaseTypeclassName +]]>>
     clone() noexcept override final {
         // Copy-construct a new instance of _tc_impl_t on the heap.
-        return std::make_unique<_tc_impl_t>(concrete);
+        return std::make_unique<_tc_impl_t<
+          [[+ ImplTypeclassName +]],
+          [[+ BaseTypeclassName +]]
+        >>(concrete);
     }
 
     std::unique_ptr<
         _tc_model_t<[[+ BaseTypeclassName +]]>>
     move_clone() noexcept override final {
-        return std::make_unique<_tc_impl_t>(std::move(concrete));
+        return std::make_unique<_tc_impl_t<
+          [[+ ImplTypeclassName +]],
+          [[+ BaseTypeclassName +]]
+        >>(std::move(concrete));
     }
 
 #if defined(ENABLE_TYPECLASS_GUID)
@@ -159,6 +162,104 @@ concrete[[~]] /* no newline */
 
   // Our actual data.
   [[+ ImplTypeclassName +]] concrete;
+};
+
+/// \note same as above, but uses reference_wrapper
+template<>
+struct _tc_impl_t<
+      std::reference_wrapper<[[+ ImplTypeclassName +]]>,
+      [[+ BaseTypeclassName +]]
+    >
+    : public _tc_model_t<[[+ BaseTypeclassName +]]> {
+    typedef std::reference_wrapper<[[+ ImplTypeclassName +]]> val_type_t;
+
+    // Construct the embedded concrete type.
+    template<typename... args_t>
+    _tc_impl_t(args_t&&... args) noexcept
+      : concrete(std::forward<args_t>(args)...)
+    {}
+
+    explicit _tc_impl_t(const std::reference_wrapper<[[+ ImplTypeclassName +]]>& concrete_arg) noexcept
+      : concrete(concrete_arg) {}
+
+[[~]]  { // startscope
+[[~]]    for(const auto& method: ReflectedBaseTypeclass->methods) {
+[[~]]      const size_t methodParamsSize = method->params.size();
+[[~]]      const bool needPrint = !method->isImplicit
+[[~]]          && !method->isOperator
+[[~]]          && !method->isCtor
+[[~]]          && !method->isDtor;
+[[~]]      if(method->isTemplate()) {
+template< [[+ templateParamsFullDecls(method->tplParams) +]] >
+[[~]]      } // method->isTemplate
+[[~]]      if(needPrint) {
+[[+ method->isExplicitCtor ? "explicit " : "" +]][[~]] /* no newline */
+[[+ method->isConstexpr ? "constexpr " : "" +]][[~]] /* no newline */
+[[+ method->isStatic ? "static " : "" +]][[~]] /* no newline */
+[[+ method->returnType->getPrintedName() +]][[~]] /* no newline */
+[[+ " __" +]][[~]] /* no newline */
+[[+ method->name +]][[~]] /* no newline */
+(
+[[+ paramsFullDecls(method->params) +]][[~]] /* no newline */
+) [[~]] /* no newline */
+[[+ method->isConst ? "const " : "" +]][[~]] /* no newline */
+[[+ method->isNoExcept ? "noexcept " : "" +]][[~]] /* no newline */
+override final
+  {
+    /// \note passes data, not ref
+    return [[+ method->name +]][[~]] /* no newline */
+< [[+ BaseTypeclassName +]] >[[~]] /* no newline */
+([[~]] /* no newline */
+concrete.get()[[~]] /* no newline */
+[[+ methodParamsSize ? ", " : "" +]][[~]] /* no newline */
+[[+ paramsCallDecls(method->params) +]][[~]] /* no newline */
+);
+  }
+[[~ /* newline */ ~]]
+[[~]]      } // needPrint
+[[~]]    } // methods endfor
+[[~]]  } // endscope
+
+    std::unique_ptr<
+        _tc_model_t<[[+ BaseTypeclassName +]]>>
+    clone() noexcept override final {
+        // Copy-construct a new instance of _tc_impl_t on the heap.
+        return std::make_unique<_tc_impl_t<
+            ///\note removed reference_wrapper
+            [[+ ImplTypeclassName +]],
+            [[+ BaseTypeclassName +]]
+          >>(
+          [[+ ImplTypeclassName +]] {
+            concrete.get()
+          }
+        );
+    }
+
+    std::unique_ptr<
+        _tc_model_t<[[+ BaseTypeclassName +]]>>
+    move_clone() noexcept override final {
+        return std::make_unique<_tc_impl_t<
+          ///\note removed reference_wrapper
+          [[+ ImplTypeclassName +]],
+          [[+ BaseTypeclassName +]]
+        >>(std::move(concrete.get()));
+    }
+
+#if defined(ENABLE_TYPECLASS_GUID)
+    std::string
+      get_GUID() const noexcept override final
+    {
+      return "[[+ ImplTypeclassName +]], "
+             "[[+ BaseTypeclassName +]]";
+    }
+#endif // ENABLE_TYPECLASS_GUID
+
+    [[+ ImplTypeclassName +]]* operator->() {
+        return &concrete.get();
+    }
+
+  // Our actual data.
+  std::reference_wrapper<[[+ ImplTypeclassName +]]> concrete;
 };
 
 } // namespace cxxctp

@@ -185,5 +185,46 @@ int main(int /*argc*/, const char* const* /*argv*/) {
 #endif // ENABLE_TYPECLASS_GUID
     }
 
+    /// \note Uses std::reference_wrapper
+    FireSpell fs{"FireSpellRef", "FireSpellRef!"};
+    _tc_combined_t<Spell, MagicItem> combinedRef1 {
+        std::ref(fs)
+    };
+
+    _tc_combined_t<Spell, MagicItem> combinedRef2;
+    combinedRef2.create_model<Spell>
+      (std::ref(fs));
+
+    fs.title = "NewSharedFireSpellRefTitle0";
+    if(combinedRef1.has_model<Spell>()) {
+      combinedRef1.cast("", 0, "");
+    }
+    if(combinedRef2.has_model<Spell>()) {
+      combinedRef2.cast("", 0, "");
+    }
+
+    /// \note Uses std::shared_ptr
+    combinedRef2.ref_model<Spell>()
+      = combinedRef1.ref_model<Spell>();
+
+    fs.title = "NewSharedFireSpellRefTitle1";
+    if(combinedRef1.has_model<Spell>()) {
+      combinedRef1.cast("", 0, "");
+    }
+    if(combinedRef2.has_model<Spell>()) {
+      combinedRef2.cast("", 0, "");
+    }
+
+    /// \note Uses std::unique_ptr, data copyed!
+    combinedRef2 = combinedRef1;
+
+    fs.title = "New__NOT_SHARED__FireSpellRefTitle!!!";
+    if(combinedRef1.has_model<Spell>()) {
+      combinedRef1.cast("", 0, "");
+    }
+    if(combinedRef2.has_model<Spell>()) {
+      combinedRef2.cast("", 0, "");
+    }
+
     return 0;
 }
