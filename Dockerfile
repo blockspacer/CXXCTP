@@ -51,6 +51,7 @@ FROM        ubuntu:18.04
 # ./build/<app>
 
 # https://askubuntu.com/a/1013396
+# https://github.com/phusion/baseimage-docker/issues/319
 # RUN export DEBIAN_FRONTEND=noninteractive
 # Set it via ARG as this only is available during build:
 ARG DEBIAN_FRONTEND=noninteractive
@@ -62,7 +63,7 @@ ENV LANGUAGE en_US:en
 
 ENV PATH=/usr/lib/clang/6.0/include:/usr/lib/llvm-6.0/include/:$PATH
 
-ARG APT="apt-get -qq --no-install-recommends"
+ARG APT="DEBIAN_FRONTEND=noninteractive apt-get -qq --no-install-recommends"
 
 # docker build --build-arg NO_SSL="False" APT="apt-get -qq --no-install-recommends" .
 ARG NO_SSL="True"
@@ -130,12 +131,22 @@ RUN wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key --no-check-certificate 
 # + http://redcrackle.com/blog/how-add-ubuntu-apt-get-key-behind-firewall
 
 # NOTE: need to set at least empty http-proxy
-
-RUN apt-key adv --keyserver-options http-proxy=$http_proxy --keyserver keyserver.ubuntu.com --recv-keys 1E9377A2BA9EF27F
-
-RUN apt-key adv --keyserver-options http-proxy=$http_proxy --keyserver keyserver.ubuntu.com --recv-keys 94558F59
-
-RUN apt-key adv --keyserver-options http-proxy=$http_proxy --keyserver keyserver.ubuntu.com --recv-keys 2EA8F35793D8809A
+# https://github.com/EtiennePerot/parcimonie.sh/issues/15
+RUN if [ ! -z "$http_proxy" ]; then \
+    apt-key adv --keyserver-options http-proxy=$http_proxy --keyserver keyserver.ubuntu.com --recv-keys 94558F59 \
+    && \
+    apt-key adv --keyserver-options http-proxy=$http_proxy --keyserver keyserver.ubuntu.com --recv-keys 1E9377A2BA9EF27F \
+    && \
+    apt-key adv --keyserver-options http-proxy=$http_proxy --keyserver keyserver.ubuntu.com --recv-keys 2EA8F35793D8809A \
+    ; \
+  else \
+    apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 94558F59 \
+    && \
+    apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 1E9377A2BA9EF27F \
+    && \
+    apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 2EA8F35793D8809A \
+    ; \
+  fi
 
 #RUN apt-key adv --keyserver-options http-proxy=$http_proxy --keyserver hkp://ha.pool.sks-keyservers.net:80 --recv-key 0xB01FA116
 
@@ -521,6 +532,8 @@ RUN         $APT remove -y \
 RUN echo ClientAliveInterval 60 >> /etc/ssh/sshd_config
 
 #RUN service ssh restart
+
+#ENV DEBIAN_FRONTEND teletype
 
 CMD ["bash"]
 
