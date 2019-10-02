@@ -42,3 +42,6 @@ custom_plugins\.cmake
 src/ctp_registry\.cpp
 
 *.log
+
+.ca-certificates/**
+!.ca-certificates/.gitkeep
