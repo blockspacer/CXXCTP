@@ -240,6 +240,86 @@ Install CXTPL library https://github.com/blockspacer/CXTPL
 
 Install CXTPL_tool https://github.com/blockspacer/CXTPL#how-to-build
 
+## Install conan - a crossplatform dependency manager for C++
+
+```bash
+pip install conan
+conan remote list
+conan search *boost* -r all
+```
+
+Configure Proxies & cacert_path in `~/.conan/conan.conf`, see https://docs.conan.io/en/latest/reference/config_files/conan.conf.html#proxies
+
+Configure conan clang profile to then use --profile clang:
+
+```bash
+/usr/bin/clang-6.0 -v
+/usr/bin/clang++-6.0 -v
+
+nano ~/.conan/profiles/clang
+
+[settings]
+# We are building in Ubuntu Linux
+os_build=Linux
+os=Linux
+arch_build=x86_64
+arch=x86_64
+
+compiler=clang
+compiler.version=6.0
+compiler.libcxx=libstdc++11
+
+[env]
+CC=/usr/bin/clang
+CXX=/usr/bin/clang++
+```
+
+And then `conan install ***** --profile clang`
+
+```bash
+/usr/bin/gcc -v
+/usr/bin/g++ -v
+
+nano ~/.conan/profiles/gcc
+
+[settings]
+# We are building in Ubuntu Linux
+os_build=Linux
+os=Linux
+arch_build=x86_64
+arch=x86_64
+
+compiler=gcc
+compiler.version=7
+compiler.libcxx=libstdc++11
+
+[env]
+CC=/usr/bin/gcc
+CXX=/usr/bin/g++
+```
+
+If you want to disable ssl (under proxy, e.t.c.):
+
+```bash
+# see https://docs.conan.io/en/latest/reference/commands/misc/remote.html#conan-remote
+conan remote update conan-center https://conan.bintray.com False
+```
+
+If you want to set corp. cacert:
+
+```bash
+CONAN_CACERT_PATH=/path/to/ca-bundle.crt
+file $CONAN_CACERT_PATH
+```
+
+Usefull links:
+
+- https://ncona.com/2019/04/dependency-management-in-cpp-with-conan/
+- https://blog.conan.io/2018/06/11/Transparent-CMake-Integration.html
+- Conan https://blog.conan.io/2018/06/11/Transparent-CMake-Integration.html https://blog.conan.io/2018/12/03/Using-Facebook-Folly-with-Conan.html
+- CONAN_PKG::cppzmq https://github.com/chaplin89/prontocpp/blob/master/CMakeLists.txt#L42
+- https://github.com/conan-io/examples
+
 ## How to build
 
 ```bash
@@ -268,6 +348,7 @@ cmake -E remove_directory build
 cmake -E make_directory build
 cmake -E remove_directory resources/cxtpl/generated
 cmake -E make_directory resources/cxtpl/generated
+cmake -E chdir build conan install --build=missing --profile gcc ..
 cmake -E chdir build cmake -E time cmake -DENABLE_CLING=FALSE -DBUILD_SHARED_LIBS=FALSE -DBUILD_EXAMPLES=FALSE -DALLOW_PER_PROJECT_CTP_SCRIPTS=TRUE  -DBUNDLE_EXAMPLE_SCRIPTS=FALSE -DCMAKE_BUILD_TYPE=Debug -DENABLE_CXXCTP=TRUE ..
 cmake -E chdir build cmake -E time cmake --build . -- -j6
 
@@ -306,6 +387,8 @@ cmake -E remove_directory build
 cmake -E make_directory build
 cmake -E remove_directory resources/cxtpl/generated
 cmake -E make_directory resources/cxtpl/generated
+# NOTE: clang profile!
+cmake -E chdir build conan install --build=missing --profile clang ..
 cmake -E chdir build cmake -E time cmake -DENABLE_CLING=TRUE -DBUILD_SHARED_LIBS=TRUE -DALLOW_PER_PROJECT_CTP_SCRIPTS=TRUE -DBUILD_EXAMPLES=FALSE -DBUNDLE_EXAMPLE_SCRIPTS=FALSE -DCLEAN_CXXCTP_GEN=TRUE -DCMAKE_BUILD_TYPE=Debug -DENABLE_CXXCTP=TRUE ..
 # OR cmake -E chdir build cmake -E time cmake -DENABLE_CLING=TRUE -DBUILD_SHARED_LIBS=TRUE -DALLOW_PER_PROJECT_CTP_SCRIPTS=FALSE -DBUILD_EXAMPLES=FALSE -DBUNDLE_EXAMPLE_SCRIPTS=TRUE -DCLEAN_CXXCTP_GEN=TRUE -DCMAKE_BUILD_TYPE=Debug -DENABLE_CXXCTP=TRUE ..
 cmake -E chdir build cmake -E time cmake --build . -- -j6
@@ -713,6 +796,23 @@ Usefull links:
 - (how to add Cling into CMake project) https://github.com/derofim/cling-cmake
 - https://github.com/root-project/cling/tree/master/www/docs/talks
 - https://github.com/caiorss/C-Cpp-Notes/blob/master/Root-cern-repl.org
+
+### clang-format
+
+```bash
+sudo apt install clang-format
+```
+
+Run based on `.clang-format` file:
+
+```bash
+find . -regex '.*\.\(cpp\|hpp\|cu\|c\|h\)' -exec clang-format -style=file -i {} \;
+```
+
+Usefull links:
+
+- Create & use `.clang-format` file https://leimao.github.io/blog/Clang-Format-Quick-Tutorial/
+- Integrate with your IDE ( QT instructions http://doc.qt.io/qtcreator/creator-beautifier.html ) Import .clang-format rules to IDE settings.
 
 ## ⭐️ How to Contribute
 

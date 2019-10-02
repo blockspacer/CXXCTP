@@ -11,9 +11,16 @@ project(
 
 set(CLING_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cling-build/" CACHE STRING "CLING DIR")
 
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules)
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/submodules/CXTPL/cmake/exports)
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/submodules/CXTPL/cmake/exports")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/build/") # for conan
+
+# Setup conan and include everything.
+#include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+#conan_basic_setup()
+include(conanbuildinfo)
+conan_basic_setup(TARGETS)
 
 # Keep symbols for JIT resolution
 set(LLVM_NO_DEAD_STRIP 1)
@@ -34,6 +41,8 @@ option(USE_RANG "Use RANG for coloring terminal" OFF)
 option(BUILD_SHARED_LIBS "Use .so/.dll" OFF)
 
 option(BUILD_EXAMPLES "Use built-in examples" OFF)
+
+option(ENABLE_TESTS "Use unit tests" ON)
 
 option(BUNDLE_EXAMPLE_SCRIPTS
   "Use built-in scripts from examples" OFF)
@@ -336,6 +345,8 @@ if(ENABLE_CXXCTP)
     Cling::clingUtils
     Cling::clingMetaProcessor
     ${CLING_LIBS}
+    #${CONAN_LIBS}
+    #CONAN_PKG::catch2
   )
 
   #target_link_libraries(CXXCTP_core PRIVATE
@@ -354,6 +365,7 @@ if(ENABLE_CXXCTP)
   )
 
   target_include_directories(CXXCTP_core PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/submodules/boost.outcome/include/outcome/quickcpplib/include/ # TODO
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_CURRENT_SOURCE_DIR}/ # path to ctp_scripts
     ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple # path to ctp_scripts
@@ -363,6 +375,7 @@ if(ENABLE_CXXCTP)
     ${LZ4_INCLUDE_DIR} # used by folly
     ${LIBGFLAGS_INCLUDE_DIR} # used by folly
     ${FOLLY_INCLUDE_DIR}
+    ${CONAN_INCLUDE_DIRS}
   )
 
   if(BUNDLE_EXAMPLE_SCRIPTS)
@@ -428,6 +441,12 @@ add_subdirectory(tool)
 if(BUILD_EXAMPLES)
   add_subdirectory(examples)
 endif(BUILD_EXAMPLES)
+
+if(ENABLE_TESTS)
+  # Now enable our tests.
+  enable_testing()
+  add_subdirectory(tests)
+endif(ENABLE_TESTS)
 
 if(ENABLE_CLING AND INSTALL_CLING)
   list(APPEND CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
