@@ -1486,3 +1486,17 @@ TODO
 
 ## Misc
 https://medium.com/fluence-network/porting-redis-to-webassembly-with-clang-wasi-af99b264ca8
+
+[twitter-alt]: Twitter
+[facebook-alt]: Facebook
+[google-alt]: Google+
+[tumblr-alt]: Tumblr
+[dribbble-alt]: Dribbble
+[github-alt]: GitHub
+
+[twitter-img]: https://i.imgur.com/wWzX9uB.png
+[facebook-img]: https://i.imgur.com/fep1WsG.png
+[google-img]: https://i.imgur.com/VlgBKQ9.png
+[tumblr-img]: https://i.imgur.com/jDRp47c.png
+[dribbble-img]: https://i.imgur.com/Vvy3Kru.png
+[github-img]: https://i.imgur.com/9I6NRUm.png
