@@ -37,7 +37,7 @@ Note: This project is provided as it is, without any warranty (see License).
 
 - enum_gen_hpp.cxtpl - (codegen) enum to string + reflection metadata.
 
-```
+```bash
 // usage example from ReflShapeKind.hpp
 enum class
 $apply(
@@ -51,7 +51,7 @@ ReflShapeKind0 : uint32_t {
 
 - typeclass_gen_cpp.cxtpl - (codegen) typeclasses. Supports combinations of multiple typeclasses and out-of-source method definitions (data and logic separation). Supports combinations of multiple typeclasses and out-of-source method definition (data and logic separation). See examples and https://twitter.com/TartanLlama/status/1159457033441165313
 
-```
+```bash
 // Usage example. NOTE: no inheritance & definition outside lib.
 // in lib .h
 struct drawable {
@@ -96,9 +96,9 @@ CVS = cvs4D; // copy
 CVS = vec.at(0); // <drawable> to <drawable, printable>
 ```
 
-- parse-time/compile-time code execution (see test.cpp)
+- parse-time/compile-time code execution (see examples)
 
-```
+```bash
 $export (
 static int resultSomeInt = 2345;
 )
@@ -122,7 +122,7 @@ $embed(
 
 - metaclasses. Supports combinations of multiple metaclasses (see examples).
 
-```
+```bash
 class
 $apply(make_interface;make_removefuncbody;make_reflect)
 SomeInterfaceName {
@@ -162,7 +162,7 @@ Note that you can run linux containers under windows/mac/e.t.c.
 
 ### Clone code
 
-```
+```bash
 git submodule sync --recursive
 git fetch --recurse-submodules
 git submodule update --init --recursive --depth 5
@@ -178,7 +178,7 @@ Clone code (as above) and `cd` into cloned dir.
 
 NOTE: You may want to build Docker image with `--build-arg NO_SSL="False"`. Read comments in Dockerfile.
 
-```
+```bash
 # Give docker the rights to access X-server
 sudo -E xhost +local:docker
 
@@ -200,7 +200,7 @@ CXTPL_tool -version --version
 
 ## Develop under Docker
 
-```
+```bash
 # Run a terminal in container
 sudo -E docker run --rm -v "$PWD":/home/u/cxxctp -w /home/u/cxxctp  -it  -e DISPLAY         -v /tmp/.X11-unix:/tmp/.X11-unix  cpp-docker-cxxctp
 
@@ -215,17 +215,24 @@ sudo -E docker run --rm -v "$PWD":/home/u/cxxctp -w /home/u/cxxctp/build cpp-doc
 
 ## DEPENDENCIES
 
-```
-# Boost
+- Boost
+
+```bash
 sudo add-apt-repository ppa:boost-latest/ppa
 sudo apt-get update && sudo apt-get upgrade
 aptitude search boost
 sudo apt-get install libboost-dev
+```
 
-# MPI
+- MPI
+
+```bash
 sudo apt-get install openmpi-bin openmpi-common libopenmpi-dev
+```
 
-# CMake
+- CMake
+
+```bash
 bash scripts/install_cmake.sh
 ```
 
@@ -235,7 +242,7 @@ Install CXTPL_tool https://github.com/blockspacer/CXTPL#how-to-build
 
 ## How to build
 
-```
+```bash
 BEFORE install_cling.sh:
 sudo apt-get update && sudo apt-get upgrade
 sudo apt-get install clang libstdc++6 libstdc++-6-dev
@@ -246,7 +253,7 @@ export CC=clang
 export CXX=clang++
 ```
 
-```
+```bash
 # Build Cling into `cling-build` folder
 cd scripts
 bash install_cling.sh
@@ -254,7 +261,7 @@ bash install_cling.sh
 
 Install deps as in CXTPL https://github.com/blockspacer/CXTPL#how-to-build
 
-```
+```bash
 export CC=gcc
 export CXX=g++
 cmake -E remove_directory build
@@ -279,7 +286,7 @@ file build/example_make_reflect.cpp.generated.cpp
 
 OR under gdb:
 
-```
+```bash
 rm -rf *generated* ; clear && clear ; gdb ./CXXCTP -ex "run" -ex "bt" -ex "q"
 ```
 
@@ -291,7 +298,7 @@ Run bash scripts/install_folly.sh from https://github.com/blockspacer/CXTPL or p
 
 Use clang (NOT GCC!) before build and `-DENABLE_CLING=TRUE`:
 
-```
+```bash
 export CC=clang
 export CXX=clang++
 sudo rm -rf examples/*/ctp_scripts/*/*/generated/
@@ -310,7 +317,7 @@ sudo cmake -E chdir build make install
 
 If you installed CXXCTP_tool - you can run examples:
 
-```
+```bash
 # requires CXXCTP_tool
 sudo cmake -E chdir build make install
 
@@ -328,8 +335,7 @@ build/examples/simple/CXXCTP_example
 
 Don`t forget to set Cling include paths by`-extra-arg=-I\$PWD/include`and library paths by`-extra-arg=-L\$PWD/build`and .so/.dll libs by`-extra-arg=-lCXXCTP_core`:
 
-```
-
+```bash
 # NOTE: runs CXXCTP_tool on multiple files and adds include paths by `-extra-arg=-I`
 cmake -E chdir build ./tool/CXXCTP_tool --ctp_scripts_paths=$PWD -L .=DBG9 -extra-arg=-I$PWD/include -extra-arg=-L$PWD/build -extra-arg=-lCXXCTP_core -extra-arg=-I../resources ../resources/ReflShapeKind.hpp ../resources/test_typeclass_base1.hpp ../resources/test_typeclass_instance1.hpp ../resources/test.cpp
 ```
@@ -338,13 +344,13 @@ cmake -E chdir build ./tool/CXXCTP_tool --ctp_scripts_paths=$PWD -L .=DBG9 -extr
 
 Use `-extra-arg` option of `CXXCTP_tool`:
 
-```
+```bash
 -extra-arg=-I$PWD/include -extra-arg=-I$PWD/include/foo -extra-arg=-DMY_DEFINITION=1 -extra-arg=-DONE_MORE_DEFINITION=1
 ```
 
 Example:
 
-```
+```bash
 cmake -E chdir build ./tool/CXXCTP_tool --ctp_scripts_paths=$PWD -L .=DBG9 -extra-arg=-I$PWD/include -extra-arg=-I../resources ../resources/ReflShapeKind.hpp ../resources/test_typeclass_base1.hpp ../resources/test_typeclass_instance1.hpp ../resources/test.cpp
 ```
 
@@ -396,7 +402,7 @@ You can use C++ annotations to tell CXXCTP what actions it must execute.
 
 Suppose we want to morph class into interface:
 
-```
+```bash
 // Source
 class SomeInterfaceName {
   int foo1() {
@@ -422,7 +428,7 @@ class SomeInterfaceName {
 
 We can use `funccall` action to run C++ scripts for source code transformation. Lets suppose that script names are `make_interface` and `make_removefuncbody` (name as you want).
 
-```
+```bash
 __attribute__((annotate("{gen};{funccall};make_interface;make_removefuncbody")))
 ```
 
@@ -436,7 +442,7 @@ Scripts will be executed from left (`make_interface`) to right (`make_removefunc
 
 Usually you don't need to write long C++ annotations, just use C++ `#define` (or include built-in header with common defines):
 
-```
+```bash
 #define $apply(...) \
   __attribute__((annotate("{gen};{funccall};" #__VA_ARGS__)))
 
@@ -461,7 +467,7 @@ Copy `custom_plugins.cmake.example` as `custom_plugins.cmake`
 
 Append your script paths to `custom_plugins.cmake` via `add_ctp_plugin`:
 
-```
+```bash
 # first arg - typeclass_instance - script function name
 # second arg - script source file
 # third arg - script header file
@@ -478,7 +484,7 @@ Check that your function name exists in generated file `ctp_registry.cpp` (may b
 
 Function signature for code transformation must be compatable with `cxxctp_callback`:
 
-```
+```bash
 typedef std::function<const char*(
     const cxxctp::parsed_func& func_with_args,
     const clang::ast_matchers::MatchFinder::MatchResult& matchResult,
@@ -498,14 +504,14 @@ Detailed function signature:
 
 Think about function name as one of `__VA_ARGS__` from
 
-```
+```bash
 #define $apply(...) \
   __attribute__((annotate("{gen};{funccall};" #__VA_ARGS__)))
 ```
 
 Example where `make_interface` and `make_removefuncbody` - two function names:
 
-```
+```bash
 $apply(make_interface;
   make_removefuncbody)
 ```
@@ -547,7 +553,7 @@ Generate files from templates using CXTPL_tool https://github.com/blockspacer/CX
 
 In CXXCTP script (`.cpp`):
 
-```
+```bash
 // see ReflectAST.cpp
 reflection::NamespacesTree m_namespaces;
 // `node` from AST parser (libtooling)
@@ -584,7 +590,7 @@ std::map<std::string, std::any> cxtpl_params;
 
 In `.cxtpl` template:
 
-```
+```bash
 const auto arguments = std::any_cast<Arguments>(cxtpl_params.at("Arguments"));
 std::cout << arguments.arg1;
 ```
@@ -597,7 +603,7 @@ CXTPL_tool wrapls libtooling to add custom command-line options.
 
 Options related to libtooling (type -help or --help):
 
-```
+```bash
 Generic Options:
 
   -help                      - Display available options (-help-hidden for more)
@@ -621,7 +627,7 @@ NOTE: `ctp_scripts_paths` requires `-DENABLE_CLING=TRUE`
 
 Example of log configuration which writes both into the file and console stream:
 
-```
+```bash
 ./build/tool/CXTPL_tool -L ".:=INFO:default:console; default=file:path=y.log,async=true,sync_level=DBG9;console=stream:stream=stderr"
 ```
 
@@ -631,7 +637,7 @@ Example of log configuration which writes both into the file and console stream:
 
 Example (custom output dir):
 
-```
+```bash
 # Remove old generated files
 rm -rf gen
 rm -rf build/*generated*
@@ -661,7 +667,7 @@ Check that the system-installed version of `CXXCTP_tool` is the same as `build/t
 
 Run `CXXCTP_tool` manually under `gdb`:
 
-```
+```bash
 gdb -ex "r" -ex "bt" --args build/tool/CXXCTP_tool .........
 ```
 
@@ -729,20 +735,20 @@ Please note that this project is released with a [Code of Conduct](CODE_OF_CONDU
   [![github-alt][github-img]](https://github.com/example)
   [![freeCodeCamp](imgs/freecodecamp.png)](https://www.freecodecamp.org/example)
 
-# Contributors List 👌
+### Contributors List 👌
 
-# D
+#### D
 
-### Denis trofimov
+##### Denis trofimov
 
 - C++ Developer
 - [![github-alt][github-img]](https://github.com/blockspacer)
 - [![github-alt][github-img]](https://github.com/derofim)
-- [linkedin](https://www.linkedin.com/in/denis-trofimov-4335bb13b/)
+- [![linkedin-alt][linkedin-img](https://www.linkedin.com/in/denis-trofimov-4335bb13b/)
 
-# Y
+#### Y
 
-### Yousif Alebyary
+##### Yousif Alebyary
 
 - Web/Mobile Developer.
 - [![github-alt][github-img]](https://github.com/yousifm)
@@ -752,9 +758,9 @@ Please note that this project is released with a [Code of Conduct](CODE_OF_CONDU
 That project possible because of [flexferrum's `autoprogrammer`](https://github.com/flexferrum/autoprogrammer)
 
 Articles about flexferrum's `autoprogrammer` in media:
-+ [RUS] метаклассах по-русски https://habr.com/ru/article/448466/
-+ [RUS] Метаклассы в C++17 Фантастика? Реальность! https://assets.ctfassets.net/oxjq45e8ilak/55bGdX2PnYzmrpM8rwCjcE/791e7eee3236c2023e86e169faca8a0e/Sergei_Sadovnikov_Metaclasses_in_C___dream_Reality.pdf
 
+- [RUS] метаклассах по-русски https://habr.com/ru/article/448466/
+- [RUS] Метаклассы в C++17 Фантастика? Реальность! https://assets.ctfassets.net/oxjq45e8ilak/55bGdX2PnYzmrpM8rwCjcE/791e7eee3236c2023e86e169faca8a0e/Sergei_Sadovnikov_Metaclasses_in_C___dream_Reality.pdf
 
 ## Similar projects
 
@@ -789,3 +795,4 @@ Articles about flexferrum's `autoprogrammer` in media:
 [tumblr-img]: https://i.imgur.com/jDRp47c.png
 [dribbble-img]: https://i.imgur.com/Vvy3Kru.png
 [github-img]: https://i.imgur.com/9I6NRUm.png
+[linkedin-img]: :fa-linkedin:
