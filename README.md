@@ -13,127 +13,138 @@
 ![GitHub language count](https://img.shields.io/github/languages/count/blockspacer/CXXCTP.svg)
 
 # 📚 About CXXCTP (CXX compile-time programming)
+
 CXXCTP is a transpiler that extends C++ for new introspection, reflection and compile-time execution.
 
-CXXCTP doesn`t aim to create predefined set of source code transformations. Users can share C++ scripts for source code transformation.
+CXXCTP doesn't aim to create predefined set of source code transformations. Users can share C++ scripts for source code transformation.
 
-Suppose somebody shared to opensource community usefull scripts like `interface.cxx` and `enum_to_json.cxx`. Just place that scripts into `ctp_scripts` folder to use them in your project.
+Suppose someone shared useful scripts like `interface.cxx` and `enum_to_json.cxx` to the open-source community. You can use them in your project just by placing them into the `ctp_scripts` folder.
 
 Metaprogramming is an “art” of writing programs to treat other programs as their data. This means that a program could generate, read, analyse, and transform code or even itself to achieve a certain solution.
 
 Note: This project is provided as it is, without any warranty (see License).
 
 ## Usage examples
-+ enum_gen_hpp.cxtpl - (codegen) enum to string + reflection metadata.
- ```
- // usage example from ReflShapeKind.hpp
- enum class
- $apply(
-   reflect_enum
- )
- ReflShapeKind0 : uint32_t {
-   Box = 3,
-   Sphere = 6,
- };
- ```
-+ typeclass_gen_cpp.cxtpl - (codegen) typeclasses. Supports combinations of multiple typeclasses and out-of-source method definition (data and logic separation). See also https://twitter.com/TartanLlama/status/1159457033441165313
- ```
- // Usage example. NOTE: no inheritance & definition outside lib.
- // in lib .h
- struct drawable {
-   virtual void draw(const char* arg1) const noexcept = 0;
- };
- struct printable {
-   virtual void print(const char* arg1, const char* arg2) const noexcept = 0;
- };
- struct canvas3D {
-   std::string name3D;
- };
- struct canvas4D {
-   std::string name4D;
- };
- // in app .cpp
- void draw<drawable>(const canvas3D& data, const char* arg1){
-   std::cout << "drawing to canvas3D name = " << data.name3D << std::endl;
- }
- void draw<drawable>(const canvas4D& data, const char* arg1){
-   std::cout << "drawing to canvas4D name = " << data.name4D << std::endl;
- }
- void print<printable>(const canvas3D& data, const char* arg1, const char* arg2){
-   std::cout << "printing to canvas3D name = " << data.name3D << std::endl;
- }
- void print<printable>(const canvas4D& data, const char* arg1, const char* arg2){
-   std::cout << "printing to canvas4D name = " << data.name4D << std::endl;
- }
- std::vector<_tc_combined_t<drawable>> vec {
-  canvas3D{},
-  canvas4D{},
- };
- _tc_combined_t<drawable, printable> CVS = canvas4D{};
- CVS.draw("");
- CVS.print("", "");
 
- canvas3D cvs3D;
- CVS = std::move(cvs3D);
+- enum_gen_hpp.cxtpl - (codegen) enum to string + reflection metadata.
 
- canvas4D cvs4D;
- CVS = cvs4D; // copy
+```
+// usage example from ReflShapeKind.hpp
+enum class
+$apply(
+  reflect_enum
+)
+ReflShapeKind0 : uint32_t {
+  Box = 3,
+  Sphere = 6,
+};
+```
 
- CVS = vec.at(0); // <drawable> to <drawable, printable>
- ```
-+ parse-time/compile-time code execution (see test.cpp)
- ```
- $export (
- static int resultSomeInt = 2345;
- )
- $eval("#include <optional>")
- $exec(
-   printf("execkjljlk\n");
-   printf("execasdasd\n");
- )
- $set_embed("set_embed103",
-   printf("set_embed101\n");
-   printf("set_embed102\n");
- )
- $embed(
-   [&clangMatchResult, &clangRewriter, &clangDecl]() {
-     printf("embed01\n");
-     printf("embed02\n");
-     return new llvm::Optional<std::string>{"embed03"};
-   }();
- )
- ```
-+ metaclasses. Supports combinations of multiple metaclasses (see test.cpp).
- ```
- class
- $apply(make_interface;make_removefuncbody;make_reflect)
- SomeInterfaceName {
-   virtual ~SomeInterfaceName() = 0;
-   /*int    f   (   )   {     // {}
-     int i = 6;
-     {
-       // {
-       // }
-     }
-     return i;
-   };*/
-   int foo();
-   virtual void foobar(int& arg1) = 0;
-   virtual inline void zoobar(int& arg2);
-   //int m_bar;
-   //int m_bar2 = 2;
- };
- ```
+- typeclass_gen_cpp.cxtpl - (codegen) typeclasses. Supports combinations of multiple typeclasses and out-of-source method definitions (data and logic separation). See also https://twitter.com/TartanLlama/status/1159457033441165313
+
+```
+// Usage example. NOTE: no inheritance & definition outside lib.
+// in lib .h
+struct drawable {
+  virtual void draw(const char* arg1) const noexcept = 0;
+};
+struct printable {
+  virtual void print(const char* arg1, const char* arg2) const noexcept = 0;
+};
+struct canvas3D {
+  std::string name3D;
+};
+struct canvas4D {
+  std::string name4D;
+};
+// in app .cpp
+void draw<drawable>(const canvas3D& data, const char* arg1){
+  std::cout << "drawing to canvas3D name = " << data.name3D << std::endl;
+}
+void draw<drawable>(const canvas4D& data, const char* arg1){
+  std::cout << "drawing to canvas4D name = " << data.name4D << std::endl;
+}
+void print<printable>(const canvas3D& data, const char* arg1, const char* arg2){
+  std::cout << "printing to canvas3D name = " << data.name3D << std::endl;
+}
+void print<printable>(const canvas4D& data, const char* arg1, const char* arg2){
+  std::cout << "printing to canvas4D name = " << data.name4D << std::endl;
+}
+std::vector<_tc_combined_t<drawable>> vec {
+ canvas3D{},
+ canvas4D{},
+};
+_tc_combined_t<drawable, printable> CVS = canvas4D{};
+CVS.draw("");
+CVS.print("", "");
+
+canvas3D cvs3D;
+CVS = std::move(cvs3D);
+
+canvas4D cvs4D;
+CVS = cvs4D; // copy
+
+CVS = vec.at(0); // <drawable> to <drawable, printable>
+```
+
+- parse-time/compile-time code execution (see test.cpp)
+
+```
+$export (
+static int resultSomeInt = 2345;
+)
+$eval("#include <optional>")
+$exec(
+  printf("execkjljlk\n");
+  printf("execasdasd\n");
+)
+$set_embed("set_embed103",
+  printf("set_embed101\n");
+  printf("set_embed102\n");
+)
+$embed(
+  [&clangMatchResult, &clangRewriter, &clangDecl]() {
+    printf("embed01\n");
+    printf("embed02\n");
+    return new llvm::Optional<std::string>{"embed03"};
+  }();
+)
+```
+
+- metaclasses. Supports combinations of multiple metaclasses (see test.cpp).
+
+```
+class
+$apply(make_interface;make_removefuncbody;make_reflect)
+SomeInterfaceName {
+  virtual ~SomeInterfaceName() = 0;
+  /*int    f   (   )   {     // {}
+    int i = 6;
+    {
+      // {
+      // }
+    }
+    return i;
+  };*/
+  int foo();
+  virtual void foobar(int& arg1) = 0;
+  virtual inline void zoobar(int& arg2);
+  //int m_bar;
+  //int m_bar2 = 2;
+};
+```
 
 ## 📈 Features
-+ C++ as compile-time scripting language (https://github.com/derofim/cling-cmake)
-+ Template engine with full C++ power (transpiles template to valid C++ code, supports Cling, e.t.c.). https://github.com/blockspacer/CXTPL
-+ Ability to modify source files (implement metaclasses, transpile from C++X to C++Y e.t.c.)
-+ Ability to create new files (separate generated class to .hpp and .cpp, e.t.c.)
-+ Ability to check source files (implement style checks, design patterns, e.t.c.)
-+ Ability to compile scripts (rules for code transformations) for maximum performance, not only interpret them in Cling.
+
+- C++ as compile-time scripting language (https://github.com/derofim/cling-cmake)
+- Template engine with full C++ power (transpiles template to valid C++ code, supports Cling, e.t.c.). https://github.com/blockspacer/CXTPL
+- Ability to modify source files (implement metaclasses, transpile from C++X to C++Y e.t.c.)
+- Ability to create new files (separate generated class to .hpp and .cpp, e.t.c.)
+- Ability to check source files (implement style checks, design patterns, e.t.c.)
+- Ability to compile scripts (rules for code transformations) for maximum performance, not only interpret them in Cling.
 
 ## Project status
+
 In development, see examples
 
 Currently supports only linux.
@@ -141,6 +152,7 @@ Currently supports only linux.
 Note that you can run linux containers under windows/mac/e.t.c.
 
 ### Clone code
+
 ```
 git submodule sync --recursive
 git fetch --recurse-submodules
@@ -150,6 +162,7 @@ git submodule update --force --recursive --init --remote
 ```
 
 ## Install & use under Docker
+
 Install and configure Docker https://medium.com/@saniaky/configure-docker-to-use-a-host-proxy-e88bd988c0aa
 
 Clone code (as above) and `cd` into cloned dir.
@@ -177,6 +190,7 @@ CXTPL_tool -version --version
 ```
 
 ## Develop under Docker
+
 ```
 # Run a terminal in container
 sudo -E docker run --rm -v "$PWD":/home/u/cxxctp -w /home/u/cxxctp  -it  -e DISPLAY         -v /tmp/.X11-unix:/tmp/.X11-unix  cpp-docker-cxxctp
@@ -191,6 +205,7 @@ sudo -E docker run --rm -v "$PWD":/home/u/cxxctp -w /home/u/cxxctp/build cpp-doc
 ```
 
 ## DEPENDENCIES
+
 ```
 # Boost
 sudo add-apt-repository ppa:boost-latest/ppa
@@ -210,6 +225,7 @@ Install CXTPL library https://github.com/blockspacer/CXTPL
 Install CXTPL_tool https://github.com/blockspacer/CXTPL#how-to-build
 
 ## How to build
+
 ```
 BEFORE install_cling.sh:
 sudo apt-get update && sudo apt-get upgrade
@@ -253,16 +269,19 @@ file build/example_make_reflect.cpp.generated.cpp
 ```
 
 OR under gdb:
+
 ```
 rm -rf *generated* ; clear && clear ; gdb ./CXXCTP -ex "run" -ex "bt" -ex "q"
 ```
 
 ## How to build with Cling support
+
 Use shared CXXCTP_core as SHARED library `-DBUILD_SHARED_LIBS=TRUE`.
 
 Run bash scripts/install_folly.sh from https://github.com/blockspacer/CXTPL or patch folly manually for clang support (replace FOLLY_USE_JEMALLOC with FOLLY_ASSUME_NO_JEMALLOC) https://github.com/facebook/folly/issues/976
 
 Use clang (NOT GCC!) before build and `-DENABLE_CLING=TRUE`:
+
 ```
 export CC=clang
 export CXX=clang++
@@ -281,6 +300,7 @@ sudo cmake -E chdir build make install
 ```
 
 If you installed CXXCTP_tool - you can run examples:
+
 ```
 # requires CXXCTP_tool
 sudo cmake -E chdir build make install
@@ -297,7 +317,7 @@ Check that `.log` find doesn`t contain errors
 build/examples/simple/CXXCTP_example
 ```
 
-Don`t forget to set Cling include paths by `-extra-arg=-I$PWD/include` and library paths by `-extra-arg=-L$PWD/build` and .so/.dll libs by `-extra-arg=-lCXXCTP_core`:
+Don`t forget to set Cling include paths by`-extra-arg=-I\$PWD/include`and library paths by`-extra-arg=-L\$PWD/build`and .so/.dll libs by`-extra-arg=-lCXXCTP_core`:
 
 ```
 
@@ -306,6 +326,7 @@ cmake -E chdir build ./tool/CXXCTP_tool --ctp_scripts_paths=$PWD -L .=DBG9 -extr
 ```
 
 ## How to add include paths or definitions for Cling
+
 Use `-extra-arg` option of `CXXCTP_tool`:
 
 ```
@@ -313,11 +334,13 @@ Use `-extra-arg` option of `CXXCTP_tool`:
 ```
 
 Example:
+
 ```
 cmake -E chdir build ./tool/CXXCTP_tool --ctp_scripts_paths=$PWD -L .=DBG9 -extra-arg=-I$PWD/include -extra-arg=-I../resources ../resources/ReflShapeKind.hpp ../resources/test_typeclass_base1.hpp ../resources/test_typeclass_instance1.hpp ../resources/test.cpp
 ```
 
 ## Motivation
+
 Why wouldn't you just extend clang since it also provides some experimental features (modules for instance)?
 
 Clang is a compiler while this project is a transpiler, that transforms code to standardized c++ code without the need to modify llvm/assembly.
@@ -325,31 +348,34 @@ Clang is a compiler while this project is a transpiler, that transforms code to 
 Because tool output is C++ code, you can compile transpiled code using emscripten, use static code analizers, run code inside cling e.t.c.
 
 CXXCTP allows you to create and share scripts for
-+ source code check (like codestyle validation)
-+ source code transformation (like alphabetical sort of all public functions inside some class)
-+ compile-time programming (like retrieve source code modification rules from remote server and save them in some folder)
-+ e.t.c.
+
+- source code check (like codestyle validation)
+- source code transformation (like alphabetical sort of all public functions inside some class)
+- compile-time programming (like retrieve source code modification rules from remote server and save them in some folder)
+- e.t.c.
 
 ## Writing code that writes code
+
 You can write custom C++ scripts for source code transformation or use existing ones.
 
 CXXCTP loads all C++ scripts from ctp_scripts folder in lexicographical order.
 
 Example contents of ctp_scripts:
-  + 1_utils
-    + CXTPL_STD
-      + CXTPL_STD.hpp
-      + CXTPL_STD.cpp
-    + CXXCTP_STD
-      + CXXCTP_STD.hpp
-      + CXXCTP_STD.cpp
-  + 2_scripts
-    + make_interface
-      + make_interface.hpp
-      + make_interface.cpp
-    + typeclass
-      + typeclass.hpp
-      + typeclass.cpp
+
+- 1_utils
+  - CXTPL_STD
+    - CXTPL_STD.hpp
+    - CXTPL_STD.cpp
+  - CXXCTP_STD
+    - CXXCTP_STD.hpp
+    - CXXCTP_STD.cpp
+- 2_scripts
+  - make_interface
+    - make_interface.hpp
+    - make_interface.cpp
+  - typeclass
+    - typeclass.hpp
+    - typeclass.cpp
 
 Utils must load before scripts (Cling related), so we added `1_`, `2_`, ... before folder names (see above).
 
@@ -419,11 +445,13 @@ SomeInterfaceName {
 Using similar approach you can apply multiple soure code transformation steps to same `class` / `struct` / e.t.c.
 
 ## How to add custom code transformation rules
+
 Create files with your function in `ctp_scripts`
 
 Copy `custom_plugins.cmake.example` as `custom_plugins.cmake`
 
 Append your script paths to `custom_plugins.cmake` via `add_ctp_plugin`:
+
 ```
 # first arg - typeclass_instance - script function name
 # second arg - script source file
@@ -440,6 +468,7 @@ add_ctp_plugin(
 Check that your function name exists in generated file `ctp_registry.cpp` (may be skipped in Cling / dev-mode)
 
 Function signature for code transformation must be compatable with `cxxctp_callback`:
+
 ```
 typedef std::function<const char*(
     const cxxctp::parsed_func& func_with_args,
@@ -450,12 +479,13 @@ typedef std::function<const char*(
 ```
 
 Detailed function signature:
-+ return value (const char*) - used to replace original code, if needed.
-+ func_with_args - currently executed function from list `all_funcs_with_args` (see below)
-+ clang::ast_matchers::MatchFinder::MatchResult - see https://xinhuang.github.io/posts/2015-02-08-clang-tutorial-the-ast-matcher.html
-+ clang::Rewriter - see https://devblogs.microsoft.com/cppblog/exploring-clang-tooling-part-3-rewriting-code-with-clang-tidy/
-+ clang::Decl - found by MatchFinder, see https://devblogs.microsoft.com/cppblog/exploring-clang-tooling-part-2-examining-the-clang-ast-with-clang-query/
-+ std::vector<parsed_func> - all arguments extracted from attribute. Example: $apply(interface, foo_with_args(1, "2")) becomes two `parsed_func` - `interface` and `foo_with_args`.
+
+- return value (const char\*) - used to replace original code, if needed.
+- func_with_args - currently executed function from list `all_funcs_with_args` (see below)
+- clang::ast_matchers::MatchFinder::MatchResult - see https://xinhuang.github.io/posts/2015-02-08-clang-tutorial-the-ast-matcher.html
+- clang::Rewriter - see https://devblogs.microsoft.com/cppblog/exploring-clang-tooling-part-3-rewriting-code-with-clang-tidy/
+- clang::Decl - found by MatchFinder, see https://devblogs.microsoft.com/cppblog/exploring-clang-tooling-part-2-examining-the-clang-ast-with-clang-query/
+- std::vector<parsed_func> - all arguments extracted from attribute. Example: \$apply(interface, foo_with_args(1, "2")) becomes two `parsed_func` - `interface` and `foo_with_args`.
 
 Think about function name as one of `__VA_ARGS__` from
 
@@ -465,41 +495,49 @@ Think about function name as one of `__VA_ARGS__` from
 ```
 
 Example where `make_interface` and `make_removefuncbody` - two function names:
+
 ```
 $apply(make_interface;
   make_removefuncbody)
 ```
 
 If you need code generation:
-+ Create template file (`.cxtpl`). Build your file using CXTPL_tool https://github.com/blockspacer/CXTPL
-+ Create all needed template arguments inside of your function. Names, types, e.t.c. for arguments must be same as in template (cause generated template is valid C++ code).
-+ Create variable `std::string cxtpl_output`, that will store result of template rendering with some arguments.
-+ Include file generation from template file (`.cxtpl`) inside of your function.
+
+- Create template file (`.cxtpl`). Build your file using CXTPL_tool https://github.com/blockspacer/CXTPL
+- Create all needed template arguments inside of your function. Names, types, e.t.c. for arguments must be same as in template (cause generated template is valid C++ code).
+- Create variable `std::string cxtpl_output`, that will store result of template rendering with some arguments.
+- Include file generation from template file (`.cxtpl`) inside of your function.
 
 ## What is `.cxtpl`
+
 `.cxtpl` is file extention for C++ template engine https://github.com/blockspacer/CXTPL
 
 ## How to add `.cxtpl` at compile-time (CMake)
+
 Add your `.cxtpl` file into `Codegen_files.cmake`
 
 NOTE:
-  In dev mode (like cling mode) it may be good idea to generate files from templates using CXTPL_tool https://github.com/blockspacer/CXTPL
-  You can add generation rules into `Codegen_files.cmake` later, in release build.
+In dev mode (like cling mode) it may be good idea to generate files from templates using CXTPL_tool https://github.com/blockspacer/CXTPL
+You can add generation rules into `Codegen_files.cmake` later, in release build.
 
 NOTE:
-  Don`t forget to provide both `.cxtpl` and `.cxtpl.h` files with shared codegen rules (add to version control system).
+Don`t forget to provide both`.cxtpl`and`.cxtpl.h` files with shared codegen rules (add to version control system).
 
 ## How to use `.cxtpl` at runtime with Cling
+
 You have two options:
-+ Generate file from your `.cxtpl`, than include it into Cling C++ script. Similar to compile-time, but you can re-generate/change files without program recompilation. Note that it is possible to generate files and include them in your script, just split script into multiple includes.
-+ Generate string from your `.cxtpl`, than run it in separate Cling interpreter. In most cases you will need first option.
+
+- Generate file from your `.cxtpl`, than include it into Cling C++ script. Similar to compile-time, but you can re-generate/change files without program recompilation. Note that it is possible to generate files and include them in your script, just split script into multiple includes.
+- Generate string from your `.cxtpl`, than run it in separate Cling interpreter. In most cases you will need first option.
 
 ## How to use `.cxtpl` with CXXCTP
+
 Pass reflection data into template engine.
 
 Generate files from templates using CXTPL_tool https://github.com/blockspacer/CXTPL
 
 In CXXCTP script (`.cpp`):
+
 ```
 // see ReflectAST.cpp
 reflection::NamespacesTree m_namespaces;
@@ -545,6 +583,7 @@ std::cout << arguments.arg1;
 See `resources/cxtpl/enum_gen_hpp.cxtpl` as example.
 
 ## How to use CXTPL_tool
+
 CXTPL_tool wrapls libtooling to add custom command-line options.
 
 Options related to libtooling (type -help or --help):
@@ -572,6 +611,7 @@ NOTE: `ctp_scripts_paths` require `-DENABLE_CLING=TRUE`
 `-L .=DBG9` is log configuration in format https://github.com/facebook/folly/blob/master/folly/logging/docs/Config.md
 
 Example of log configuration which writes both into the file and console stream:
+
 ```
 ./build/tool/CXTPL_tool -L ".:=INFO:default:console; default=file:path=y.log,async=true,sync_level=DBG9;console=stream:stream=stderr"
 ```
@@ -581,6 +621,7 @@ Example of log configuration which writes both into the file and console stream:
 `--resdir` to change current filesystem path for output files.
 
 Example (custom output dir):
+
 ```
 # Remove old generated files
 rm -rf gen
@@ -596,6 +637,7 @@ cmake -E chdir gen ../build/tool/CXXCTP_tool --resdir=$PWD/gen/out --ctp_scripts
 ```
 
 ## How to debug `ctp_scripts`
+
 Remove old build artifacts and generated files.
 
 Bundle your scripts with `CXXCTP_tool` via `-DBUNDLE_EXAMPLE_SCRIPTS=TRUE`.
@@ -609,6 +651,7 @@ Check that your scripts (plugins) are in `build/tool/CXXCTP_tool --plugins`
 Check that installed in system version of `CXXCTP_tool` same as `build/tool/CXXCTP_tool` (by date/file hash)
 
 Run `CXXCTP_tool` by hand under `gdb`:
+
 ```
 gdb -ex "r" -ex "bt" --args build/tool/CXXCTP_tool .........
 ```
@@ -618,39 +661,43 @@ Check that all needed paths are in `-extra-arg=`.
 Make log to file in `DBG9` mode and check `.log` files.
 
 ## About libtooling
+
 CXXCTP uses LibTooling to parse and modify C++.
 
 LibTooling is a library to support writing standalone tools based on Clang.
 
 Usefull links:
-+ https://clang.llvm.org/extra/clang-rename.html
-+ Clang Tooling I (add override keyword) https://medium.com/@chichunchen844/clang-tooling-i-add-override-keyword-ddfdf6113b24
-+ llvm-clang-samples https://github.com/eliben/llvm-clang-samples/blob/master/src_clang/tooling_sample.cpp
-+ https://chromium.googlesource.com/chromium/src/+/master/tools/clang/rewrite_to_chrome_style/RewriteToChromeStyle.cpp
-+ http://www.dreamlandcoder.com/system-security/how-i-learned/clang-libtool/
-+ https://jonasdevlieghere.com/understanding-the-clang-ast/
-+ http://swtv.kaist.ac.kr/courses/cs453-fall13/Clang%20tutorial%20v4.pdf
-+ https://meetingcpp.com/mcpp/slides/2019/Teaching%20Old%20Compilers%20New%20Tricks_%20Transpiling%20C++17%20to%20C++11.pdf
-+ https://gist.github.com/riyadparvez/a2c157b24579c6552466
-+ https://devblogs.microsoft.com/cppblog/exploring-clang-tooling-part-3-rewriting-code-with-clang-tidy/
-+ http://blog.audio-tk.com/2018/03/20/writing-custom-checks-for-clang-tidy/
-+ https://meetingcpp.com/mcpp/slides/2018/Reflection2.pdf
-+ https://s3.amazonaws.com/connect.linaro.org/yvr18/presentations/yvr18-223.pdf
-+ https://kevinaboos.wordpress.com/2013/07/30/clang-tips-and-tricks/
-+ https://eli.thegreenplace.net/tag/llvm-clang
-+ http://www.goldsborough.me/c++/clang/llvm/tools/2017/02/24/00-00-06-emitting_diagnostics_and_fixithints_in_clang_tools/
-+ https://www.amazon.com/Getting-Started-LLVM-Core-Libraries/dp/1782166920
-+ https://variousburglarious.com/tag/clang/
+
+- https://clang.llvm.org/extra/clang-rename.html
+- Clang Tooling I (add override keyword) https://medium.com/@chichunchen844/clang-tooling-i-add-override-keyword-ddfdf6113b24
+- llvm-clang-samples https://github.com/eliben/llvm-clang-samples/blob/master/src_clang/tooling_sample.cpp
+- https://chromium.googlesource.com/chromium/src/+/master/tools/clang/rewrite_to_chrome_style/RewriteToChromeStyle.cpp
+- http://www.dreamlandcoder.com/system-security/how-i-learned/clang-libtool/
+- https://jonasdevlieghere.com/understanding-the-clang-ast/
+- http://swtv.kaist.ac.kr/courses/cs453-fall13/Clang%20tutorial%20v4.pdf
+- https://meetingcpp.com/mcpp/slides/2019/Teaching%20Old%20Compilers%20New%20Tricks_%20Transpiling%20C++17%20to%20C++11.pdf
+- https://gist.github.com/riyadparvez/a2c157b24579c6552466
+- https://devblogs.microsoft.com/cppblog/exploring-clang-tooling-part-3-rewriting-code-with-clang-tidy/
+- http://blog.audio-tk.com/2018/03/20/writing-custom-checks-for-clang-tidy/
+- https://meetingcpp.com/mcpp/slides/2018/Reflection2.pdf
+- https://s3.amazonaws.com/connect.linaro.org/yvr18/presentations/yvr18-223.pdf
+- https://kevinaboos.wordpress.com/2013/07/30/clang-tips-and-tricks/
+- https://eli.thegreenplace.net/tag/llvm-clang
+- http://www.goldsborough.me/c++/clang/llvm/tools/2017/02/24/00-00-06-emitting_diagnostics_and_fixithints_in_clang_tools/
+- https://www.amazon.com/Getting-Started-LLVM-Core-Libraries/dp/1782166920
+- https://variousburglarious.com/tag/clang/
 
 ## About cling
+
 CXXCTP uses cling to execute C++ at compile-time.
 
 You can use cling for hot code reload / REPL / Fast C++ prototyping / Scripting engine / JIT / e.t.c.
 
 Usefull links:
- + (how to add Cling into CMake project) https://github.com/derofim/cling-cmake
- + https://github.com/root-project/cling/tree/master/www/docs/talks
- + https://github.com/caiorss/C-Cpp-Notes/blob/master/Root-cern-repl.org
+
+- (how to add Cling into CMake project) https://github.com/derofim/cling-cmake
+- https://github.com/root-project/cling/tree/master/www/docs/talks
+- https://github.com/caiorss/C-Cpp-Notes/blob/master/Root-cern-repl.org
 
 ## ⭐️ How to Contribute
 
@@ -678,6 +725,7 @@ Please note that this project is released with a [Code of Conduct](CODE_OF_CONDU
 # D
 
 ### Denis trofimov
+
 - C++ Developer
 - [![github-alt][github-img]](https://github.com/blockspacer)
 - [![github-alt][github-img]](https://github.com/derofim)
@@ -685,24 +733,24 @@ Please note that this project is released with a [Code of Conduct](CODE_OF_CONDU
 
 ## Similar projects
 
-+ Clava https://github.com/specs-feup/clava
-+ Compile-time EXecution of C++ code https://github.com/MaliusArth/cex/blob/6f6e700a253b06c7ae6801e1a3c1f3d842931d77/tool/src/MatchCallbacks/AnnotatedFunctionCallback.cpp
-+ circle https://github.com/seanbaxter/circle/blob/master/examples/README.md
-+ SugarCpp https://github.com/curimit/SugarCpp
-+ ExtendedCpp https://github.com/reneeichhorn/extended-cpp
-+ https://github.com/dobkeratops/compiler
-+ transpiling_cpp17_to_cpp11 https://github.com/neobrain/cftf
-+ https://github.com/flexferrum/autoprogrammer/blob/8c9867d357450b99202dac81730851ffc8faa891/src/generators/pimpl_generator.cpp
-+ https://github.com/llvm-mirror/clang-tools-extra/blob/388528d/clang-tidy/add_new_check.py
-+ https://github.com/aantron/better-enums
-+ https://github.com/Neargye/magic_enum
-+ https://github.com/foonathan/standardese
-+ https://github.com/Leandros/metareflect/blob/0208fdd4fc0ea1081ae2ff4c3bfce161305a7423/README.md#run-the-metareflect-tool
-+ https://github.com/qtinuum/QtnProperty#overview
-+ https://github.com/p-ranav/pprint
-+ https://github.com/google/draco/blob/master/CMakeLists.txt#L715
-+ https://github.com/goto40/rpp/blob/ec8a4c4a3ac32dccee8c4e8ba97be8c2ba1c8f88/src/parser/common_parser.cpp#L21
-+ More https://gist.github.com/blockspacer/6f03933de4f9a6c920649713b056ba4a
+- Clava https://github.com/specs-feup/clava
+- Compile-time EXecution of C++ code https://github.com/MaliusArth/cex/blob/6f6e700a253b06c7ae6801e1a3c1f3d842931d77/tool/src/MatchCallbacks/AnnotatedFunctionCallback.cpp
+- circle https://github.com/seanbaxter/circle/blob/master/examples/README.md
+- SugarCpp https://github.com/curimit/SugarCpp
+- ExtendedCpp https://github.com/reneeichhorn/extended-cpp
+- https://github.com/dobkeratops/compiler
+- transpiling_cpp17_to_cpp11 https://github.com/neobrain/cftf
+- https://github.com/flexferrum/autoprogrammer/blob/8c9867d357450b99202dac81730851ffc8faa891/src/generators/pimpl_generator.cpp
+- https://github.com/llvm-mirror/clang-tools-extra/blob/388528d/clang-tidy/add_new_check.py
+- https://github.com/aantron/better-enums
+- https://github.com/Neargye/magic_enum
+- https://github.com/foonathan/standardese
+- https://github.com/Leandros/metareflect/blob/0208fdd4fc0ea1081ae2ff4c3bfce161305a7423/README.md#run-the-metareflect-tool
+- https://github.com/qtinuum/QtnProperty#overview
+- https://github.com/p-ranav/pprint
+- https://github.com/google/draco/blob/master/CMakeLists.txt#L715
+- https://github.com/goto40/rpp/blob/ec8a4c4a3ac32dccee8c4e8ba97be8c2ba1c8f88/src/parser/common_parser.cpp#L21
+- More https://gist.github.com/blockspacer/6f03933de4f9a6c920649713b056ba4a
 
 [twitter-alt]: Twitter
 [facebook-alt]: Facebook
@@ -710,7 +758,6 @@ Please note that this project is released with a [Code of Conduct](CODE_OF_CONDU
 [tumblr-alt]: Tumblr
 [dribbble-alt]: Dribbble
 [github-alt]: GitHub
-
 [twitter-img]: https://i.imgur.com/wWzX9uB.png
 [facebook-img]: https://i.imgur.com/fep1WsG.png
 [google-img]: https://i.imgur.com/VlgBKQ9.png
