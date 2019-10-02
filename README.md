@@ -736,7 +736,7 @@ Please note that this project is released with a [Code of Conduct](CODE_OF_CONDU
 ### Yousif Alebyary
 
 - Web/Mobile Developer.
-- [![github-alt][github-img]](https://github.com/example)
+- [![github-alt][github-img]](https://github.com/yousifm)
 
 ## Similar projects
 
