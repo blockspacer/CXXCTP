@@ -487,7 +487,7 @@ If you need code generation:
 + Include file generation from template file (`.cxtpl`) inside of your function.
 
 ## What is `.cxtpl`
-`.cxtpl` is file extention for C++ template engine https://github.com/blockspacer/CXTPL
+`.cxtpl` is a file extension for C++ template engine https://github.com/blockspacer/CXTPL
 
 ## How to add `.cxtpl` at compile-time (CMake)
 Add your `.cxtpl` file into `Codegen_files.cmake`
@@ -632,7 +632,7 @@ CXXCTP uses LibTooling to parse and modify C++.
 
 LibTooling is a library to support writing standalone tools based on Clang.
 
-Usefull links:
+Useful links:
 + https://clang.llvm.org/extra/clang-rename.html
 + Clang Tooling I (add override keyword) https://medium.com/@chichunchen844/clang-tooling-i-add-override-keyword-ddfdf6113b24
 + llvm-clang-samples https://github.com/eliben/llvm-clang-samples/blob/master/src_clang/tooling_sample.cpp
@@ -657,7 +657,7 @@ CXXCTP uses cling to execute C++ at compile-time.
 
 You can use cling for hot code reload / REPL / Fast C++ prototyping / Scripting engine / JIT / e.t.c.
 
-Usefull links:
+Useful links:
  + (how to add Cling into CMake project) https://github.com/derofim/cling-cmake
  + https://github.com/root-project/cling/tree/master/www/docs/talks
  + https://github.com/caiorss/C-Cpp-Notes/blob/master/Root-cern-repl.org
