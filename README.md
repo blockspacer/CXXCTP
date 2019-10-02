@@ -521,7 +521,7 @@ In dev mode (like cling mode) it may be a good idea to generate files from templ
 You can add generation rules into `Codegen_files.cmake` later in the release build.
 
 NOTE:
-Don`t forget to provide both`.cxtpl`and`.cxtpl.h` files with shared codegen rules (add to version control system).
+Don't forget to provide both `.cxtpl`and`.cxtpl.h` files with shared codegen rules (add to version control system).
 
 ## How to use `.cxtpl` at runtime with Cling
 
