@@ -345,7 +345,7 @@ Why wouldn't you just extend clang since it also provides some experimental feat
 
 Clang is a compiler while this project is a transpiler, that transforms code to standardized c++ code without the need to modify llvm/assembly.
 
-Because tool output is C++ code, you can compile transpiled code using emscripten, use static code analizers, run code inside cling e.t.c.
+Because the tool's output is C++ code, you can compile transpiled code using emscripten, use static code analizers, run code inside cling e.t.c.
 
 CXXCTP allows you to create and share scripts for
 
@@ -379,7 +379,7 @@ Example contents of ctp_scripts:
 
 Utils must load before scripts (Cling related), so we added `1_`, `2_`, ... before folder names (see above).
 
-You can use `#include`, use filesystem, access internet, e.t.c. in C++ scripts.
+You can use `#include`, use filesystem, access the internet, e.t.c. in C++ scripts.
 
 ## About CXXCTP code annotations
 
@@ -442,7 +442,7 @@ SomeInterfaceName {
 };
 ```
 
-Using similar approach you can apply multiple soure code transformation steps to same `class` / `struct` / e.t.c.
+Using a similar approach you can apply multiple soure code transformation steps to same the `class` / `struct` / e.t.c.
 
 ## How to add custom code transformation rules
 
@@ -510,15 +510,15 @@ If you need code generation:
 
 ## What is `.cxtpl`
 
-`.cxtpl` is file extention for C++ template engine https://github.com/blockspacer/CXTPL
+`.cxtpl` is the file extention for the C++ template engine https://github.com/blockspacer/CXTPL
 
 ## How to add `.cxtpl` at compile-time (CMake)
 
 Add your `.cxtpl` file into `Codegen_files.cmake`
 
 NOTE:
-In dev mode (like cling mode) it may be good idea to generate files from templates using CXTPL_tool https://github.com/blockspacer/CXTPL
-You can add generation rules into `Codegen_files.cmake` later, in release build.
+In dev mode (like cling mode) it may be a good idea to generate files from templates using CXTPL_tool https://github.com/blockspacer/CXTPL
+You can add generation rules into `Codegen_files.cmake` later in the release build.
 
 NOTE:
 Don`t forget to provide both`.cxtpl`and`.cxtpl.h` files with shared codegen rules (add to version control system).
