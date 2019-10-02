@@ -353,6 +353,14 @@ RUN echo "               151.101.113.63:443" >> $HOME/.pip/pip.conf
 # RUN cat $HOME/.pip/pip.conf
 
 WORKDIR /opt
+
+# pip install setuptools --upgrade
+
+# /usr/lib/python3.6/distutils/dist.py:261: UserWarning: Unknown distribution option: 'long_description_content_type'
+RUN pip3 install --index-url=https://pypi.python.org/simple/ --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org wheel
+
+RUN pip3 install --index-url=https://pypi.python.org/simple/ --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org virtualenv
+
 #RUN git clone https://github.com/conan-io/conan.git
 #WORKDIR /opt/conan
 RUN pip3 install --index-url=https://pypi.python.org/simple/ --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org conan
@@ -489,6 +497,7 @@ RUN export CC=clang
 RUN export CXX=clang++
 RUN cmake -E make_directory build
 RUN cmake -E make_directory resources/cxtpl/generated
+RUN cmake -E chdir build conan install --build=missing --profile clang ..
 RUN cmake -E chdir build cmake -E time cmake -DENABLE_CLING=TRUE -DBUILD_SHARED_LIBS=TRUE -DALLOW_PER_PROJECT_CTP_SCRIPTS=TRUE RUN -DBUILD_EXAMPLES=FALSE -DBUNDLE_EXAMPLE_SCRIPTS=FALSE -DCMAKE_BUILD_TYPE=Debug -DENABLE_CXXCTP=TRUE ..
 RUN cmake -E chdir build cmake -E time cmake --build . -- -j6
 # you can install CXXCTP_tool:
