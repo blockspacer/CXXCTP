@@ -284,6 +284,9 @@ RUN         $APT install -y mesa-utils \
                             python3-dev \
                             python3-setuptools
 
+RUN         $APT install -y nano \
+                            mc
+
 #                            python \
 #                            python-dev \
 #                            python-pip \
@@ -498,7 +501,7 @@ RUN rm -rf /opt/CXXCTP
 
 # reset
 WORKDIR /opt
-CMD LD_LIBRARY_PATH=/usr/lib:/usr/local/lib
+# LD_LIBRARY_PATH=/usr/lib:/usr/local/lib
 
 # remove unused apps after install
 RUN         $APT remove -y \
@@ -506,4 +509,8 @@ RUN         $APT remove -y \
                     wget
 
 RUN echo ClientAliveInterval 60 >> /etc/ssh/sshd_config
-RUN service ssh restart
+
+#RUN service ssh restart
+
+CMD ["bash"]
+

@@ -1,7 +1,16 @@
+﻿&nbsp;
+<p align="center">
+  <a href="https://CXXCTP.github.io">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Cpp-Francophonie.svg/512px-Cpp-Francophonie.svg.png" width="100px" alt="CXXCTP" />
+  </a>
+</p>
+<h3 align="center">Add custom features to C++ language, like <a href="https://www.fluentcpp.com/2018/03/09/c-metaclasses-proposal-less-5-minutes/">metaclasses</a>, <a href="https://twitter.com/TartanLlama/status/1159457033441165313">Rust-like traits</a>, reflection and any more</h3>
+<p align="center">A fully open source, powerful solution for modification and generation of C++ source code. Reduce the amount of boilerplate code in your C++ projects.</p>
+<hr />
+
 ﻿![Open Source Love](https://img.shields.io/badge/Open%20Source-%E2%9D%A4-pink.svg)
 ![First Timers Only](https://img.shields.io/badge/first--timers--only-friendly-blue.svg?style=flat)
 ![Up For Grabs](https://img.shields.io/badge/up--for--grabs-friendly-green.svg?style=flat)
-
 ![GitHub](https://img.shields.io/github/license/blockspacer/CXXCTP.svg)
 ![GitHub forks](https://img.shields.io/github/forks/blockspacer/CXXCTP.svg)
 ![GitHub issues](https://img.shields.io/github/issues/blockspacer/CXXCTP.svg)
@@ -40,7 +49,7 @@ ReflShapeKind0 : uint32_t {
 };
 ```
 
-- typeclass_gen_cpp.cxtpl - (codegen) typeclasses. Supports combinations of multiple typeclasses and out-of-source method definitions (data and logic separation). See also https://twitter.com/TartanLlama/status/1159457033441165313
+- typeclass_gen_cpp.cxtpl - (codegen) typeclasses. Supports combinations of multiple typeclasses and out-of-source method definitions (data and logic separation). Supports combinations of multiple typeclasses and out-of-source method definition (data and logic separation). See examples and https://twitter.com/TartanLlama/status/1159457033441165313
 
 ```
 // Usage example. NOTE: no inheritance & definition outside lib.
@@ -111,7 +120,7 @@ $embed(
 )
 ```
 
-- metaclasses. Supports combinations of multiple metaclasses (see test.cpp).
+- metaclasses. Supports combinations of multiple metaclasses (see examples).
 
 ```
 class
@@ -737,6 +746,15 @@ Please note that this project is released with a [Code of Conduct](CODE_OF_CONDU
 
 - Web/Mobile Developer.
 - [![github-alt][github-img]](https://github.com/yousifm)
+
+## Standing on the Shoulders of Giants
+
+That project possible because of [flexferrum's `autoprogrammer`](https://github.com/flexferrum/autoprogrammer)
+
+Articles about flexferrum's `autoprogrammer` in media:
++ [RUS] метаклассах по-русски https://habr.com/ru/article/448466/
++ [RUS] Метаклассы в C++17 Фантастика? Реальность! https://assets.ctfassets.net/oxjq45e8ilak/55bGdX2PnYzmrpM8rwCjcE/791e7eee3236c2023e86e169faca8a0e/Sergei_Sadovnikov_Metaclasses_in_C___dream_Reality.pdf
+
 
 ## Similar projects
 
