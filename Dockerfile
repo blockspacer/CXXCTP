@@ -467,6 +467,10 @@ RUN ["chmod", "+x", "/opt/CXXCTP/submodules/CXTPL/scripts/install_gtest.sh"]
 # gflags
 RUN ["chmod", "+x", "/opt/CXXCTP/submodules/CXTPL/scripts/install_gflags.sh"]
 
+# folly
+# NOTE: we patched folly for clang support https://github.com/facebook/folly/issues/976
+RUN ["chmod", "+x", "/opt/CXXCTP/submodules/CXTPL/scripts/install_folly.sh"]
+
 RUN export CC=gcc
 RUN export CXX=g++
 # create build dir
@@ -490,10 +494,6 @@ RUN cmake -E chdir build cmake -E time cmake --build . -- -j6
 RUN cmake -E chdir build make install
 # check supported plugins
 RUN /usr/local/bin/CXXCTP_tool --plugins
-
-# folly
-# NOTE: we patched folly for clang support https://github.com/facebook/folly/issues/976
-RUN ["chmod", "+x", "/opt/CXXCTP/submodules/CXTPL/scripts/install_folly.sh"]
 
 WORKDIR /opt/CXXCTP
 
