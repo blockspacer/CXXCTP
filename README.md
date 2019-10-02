@@ -1,4 +1,18 @@
-﻿# About CXXCTP (CXX compile-time programming)
+﻿![Open Source Love](https://img.shields.io/badge/Open%20Source-%E2%9D%A4-pink.svg)
+![First Timers Only](https://img.shields.io/badge/first--timers--only-friendly-blue.svg?style=flat)
+![Up For Grabs](https://img.shields.io/badge/up--for--grabs-friendly-green.svg?style=flat)
+
+![GitHub](https://img.shields.io/github/license/blockspacer/CXXCTP.svg)
+![GitHub forks](https://img.shields.io/github/forks/blockspacer/CXXCTP.svg)
+![GitHub issues](https://img.shields.io/github/issues/blockspacer/CXXCTP.svg)
+![GitHub pull requests](https://img.shields.io/github/issues-pr/blockspacer/CXXCTP.svg)
+![GitHub contributors](https://img.shields.io/github/contributors/blockspacer/CXXCTP.svg)
+![GitHub commit activity the past week, 4 weeks, year](https://img.shields.io/github/commit-activity/w/blockspacer/CXXCTP.svg)
+![GitHub last commit](https://img.shields.io/github/last-commit/blockspacer/CXXCTP.svg)
+![GitHub top language](https://img.shields.io/github/languages/top/blockspacer/CXXCTP.svg)
+![GitHub language count](https://img.shields.io/github/languages/count/blockspacer/CXXCTP.svg)
+
+# 📚 About CXXCTP (CXX compile-time programming)
 CXXCTP is a transpiler that extends C++ for new introspection, reflection and compile-time execution.
 
 CXXCTP doesn`t aim to create predefined set of source code transformations. Users can share C++ scripts for source code transformation.
@@ -111,7 +125,7 @@ Note: this project is provided as is, without any warranty (see License).
  };
  ```
 
-## Features
+## 📈 Features
 + C++ as compile-time scripting language (https://github.com/derofim/cling-cmake)
 + Template engine with full C++ power (transpiles template to valid C++ code, supports Cling, e.t.c.). https://github.com/blockspacer/CXTPL
 + Ability to modify source files (implement metaclasses, transpile from C++X to C++Y e.t.c.)
@@ -716,6 +730,37 @@ Usefull links:
  + (how to add Cling into CMake project) https://github.com/derofim/cling-cmake
  + https://github.com/root-project/cling/tree/master/www/docs/talks
  + https://github.com/caiorss/C-Cpp-Notes/blob/master/Root-cern-repl.org
+
+## ⭐️ How to Contribute
+
+Please read our [contributing](CONTRIBUTING.md) guidelines before making your pull request.
+
+## Code of Conduct
+
+Please note that this project is released with a [Code of Conduct](CODE_OF_CONDUCT.md). By participating in this project you agree to abide by its terms.
+
+### Contributors List: Example Profile
+
+- I'm an example that you can copy, if you want :)
+- I work on many things like...
+- My hobbies include...
+- [![twitter-alt][twitter-img]](https://twitter.com/example)
+  [![facebook-alt][facebook-img]](https://facebook.com/example)
+  [![google-img][google-img]](https://plus.google.com/+Example)
+  [![tumblr-alt][tumblr-img]](https://example.tumblr.com)
+  [![dribbble-alt][dribbble-img]](https://dribbble.com/example)
+  [![github-alt][github-img]](https://github.com/example)
+  [![freeCodeCamp](imgs/freecodecamp.png)](https://www.freecodecamp.org/example)
+
+# Contributors List 👌
+
+# D
+
+### Denis trofimov
+- C++ Developer
+- [![github-alt][github-img]](https://github.com/blockspacer)
+- [![github-alt][github-img]](https://github.com/derofim)
+- [linkedin](https://www.linkedin.com/in/denis-trofimov-4335bb13b/)
 
 ## Similar projects
 
