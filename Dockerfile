@@ -19,10 +19,10 @@ FROM        ubuntu:18.04
 # sudo -E docker build  \
 #  --build-arg http_proxy=http://172.17.0.1:3128 \
 #  --build-arg https_proxy=http://172.17.0.1:3128 \
-#  --build-arg no_proxy=localhost,127.0.0.*,10.*,192.168.*,*.tander.ru,*.magnit.ru \
+#  --build-arg no_proxy=localhost,127.0.0.*,10.*,192.168.*,*.somecorp.ru,*.mycorp.ru \
 #  --build-arg HTTP_PROXY=http://172.17.0.1:3128 \
 #  --build-arg HTTPS_PROXY=http://172.17.0.1:3128 \
-#  --build-arg NO_PROXY=localhost,127.0.0.*,10.*,192.168.*,*.tander.ru,*.magnit.ru \
+#  --build-arg NO_PROXY=localhost,127.0.0.*,10.*,192.168.*,*.somecorp.ru,*.mycorp.ru \
 #  --no-cache -t cpp-docker-cxxctp .
 
 # Now let’s check if our image has been created.
@@ -261,7 +261,18 @@ RUN         $APT install -y libboost-dev \
                     unzip \
                     gcc \
                     g++ \
-                    libgtest-dev
+                    gnutls-bin \
+                    openssl \
+                    libgtest-dev \
+                    fakeroot \
+                    dpkg-dev \
+                    libcurl4-openssl-dev
+
+#                    build-dep \ # Unable to locate package build-dep
+
+RUN         $APT install -y mesa-utils \
+                            dbus-x11 \
+                            libx11-dev
 
 WORKDIR /opt
 
@@ -317,29 +328,49 @@ COPY . /opt/CXXCTP
 
 WORKDIR /opt/CXXCTP
 
+# TODO
+# https://stackoverflow.com/a/51565653/1373413
+# RUN cmake -E make_directory /opt/openssl
+# WORKDIR /opt/openssl
+# wget https://www.openssl.org/source/old/1.1.0/openssl-1.1.0g.tar.gz --no-check-certificate
+# tar xzvf openssl-1.1.0g.tar.gz
+# cd openssl-1.1.0g
+# ./config
+# make
+# sudo make install
+
+# TODO https://stackoverflow.com/a/40465312
+# git submodule deinit --all -f
 RUN git submodule sync --recursive || true
-RUN git submodule update --init --recursive --depth 50 || true
+RUN git fetch --recurse-submodules || true
+RUN git submodule update --init --recursive --depth 5 || true
 RUN git submodule update --force --recursive --init --remote || true
+RUN ls -artl /opt/CXXCTP/
+RUN ls -artl /opt/CXXCTP/scripts
+RUN ls -artl /opt/CXXCTP/submodules
 
 # cling
-RUN scripts/install_cling.sh
+# NOTE: run from scripts folder!
+WORKDIR /opt/CXXCTP/scripts
+RUN ["chmod", "+x", "/opt/CXXCTP/scripts/install_cling.sh"]
+WORKDIR /opt/CXXCTP
 
 # CMake
-RUN scripts/install_cmake.sh
+RUN ["chmod", "+x", "/opt/CXXCTP/scripts/install_cmake.sh"]
 
 # NOTE: need libunwind with -fPIC (POSITION_INDEPENDENT_CODE) support
-RUN scripts/install_libunwind.sh
+RUN ["chmod", "+x", "/opt/CXXCTP/scripts/install_libunwind.sh"]
 
 WORKDIR /opt/CXXCTP/submodules/CXTPL
 
 # g3log
-RUN scripts/install_g3log.sh
+RUN ["chmod", "+x", "/opt/CXXCTP/submodules/CXTPL/scripts/install_g3log.sh"]
 
 # gtest
-RUN scripts/install_gtest.sh
+RUN ["chmod", "+x", "/opt/CXXCTP/submodules/CXTPL/scripts/install_gtest.sh"]
 
 # gflags
-RUN scripts/install_gflags.sh
+RUN ["chmod", "+x", "/opt/CXXCTP/submodules/CXTPL/scripts/install_gflags.sh"]
 
 RUN export CC=gcc
 RUN export CXX=g++
@@ -367,7 +398,7 @@ RUN /usr/local/bin/CXXCTP_tool --plugins
 
 # folly
 # NOTE: we patched folly for clang support https://github.com/facebook/folly/issues/976
-RUN scripts/install_folly.sh
+RUN ["chmod", "+x", "/opt/CXXCTP/submodules/CXTPL/scripts/install_folly.sh"]
 
 WORKDIR /opt/CXXCTP
 

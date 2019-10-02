@@ -1,4 +1,6 @@
 !**/.git
+!**/submodules/*
+**/.gitignore
 **/*.md
 **/docker-compose.yml
 **/Dockerfile*
@@ -9,7 +11,6 @@
 **/build/*
 **/*-build
 **/build-*
-**/submodules/*
 **/bin/*
 **/node_modules
 **/tmp
@@ -60,5 +61,4 @@
 **/generated/
 **/custom_plugins\.cmake
 **/src/ctp_registry\.cpp
-**/.gitignore
 

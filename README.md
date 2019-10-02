@@ -143,7 +143,8 @@ Note that you can run linux containers under windows/mac/e.t.c.
 ### Clone code
 ```
 git submodule sync --recursive
-git submodule update --init --recursive --depth 50
+git fetch --recurse-submodules
+git submodule update --init --recursive --depth 5
 # or
 git submodule update --force --recursive --init --remote
 ```
