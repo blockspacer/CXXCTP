@@ -24,6 +24,8 @@ FROM        ubuntu:18.04
 #  --build-arg HTTPS_PROXY=http://172.17.0.1:3128 \
 #  --build-arg NO_PROXY=localhost,127.0.0.*,10.*,192.168.*,*.somecorp.ru,*.mycorp.ru \
 #  --no-cache -t cpp-docker-cxxctp .
+# OR
+# --network=host. This will make the build command use the network settings of the host.
 
 # Now let’s check if our image has been created.
 # sudo -E docker images
@@ -268,11 +270,93 @@ RUN         $APT install -y libboost-dev \
                     dpkg-dev \
                     libcurl4-openssl-dev
 
+#                    libssl1.0-dev # https://serverfault.com/a/929084
 #                    build-dep \ # Unable to locate package build-dep
 
 RUN         $APT install -y mesa-utils \
+                            libglu1-mesa-dev \
                             dbus-x11 \
-                            libx11-dev
+                            libx11-dev \
+                            xorg-dev \
+                            libssl-dev \
+                            python3 \
+                            python3-pip \
+                            python3-dev \
+                            python3-setuptools
+
+#                            python \
+#                            python-dev \
+#                            python-pip \
+#                            python-setuptools
+
+# RUN mkdir ~/.pip && echo "[global]\n#index-urls:  https://pypi.douban.com, https://mirrors.aliyun.com/pypi,\ncheckout https://www.pypi-mirrors.org/ for more available mirror servers\nindex-url = https://pypi.douban.com/simple\ntrusted-host = pypi.douban.com" > ~/.pip/pip.conf
+
+# pip install pip setuptools --index-url=https://pypi.python.org/simple/ --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org
+
+# RUN mkdir -p $HOME/.config/pip/
+# # https://stackoverflow.com/a/54397762
+# RUN echo $'
+# [global]
+# timeout = 60
+# index-url = https://pypi.python.org/simple/
+# extra-index-url = http://151.101.112.223/root/pypi/+simple/
+#                 http://pypi.python.org/simple
+# trusted-host = download.zope.org
+#             pypi.python.org
+#             secondary.extra.host
+#             https://pypi.org
+#             pypi.org
+#             pypi.org:443
+#             151.101.128.223
+#             151.101.128.223:443
+#             https://pypi.python.org
+#             pypi.python.org
+#             pypi.python.org:443
+#             151.101.112.223
+#             151.101.112.223:443
+#             https://files.pythonhosted.org
+#             files.pythonhosted.org
+#             files.pythonhosted.org:443
+#             151.101.113.63
+#             151.101.113.63:443
+# ' >> $HOME/.config/pip/pip.conf
+
+RUN mkdir -p $HOME/.pip/
+# TODO https://github.com/moby/moby/issues/1799#issuecomment-489119778
+RUN echo "[global]" >> $HOME/.pip/pip.conf
+RUN echo "timeout = 60" >> $HOME/.pip/pip.conf
+RUN echo "index-url = https://pypi.python.org/simple" >> $HOME/.pip/pip.conf
+RUN echo "extra-index-url = http://151.101.112.223/root/pypi/+simple" >> $HOME/.pip/pip.conf
+RUN echo "                  http://pypi.python.org/simple" >> $HOME/.pip/pip.conf
+RUN echo "trusted-host = download.zope.org" >> $HOME/.pip/pip.conf
+RUN echo "               pypi.python.org" >> $HOME/.pip/pip.conf
+RUN echo "               secondary.extra.host" >> $HOME/.pip/pip.conf
+RUN echo "               https://pypi.org" >> $HOME/.pip/pip.conf
+RUN echo "               pypi.org" >> $HOME/.pip/pip.conf
+RUN echo "               pypi.org:443" >> $HOME/.pip/pip.conf
+RUN echo "               151.101.128.223" >> $HOME/.pip/pip.conf
+RUN echo "               151.101.128.223:443" >> $HOME/.pip/pip.conf
+RUN echo "               https://pypi.python.org" >> $HOME/.pip/pip.conf
+RUN echo "               pypi.python.org" >> $HOME/.pip/pip.conf
+RUN echo "               pypi.python.org:443" >> $HOME/.pip/pip.conf
+RUN echo "               151.101.112.223" >> $HOME/.pip/pip.conf
+RUN echo "               151.101.112.223:443" >> $HOME/.pip/pip.conf
+RUN echo "               https://files.pythonhosted.org" >> $HOME/.pip/pip.conf
+RUN echo "               files.pythonhosted.org" >> $HOME/.pip/pip.conf
+RUN echo "               files.pythonhosted.org:443" >> $HOME/.pip/pip.conf
+RUN echo "               151.101.113.63" >> $HOME/.pip/pip.conf
+RUN echo "               151.101.113.63:443" >> $HOME/.pip/pip.conf
+
+# RUN cat $HOME/.pip/pip.conf
+
+WORKDIR /opt
+#RUN git clone https://github.com/conan-io/conan.git
+#WORKDIR /opt/conan
+RUN pip3 install --index-url=https://pypi.python.org/simple/ --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org conan
+#RUN pip3 install --index-url=https://pypi.python.org/simple/ --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org -r conans/requirements.txt
+#WORKDIR /opt
+
+RUN pip3 install --index-url=https://pypi.python.org/simple/ --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org conan_package_tools
 
 WORKDIR /opt
 
@@ -328,16 +412,24 @@ COPY . /opt/CXXCTP
 
 WORKDIR /opt/CXXCTP
 
-# TODO
+# openssl: relocation error: openssl: symbol EVP_mdc2 version OPENSSL_1_1_0 not defined in file libcrypto.so.1.1 with link time reference
 # https://stackoverflow.com/a/51565653/1373413
 # RUN cmake -E make_directory /opt/openssl
 # WORKDIR /opt/openssl
-# wget https://www.openssl.org/source/old/1.1.0/openssl-1.1.0g.tar.gz --no-check-certificate
-# tar xzvf openssl-1.1.0g.tar.gz
-# cd openssl-1.1.0g
-# ./config
-# make
-# sudo make install
+# RUN wget https://www.openssl.org/source/old/1.1.0/openssl-1.1.0g.tar.gz --no-check-certificate
+# RUN tar xzvf openssl-1.1.0g.tar.gz
+# WORKDIR /opt/openssl/openssl-1.1.0g
+# RUN ./config
+# RUN make
+# RUN make install
+
+# NOTE: create folder `.ca-certificates` with custom certs
+# switch to root
+#USER root
+COPY ./.ca-certificates/* /usr/local/share/ca-certificates/
+RUN update-ca-certificates --fresh
+# switch back to custom user
+#USER docker
 
 # TODO https://stackoverflow.com/a/40465312
 # git submodule deinit --all -f
