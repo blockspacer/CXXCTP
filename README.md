@@ -527,8 +527,8 @@ Don't forget to provide both `.cxtpl`and`.cxtpl.h` files with shared codegen rul
 
 You have two options:
 
-- Generate file from your `.cxtpl`, than include it into Cling C++ script. Similar to compile-time, but you can re-generate/change files without program recompilation. Note that it is possible to generate files and include them in your script, just split script into multiple includes.
-- Generate string from your `.cxtpl`, than run it in separate Cling interpreter. In most cases you will need first option.
+- Generate a file from your `.cxtpl`, then include it into Cling C++ script. Similar to compile-time, but you can re-generate/change files without program recompilation. Note that it is possible to generate files and include them in your script, just split script into multiple includes.
+- Generate a string from your `.cxtpl`, then run it in a separate Cling interpreter. In most cases you will use the first option.
 
 ## How to use `.cxtpl` with CXXCTP
 
@@ -580,7 +580,7 @@ const auto arguments = std::any_cast<Arguments>(cxtpl_params.at("Arguments"));
 std::cout << arguments.arg1;
 ```
 
-See `resources/cxtpl/enum_gen_hpp.cxtpl` as example.
+See `resources/cxtpl/enum_gen_hpp.cxtpl` as an example.
 
 ## How to use CXTPL_tool
 
@@ -606,7 +606,7 @@ Options related to CXTPL_tool (type --help, not -help):
 
 `ctp_scripts_paths` - list of paths where toll will search for ctp_scripts subfolder
 
-NOTE: `ctp_scripts_paths` require `-DENABLE_CLING=TRUE`
+NOTE: `ctp_scripts_paths` requires `-DENABLE_CLING=TRUE`
 
 `-L .=DBG9` is log configuration in format https://github.com/facebook/folly/blob/master/folly/logging/docs/Config.md
 
@@ -642,15 +642,15 @@ Remove old build artifacts and generated files.
 
 Bundle your scripts with `CXXCTP_tool` via `-DBUNDLE_EXAMPLE_SCRIPTS=TRUE`.
 
-Make sure that your scripts (plugins) added to `CXXCTP_tool` via `custom_plugins.cmake.example`.
+Make sure that your scripts (plugins) are added to `CXXCTP_tool` via `custom_plugins.cmake.example`.
 
 Disable per-project scripts `-DALLOW_PER_PROJECT_CTP_SCRIPTS=FALSE`.
 
 Check that your scripts (plugins) are in `build/tool/CXXCTP_tool --plugins`
 
-Check that installed in system version of `CXXCTP_tool` same as `build/tool/CXXCTP_tool` (by date/file hash)
+Check that the system-installed version of `CXXCTP_tool` is the same as `build/tool/CXXCTP_tool` (by date/file hash)
 
-Run `CXXCTP_tool` by hand under `gdb`:
+Run `CXXCTP_tool` manually under `gdb`:
 
 ```
 gdb -ex "r" -ex "bt" --args build/tool/CXXCTP_tool .........
@@ -658,7 +658,7 @@ gdb -ex "r" -ex "bt" --args build/tool/CXXCTP_tool .........
 
 Check that all needed paths are in `-extra-arg=`.
 
-Make log to file in `DBG9` mode and check `.log` files.
+Make a log to file in `DBG9` mode and check `.log` files.
 
 ## About libtooling
 
