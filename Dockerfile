@@ -56,20 +56,19 @@ FROM        ubuntu:18.04
 # Set it via ARG as this only is available during build:
 ARG DEBIAN_FRONTEND=noninteractive
 
-ENV LC_ALL C.UTF-8
-ENV LANG en_US.UTF-8
-ENV LANGUAGE en_US:en
-#ENV TERM screen
+ENV LC_ALL=C.UTF-8 \
+    LANG=en_US.UTF-8 \
+    LANGUAGE=en_US:en \
+    #TERM=screen \
+    PATH=/usr/lib/clang/6.0/include:/usr/lib/llvm-6.0/include/:$PATH
 
-ENV PATH=/usr/lib/clang/6.0/include:/usr/lib/llvm-6.0/include/:$PATH
-
-ARG APT="DEBIAN_FRONTEND=noninteractive apt-get -qq --no-install-recommends"
+ARG APT="apt-get -qq --no-install-recommends"
 
 # docker build --build-arg NO_SSL="False" APT="apt-get -qq --no-install-recommends" .
 ARG NO_SSL="True"
 
 # https://www.peterbe.com/plog/set-ex
-RUN set -ex
+# RUN set -ex
 
 # NO_SSL usefull under proxy, you can disable it with --build-arg NO_SSL="False"
 # Also change http-proxy.conf and ~/.docker/config.json like so https://medium.com/@saniaky/configure-docker-to-use-a-host-proxy-e88bd988c0aa
@@ -80,7 +79,9 @@ RUN set -ex
 #
 # (!!!) Turns off SSL verification on the whole system (!!!)
 #
-RUN if [ "$NO_SSL" = "True" ]; then \
+RUN set -ex \
+  && \
+  if [ "$NO_SSL" = "True" ]; then \
     echo 'NODE_TLS_REJECT_UNAUTHORIZED=0' >> ~/.bashrc \
     && \
     echo "strict-ssl=false" >> ~/.npmrc \
@@ -117,22 +118,24 @@ RUN if [ "$NO_SSL" = "True" ]; then \
     && \
     echo "insecure" >> ~/.curlrc \
     ; \
-  fi
-
-RUN $APT update
-
-RUN $APT install -y --reinstall software-properties-common
-
-RUN $APT install -y gnupg2 wget
-
-RUN wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key --no-check-certificate | apt-key add -
+  fi \
+  && \
+  $APT update \
+  && \
+  $APT install -y --reinstall software-properties-common \
+  && \
+  $APT install -y gnupg2 wget \
+  && \
+  wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key --no-check-certificate | apt-key add -
 
 # See `How to add an Ubuntu apt-get key from behind a firewall`
 # + http://redcrackle.com/blog/how-add-ubuntu-apt-get-key-behind-firewall
 
 # NOTE: need to set at least empty http-proxy
 # https://github.com/EtiennePerot/parcimonie.sh/issues/15
-RUN if [ ! -z "$http_proxy" ]; then \
+RUN set -ex \
+  && \
+  if [ ! -z "$http_proxy" ]; then \
     apt-key adv --keyserver-options http-proxy=$http_proxy --keyserver keyserver.ubuntu.com --recv-keys 94558F59 \
     && \
     apt-key adv --keyserver-options http-proxy=$http_proxy --keyserver keyserver.ubuntu.com --recv-keys 1E9377A2BA9EF27F \
@@ -146,99 +149,59 @@ RUN if [ ! -z "$http_proxy" ]; then \
     && \
     apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 2EA8F35793D8809A \
     ; \
-  fi
-
-#RUN apt-key adv --keyserver-options http-proxy=$http_proxy --keyserver hkp://ha.pool.sks-keyservers.net:80 --recv-key 0xB01FA116
-
-#RUN apt-key adv --keyserver-options http-proxy=$http_proxy --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10
-
-#RUN apt-key adv --keyserver-options http-proxy=$http_proxy --keyserver keyserver.ubuntu.com --recv-keys 16126D3A3E5C1192
-
-#RUN apt-key adv --keyserver-options http-proxy=$http_proxy --keyserver keyserver.ubuntu.com --recv-keys 4C1CBC1B69B0E2F4
-
-#RUN apt-key adv --keyserver-options http-proxy=$http_proxy --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 36A1D7869245C8950F966E92D8576A8BA88D21E9
-
-#RUN apt-key adv --keyserver-options http-proxy=$http_proxy --keyserver keyserver.ubuntu.com --recv-keys 1397BC53640DB551
-
-#RUN apt-key adv --keyserver-options http-proxy=$http_proxy --keyserver keyserver.ubuntu.com --recv-keys 40976EAF437D05B5
-
-# https://launchpad.net/~boost-latest/+archive/ubuntu/ppa
-# RUN apt-key adv --keyserver-options http-proxy=$http_proxy --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys D9CFF117BD794DCE7C080E310CFB84AE029DB5C7
-#RUN apt-key adv --keyserver-options http-proxy=$http_proxy --keyserver keyserver.ubuntu.com --recv-keys D9CFF117BD794DCE7C080E310CFB84AE029DB5C7
-
-# Now to verify that apt-key worked, run this command (from this answer):
-# apt-key list
-
-# Newer versions of apt also support the following:
-# apt-key adv --fetch-keys http://deb.opera.com/archive.key
-
-# apt-key adv --list-public-keys --with-fingerprint --with-colons
-
-# RUN curl -sSL 'http://llvm.org/apt/llvm-snapshot.gpg.key' | apt-key add --keyserver-options http-proxy=$http_proxy -
-RUN apt-key adv --keyserver-options http-proxy=$http_proxy --fetch-keys http://llvm.org/apt/llvm-snapshot.gpg.key
-
-RUN apt-add-repository -y "deb http://ppa.launchpad.net/ubuntu-toolchain-r/test/ubuntu $(lsb_release -sc) main"
-
-RUN apt-add-repository -y "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-5.0 main"
-
-RUN apt-add-repository -y "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-6.0 main"
-
-RUN apt-add-repository -y "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-7 main"
-
-RUN apt-add-repository -y "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-8 main"
-
-#RUN apt-add-repository -y "deb http://archive.ubuntu.com/ubuntu $(lsb_release -sc) universe"
-
-#RUN echo "deb http://ppa.launchpad.net/boost-latest/ppa/ubuntu $(lsb_release -sc) main" >> /etc/apt/sources.list
-
-#RUN echo "deb-src http://ppa.launchpad.net/boost-latest/ppa/ubuntu $(lsb_release -sc) main" >> /etc/apt/sources.list
-
-#RUN         $APT update
-
-# RUN apt-add-repository -y "deb http://ppa.launchpad.net/boost-latest/ppa/ubuntu $(lsb_release -sc) main"
-#RUN add-apt-repository -y "ppa:boost-latest/ppa"
-
-#RUN apt-add-repository -y "ppa:ubuntu-toolchain-r/test"
-#RUN apt-add-repository -y "deb http://ppa.launchpad.net/ubuntu-toolchain-r/test/ubuntu $(lsb_release -sc) main"
-
-# update and install dependencies
-RUN         $APT update
-
-RUN         $APT install -y \
+  fi \
+  && \
+  apt-key adv --keyserver-options http-proxy=$http_proxy --fetch-keys http://llvm.org/apt/llvm-snapshot.gpg.key \
+  && \
+  apt-add-repository -y "deb http://ppa.launchpad.net/ubuntu-toolchain-r/test/ubuntu $(lsb_release -sc) main" \
+  && \
+  apt-add-repository -y "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-5.0 main" \
+  && \
+  apt-add-repository -y "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-6.0 main" \
+  && \
+  apt-add-repository -y "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-7 main" \
+  && \
+  apt-add-repository -y "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-8 main" \
+  && \
+  $APT update \
+  && \
+  $APT install -y \
                     ca-certificates \
                     software-properties-common \
                     git \
                     wget \
                     locales
 
-RUN if [ "$NO_SSL" = "True" ]; then \
-    git config --global http.sslVerify false\
+RUN set -ex \
+  && \
+  if [ "$NO_SSL" = "True" ]; then \
+    git config --global http.sslVerify false \
     && \
     git config --global http.postBuffer 1048576000 \
     && \
     export GIT_SSL_NO_VERIFY=true \
     ; \
-  fi
-
-RUN         $APT update
-
-RUN         $APT install -y \
+  fi \
+  && \
+  $APT update \
+  && \
+  $APT install -y \
                     make \
                     git \
                     curl \
                     vim \
-                    vim-gnome
-
-RUN         $APT install -y cmake
-
-RUN         $APT install -y \
+                    vim-gnome \
+  && \
+  $APT install -y cmake \
+  && \
+  $APT install -y \
                     build-essential \
                     clang-6.0 python-lldb-6.0 lldb-6.0 lld-6.0 llvm-6.0-dev \
                     clang-tools-6.0 libclang-common-6.0-dev libclang-6.0-dev \
                     libc++abi-dev libc++-dev libclang-common-6.0-dev libclang1-6.0 libclang-6.0-dev \
-                    libstdc++6 libstdc++-6-dev
-
-RUN         $APT install -y libboost-dev \
+                    libstdc++6 libstdc++-6-dev \
+  && \
+  $APT install -y libboost-dev \
                     openmpi-bin \
                     openmpi-common \
                     libopenmpi-dev \
@@ -279,12 +242,9 @@ RUN         $APT install -y libboost-dev \
                     libgtest-dev \
                     fakeroot \
                     dpkg-dev \
-                    libcurl4-openssl-dev
-
-#                    libssl1.0-dev # https://serverfault.com/a/929084
-#                    build-dep \ # Unable to locate package build-dep
-
-RUN         $APT install -y mesa-utils \
+                    libcurl4-openssl-dev \
+  && \
+  $APT install -y mesa-utils \
                             libglu1-mesa-dev \
                             dbus-x11 \
                             libx11-dev \
@@ -293,9 +253,9 @@ RUN         $APT install -y mesa-utils \
                             python3 \
                             python3-pip \
                             python3-dev \
-                            python3-setuptools
-
-RUN         $APT install -y nano \
+                            python3-setuptools \
+  && \
+  $APT install -y nano \
                             mc
 
 #                            python \
@@ -335,31 +295,54 @@ RUN         $APT install -y nano \
 #             151.101.113.63:443
 # ' >> $HOME/.config/pip/pip.conf
 
-RUN mkdir -p $HOME/.pip/
 # TODO https://github.com/moby/moby/issues/1799#issuecomment-489119778
-RUN echo "[global]" >> $HOME/.pip/pip.conf
-RUN echo "timeout = 60" >> $HOME/.pip/pip.conf
-RUN echo "index-url = https://pypi.python.org/simple" >> $HOME/.pip/pip.conf
-RUN echo "extra-index-url = http://151.101.112.223/root/pypi/+simple" >> $HOME/.pip/pip.conf
-RUN echo "                  http://pypi.python.org/simple" >> $HOME/.pip/pip.conf
-RUN echo "trusted-host = download.zope.org" >> $HOME/.pip/pip.conf
-RUN echo "               pypi.python.org" >> $HOME/.pip/pip.conf
-RUN echo "               secondary.extra.host" >> $HOME/.pip/pip.conf
-RUN echo "               https://pypi.org" >> $HOME/.pip/pip.conf
-RUN echo "               pypi.org" >> $HOME/.pip/pip.conf
-RUN echo "               pypi.org:443" >> $HOME/.pip/pip.conf
-RUN echo "               151.101.128.223" >> $HOME/.pip/pip.conf
-RUN echo "               151.101.128.223:443" >> $HOME/.pip/pip.conf
-RUN echo "               https://pypi.python.org" >> $HOME/.pip/pip.conf
-RUN echo "               pypi.python.org" >> $HOME/.pip/pip.conf
-RUN echo "               pypi.python.org:443" >> $HOME/.pip/pip.conf
-RUN echo "               151.101.112.223" >> $HOME/.pip/pip.conf
-RUN echo "               151.101.112.223:443" >> $HOME/.pip/pip.conf
-RUN echo "               https://files.pythonhosted.org" >> $HOME/.pip/pip.conf
-RUN echo "               files.pythonhosted.org" >> $HOME/.pip/pip.conf
-RUN echo "               files.pythonhosted.org:443" >> $HOME/.pip/pip.conf
-RUN echo "               151.101.113.63" >> $HOME/.pip/pip.conf
-RUN echo "               151.101.113.63:443" >> $HOME/.pip/pip.conf
+RUN mkdir -p $HOME/.pip/
+  && \
+  echo "[global]" >> $HOME/.pip/pip.conf \
+  && \
+  echo "timeout = 60" >> $HOME/.pip/pip.conf \
+  && \
+  echo "index-url = https://pypi.python.org/simple" >> $HOME/.pip/pip.conf \
+  && \
+  echo "extra-index-url = http://151.101.112.223/root/pypi/+simple" >> $HOME/.pip/pip.conf \
+  && \
+  echo "                  http://pypi.python.org/simple" >> $HOME/.pip/pip.conf \
+  && \
+  echo "trusted-host = download.zope.org" >> $HOME/.pip/pip.conf \
+  && \
+  echo "               pypi.python.org" >> $HOME/.pip/pip.conf \
+  && \
+  echo "               secondary.extra.host" >> $HOME/.pip/pip.conf \
+  && \
+  echo "               https://pypi.org" >> $HOME/.pip/pip.conf \
+  && \
+  echo "               pypi.org" >> $HOME/.pip/pip.conf \
+  && \
+  echo "               pypi.org:443" >> $HOME/.pip/pip.conf \
+  && \
+  echo "               151.101.128.223" >> $HOME/.pip/pip.conf \
+  && \
+  echo "               151.101.128.223:443" >> $HOME/.pip/pip.conf \
+  && \
+  echo "               https://pypi.python.org" >> $HOME/.pip/pip.conf \
+  && \
+  echo "               pypi.python.org" >> $HOME/.pip/pip.conf \
+  && \
+  echo "               pypi.python.org:443" >> $HOME/.pip/pip.conf \
+  && \
+  echo "               151.101.112.223" >> $HOME/.pip/pip.conf \
+  && \
+  echo "               151.101.112.223:443" >> $HOME/.pip/pip.conf \
+  && \
+  echo "               https://files.pythonhosted.org" >> $HOME/.pip/pip.conf \
+  && \
+  echo "               files.pythonhosted.org" >> $HOME/.pip/pip.conf \
+  && \
+  echo "               files.pythonhosted.org:443" >> $HOME/.pip/pip.conf \
+  && \
+  echo "               151.101.113.63" >> $HOME/.pip/pip.conf \
+  && \
+  echo "               151.101.113.63:443" >> $HOME/.pip/pip.conf
 
 # RUN cat $HOME/.pip/pip.conf
 
@@ -368,17 +351,13 @@ WORKDIR /opt
 # pip install setuptools --upgrade
 
 # /usr/lib/python3.6/distutils/dist.py:261: UserWarning: Unknown distribution option: 'long_description_content_type'
-RUN pip3 install --index-url=https://pypi.python.org/simple/ --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org wheel
-
-RUN pip3 install --index-url=https://pypi.python.org/simple/ --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org virtualenv
-
-#RUN git clone https://github.com/conan-io/conan.git
-#WORKDIR /opt/conan
-RUN pip3 install --index-url=https://pypi.python.org/simple/ --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org conan
-#RUN pip3 install --index-url=https://pypi.python.org/simple/ --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org -r conans/requirements.txt
-#WORKDIR /opt
-
-RUN pip3 install --index-url=https://pypi.python.org/simple/ --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org conan_package_tools
+RUN pip3 install --index-url=https://pypi.python.org/simple/ --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org wheel \
+  && \
+  pip3 install --index-url=https://pypi.python.org/simple/ --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org virtualenv \
+  && \
+  pip3 install --index-url=https://pypi.python.org/simple/ --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org conan \
+  && \
+  pip3 install --index-url=https://pypi.python.org/simple/ --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org conan_package_tools
 
 WORKDIR /opt
 
@@ -427,13 +406,6 @@ WORKDIR /opt
 #     make install
 # RUN rm -rf /opt/build-gtest
 
-WORKDIR /opt
-
-COPY . /opt/CXXCTP
-# RUN git clone --depth=1 --recurse-submodules --single-branch --branch=master https://github.com/blockspacer/CXXCTP.git
-
-WORKDIR /opt/CXXCTP
-
 # openssl: relocation error: openssl: symbol EVP_mdc2 version OPENSSL_1_1_0 not defined in file libcrypto.so.1.1 with link time reference
 # https://stackoverflow.com/a/51565653/1373413
 # RUN cmake -E make_directory /opt/openssl
@@ -453,6 +425,18 @@ RUN update-ca-certificates --fresh
 # switch back to custom user
 #USER docker
 
+WORKDIR /opt
+
+COPY . /opt/CXXCTP
+# RUN git clone --depth=1 --recurse-submodules --single-branch --branch=master https://github.com/blockspacer/CXXCTP.git
+
+WORKDIR /opt/CXXCTP
+
+# need some git config to apply git patch
+RUN git config --global user.email "you@example.com"\
+  && \
+  git config --global user.name "Your Name"
+
 # TODO https://stackoverflow.com/a/40465312
 # RUN git submodule deinit -f . || true
 RUN git pull --recurse-submodules || true
@@ -460,36 +444,53 @@ RUN git submodule sync --recursive || true
 RUN git fetch --recurse-submodules || true
 RUN git submodule update --init --recursive --depth 5 || true
 RUN git submodule update --force --recursive --init --remote || true
-RUN ls -artl /opt/CXXCTP/
-RUN ls -artl /opt/CXXCTP/scripts
-RUN ls -artl /opt/CXXCTP/submodules
+
+RUN ls -artl /opt/CXXCTP/ \
+  && \
+  ls -artl /opt/CXXCTP/scripts \
+  && \
+  ls -artl /opt/CXXCTP/submodules
 
 # cling
 # NOTE: run from scripts folder!
 WORKDIR /opt/CXXCTP/scripts
-RUN ["chmod", "+x", "/opt/CXXCTP/scripts/install_cling.sh"]
+RUN ["chmod", "+x", "/opt/CXXCTP/scripts/install_cling.sh"] \
+  && \
+  /bin/bash -c "source /opt/CXXCTP/scripts/install_cling.sh"
 WORKDIR /opt/CXXCTP
 
 # CMake
-RUN ["chmod", "+x", "/opt/CXXCTP/scripts/install_cmake.sh"]
+#RUN ["chmod", "+x", "/opt/CXXCTP/scripts/install_cmake.sh"]
+#RUN /bin/bash -c "source /opt/CXXCTP/scripts/install_cmake.sh"
+RUN cmake --version
 
 # NOTE: need libunwind with -fPIC (POSITION_INDEPENDENT_CODE) support
-RUN ["chmod", "+x", "/opt/CXXCTP/scripts/install_libunwind.sh"]
+RUN ["chmod", "+x", "/opt/CXXCTP/scripts/install_libunwind.sh"] \
+  && \
+  /bin/bash -c "source /opt/CXXCTP/scripts/install_libunwind.sh"
 
 WORKDIR /opt/CXXCTP/submodules/CXTPL
 
 # g3log
-RUN ["chmod", "+x", "/opt/CXXCTP/submodules/CXTPL/scripts/install_g3log.sh"]
+RUN ["chmod", "+x", "/opt/CXXCTP/submodules/CXTPL/scripts/install_g3log.sh"] \
+  && \
+  /bin/bash -c "source /opt/CXXCTP/submodules/CXTPL/scripts/install_g3log.sh"
 
 # gtest
-RUN ["chmod", "+x", "/opt/CXXCTP/submodules/CXTPL/scripts/install_gtest.sh"]
+RUN ["chmod", "+x", "/opt/CXXCTP/submodules/CXTPL/scripts/install_gtest.sh"] \
+  && \
+  /bin/bash -c "source /opt/CXXCTP/submodules/CXTPL/scripts/install_gtest.sh"
 
 # gflags
-RUN ["chmod", "+x", "/opt/CXXCTP/submodules/CXTPL/scripts/install_gflags.sh"]
+RUN ["chmod", "+x", "/opt/CXXCTP/submodules/CXTPL/scripts/install_gflags.sh"] \
+  && \
+  /bin/bash -c "source /opt/CXXCTP/submodules/CXTPL/scripts/install_gflags.sh"
 
 # folly
 # NOTE: we patched folly for clang support https://github.com/facebook/folly/issues/976
-RUN ["chmod", "+x", "/opt/CXXCTP/submodules/CXTPL/scripts/install_folly.sh"]
+RUN ["chmod", "+x", "/opt/CXXCTP/submodules/CXTPL/scripts/install_folly.sh"] \
+  && \
+  /bin/bash -c "source /opt/CXXCTP/submodules/CXTPL/scripts/install_folly.sh"
 
 RUN export CC=gcc
 RUN export CXX=g++
