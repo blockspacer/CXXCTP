@@ -1,29 +1,42 @@
+# cmake-format configuration file
+# Use run-cmake-format.py to reformat all cmake files in the source tree
 
-tab_size = 4
-separate_ctrl_name_with_space = True
+# How wide to allow formatted cmake files
+line_width = 90
 
-additional_commands = {
-    "externalproject_add": {
-        "flags": [
-        ],
-        "kwargs": {
-            "BUILD_COMMAND": "+",
-            "BUILD_BYPRODUCTS": "+",
-            "CMAKE_ARGS": "+",
-            "COMMAND": "+",
-            "CONFIGURE_COMMAND": "+",
-            "DEPENDS": "+",
-            "DOWNLOAD_COMMAND": "+",
-            "EXCLUDE_FROM_ALL": 1,
-            "INSTALL_COMMAND": "+",
-            "INSTALL_DIR": 1,
-            "LOG_BUILD": 1,
-            "LOG_CONFIGURE": 1,
-            "LOG_DOWNLOAD": 1,
-            "LOG_INSTALL": 1,
-            "PREFIX": 1,
-            "URL": 1,
-            "URL_HASH": 1,
-        }
-    }
-}
+# How many spaces to tab for indent
+tab_size = 2
+
+# If arglists are longer than this, break them always
+max_subargs_per_line = 4
+
+# If true, separate flow control names from their parentheses with a space
+separate_ctrl_name_with_space = False
+
+# If true, separate function names from parentheses with a space
+separate_fn_name_with_space = False
+
+# If a statement is wrapped to more than one line, than dangle the closing
+# parenthesis on it's own line
+dangle_parens = False
+
+# What style line endings to use in the output.
+line_ending = 'unix'
+
+# Format command names consistently as 'lower' or 'upper' case
+command_case = 'lower'
+
+# Format keywords consistently as 'lower' or 'upper' case
+keyword_case = 'unchanged'
+
+# enable comment markup parsing and reflow
+enable_markup = False
+
+# If comment markup is enabled, don't reflow the first comment block in
+# eachlistfile. Use this to preserve formatting of your
+# copyright/licensestatements.
+first_comment_is_literal = False
+
+# If comment markup is enabled, don't reflow any comment block which matchesthis
+# (regex) pattern. Default is `None` (disabled).
+literal_comment_pattern = None

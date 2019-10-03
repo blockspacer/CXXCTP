@@ -390,6 +390,7 @@ if(ENABLE_CXXCTP)
 
   target_compile_definitions( CXXCTP_core PUBLIC
     ${CLING_DEFINITIONS}
+    FOLLY_NO_CONFIG=1 # we don't build a folly/folly-config.h
   )
 
   target_compile_definitions( CXXCTP_core PRIVATE

@@ -23,7 +23,7 @@
 [![Project Status: WIP - Initial development is in progress, but there has not yet been a stable, usable release suitable for the public.](http://www.repostatus.org/badges/latest/wip.svg)](http://www.repostatus.org/#wip)
 [![license](https://img.shields.io/github/license/blockspacer/CXXCTP.svg?style=flat-square)](https://github.com/blockspacer/CXXCTP/master/LICENSE)
 [![Total alerts](https://img.shields.io/lgtm/alerts/g/bsamseth/cpp-project.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/blockspacer/CXXCTP/alerts/)
-[![Lines of Code](https://tokei.rs/b1/github/blockspacer/CXXCTP)](https://github.com/Aaronepower/tokei).
+[![Lines of Code](https://tokei.rs/b1/github/blockspacer/CXXCTP)](https://github.com/blockspacer/CXXCTP)
 [![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/blockspacer/CXXCTP.svg)](http://isitmaintained.com/project/blockspacer/CXXCTP "Average time to resolve an issue")
 [![Percentage of issues still open](http://isitmaintained.com/badge/open/blockspacer/CXXCTP.svg)](http://isitmaintained.com/project/blockspacer/CXXCTP "Percentage of issues still open")
 
@@ -239,6 +239,7 @@ sudo apt-get install openmpi-bin openmpi-common libopenmpi-dev
 - CMake
 
 ```bash
+sudo -E apt-get purge -y cmake
 bash scripts/install_cmake.sh
 ```
 
@@ -884,6 +885,27 @@ Articles about flexferrum's `autoprogrammer` in media:
 
 - [RUS] метаклассах по-русски https://habr.com/ru/article/448466/
 - [RUS] Метаклассы в C++17 Фантастика? Реальность! https://assets.ctfassets.net/oxjq45e8ilak/55bGdX2PnYzmrpM8rwCjcE/791e7eee3236c2023e86e169faca8a0e/Sergei_Sadovnikov_Metaclasses_in_C___dream_Reality.pdf
+
+### CMake Code style
+
+CMake files pass style checks, can be fixed by running run-cmake-format.py from the root of the repository. This requires Python 3 and [cmake_format](https://github.com/cheshirekow/cmake_format) (note: this currently does not work on Windows)
+
+Use autoformatter `cmake-format.py` and `run-cmake-format.py`
+
+```bash
+pip3 install cmake_format
+python3 run-cmake-format.py
+```
+
+To use cmake-format on a specific CMakeLists.txt file in the command line run
+
+```bash
+python3 -m cmake_format -c cmake-format.py -i CMakeLists.txt
+```
+
+There is an official Visual Studio extension, details of which can be found [here](https://marketplace.visualstudio.com/items?itemName=cheshirekow.cmake-format).
+
+Follow CMake StyleGuide https://github.com/ruslo/0
 
 ## Similar projects
 
