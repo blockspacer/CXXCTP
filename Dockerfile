@@ -7,7 +7,8 @@
 # + https://stackoverflow.com/a/38901128
 # + https://dev.to/shriharshmishra/behind-the-corporate-proxy-2jd8
 # + https://stackoverflow.com/a/38901128
-FROM        ubuntu:18.04
+ARG UBUNTU_VERSION=18.04
+FROM        ubuntu:${UBUNTU_VERSION} as cxxctp_build_env
 
 # Give docker the rights to access X-server
 # sudo -E xhost +local:docker
@@ -56,16 +57,29 @@ FROM        ubuntu:18.04
 # Set it via ARG as this only is available during build:
 ARG DEBIAN_FRONTEND=noninteractive
 
+ARG ENABLE_LLVM="True"
+
+ARG GIT_EMAIL="you@example.com"
+
+ARG GIT_USERNAME="Your Name"
+
 ENV LC_ALL=C.UTF-8 \
     LANG=en_US.UTF-8 \
     LANGUAGE=en_US:en \
     #TERM=screen \
-    PATH=/usr/lib/clang/6.0/include:/usr/lib/llvm-6.0/include/:$PATH
+    PATH=/usr/lib/clang/6.0/include:/usr/lib/llvm-6.0/include/:$PATH \
+    GIT_AUTHOR_NAME=$GIT_USERNAME \
+    GIT_AUTHOR_EMAIL=$GIT_EMAIL \
+    GIT_COMMITTER_NAME=$GIT_USERNAME \
+    GIT_COMMITTER_EMAIL=$GIT_EMAIL
 
 ARG APT="apt-get -qq --no-install-recommends"
 
 # docker build --build-arg NO_SSL="False" APT="apt-get -qq --no-install-recommends" .
 ARG NO_SSL="True"
+
+# TODO
+# better dev-env https://github.com/aya/infra/blob/318b16621c7f6d3cd33cfd481f46eed5d750b6aa/stack/ide/docker/ide/Dockerfile
 
 # https://www.peterbe.com/plog/set-ex
 # RUN set -ex
@@ -171,6 +185,27 @@ RUN set -ex \
                     git \
                     wget \
                     locales
+# TODO
+#RUN set -ex \
+#    && for key in \
+#    4ED778F539E3634C779C87C6D7062848A1AB005C \
+#    B9E2F5981AA6E0CD28160D9FF13993A75599653C \
+#    94AE36675C464D64BAFA68DD7434390BDBE9B9C5 \
+#    B9AE9905FFD7803F25714661B63B535A4C206CA9 \
+#    77984A986EBC2AA786BC0F66B01FBB92821C587A \
+#    71DCFD284A79C3B38668286BC97EC7A07EDE3FC1 \
+#    FD3A5288F042B6850C66B31F09FE44734EB7990E \
+#    8FCCA13FEF1D0C2E91008E09770F7A9A5AE15600 \
+#    C4F0DFFF4E8C1A8236409D08E73BC641CC11F4C8 \
+#    DD8F2338BAE7501E3DD5AC78C273792F7D83545D \
+#    A48C2BEE680E841632CD4E44F07496B3EB3C1762 \
+#    ; do \
+#    gpg --batch --keyserver ipv4.pool.sks-keyservers.net --recv-keys "$key" || \
+#    gpg --batch --keyserver pool.sks-keyservers.net --recv-keys "$key" || \
+#    gpg --batch --keyserver pgp.mit.edu --recv-keys "$key" || \
+#    gpg --batch --keyserver keyserver.pgp.com --recv-keys "$key" || \
+#    gpg --batch --keyserver ha.pool.sks-keyservers.net --recv-keys "$key" ; \
+#    done
 
 RUN set -ex \
   && \
@@ -192,14 +227,16 @@ RUN set -ex \
                     vim \
                     vim-gnome \
   && \
-  $APT install -y cmake \
+  $APT install -y cmake build-essential \
   && \
-  $APT install -y \
-                    build-essential \
+    if [ "$ENABLE_LLVM" = "True" ]; then \
+    $APT install -y \
                     clang-6.0 python-lldb-6.0 lldb-6.0 lld-6.0 llvm-6.0-dev \
                     clang-tools-6.0 libclang-common-6.0-dev libclang-6.0-dev \
                     libc++abi-dev libc++-dev libclang-common-6.0-dev libclang1-6.0 libclang-6.0-dev \
                     libstdc++6 libstdc++-6-dev \
+    ; \
+    fi \
   && \
   $APT install -y libboost-dev \
                     openmpi-bin \
@@ -296,7 +333,7 @@ RUN set -ex \
 # ' >> $HOME/.config/pip/pip.conf
 
 # TODO https://github.com/moby/moby/issues/1799#issuecomment-489119778
-RUN mkdir -p $HOME/.pip/
+RUN mkdir -p $HOME/.pip/ \
   && \
   echo "[global]" >> $HOME/.pip/pip.conf \
   && \
@@ -359,6 +396,62 @@ RUN pip3 install --index-url=https://pypi.python.org/simple/ --trusted-host pypi
   && \
   pip3 install --index-url=https://pypi.python.org/simple/ --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org conan_package_tools
 
+RUN conan remote update conan-center https://conan.bintray.com False
+
+# TODO: use conan profile new https://github.com/conan-io/conan/issues/1541#issuecomment-321235829
+RUN mkdir -p $HOME/.conan/profiles/ \
+  && \
+  echo "[settings]" >> ~/.conan/profiles/clang \
+  && \
+  echo "os_build=Linux" >> ~/.conan/profiles/clang \
+  && \
+  echo "os=Linux" >> ~/.conan/profiles/clang \
+  && \
+  echo "arch_build=x86_64" >> ~/.conan/profiles/clang \
+  && \
+  echo "arch=x86_64" >> ~/.conan/profiles/clang \
+  && \
+  echo "compiler=clang" >> ~/.conan/profiles/clang \
+  && \
+  echo "compiler.version=6.0" >> ~/.conan/profiles/clang \
+  && \
+  echo "compiler.libcxx=libstdc++11" >> ~/.conan/profiles/clang \
+  && \
+  echo "" >> ~/.conan/profiles/clang \
+  && \
+  echo "[env]" >> ~/.conan/profiles/clang \
+  && \
+  echo "CC=/usr/bin/clang" >> ~/.conan/profiles/clang \
+  && \
+  echo "CXX=/usr/bin/clang++" >> ~/.conan/profiles/clang
+
+# TODO: use conan profile new https://github.com/conan-io/conan/issues/1541#issuecomment-321235829
+RUN mkdir -p $HOME/.conan/profiles/ \
+  && \
+  echo "[settings]" >> ~/.conan/profiles/gcc \
+  && \
+  echo "os_build=Linux" >> ~/.conan/profiles/gcc \
+  && \
+  echo "os=Linux" >> ~/.conan/profiles/gcc \
+  && \
+  echo "arch_build=x86_64" >> ~/.conan/profiles/gcc \
+  && \
+  echo "arch=x86_64" >> ~/.conan/profiles/gcc \
+  && \
+  echo "compiler=gcc" >> ~/.conan/profiles/gcc \
+  && \
+  echo "compiler.version=7" >> ~/.conan/profiles/gcc \
+  && \
+  echo "compiler.libcxx=libstdc++11" >> ~/.conan/profiles/gcc \
+  && \
+  echo "" >> ~/.conan/profiles/gcc \
+  && \
+  echo "[env]" >> ~/.conan/profiles/gcc \
+  && \
+  echo "CC=/usr/bin/gcc" >> ~/.conan/profiles/gcc \
+  && \
+  echo "CXX=/usr/bin/g++" >> ~/.conan/profiles/gcc
+
 WORKDIR /opt
 
 # libunwind
@@ -417,6 +510,9 @@ WORKDIR /opt
 # RUN make
 # RUN make install
 
+# allows individual sections to be run by doing: docker build --target cxxctp_tool ...
+FROM        cxxctp_build_env as cxxctp_tool
+
 # NOTE: create folder `.ca-certificates` with custom certs
 # switch to root
 #USER root
@@ -427,29 +523,36 @@ RUN update-ca-certificates --fresh
 
 WORKDIR /opt
 
-COPY . /opt/CXXCTP
+# NOTE: ADD invalidate the cache for the copy
+ADD . /opt/CXXCTP
+
 # RUN git clone --depth=1 --recurse-submodules --single-branch --branch=master https://github.com/blockspacer/CXXCTP.git
 
 WORKDIR /opt/CXXCTP
 
 # need some git config to apply git patch
-RUN git config --global user.email "you@example.com"\
+RUN git config --global user.email "$GIT_EMAIL" \
   && \
-  git config --global user.name "Your Name"
+  git config --global user.name "$GIT_USERNAME"
 
 # TODO https://stackoverflow.com/a/40465312
 # RUN git submodule deinit -f . || true
-RUN git pull --recurse-submodules || true
-RUN git submodule sync --recursive || true
-RUN git fetch --recurse-submodules || true
+#RUN git pull --recurse-submodules || true
+#RUN git submodule sync --recursive || true
+#RUN git fetch --recurse-submodules || true
 RUN git submodule update --init --recursive --depth 5 || true
-RUN git submodule update --force --recursive --init --remote || true
+#RUN git submodule update --force --recursive --init --remote || true
 
 RUN ls -artl /opt/CXXCTP/ \
   && \
   ls -artl /opt/CXXCTP/scripts \
   && \
   ls -artl /opt/CXXCTP/submodules
+
+# CMake
+#RUN ["chmod", "+x", "/opt/CXXCTP/scripts/install_cmake.sh"]
+#RUN /bin/bash -c "source /opt/CXXCTP/scripts/install_cmake.sh"
+#RUN cmake --version
 
 # cling
 # NOTE: run from scripts folder!
@@ -458,11 +561,6 @@ RUN ["chmod", "+x", "/opt/CXXCTP/scripts/install_cling.sh"] \
   && \
   /bin/bash -c "source /opt/CXXCTP/scripts/install_cling.sh"
 WORKDIR /opt/CXXCTP
-
-# CMake
-#RUN ["chmod", "+x", "/opt/CXXCTP/scripts/install_cmake.sh"]
-#RUN /bin/bash -c "source /opt/CXXCTP/scripts/install_cmake.sh"
-RUN cmake --version
 
 # NOTE: need libunwind with -fPIC (POSITION_INDEPENDENT_CODE) support
 RUN ["chmod", "+x", "/opt/CXXCTP/scripts/install_libunwind.sh"] \
@@ -474,48 +572,64 @@ WORKDIR /opt/CXXCTP/submodules/CXTPL
 # g3log
 RUN ["chmod", "+x", "/opt/CXXCTP/submodules/CXTPL/scripts/install_g3log.sh"] \
   && \
-  /bin/bash -c "source /opt/CXXCTP/submodules/CXTPL/scripts/install_g3log.sh"
-
-# gtest
-RUN ["chmod", "+x", "/opt/CXXCTP/submodules/CXTPL/scripts/install_gtest.sh"] \
+  /bin/bash -c "source /opt/CXXCTP/submodules/CXTPL/scripts/install_g3log.sh" \
   && \
-  /bin/bash -c "source /opt/CXXCTP/submodules/CXTPL/scripts/install_gtest.sh"
-
-# gflags
-RUN ["chmod", "+x", "/opt/CXXCTP/submodules/CXTPL/scripts/install_gflags.sh"] \
+  # gtest \
+  ["chmod", "+x", "/opt/CXXCTP/submodules/CXTPL/scripts/install_gtest.sh"] \
   && \
-  /bin/bash -c "source /opt/CXXCTP/submodules/CXTPL/scripts/install_gflags.sh"
-
-# folly
-# NOTE: we patched folly for clang support https://github.com/facebook/folly/issues/976
-RUN ["chmod", "+x", "/opt/CXXCTP/submodules/CXTPL/scripts/install_folly.sh"] \
+  /bin/bash -c "source /opt/CXXCTP/submodules/CXTPL/scripts/install_gtest.sh" \
+  && \
+  # gflags \
+  ["chmod", "+x", "/opt/CXXCTP/submodules/CXTPL/scripts/install_gflags.sh"] \
+  && \
+  /bin/bash -c "source /opt/CXXCTP/submodules/CXTPL/scripts/install_gflags.sh" \
+  && \
+  # folly \
+  # NOTE: we patched folly for clang support https://github.com/facebook/folly/issues/976 \
+  ["chmod", "+x", "/opt/CXXCTP/submodules/CXTPL/scripts/install_folly.sh"] \
   && \
   /bin/bash -c "source /opt/CXXCTP/submodules/CXTPL/scripts/install_folly.sh"
 
-RUN export CC=gcc
-RUN export CXX=g++
-# create build dir
-RUN cmake -E make_directory build
-# configure
-RUN cmake -E chdir build cmake -E time cmake -DBUILD_EXAMPLES=FALSE -DENABLE_CLING=FALSE -DCMAKE_BUILD_TYPE=Debug ..
-# build
-RUN cmake -E chdir build cmake -E time cmake --build . -- -j6
-# install lib and CXTPL_tool
-RUN cmake -E chdir build make install
+RUN export CC=gcc \
+  && \
+  export CXX=g++ \
+  # create build dir \
+  && \
+  cmake -E make_directory build \
+  && \
+  # configure \
+  && \
+  cmake -E chdir build conan install --build=missing --profile gcc .. \
+  && \
+  cmake -E chdir build cmake -E time cmake -DBUILD_EXAMPLES=FALSE -DENABLE_CLING=FALSE -DCMAKE_BUILD_TYPE=Debug .. \
+  # build \
+  && \
+  cmake -E chdir build cmake -E time cmake --build . -- -j6 \
+  # install lib and CXTPL_tool \
+  && \
+  cmake -E chdir build make install
 
 WORKDIR /opt/CXXCTP
 
-RUN export CC=clang
-RUN export CXX=clang++
-RUN cmake -E make_directory build
-RUN cmake -E make_directory resources/cxtpl/generated
-RUN cmake -E chdir build conan install --build=missing --profile clang ..
-RUN cmake -E chdir build cmake -E time cmake -DENABLE_CLING=TRUE -DBUILD_SHARED_LIBS=TRUE -DALLOW_PER_PROJECT_CTP_SCRIPTS=TRUE RUN -DBUILD_EXAMPLES=FALSE -DBUNDLE_EXAMPLE_SCRIPTS=FALSE -DCMAKE_BUILD_TYPE=Debug -DENABLE_CXXCTP=TRUE ..
-RUN cmake -E chdir build cmake -E time cmake --build . -- -j6
-# you can install CXXCTP_tool:
-RUN cmake -E chdir build make install
-# check supported plugins
-RUN /usr/local/bin/CXXCTP_tool --plugins
+RUN export CC=clang \
+  && \
+  export CXX=clang++ \
+  && \
+  cmake -E make_directory build \
+  && \
+  cmake -E make_directory resources/cxtpl/generated \
+  && \
+  cmake -E chdir build conan install --build=missing --profile clang .. \
+  && \
+  cmake -E chdir build cmake -E time cmake -DENABLE_CLING=TRUE -DBUILD_SHARED_LIBS=TRUE -DALLOW_PER_PROJECT_CTP_SCRIPTS=TRUE RUN -DBUILD_EXAMPLES=FALSE -DBUNDLE_EXAMPLE_SCRIPTS=FALSE -DCMAKE_BUILD_TYPE=Debug -DENABLE_CXXCTP=TRUE .. \
+  && \
+  cmake -E chdir build cmake -E time cmake --build . -- -j6 \
+  #  you can install CXXCTP_tool: \
+  && \
+  cmake -E chdir build make install \
+  #  check supported plugins \
+  && \
+  /usr/local/bin/CXXCTP_tool --plugins
 
 WORKDIR /opt/CXXCTP
 
@@ -535,6 +649,9 @@ RUN echo ClientAliveInterval 60 >> /etc/ssh/sshd_config
 #RUN service ssh restart
 
 #ENV DEBIAN_FRONTEND teletype
+
+# default
+FROM        cxxctp_tool
 
 CMD ["bash"]
 

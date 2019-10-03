@@ -42,7 +42,7 @@ option(BUILD_SHARED_LIBS "Use .so/.dll" OFF)
 
 option(BUILD_EXAMPLES "Use built-in examples" OFF)
 
-option(ENABLE_TESTS "Use unit tests" ON)
+option(ENABLE_TESTS "Use unit tests" OFF)
 
 option(BUNDLE_EXAMPLE_SCRIPTS
   "Use built-in scripts from examples" OFF)
@@ -366,6 +366,7 @@ if(ENABLE_CXXCTP)
 
   target_include_directories(CXXCTP_core PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/submodules/boost.outcome/include/outcome/quickcpplib/include/ # TODO
+    ${CMAKE_CURRENT_SOURCE_DIR}/submodules/folly # TODO
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_CURRENT_SOURCE_DIR}/ # path to ctp_scripts
     ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple # path to ctp_scripts
@@ -457,6 +458,7 @@ if(ENABLE_CLING AND INSTALL_CLING)
           PATTERN "*.so"
           PATTERN "*.dll"
           PATTERN "*.a"
+          PATTERN "*.lib"
           PATTERN "CMake" EXCLUDE
           PATTERN "cmake" EXCLUDE
           PATTERN "CMakeFiles" EXCLUDE

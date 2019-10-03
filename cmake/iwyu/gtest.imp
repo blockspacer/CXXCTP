@@ -1,0 +1,10 @@
+[
+{ include: ["@<gtest/*.h>", private, "<gtest/gtest.h>", public ] },
+{ include: ["@\"gtest/*.h\"", private, "<gtest/gtest.h>", public ] },
+{ include: ["@<gtest/gtest-*.h>", private, "<gtest/gtest.h>", public ] },
+{ include: ["@\"gtest/gtest-*.h\"", private, "<gtest/gtest.h>", public ] },
+{ include: ["<gtest/gtest-message.h>", private, "<gtest/gtest.h>", public ] },
+{ include: ["<gtest/gtest-test-part.h>", private, "<gtest/gtest.h>", public ] },
+{ include: ["\"gtest/gtest-message.h\"", private, "<gtest/gtest.h>", public ] },
+{ include: ["\"gtest/gtest-test-part.h\"", private, "<gtest/gtest.h>", public ] },
+]

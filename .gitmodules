@@ -3,53 +3,62 @@
   url = http://github.com/blockspacer/CXTPL.git
 	branch = master
 	fetchRecurseSubmodules = true
+  ignore = all
 [submodule "submodules/boost.outcome"]
 	path = submodules/boost.outcome
   url = http://github.com/ned14/outcome.git
 	branch = master
 	fetchRecurseSubmodules = true
+  ignore = all
 [submodule "submodules/GSL"]
 	path = submodules/GSL
   url = http://github.com/microsoft/GSL.git
 	branch = master
 	fetchRecurseSubmodules = true
+  ignore = all
 [submodule "submodules/folly"]
 	path = submodules/folly
   url = http://github.com/facebook/folly.git
-	branch = master
 	fetchRecurseSubmodules = true
 [submodule "submodules/iwyu"]
 	path = submodules/iwyu
   url = http://github.com/include-what-you-use/include-what-you-use.git
-	branch = master
+	branch = clang_6.0
 	fetchRecurseSubmodules = true
+  ignore = all
 [submodule "submodules/g3log"]
 	path = submodules/g3log
   url = http://github.com/KjellKod/g3log.git
 	branch = master
 	fetchRecurseSubmodules = true
+  ignore = all
 [submodule "submodules/rang"]
 	path = submodules/rang
   url = http://github.com/agauniyal/rang.git
 	branch = master
 	fetchRecurseSubmodules = true
+  ignore = all
 [submodule "submodules/Catch"]
 	path = submodules/Catch
   url = http://github.com/philsquared/Catch.git
 	branch = master
 	fetchRecurseSubmodules = true
+  ignore = all
 [submodule "submodules/FakeIt"]
 	path = submodules/FakeIt
   url = http://github.com/eranpeer/FakeIt.git
 	branch = master
 	fetchRecurseSubmodules = true
+  ignore = all
 [submodule "submodules/glog"]
 	path = submodules/glog
   url = http://github.com/google/glog.git
 	branch = master
 	fetchRecurseSubmodules = true
+  ignore = all
 [submodule "submodules/gflags"]
 	path = submodules/gflags
   url = http://github.com/gflags/gflags.git
 	branch = master
 	fetchRecurseSubmodules = true
+  ignore = all

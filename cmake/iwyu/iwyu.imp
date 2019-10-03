@@ -1,0 +1,135 @@
+[
+ # READ https://github.com/hdclark/DICOMautomaton/blob/master/artifacts/20180318_include-what-you-use/iwyu_how-to.txt
+
+# { ref: cmake_mapping.imp },
+# { ref: boost-all-private.imp },
+ { ref: boost-all.imp },
+ { ref: beast-all.imp },
+ { ref: qt5_4.imp },
+ { ref: gtest.imp },
+ { ref: libcxx.imp },
+ { ref: gcc.libc.imp },
+ { ref: gcc.symbols.imp },
+ { ref: gcc.stl.headers.imp },
+ { ref: stl.c.headers.imp },
+ { ref: third_party.imp },
+ { ref: stl_c_headers.imp },
+ { include: ["<jconfig.h>", "private", "<jpeglib.h>", "public"] },
+ { include: ["<jmorecfg.h>", "private", "<jpeglib.h>", "public"] },
+ { include: ["@<gtest/.*>", "private", "<gtest/gtest.h>", "public"] },
+ { include: ["@<gmock/.*>", "private", "<gmock/gmock.h>", "public"] },
+ { include: ["<ThreadSafetyAnalysis.h>", "private", "\"ThreadSafetyAnalysis.h\"", "public"] },
+ { symbol: ["size_t", private, "<cstddef>", public]},
+ { symbol: ["ssize_t", private, "<cstddef>", public]},
+ { symbol: ["std::abs", private, "<cmath>", public]},
+ { symbol: ["abs", private, "<cmath>", public]},
+ { symbol: ["std::hash", private, "<functional>", public]},
+
+ # iwyu-mapping-stl
+ { include: ["<bits/exception.h>", private, "<exception>", public ] },
+ { include: ["<bits/refwrap.h>", private, "<functional>", public ] },
+ { include: ["<bits/std_abs.h>", private, "<cmath>", public ] },
+ { include: ["<bits/stdint-intn.h>", private, "<cstdint>", public ] },
+ { include: ["<bits/stdint-uintn.h>", private, "<cstdint>", public ] },
+ { include: ["<bits/types/struct_timeval.h>", private, "<sys/time.h>", public ] },
+ { include: ["<bits/types/struct_tm.h>", private, "<ctime>", public ] },
+ { include: ["<bits/types/time_t.h>", private, "<ctime>", public ] },
+ { include: ["<bits/exception.h>", private, "<stdexcept>", public]},
+ { include: ["<bits/shared_ptr.h>", private, "<memory>", public]},
+ { include: ["<bits/unique_ptr.h>", private, "<memory>", public]},
+ { include: ["<bits/std_function.h>", private, "<functional>", public]},
+ { include: ["<bits/stl_set.h>", "private", "<set>", "public"] },
+ { include: ["<bits/exception.h>", "private", "<exception>", "public"] },
+ { include: ["<bits/types/clock_t.h>", "private", "<ctime>", "public"] },
+
+ { include: ["<ext/alloc_traits.h>", private, "<memory>", public ] },
+
+ # NOTE: this <cmath> is the correct header for std::abs() in c++17
+ {include: ["<bits/std_abs.h>", private, "<cstdlib>", public]},
+
+ {include: ["<assert.h>", public, "<cassert>", public]},
+ {include: ["<stddef.h>", public, "<cstddef>", public]},
+ {include: ["<string.h>", public, "<cstring>", public]},
+
+ # C++ alternatives to C standard headers
+ # got from https://gitlab.kitware.com/pps83/cmake/blob/master/Utilities/IWYU/mapping.imp
+ { include: [ "<assert.h>", public, "<cassert>", public ] },
+ { include: [ "<complex.h>", public, "<ccomplex>", public ] },
+ { include: [ "<ctype.h>", public, "<cctype>", public ] },
+ { include: [ "<errno.h>", public, "<cerrno>", public ] },
+ { include: [ "<float.h>", public, "<cfloat>", public ] },
+ { include: [ "<iso646.h>", public, "<ciso646>", public ] },
+ { include: [ "<limits.h>", public, "<climits>", public ] },
+ { include: [ "<locale.h>", public, "<clocale>", public ] },
+ { include: [ "<math.h>", public, "<cmath>", public ] },
+ { include: [ "<setjmp.h>", public, "<csetjmp>", public ] },
+ { include: [ "<signal.h>", public, "<csignal>", public ] },
+ { include: [ "<stdarg.h>", public, "<cstdarg>", public ] },
+ { include: [ "<stddef.h>", public, "<cstddef>", public ] },
+ { include: [ "<stdio.h>", public, "<cstdio>", public ] },
+ { include: [ "<stdlib.h>", public, "<cstdlib>", public ] },
+ { include: [ "<string.h>", public, "<cstring>", public ] },
+ { include: [ "<time.h>", public, "<ctime>", public ] },
+ { include: [ "<wchar.h>", public, "<cwchar>", public ] },
+ { include: [ "<wctype.h>", public, "<cwctype>", public ] },
+
+ # HACK: check whether this can be removed with next iwyu release.
+ { include: [ "<bits/shared_ptr.h>", private, "<memory>", public ] },
+ { include: [ "<bits/std_function.h>", private, "<functional>", public ] },
+ { include: [ "<bits/time.h>", private, "<time.h>", public ] },
+ { include: [ "<bits/types/clock_t.h>", private, "<time.h>", public ] },
+ { include: [ "<bits/types/struct_timespec.h>", private, "<time.h>", public ] },
+ { include: [ "<bits/types/struct_timeval.h>", private, "<time.h>", public ] },
+ { include: [ "<bits/types/struct_tm.h>", private, "<time.h>", public ] },
+ { include: [ "<bits/types/time_t.h>", private, "<time.h>", public ] },
+
+ # HACK: check whether this can be removed with next iwyu release.
+ { symbol: [ "__GLIBC__", private, "<stdlib.h>", public ] },
+ { symbol: [ "_Noreturn", private, "<stdlib.h>", public ] },
+
+ # HACK: iwyu wrongly thinks that including <iosfwd> is sufficient.
+ { symbol: [ "std::stringstream", private, "<sstream>", public ] },
+ { symbol: [ "std::istringstream", private, "<sstream>", public ] },
+ { symbol: [ "std::ostringstream", private, "<sstream>", public ] },
+
+ # HACK: iwyu suggests those two files each time vector[] is used.
+ # https://github.com/include-what-you-use/include-what-you-use/issues/166
+ { include: [ "<ext/alloc_traits.h>", private, "<vector>", public ] },
+ { include: [ "<memory>", public, "<vector>", public ] },
+
+ # TODO: enable this block and remove some <utility> includes?
+ #{ symbol: [ "std::pair", private, "<utility>", public ] },
+ #{ symbol: [ "std::pair", private, "<map>", public ] },
+ #{ symbol: [ "std::pair", private, "<set>", public ] },
+
+# iwyu gets confused by some system headers; hack around them:
+ { include: ["<ext/alloc_traits.h>", "private", "<vector>", "public"] },
+ { include: ["<cxxabi.h>", "public", "<system_error>", "public"] },
+ { include: ["<ext/new_allocator.h>", "private", "<memory>", "public"] },
+ { symbol: ["hash", "private", "<functional>", "public"] },
+
+# Hacks for boost:
+# { include: ["<boost/core/explicit_operator_bool.hpp>", "private", "<boost/math/distributions/normal.hpp>", "public"] },
+# { include: ["<boost/format/alt_sstream.hpp>", "private", "<boost/math/distributions/normal.hpp>", "public"] },
+# { include: ["<boost/format/alt_sstream_impl.hpp>", "private", "<boost/math/distributions/normal.hpp>", "public"] },
+# { include: ["<boost/format/format_implementation.hpp>", "private", "<boost/math/distributions/normal.hpp>", "public"] },
+# { include: ["<boost/math/distributions/detail/derived_accessors.hpp>", "private", "<boost/math/distributions/normal.hpp>", "public"] },
+# { include: ["<boost/math/policies/policy.hpp>", "private", "<boost/math/distributions/normal.hpp>", "public"] },
+# { include: ["<boost/math/special_functions/fpclassify.hpp>", "private", "<boost/math/distributions/normal.hpp>", "public"] },
+# { include: ["<boost/optional/optional.hpp>", "private", "<boost/math/distributions/normal.hpp>", "public"] },
+
+# Eigen:
+ { include: ["@\"Eigen/src/Core/.*\"", "private", "<Eigen/Core>", "public"] },
+ { include: ["@\"Eigen/src/Cholesky/.*\"", "private", "<Eigen/Cholesky>", "public"] },
+ { include: ["@\"Eigen/src/QR/.*\"", "private", "<Eigen/QR>", "public"] },
+ { include: ["@\"Eigen/src/SVD/.*\"", "private", "<Eigen/SVD>", "public"] },
+ { include: ["@\"Eigen/src/Jacobi/.*\"", "private", "<Eigen/Jacobi>", "public"] },
+ { include: ["@\"Eigen/src/Householder/.*\"", "private", "<Eigen/Householder>", "public"] },
+ { include: ["\"Eigen/Householder\"", "public", "<Eigen/QR>", "public"] },
+ { include: ["\"Eigen/Jacobi\"", "public", "<Eigen/JacobiSVD>", "public"] },
+
+# LUA
+ { symbol: [ "sol::state", private, "<sol3/sol.hpp>", public ] },,
+ { symbol: [ "sol::state", private, "<sol2/sol.hpp>", public ] }
+ { symbol: [ "sol::state", private, "<sol/sol.hpp>", public ] }
+]

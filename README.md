@@ -20,6 +20,12 @@
 ![GitHub last commit](https://img.shields.io/github/last-commit/blockspacer/CXXCTP.svg)
 ![GitHub top language](https://img.shields.io/github/languages/top/blockspacer/CXXCTP.svg)
 ![GitHub language count](https://img.shields.io/github/languages/count/blockspacer/CXXCTP.svg)
+[![Project Status: WIP - Initial development is in progress, but there has not yet been a stable, usable release suitable for the public.](http://www.repostatus.org/badges/latest/wip.svg)](http://www.repostatus.org/#wip)
+[![license](https://img.shields.io/github/license/blockspacer/CXXCTP.svg?style=flat-square)](https://github.com/blockspacer/CXXCTP/master/LICENSE)
+[![Total alerts](https://img.shields.io/lgtm/alerts/g/bsamseth/cpp-project.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/blockspacer/CXXCTP/alerts/)
+[![Lines of Code](https://tokei.rs/b1/github/blockspacer/CXXCTP)](https://github.com/Aaronepower/tokei).
+[![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/blockspacer/CXXCTP.svg)](http://isitmaintained.com/project/blockspacer/CXXCTP "Average time to resolve an issue")
+[![Percentage of issues still open](http://isitmaintained.com/badge/open/blockspacer/CXXCTP.svg)](http://isitmaintained.com/project/blockspacer/CXXCTP "Percentage of issues still open")
 
 # 📚 About CXXCTP (CXX compile-time programming)
 
@@ -146,10 +152,10 @@ SomeInterfaceName {
 ## 📈 Features
 
 - C++ as compile-time scripting language (https://github.com/derofim/cling-cmake)
-- Template engine with full C++ power (transpiles template to valid C++ code, supports Cling, e.t.c.). https://github.com/blockspacer/CXTPL
-- Ability to modify source files (implement metaclasses, transpile from C++X to C++Y e.t.c.)
-- Ability to create new files (separate generated class to .hpp and .cpp, e.t.c.)
-- Ability to check source files (implement style checks, design patterns, e.t.c.)
+- Template engine with full C++ power (transpiles template to valid C++ code, supports Cling, etc.). https://github.com/blockspacer/CXTPL
+- Ability to modify source files (implement metaclasses, transpile from C++X to C++Y etc.)
+- Ability to create new files (separate generated class to .hpp and .cpp, etc.)
+- Ability to check source files (implement style checks, design patterns, etc.)
 - Ability to compile scripts (rules for code transformations) for maximum performance, not only interpret them in Cling.
 
 ## Project status
@@ -158,7 +164,7 @@ In development, see examples
 
 Currently supports only linux.
 
-Note that you can run linux containers under windows/mac/e.t.c.
+Note that you can run linux containers under windows/mac/etc.
 
 ### Clone code
 
@@ -243,8 +249,19 @@ Install CXTPL_tool https://github.com/blockspacer/CXTPL#how-to-build
 ## Install conan - a crossplatform dependency manager for C++
 
 ```bash
-pip install conan
+pip install --index-url=https://pypi.python.org/simple/ --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org wheel \
+  && \
+  pip install --index-url=https://pypi.python.org/simple/ --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org virtualenv \
+  && \
+  pip install --index-url=https://pypi.python.org/simple/ --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org conan \
+  && \
+  pip install --index-url=https://pypi.python.org/simple/ --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org conan_package_tools
+
+conan profile new default --detect
+# conan profile update settings.compiler.libcxx=libstdc++11 default
+
 conan remote list
+
 conan search *boost* -r all
 ```
 
@@ -298,11 +315,16 @@ CC=/usr/bin/gcc
 CXX=/usr/bin/g++
 ```
 
-If you want to disable ssl (under proxy, e.t.c.):
+If you want to disable ssl (under proxy, etc.):
 
 ```bash
 # see https://docs.conan.io/en/latest/reference/commands/misc/remote.html#conan-remote
 conan remote update conan-center https://conan.bintray.com False
+conan search boost* -r=conan-center
+
+conan remote add bincrafters https://api.bintray.com/conan/bincrafters/public-conan
+conan remote update bincrafters https://api.bintray.com/conan/bincrafters/public-conan False
+conan search boost* -r=bincrafters
 ```
 
 If you want to set corp. cacert:
@@ -312,7 +334,7 @@ CONAN_CACERT_PATH=/path/to/ca-bundle.crt
 file $CONAN_CACERT_PATH
 ```
 
-Usefull links:
+Useful links:
 
 - https://ncona.com/2019/04/dependency-management-in-cpp-with-conan/
 - https://blog.conan.io/2018/06/11/Transparent-CMake-Integration.html
@@ -348,7 +370,7 @@ cmake -E remove_directory build
 cmake -E make_directory build
 cmake -E remove_directory resources/cxtpl/generated
 cmake -E make_directory resources/cxtpl/generated
-cmake -E chdir build conan install --build=missing --profile gcc ..
+cmake -E chdir build conan install --build=missing --profile gcc -o enable_tests=False ..
 cmake -E chdir build cmake -E time cmake -DENABLE_CLING=FALSE -DBUILD_SHARED_LIBS=FALSE -DBUILD_EXAMPLES=FALSE -DALLOW_PER_PROJECT_CTP_SCRIPTS=TRUE  -DBUNDLE_EXAMPLE_SCRIPTS=FALSE -DCMAKE_BUILD_TYPE=Debug -DENABLE_CXXCTP=TRUE ..
 cmake -E chdir build cmake -E time cmake --build . -- -j6
 
@@ -388,7 +410,7 @@ cmake -E make_directory build
 cmake -E remove_directory resources/cxtpl/generated
 cmake -E make_directory resources/cxtpl/generated
 # NOTE: clang profile!
-cmake -E chdir build conan install --build=missing --profile clang ..
+cmake -E chdir build conan install --build=missing --profile clang -o enable_tests=False ..
 cmake -E chdir build cmake -E time cmake -DENABLE_CLING=TRUE -DBUILD_SHARED_LIBS=TRUE -DALLOW_PER_PROJECT_CTP_SCRIPTS=TRUE -DBUILD_EXAMPLES=FALSE -DBUNDLE_EXAMPLE_SCRIPTS=FALSE -DCLEAN_CXXCTP_GEN=TRUE -DCMAKE_BUILD_TYPE=Debug -DENABLE_CXXCTP=TRUE ..
 # OR cmake -E chdir build cmake -E time cmake -DENABLE_CLING=TRUE -DBUILD_SHARED_LIBS=TRUE -DALLOW_PER_PROJECT_CTP_SCRIPTS=FALSE -DBUILD_EXAMPLES=FALSE -DBUNDLE_EXAMPLE_SCRIPTS=TRUE -DCLEAN_CXXCTP_GEN=TRUE -DCMAKE_BUILD_TYPE=Debug -DENABLE_CXXCTP=TRUE ..
 cmake -E chdir build cmake -E time cmake --build . -- -j6
@@ -443,14 +465,14 @@ Why wouldn't you just extend clang since it also provides some experimental feat
 
 Clang is a compiler while this project is a transpiler, that transforms code to standardized c++ code without the need to modify llvm/assembly.
 
-Because the tool's output is C++ code, you can compile transpiled code using emscripten, use static code analizers, run code inside cling e.t.c.
+Because the tool's output is C++ code, you can compile transpiled code using emscripten, use static code analizers, run code inside cling etc.
 
 CXXCTP allows you to create and share scripts for
 
 - source code check (like codestyle validation)
 - source code transformation (like alphabetical sort of all public functions inside some class)
 - compile-time programming (like retrieve source code modification rules from remote server and save them in some folder)
-- e.t.c.
+- etc.
 
 ## Writing code that writes code
 
@@ -477,7 +499,7 @@ Example contents of ctp_scripts:
 
 Utils must load before scripts (Cling related), so we added `1_`, `2_`, ... before folder names (see above).
 
-You can use `#include`, use filesystem, access the internet, e.t.c. in C++ scripts.
+You can use `#include`, use filesystem, access the internet, etc. in C++ scripts.
 
 ## About CXXCTP code annotations
 
@@ -540,7 +562,7 @@ SomeInterfaceName {
 };
 ```
 
-Using a similar approach you can apply multiple soure code transformation steps to same the `class` / `struct` / e.t.c.
+Using a similar approach you can apply multiple soure code transformation steps to same the `class` / `struct` / etc.
 
 ## How to add custom code transformation rules
 
@@ -602,7 +624,7 @@ $apply(make_interface;
 If you need code generation:
 
 - Create template file (`.cxtpl`). Build your file using CXTPL_tool https://github.com/blockspacer/CXTPL
-- Create all needed template arguments inside of your function. Names, types, e.t.c. for arguments must be same as in template (cause generated template is valid C++ code).
+- Create all needed template arguments inside of your function. Names, types, etc. for arguments must be same as in template (cause generated template is valid C++ code).
 - Create variable `std::string cxtpl_output`, that will store result of template rendering with some arguments.
 - Include file generation from template file (`.cxtpl`) inside of your function.
 
@@ -764,7 +786,7 @@ CXXCTP uses LibTooling to parse and modify C++.
 
 LibTooling is a library to support writing standalone tools based on Clang.
 
-Usefull links:
+Useful links:
 
 - https://clang.llvm.org/extra/clang-rename.html
 - Clang Tooling I (add override keyword) https://medium.com/@chichunchen844/clang-tooling-i-add-override-keyword-ddfdf6113b24
@@ -789,9 +811,9 @@ Usefull links:
 
 CXXCTP uses cling to execute C++ at compile-time.
 
-You can use cling for hot code reload / REPL / Fast C++ prototyping / Scripting engine / JIT / e.t.c.
+You can use cling for hot code reload / REPL / Fast C++ prototyping / Scripting engine / JIT / etc.
 
-Usefull links:
+Useful links:
 
 - (how to add Cling into CMake project) https://github.com/derofim/cling-cmake
 - https://github.com/root-project/cling/tree/master/www/docs/talks
@@ -809,7 +831,7 @@ Run based on `.clang-format` file:
 find . -regex '.*\.\(cpp\|hpp\|cu\|c\|h\)' -exec clang-format -style=file -i {} \;
 ```
 
-Usefull links:
+Useful links:
 
 - Create & use `.clang-format` file https://leimao.github.io/blog/Clang-Format-Quick-Tutorial/
 - Integrate with your IDE ( QT instructions http://doc.qt.io/qtcreator/creator-beautifier.html ) Import .clang-format rules to IDE settings.
