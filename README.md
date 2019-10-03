@@ -37,7 +37,7 @@ Note: This project is provided as it is, without any warranty (see License).
 
 - enum_gen_hpp.cxtpl - (codegen) enum to string + reflection metadata.
 
-```bash
+```cpp
 // usage example from ReflShapeKind.hpp
 enum class
 $apply(
@@ -51,7 +51,7 @@ ReflShapeKind0 : uint32_t {
 
 - typeclass_gen_cpp.cxtpl - (codegen) typeclasses. Supports combinations of multiple typeclasses and out-of-source method definitions (data and logic separation). Supports combinations of multiple typeclasses and out-of-source method definition (data and logic separation). See examples and https://twitter.com/TartanLlama/status/1159457033441165313
 
-```bash
+```cpp
 // Usage example. NOTE: no inheritance & definition outside lib.
 // in lib .h
 struct drawable {
@@ -98,7 +98,7 @@ CVS = vec.at(0); // <drawable> to <drawable, printable>
 
 - parse-time/compile-time code execution (see examples)
 
-```bash
+```cpp
 $export (
 static int resultSomeInt = 2345;
 )
@@ -122,7 +122,7 @@ $embed(
 
 - metaclasses. Supports combinations of multiple metaclasses (see examples).
 
-```bash
+```cpp
 class
 $apply(make_interface;make_removefuncbody;make_reflect)
 SomeInterfaceName {
@@ -416,7 +416,7 @@ Check that `.log` find doesn`t contain errors
 build/examples/simple/CXXCTP_example
 ```
 
-Don`t forget to set Cling include paths by`-extra-arg=-I\$PWD/include`and library paths by`-extra-arg=-L\$PWD/build`and .so/.dll libs by`-extra-arg=-lCXXCTP_core`:
+Don't forget to set Cling include paths by`-extra-arg=-I\$PWD/include`and library paths by`-extra-arg=-L\$PWD/build`and .so/.dll libs by`-extra-arg=-lCXXCTP_core`:
 
 ```bash
 # NOTE: runs CXXCTP_tool on multiple files and adds include paths by `-extra-arg=-I`
@@ -485,7 +485,7 @@ You can use C++ annotations to tell CXXCTP what actions it must execute.
 
 Suppose we want to morph class into interface:
 
-```bash
+```cpp
 // Source
 class SomeInterfaceName {
   int foo1() {
@@ -511,7 +511,7 @@ class SomeInterfaceName {
 
 We can use `funccall` action to run C++ scripts for source code transformation. Lets suppose that script names are `make_interface` and `make_removefuncbody` (name as you want).
 
-```bash
+```cpp
 __attribute__((annotate("{gen};{funccall};make_interface;make_removefuncbody")))
 ```
 
@@ -525,7 +525,7 @@ Scripts will be executed from left (`make_interface`) to right (`make_removefunc
 
 Usually you don't need to write long C++ annotations, just use C++ `#define` (or include built-in header with common defines):
 
-```bash
+```cpp
 #define $apply(...) \
   __attribute__((annotate("{gen};{funccall};" #__VA_ARGS__)))
 
@@ -567,7 +567,7 @@ Check that your function name exists in generated file `ctp_registry.cpp` (may b
 
 Function signature for code transformation must be compatable with `cxxctp_callback`:
 
-```bash
+```cpp
 typedef std::function<const char*(
     const cxxctp::parsed_func& func_with_args,
     const clang::ast_matchers::MatchFinder::MatchResult& matchResult,
@@ -587,14 +587,14 @@ Detailed function signature:
 
 Think about function name as one of `__VA_ARGS__` from
 
-```bash
+```cpp
 #define $apply(...) \
   __attribute__((annotate("{gen};{funccall};" #__VA_ARGS__)))
 ```
 
 Example where `make_interface` and `make_removefuncbody` - two function names:
 
-```bash
+```cpp
 $apply(make_interface;
   make_removefuncbody)
 ```
@@ -636,7 +636,7 @@ Generate files from templates using CXTPL_tool https://github.com/blockspacer/CX
 
 In CXXCTP script (`.cpp`):
 
-```bash
+```cpp
 // see ReflectAST.cpp
 reflection::NamespacesTree m_namespaces;
 // `node` from AST parser (libtooling)
@@ -673,7 +673,7 @@ std::map<std::string, std::any> cxtpl_params;
 
 In `.cxtpl` template:
 
-```bash
+```cpp
 const auto arguments = std::any_cast<Arguments>(cxtpl_params.at("Arguments"));
 std::cout << arguments.arg1;
 ```
