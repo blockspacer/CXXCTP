@@ -11,4 +11,4 @@ list(APPEND cxtpl_outputs "${cxtpl_out_dir}/typeclass_gen_hpp.cxtpl.cpp")
 conditional_remove(TRUE ${cxtpl_out_dir} ${CMAKE_CURRENT_SOURCE_DIR})
 
 # create new codegen files
-target_add_CXTPL_tool(CXXCTP_core "typeclass" "${cxtpl_inputs}" "${cxtpl_outputs}")
+target_add_cxtpl_tool(CXXCTP_core "typeclass" "${cxtpl_inputs}" "${cxtpl_outputs}")

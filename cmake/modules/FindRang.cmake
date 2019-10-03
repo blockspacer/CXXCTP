@@ -2,25 +2,25 @@
 
 # - Find RANG library
 
-FIND_PATH(RANG_INCLUDE_DIR rang.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/submodules/rang/include
-  /include
-  /usr/include
-  /usr/local/include
-)
+find_path(RANG_INCLUDE_DIR
+          rang.hpp
+          ${CMAKE_CURRENT_SOURCE_DIR}/submodules/rang/include
+          /include
+          /usr/include
+          /usr/local/include)
 
-IF (RANG_INCLUDE_DIR)
-  SET(RANG_FOUND "YES")
-ELSE ()
-  SET(RANG_FOUND "NO")
-ENDIF ()
+if(RANG_INCLUDE_DIR)
+  set(RANG_FOUND "YES")
+else()
+  set(RANG_FOUND "NO")
+endif()
 
-IF (RANG_FOUND)
-  IF (NOT RANG_FIND_QUIETLY)
-    MESSAGE(STATUS "Found RANG: ${RANG_INCLUDE_DIR}")
-  ENDIF ()
-ELSE ()
-  IF (RANG_FIND_REQUIRED)
-    MESSAGE(FATAL_ERROR "Could not find RANG library")
-  ENDIF ()
-ENDIF ()
+if(RANG_FOUND)
+  if(NOT RANG_FIND_QUIETLY)
+    message(STATUS "Found RANG: ${RANG_INCLUDE_DIR}")
+  endif()
+else()
+  if(RANG_FIND_REQUIRED)
+    message(FATAL_ERROR "Could not find RANG library")
+  endif()
+endif()

@@ -28,51 +28,50 @@
 #  gflags_FOUND       - True if libgflags found.
 #
 
-IF (LIBGFLAGS_INCLUDE_DIR)
+if(LIBGFLAGS_INCLUDE_DIR)
   # Already in cache, be silent
-  SET(Gflags_FIND_QUIETLY TRUE)
-ENDIF ()
+  set(Gflags_FIND_QUIETLY TRUE)
+endif()
 
-if (NOT gflags_FOUND)
-  FIND_PATH(LIBGFLAGS_INCLUDE_DIR gflags/gflags.h)
+if(NOT gflags_FOUND)
+  find_path(LIBGFLAGS_INCLUDE_DIR gflags/gflags.h)
   find_library(LIBGFLAGS_LIBRARY_DEBUG
-    NAMES gflags_staticd gflagsd
-    PATHS
-    /usr
-    /lib
-    /usr/lib
-    /usr/local/lib
-    /usr/local/homebrew/lib
-    /opt/local/lib
-    ~/Library/Frameworks
-    /Library/Frameworks
-    /sw
-    /opt/local
-    /opt/csw
-    /opt)
+               NAMES gflags_staticd gflagsd
+               PATHS /usr
+                     /lib
+                     /usr/lib
+                     /usr/local/lib
+                     /usr/local/homebrew/lib
+                     /opt/local/lib
+                     ~/Library/Frameworks
+                     /Library/Frameworks
+                     /sw
+                     /opt/local
+                     /opt/csw
+                     /opt)
   find_library(LIBGFLAGS_LIBRARY_RELEASE
-    NAMES gflags_static gflags
-    PATHS
-    /usr
-    /lib
-    /usr/lib
-    /usr/local/lib
-    /usr/local/homebrew/lib
-    /opt/local/lib
-    ~/Library/Frameworks
-    /Library/Frameworks
-    /sw
-    /opt/local
-    /opt/csw
-    /opt)
+               NAMES gflags_static gflags
+               PATHS /usr
+                     /lib
+                     /usr/lib
+                     /usr/local/lib
+                     /usr/local/homebrew/lib
+                     /opt/local/lib
+                     ~/Library/Frameworks
+                     /Library/Frameworks
+                     /sw
+                     /opt/local
+                     /opt/csw
+                     /opt)
 
-  INCLUDE(SelectLibraryConfigurations)
-  SELECT_LIBRARY_CONFIGURATIONS(LIBGFLAGS)
+  include(SelectLibraryConfigurations)
+  select_library_configurations(LIBGFLAGS)
 
   # handle the QUIETLY and REQUIRED arguments and set LIBGFLAGS_FOUND to TRUE if
   # all listed variables are TRUE
-  INCLUDE(FindPackageHandleStandardArgs)
-  FIND_PACKAGE_HANDLE_STANDARD_ARGS(gflags DEFAULT_MSG LIBGFLAGS_LIBRARY LIBGFLAGS_INCLUDE_DIR)
+  include(FindPackageHandleStandardArgs)
+  find_package_handle_standard_args(gflags DEFAULT_MSG LIBGFLAGS_LIBRARY
+                                    LIBGFLAGS_INCLUDE_DIR)
   # cmake module compat
   set(Gflags_FOUND ${GFLAGS_FOUND})
   # compat with some existing FindGflags consumers
@@ -85,13 +84,13 @@ if (NOT gflags_FOUND)
   set(GFLAGS_TARGET ${LIBGFLAGS_LIBRARY})
   set(gflags_TARGET ${LIBGFLAGS_LIBRARY})
 
-  MARK_AS_ADVANCED(LIBGFLAGS_LIBRARY LIBGFLAGS_INCLUDE_DIR)
+  mark_as_advanced(LIBGFLAGS_LIBRARY LIBGFLAGS_INCLUDE_DIR)
 endif()
 
-if (NOT gflags_FOUND)
+if(NOT gflags_FOUND)
   find_package(gflags CONFIG QUIET)
-  if (gflags_FOUND)
-    if (NOT Gflags_FIND_QUIETLY)
+  if(gflags_FOUND)
+    if(NOT Gflags_FIND_QUIETLY)
       message(STATUS "Found gflags from package config ${gflags_CONFIG}")
     endif()
     # Re-export the config-specified libs with our local names
@@ -105,8 +104,12 @@ if (NOT gflags_FOUND)
 endif(NOT gflags_FOUND)
 
 # Compat with the gflags CONFIG based detection
-if (LIBGFLAGS_FOUND AND NOT TARGET gflags)
+if(LIBGFLAGS_FOUND AND NOT TARGET gflags)
   add_library(gflags UNKNOWN IMPORTED)
-  set_target_properties(gflags PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${LIBGFLAGS_INCLUDE_DIR}")
-  set_target_properties(gflags PROPERTIES IMPORTED_LINK_INTERFACE_LANGUAGES "C" IMPORTED_LOCATION "${LIBGFLAGS_LIBRARY}")
+  set_target_properties(gflags
+                        PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
+                                   "${LIBGFLAGS_INCLUDE_DIR}")
+  set_target_properties(gflags
+                        PROPERTIES IMPORTED_LINK_INTERFACE_LANGUAGES "C" IMPORTED_LOCATION
+                                   "${LIBGFLAGS_LIBRARY}")
 endif()

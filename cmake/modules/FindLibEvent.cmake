@@ -12,7 +12,7 @@ foreach(prefix ${LibEvent_EXTRA_PREFIXES})
 endforeach()
 
 find_package(Libevent CONFIG QUIET)
-if (TARGET event)
+if(TARGET event)
   # Re-export the config under our own names
 
   # Somewhat gross, but some vcpkg installed libevents have a relative
@@ -22,7 +22,7 @@ if (TARGET event)
   # INTERFACE_INCLUDE_DIRECTORIES.  Thankfully on such a system the
   # actual include directory is already part of the global include
   # directories, so we can just skip it.
-  if (NOT "${LIBEVENT_INCLUDE_DIRS}" STREQUAL "include")
+  if(NOT "${LIBEVENT_INCLUDE_DIRS}" STREQUAL "include")
     set(LIBEVENT_INCLUDE_DIR ${LIBEVENT_INCLUDE_DIRS})
   else()
     set(LIBEVENT_INCLUDE_DIR)
@@ -45,33 +45,33 @@ if (TARGET event)
   cmake_policy(POP)
 
   set(LibEvent_FOUND ${Libevent_FOUND})
-  if (NOT LibEvent_FIND_QUIETLY)
-    message(STATUS "Found libevent from package config include=${LIBEVENT_INCLUDE_DIRS} lib=${LIBEVENT_LIB}")
+  if(NOT LibEvent_FIND_QUIETLY)
+    message(
+      STATUS
+        "Found libevent from package config include=${LIBEVENT_INCLUDE_DIRS} lib=${LIBEVENT_LIB}"
+      )
   endif()
 else()
   find_path(LIBEVENT_INCLUDE_DIR event.h PATHS ${LibEvent_INCLUDE_PATHS})
   find_library(LIBEVENT_LIB NAMES event PATHS ${LibEvent_LIB_PATHS})
 
-  if (LIBEVENT_LIB AND LIBEVENT_INCLUDE_DIR)
+  if(LIBEVENT_LIB AND LIBEVENT_INCLUDE_DIR)
     set(LibEvent_FOUND TRUE)
     set(LIBEVENT_LIB ${LIBEVENT_LIB})
-  else ()
+  else()
     set(LibEvent_FOUND FALSE)
-  endif ()
+  endif()
 
-  if (LibEvent_FOUND)
-    if (NOT LibEvent_FIND_QUIETLY)
+  if(LibEvent_FOUND)
+    if(NOT LibEvent_FIND_QUIETLY)
       message(STATUS "Found libevent: ${LIBEVENT_LIB}")
-    endif ()
-  else ()
-    if (LibEvent_FIND_REQUIRED)
+    endif()
+  else()
+    if(LibEvent_FIND_REQUIRED)
       message(FATAL_ERROR "Could NOT find libevent.")
-    endif ()
+    endif()
     message(STATUS "libevent NOT found.")
-  endif ()
+  endif()
 
-  mark_as_advanced(
-    LIBEVENT_LIB
-    LIBEVENT_INCLUDE_DIR
-  )
+  mark_as_advanced(LIBEVENT_LIB LIBEVENT_INCLUDE_DIR)
 endif()

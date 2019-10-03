@@ -18,96 +18,74 @@
 #  FOLLY_LIBRARIES         The folly library/libraries
 #  FOLLY_INCLUDE_DIR       The location of folly headers
 
-find_path(FOLLY_ROOT_DIR
-    NAMES include/folly/folly-config.h
-)
+find_path(FOLLY_ROOT_DIR NAMES include/folly/folly-config.h)
 
 find_library(FOLLY_LIBRARIES
-    NAMES folly
-    HINTS
-    ENV LD_LIBRARY_PATH
-    ENV DYLD_LIBRARY_PATH
-    PATHS
-    ${FOLLY_ROOT_DIR}/lib
-    /usr
-    /lib
-    /usr/lib
-    /usr/local/lib
-    /usr/local/homebrew/lib
-    /opt/local/lib
-    ~/Library/Frameworks
-    /Library/Frameworks
-    /sw
-    /opt/local
-    /opt/csw
-    /opt)
+             NAMES folly
+             HINTS ENV LD_LIBRARY_PATH ENV DYLD_LIBRARY_PATH
+             PATHS ${FOLLY_ROOT_DIR}/lib
+                   /usr
+                   /lib
+                   /usr/lib
+                   /usr/local/lib
+                   /usr/local/homebrew/lib
+                   /opt/local/lib
+                   ~/Library/Frameworks
+                   /Library/Frameworks
+                   /sw
+                   /opt/local
+                   /opt/csw
+                   /opt)
 
 find_library(FOLLY_BENCHMARK_LIBRARIES
-    NAMES follybenchmark
-    HINTS
-    ENV LD_LIBRARY_PATH
-    ENV DYLD_LIBRARY_PATH
-    PATHS
-    ${FOLLY_ROOT_DIR}/lib
-    /usr
-    /lib
-    /usr/lib
-    /usr/local/lib
-    /usr/local/homebrew/lib
-    /opt/local/lib
-    ~/Library/Frameworks
-    /Library/Frameworks
-    /sw
-    /opt/local
-    /opt/csw
-    /opt)
+             NAMES follybenchmark
+             HINTS ENV LD_LIBRARY_PATH ENV DYLD_LIBRARY_PATH
+             PATHS ${FOLLY_ROOT_DIR}/lib
+                   /usr
+                   /lib
+                   /usr/lib
+                   /usr/local/lib
+                   /usr/local/homebrew/lib
+                   /opt/local/lib
+                   ~/Library/Frameworks
+                   /Library/Frameworks
+                   /sw
+                   /opt/local
+                   /opt/csw
+                   /opt)
 
 find_library(FOLLY_DC_LIBRARY
-  NAMES double-conversion
-  HINTS
-  ENV LD_LIBRARY_PATH
-  ENV DYLD_LIBRARY_PATH
-  PATHS
-  /usr
-  /lib
-  /usr/lib
-  /usr/local/lib
-  /usr/local/homebrew/lib
-  /opt/local/lib
-  ~/Library/Frameworks
-  /Library/Frameworks
-  /sw
-  /opt/local
-  /opt/csw
-  /opt)
+             NAMES double-conversion
+             HINTS ENV LD_LIBRARY_PATH ENV DYLD_LIBRARY_PATH
+             PATHS /usr
+                   /lib
+                   /usr/lib
+                   /usr/local/lib
+                   /usr/local/homebrew/lib
+                   /opt/local/lib
+                   ~/Library/Frameworks
+                   /Library/Frameworks
+                   /sw
+                   /opt/local
+                   /opt/csw
+                   /opt)
 
-find_path(FOLLY_INCLUDE_DIR
-    NAMES folly/folly-config.h
-    HINTS ${FOLLY_ROOT_DIR}/include
-)
+find_path(FOLLY_INCLUDE_DIR NAMES folly/folly-config.h HINTS ${FOLLY_ROOT_DIR}/include)
 
 find_library(FOLLY_INCLUDE_DIR
-  NAMES folly/folly-config.h
-  HINTS
-  ENV LD_LIBRARY_PATH
-  ENV DYLD_LIBRARY_PATH
-  PATHS
-  ${FOLLY_ROOT_DIR}/include
-  /usr/include
-  /usr/local/include
-  /usr/local/homebrew/include
-  /opt/local/include)
+             NAMES folly/folly-config.h
+             HINTS ENV LD_LIBRARY_PATH ENV DYLD_LIBRARY_PATH
+             PATHS ${FOLLY_ROOT_DIR}/include
+                   /usr/include
+                   /usr/local/include
+                   /usr/local/homebrew/include
+                   /opt/local/include)
 
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(Folly DEFAULT_MSG
-    FOLLY_LIBRARIES
-    FOLLY_INCLUDE_DIR
-)
+find_package_handle_standard_args(Folly DEFAULT_MSG FOLLY_LIBRARIES FOLLY_INCLUDE_DIR)
 
-mark_as_advanced(
-    FOLLY_ROOT_DIR
-    FOLLY_LIBRARIES
-    FOLLY_DC_LIBRARY
-    FOLLY_BENCHMARK_LIBRARIES
-    FOLLY_INCLUDE_DIR
-)
+mark_as_advanced(FOLLY_ROOT_DIR
+                 FOLLY_LIBRARIES
+                 FOLLY_DC_LIBRARY
+                 FOLLY_BENCHMARK_LIBRARIES
+                 FOLLY_INCLUDE_DIR)
