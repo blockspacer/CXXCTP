@@ -62,3 +62,6 @@
 	branch = master
 	fetchRecurseSubmodules = true
   ignore = all
+[submodule "submodules/m.css"]
+	path = submodules/m.css
+	url = https://github.com/mosra/m.css.git
