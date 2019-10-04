@@ -532,7 +532,7 @@ class SomeInterfaceName {
 };
 ```
 
-We can use `funccall` action to run C++ scripts for source code transformation. Lets suppose that script names are `make_interface` and `make_removefuncbody` (name as you want).
+We can use `funccall` action to run C++ scripts for source code transformation. Let's suppose that script names are `make_interface` and `make_removefuncbody` (name as you want).
 
 ```cpp
 __attribute__((annotate("{gen};{funccall};make_interface;make_removefuncbody")))
@@ -648,7 +648,7 @@ Don't forget to provide both `.cxtpl`and`.cxtpl.h` files with shared codegen rul
 
 You have two options:
 
-- Generate a file from your `.cxtpl`, then include it into Cling C++ script. Similar to compile-time, but you can re-generate/change files without program recompilation. Note that it is possible to generate files and include them in your script, just split script into multiple includes.
+- Generate a file from your `.cxtpl`, then include it into Cling C++ script. Similar to compile-time, but you can re-generate or change files without program recompilation. Note that it is possible to generate files and include them in your script; just split script into multiple includes.
 - Generate a string from your `.cxtpl`, then run it in a separate Cling interpreter. In most cases you will use the first option.
 
 ## How to use `.cxtpl` with CXXCTP
@@ -731,7 +731,7 @@ NOTE: `ctp_scripts_paths` requires `-DENABLE_CLING=TRUE`
 
 `-L .=DBG9` is log configuration in format https://github.com/facebook/folly/blob/master/folly/logging/docs/Config.md
 
-Example of log configuration which writes both into the file and console stream:
+Example of log configuration that writes both into the file and console stream:
 
 ```bash
 ./build/tool/CXTPL_tool -L ".:=INFO:default:console; default=file:path=y.log,async=true,sync_level=DBG9;console=stream:stream=stderr"
@@ -843,7 +843,7 @@ Please read our [contributing](CONTRIBUTING.md) guidelines before making your pu
 
 ## Code of Conduct
 
-Please note that this project is released with a [Code of Conduct](CODE_OF_CONDUCT.md). By participating in this project you agree to abide by its terms.
+Please note that this project is released with a [Code of Conduct](CODE_OF_CONDUCT.md). By participating in this project, you agree to abide by its terms.
 
 ### Contributors List: Example Profile
 
@@ -860,6 +860,14 @@ Please note that this project is released with a [Code of Conduct](CODE_OF_CONDU
   [<img src="imgs/linkedin.svg" width="20" height="20">](https://www.linkedin.com/in/example/)
 
 ### Contributors List 👌
+
+#### A
+
+##### Anindita Basu
+
+- Technical writer
+- [![twitter-alt][twitter-img]](https://twitter.com/anindita_basu)
+  [![github-alt][github-img]](https://github.com/AninditaBasu)
 
 #### D
 
@@ -879,7 +887,7 @@ Please note that this project is released with a [Code of Conduct](CODE_OF_CONDU
 
 ## Standing on the Shoulders of Giants
 
-That project possible because of [flexferrum's `autoprogrammer`](https://github.com/flexferrum/autoprogrammer)
+That project possible because of [flexferrum's `autoprogrammer`](https://github.com/flexferrum/autoprogrammer).
 
 Articles about flexferrum's `autoprogrammer` in media:
 
