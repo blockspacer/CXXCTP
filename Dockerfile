@@ -17,13 +17,14 @@ FROM        ubuntu:${UBUNTU_VERSION} as cxxctp_build_env
 # sudo -E docker build --no-cache -t cpp-docker-cxxctp .
 #
 # OR under proxy:
-# sudo -E docker build  \
+# sudo -E DOCKER_OPTS='--insecure-registry registry.docker.io --insecure-registry production.cloudflare.docker.com' \
+#  docker build  \
 #  --build-arg http_proxy=http://172.17.0.1:3128 \
 #  --build-arg https_proxy=http://172.17.0.1:3128 \
-#  --build-arg no_proxy=localhost,127.0.0.*,10.*,192.168.*,*.somecorp.ru,*.mycorp.ru \
+#  --build-arg no_proxy=192.168.99.0/24,$(minikube ip),localhost,127.0.0.*,10.*,192.168.*,*.somecorp.ru,*.mycorp.ru \
 #  --build-arg HTTP_PROXY=http://172.17.0.1:3128 \
 #  --build-arg HTTPS_PROXY=http://172.17.0.1:3128 \
-#  --build-arg NO_PROXY=localhost,127.0.0.*,10.*,192.168.*,*.somecorp.ru,*.mycorp.ru \
+#  --build-arg NO_PROXY=192.168.99.0/24,$(minikube ip),localhost,127.0.0.*,10.*,192.168.*,*.somecorp.ru,*.mycorp.ru \
 #  --no-cache -t cpp-docker-cxxctp .
 # OR
 # --network=host. This will make the build command use the network settings of the host.
@@ -51,18 +52,9 @@ FROM        ubuntu:${UBUNTU_VERSION} as cxxctp_build_env
 # Run resulting app in host OS:
 # ./build/<app>
 
-# https://askubuntu.com/a/1013396
-# https://github.com/phusion/baseimage-docker/issues/319
-# RUN export DEBIAN_FRONTEND=noninteractive
-# Set it via ARG as this only is available during build:
-ARG DEBIAN_FRONTEND=noninteractive
-
 ARG ENABLE_LLVM="True"
-
 ARG GIT_EMAIL="you@example.com"
-
 ARG GIT_USERNAME="Your Name"
-
 ENV LC_ALL=C.UTF-8 \
     LANG=en_US.UTF-8 \
     LANGUAGE=en_US:en \
@@ -71,12 +63,17 @@ ENV LC_ALL=C.UTF-8 \
     GIT_AUTHOR_NAME=$GIT_USERNAME \
     GIT_AUTHOR_EMAIL=$GIT_EMAIL \
     GIT_COMMITTER_NAME=$GIT_USERNAME \
-    GIT_COMMITTER_EMAIL=$GIT_EMAIL
-
+    GIT_COMMITTER_EMAIL=$GIT_EMAIL \
+    WDIR=/opt
+RUN mkdir -p $WDIR
 ARG APT="apt-get -qq --no-install-recommends"
-
 # docker build --build-arg NO_SSL="False" APT="apt-get -qq --no-install-recommends" .
 ARG NO_SSL="True"
+# https://askubuntu.com/a/1013396
+# https://github.com/phusion/baseimage-docker/issues/319
+# RUN export DEBIAN_FRONTEND=noninteractive
+# Set it via ARG as this only is available during build:
+RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
 
 # TODO
 # better dev-env https://github.com/aya/infra/blob/318b16621c7f6d3cd33cfd481f46eed5d750b6aa/stack/ide/docker/ide/Dockerfile
@@ -214,6 +211,9 @@ RUN set -ex \
     && \
     git config --global http.postBuffer 1048576000 \
     && \
+    # solves 'Connection time out' on server in company domain. \
+    git config --global url."https://github.com".insteadOf git://github.com \
+    && \
     export GIT_SSL_NO_VERIFY=true \
     ; \
   fi \
@@ -222,6 +222,7 @@ RUN set -ex \
   && \
   $APT install -y \
                     make \
+                    autoconf libtool \
                     git \
                     curl \
                     vim \
@@ -385,7 +386,7 @@ RUN mkdir -p $HOME/.pip/ \
 
 # RUN cat $HOME/.pip/pip.conf
 
-WORKDIR /opt
+WORKDIR $WDIR
 
 # pip install setuptools --upgrade
 
@@ -454,71 +455,10 @@ RUN mkdir -p $HOME/.conan/profiles/ \
   && \
   echo "CXX=/usr/bin/g++" >> ~/.conan/profiles/gcc
 
-WORKDIR /opt
-
-# libunwind
-# WORKDIR /opt
-# RUN git clone --depth=1 --recurse-submodules --single-branch --branch=master git://github.com/pathscale/libunwind.git
-# WORKDIR /opt/libunwind
-# RUN ./autogen.sh
-# RUN ./configure CFLAGS="-fPIC" LDFLAGS="-L$PWD/src/.libs"
-# RUN make -j4
-# RUN make install prefix=/usr/local
-# RUN rm -rf /opt/libunwind
-
-# g3log
-# WORKDIR /opt
-# RUN git clone --depth=1 --recurse-submodules --single-branch --branch=master https://github.com/KjellKod/g3log.git
-# WORKDIR /opt/g3log
-# RUN cmake . -DBUILD_STATIC_LIBS=ON -DG3_SHARED_LIB=OFF -DBUILD_SHARED_LIBS=OFF -DBUILD_STATIC=ON # -DCPACK_PACKAGING_INSTALL_PREFIX=. -DCMAKE_BUILD_TYPE=Release
-# RUN cmake --build . --config Release --clean-first -- -j4
-# RUN make install
-# RUN rm -rf /opt/g3log
-
-# gflags
-# WORKDIR /opt
-# RUN cmake -E make_directory build-gflags
-# WORKDIR /opt/build-gflags
-# RUN wget https://github.com/gflags/gflags/archive/v2.2.2.tar.gz && \
-#     tar zxf v2.2.2.tar.gz && \
-#     rm -f v2.2.2.tar.gz && \
-#     cd gflags-2.2.2 && \
-#     cmake -DGFLAGS_BUILD_SHARED_LIBS=OFF -DGFLAGS_BUILD_STATIC_LIBS=ON -DCMAKE_POSITION_INDEPENDENT_CODE=ON . && \
-#     make && \
-#     make install
-# RUN rm -rf /opt/build-gflags
-
-# gtest
-# WORKDIR /opt
-# RUN cmake -E make_directory build-gtest
-# WORKDIR /opt/build-gtest
-# RUN wget https://github.com/google/googletest/archive/release-1.8.0.tar.gz && \
-#     tar zxf release-1.8.0.tar.gz && \
-#     rm -f release-1.8.0.tar.gz && \
-#     cd googletest-release-1.8.0 && \
-#     cmake . && \
-#     make && \
-#     make install
-# RUN rm -rf /opt/build-gtest
-
-# openssl: relocation error: openssl: symbol EVP_mdc2 version OPENSSL_1_1_0 not defined in file libcrypto.so.1.1 with link time reference
-# https://stackoverflow.com/a/51565653/1373413
-# RUN cmake -E make_directory /opt/openssl
-# WORKDIR /opt/openssl
-# RUN wget https://www.openssl.org/source/old/1.1.0/openssl-1.1.0g.tar.gz --no-check-certificate
-# RUN tar xzvf openssl-1.1.0g.tar.gz
-# WORKDIR /opt/openssl/openssl-1.1.0g
-# RUN ./config
-# RUN make
-# RUN make install
+WORKDIR $WDIR
 
 # allows individual sections to be run by doing: docker build --target cxxctp_tool ...
 FROM        cxxctp_build_env as cxxctp_tool
-# https://askubuntu.com/a/1013396
-# https://github.com/phusion/baseimage-docker/issues/319
-# RUN export DEBIAN_FRONTEND=noninteractive
-# Set it via ARG as this only is available during build:
-ARG DEBIAN_FRONTEND=noninteractive
 ARG GIT_EMAIL="you@example.com"
 ARG GIT_USERNAME="Your Name"
 ARG APT="apt-get -qq --no-install-recommends"
@@ -530,7 +470,14 @@ ENV LC_ALL=C.UTF-8 \
     GIT_AUTHOR_NAME=$GIT_USERNAME \
     GIT_AUTHOR_EMAIL=$GIT_EMAIL \
     GIT_COMMITTER_NAME=$GIT_USERNAME \
-    GIT_COMMITTER_EMAIL=$GIT_EMAIL
+    GIT_COMMITTER_EMAIL=$GIT_EMAIL \
+    WDIR=/opt
+RUN mkdir -p $WDIR
+# https://askubuntu.com/a/1013396
+# https://github.com/phusion/baseimage-docker/issues/319
+# RUN export DEBIAN_FRONTEND=noninteractive
+# Set it via ARG as this only is available during build:
+RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
 
 # NOTE: create folder `.ca-certificates` with custom certs
 # switch to root
@@ -540,14 +487,14 @@ RUN update-ca-certificates --fresh
 # switch back to custom user
 #USER docker
 
-WORKDIR /opt
+WORKDIR $WDIR
 
 # NOTE: ADD invalidate the cache for the copy
-ADD . /opt/CXXCTP
+ADD . $WDIR/CXXCTP
 
 # RUN git clone --depth=1 --recurse-submodules --single-branch --branch=master https://github.com/blockspacer/CXXCTP.git
 
-WORKDIR /opt/CXXCTP
+WORKDIR $WDIR/CXXCTP
 
 # need some git config to apply git patch
 RUN git config --global user.email "$GIT_EMAIL" \
@@ -562,23 +509,24 @@ RUN git config --global user.email "$GIT_EMAIL" \
 RUN git submodule update --init --recursive --depth 5 || true
 #RUN git submodule update --force --recursive --init --remote || true
 
-RUN ls -artl /opt/CXXCTP/ \
+RUN ls -artl $WDIR/CXXCTP/ \
   && \
-  ls -artl /opt/CXXCTP/scripts \
+  ls -artl $WDIR/CXXCTP/scripts \
   && \
-  ls -artl /opt/CXXCTP/submodules
+  ls -artl $WDIR/CXXCTP/submodules
 
 # CMake
-#RUN /bin/bash -c "source /opt/CXXCTP/scripts/install_cmake.sh"
+#RUN /bin/bash -c "source $WDIR/CXXCTP/scripts/install_cmake.sh"
 #RUN cmake --version
 
-RUN ["chmod", "+x", "/opt/CXXCTP/scripts/install_cmake.sh"]
-RUN ["chmod", "+x", "/opt/CXXCTP/scripts/install_cling.sh"]
-RUN ["chmod", "+x", "/opt/CXXCTP/scripts/install_libunwind.sh"]
-RUN ["chmod", "+x", "/opt/CXXCTP/submodules/CXTPL/scripts/install_g3log.sh"]
-RUN ["chmod", "+x", "/opt/CXXCTP/submodules/CXTPL/scripts/install_gtest.sh"]
-RUN ["chmod", "+x", "/opt/CXXCTP/submodules/CXTPL/scripts/install_gflags.sh"]
-RUN ["chmod", "+x", "/opt/CXXCTP/submodules/CXTPL/scripts/install_folly.sh"]
+WORKDIR $WDIR/CXXCTP
+RUN ["chmod", "+x", "scripts/install_cmake.sh"]
+RUN ["chmod", "+x", "scripts/install_cling.sh"]
+RUN ["chmod", "+x", "scripts/install_libunwind.sh"]
+RUN ["chmod", "+x", "submodules/CXTPL/scripts/install_g3log.sh"]
+RUN ["chmod", "+x", "submodules/CXTPL/scripts/install_gtest.sh"]
+RUN ["chmod", "+x", "submodules/CXTPL/scripts/install_gflags.sh"]
+RUN ["chmod", "+x", "submodules/CXTPL/scripts/install_folly.sh"]
 
 # Uninstall the default version provided by Ubuntu’s package manager, so we can install custom one
 RUN set -ex \
@@ -587,50 +535,50 @@ RUN set -ex \
 
 # cling
 # NOTE: run from scripts folder!
-WORKDIR /opt/CXXCTP/scripts
+WORKDIR $WDIR/CXXCTP/scripts
 
 #RUN set -ex \
 #  && \
-#  /bin/bash -c "source /opt/CXXCTP/scripts/install_cmake.sh" \
+#  /bin/bash -c "source $WDIR/CXXCTP/scripts/install_cmake.sh" \
 #  && \
-#  /bin/bash -c "source /opt/CXXCTP/scripts/install_cling.sh"
+#  /bin/bash -c "source $WDIR/CXXCTP/scripts/install_cling.sh"
 
-RUN ["bash", "-c", "bash /opt/CXXCTP/scripts/install_cmake.sh \
+RUN ["bash", "-c", "bash $WDIR/CXXCTP/scripts/install_cmake.sh \
                         && \
-                        bash /opt/CXXCTP/scripts/install_cling.sh"]
+                        bash $WDIR/CXXCTP/scripts/install_cling.sh"]
 
-WORKDIR /opt/CXXCTP
+WORKDIR $WDIR/CXXCTP
 
 # NOTE: need libunwind with -fPIC (POSITION_INDEPENDENT_CODE) support
 #RUN set -ex \
 #  && \
-#  /bin/bash -c "source /opt/CXXCTP/scripts/install_libunwind.sh"
+#  /bin/bash -c "source $WDIR/CXXCTP/scripts/install_libunwind.sh"
 
-RUN ["bash", "-c", "bash /opt/CXXCTP/scripts/install_libunwind.sh"]
+RUN ["bash", "-c", "bash $WDIR/CXXCTP/scripts/install_libunwind.sh"]
 
-WORKDIR /opt/CXXCTP/submodules/CXTPL
+WORKDIR $WDIR/CXXCTP/submodules/CXTPL
 
 #RUN set -ex \
 #  && \
-#  /bin/bash -c "source /opt/CXXCTP/submodules/CXTPL/scripts/install_g3log.sh" \
+#  /bin/bash -c "source $WDIR/CXXCTP/submodules/CXTPL/scripts/install_g3log.sh" \
 #  && \
 #  # gtest \
-#  /bin/bash -c "source /opt/CXXCTP/submodules/CXTPL/scripts/install_gtest.sh" \
+#  /bin/bash -c "source $WDIR/CXXCTP/submodules/CXTPL/scripts/install_gtest.sh" \
 #  && \
 #  # gflags \
-#  /bin/bash -c "source /opt/CXXCTP/submodules/CXTPL/scripts/install_gflags.sh" \
+#  /bin/bash -c "source $WDIR/CXXCTP/submodules/CXTPL/scripts/install_gflags.sh" \
 #  && \
 #  # folly \
 #  # NOTE: we patched folly for clang support https://github.com/facebook/folly/issues/976 \
-#  /bin/bash -c "source /opt/CXXCTP/submodules/CXTPL/scripts/install_folly.sh"
+#  /bin/bash -c "source $WDIR/CXXCTP/submodules/CXTPL/scripts/install_folly.sh"
 
-RUN ["bash", "-c", "bash /opt/CXXCTP/submodules/CXTPL/scripts/install_g3log.sh \
+RUN ["bash", "-c", "bash $WDIR/CXXCTP/submodules/CXTPL/scripts/install_g3log.sh \
                         && \
-                        bash /opt/CXXCTP/submodules/CXTPL/scripts/install_gtest.sh \
+                        bash $WDIR/CXXCTP/submodules/CXTPL/scripts/install_gtest.sh \
                         && \
-                        bash /opt/CXXCTP/submodules/CXTPL/scripts/install_gflags.sh \
+                        bash $WDIR/CXXCTP/submodules/CXTPL/scripts/install_gflags.sh \
                         && \
-                        bash /opt/CXXCTP/submodules/CXTPL/scripts/install_folly.sh"]
+                        bash $WDIR/CXXCTP/submodules/CXTPL/scripts/install_folly.sh"]
 
 RUN ls -artl submodules/folly \
     && \
@@ -656,7 +604,7 @@ RUN export CC=gcc \
   # install lib and CXTPL_tool \
   cmake -E chdir build make install
 
-WORKDIR /opt/CXXCTP
+WORKDIR $WDIR/CXXCTP
 
 RUN export CC=clang \
   && \
@@ -678,18 +626,21 @@ RUN export CC=clang \
   && \
   /usr/local/bin/CXXCTP_tool --plugins
 
-WORKDIR /opt/CXXCTP
+WORKDIR $WDIR/CXXCTP
 
-RUN rm -rf /opt/CXXCTP
+RUN rm -rf $WDIR/CXXCTP
 
 # reset
-WORKDIR /opt
+WORKDIR $WDIR
 # LD_LIBRARY_PATH=/usr/lib:/usr/local/lib
 
 # remove unused apps after install
 RUN         $APT remove -y \
                     git \
                     wget
+
+RUN         $APT clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 RUN mkdir -p /etc/ssh/ && echo ClientAliveInterval 60 >> /etc/ssh/sshd_config
 
@@ -699,6 +650,6 @@ RUN mkdir -p /etc/ssh/ && echo ClientAliveInterval 60 >> /etc/ssh/sshd_config
 
 # default
 FROM        cxxctp_tool
-
+WORKDIR $WDIR
+ENTRYPOINT ["/bin/bash"]
 CMD ["bash"]
-
