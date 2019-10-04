@@ -67,7 +67,7 @@ ENV LC_ALL=C.UTF-8 \
     LANG=en_US.UTF-8 \
     LANGUAGE=en_US:en \
     #TERM=screen \
-    PATH=/usr/local/bin/:/usr/lib/clang/6.0/include:/usr/lib/llvm-6.0/include/:$PATH \
+    PATH=/usr/local/bin/:/usr/local/include/:/usr/lib/clang/6.0/include:/usr/lib/llvm-6.0/include/:$PATH \
     GIT_AUTHOR_NAME=$GIT_USERNAME \
     GIT_AUTHOR_EMAIL=$GIT_EMAIL \
     GIT_COMMITTER_NAME=$GIT_USERNAME \
@@ -280,6 +280,7 @@ RUN set -ex \
                     fakeroot \
                     dpkg-dev \
                     libcurl4-openssl-dev \
+                    libzstd-dev \
   && \
   $APT install -y mesa-utils \
                             libglu1-mesa-dev \
@@ -293,7 +294,8 @@ RUN set -ex \
                             python3-setuptools \
   && \
   $APT install -y nano \
-                            mc
+                            mc \
+                            bash
 
 #                            python \
 #                            python-dev \
@@ -512,6 +514,23 @@ WORKDIR /opt
 
 # allows individual sections to be run by doing: docker build --target cxxctp_tool ...
 FROM        cxxctp_build_env as cxxctp_tool
+# https://askubuntu.com/a/1013396
+# https://github.com/phusion/baseimage-docker/issues/319
+# RUN export DEBIAN_FRONTEND=noninteractive
+# Set it via ARG as this only is available during build:
+ARG DEBIAN_FRONTEND=noninteractive
+ARG GIT_EMAIL="you@example.com"
+ARG GIT_USERNAME="Your Name"
+ARG APT="apt-get -qq --no-install-recommends"
+ENV LC_ALL=C.UTF-8 \
+    LANG=en_US.UTF-8 \
+    LANGUAGE=en_US:en \
+    #TERM=screen \
+    PATH=/usr/local/bin/:/usr/local/include/:/usr/lib/clang/6.0/include:/usr/lib/llvm-6.0/include/:$PATH \
+    GIT_AUTHOR_NAME=$GIT_USERNAME \
+    GIT_AUTHOR_EMAIL=$GIT_EMAIL \
+    GIT_COMMITTER_NAME=$GIT_USERNAME \
+    GIT_COMMITTER_EMAIL=$GIT_EMAIL
 
 # NOTE: create folder `.ca-certificates` with custom certs
 # switch to root
@@ -569,33 +588,55 @@ RUN set -ex \
 # cling
 # NOTE: run from scripts folder!
 WORKDIR /opt/CXXCTP/scripts
-RUN set -ex \
-  && \
-  /bin/bash -c "source /opt/cxtpl/scripts/install_cmake.sh" \
-  && \
-  /bin/bash -c "source /opt/CXXCTP/scripts/install_cling.sh"
+
+#RUN set -ex \
+#  && \
+#  /bin/bash -c "source /opt/CXXCTP/scripts/install_cmake.sh" \
+#  && \
+#  /bin/bash -c "source /opt/CXXCTP/scripts/install_cling.sh"
+
+RUN ["bash", "-c", "bash /opt/CXXCTP/scripts/install_cmake.sh \
+                        && \
+                        bash /opt/CXXCTP/scripts/install_cling.sh"]
+
 WORKDIR /opt/CXXCTP
 
 # NOTE: need libunwind with -fPIC (POSITION_INDEPENDENT_CODE) support
-RUN set -ex \
-  && \
-  /bin/bash -c "source /opt/CXXCTP/scripts/install_libunwind.sh"
+#RUN set -ex \
+#  && \
+#  /bin/bash -c "source /opt/CXXCTP/scripts/install_libunwind.sh"
+
+RUN ["bash", "-c", "bash /opt/CXXCTP/scripts/install_libunwind.sh"]
 
 WORKDIR /opt/CXXCTP/submodules/CXTPL
 
-RUN set -ex \
-  && \
-  /bin/bash -c "source /opt/CXXCTP/submodules/CXTPL/scripts/install_g3log.sh" \
-  && \
-  # gtest \
-  /bin/bash -c "source /opt/CXXCTP/submodules/CXTPL/scripts/install_gtest.sh" \
-  && \
-  # gflags \
-  /bin/bash -c "source /opt/CXXCTP/submodules/CXTPL/scripts/install_gflags.sh" \
-  && \
-  # folly \
-  # NOTE: we patched folly for clang support https://github.com/facebook/folly/issues/976 \
-  /bin/bash -c "source /opt/CXXCTP/submodules/CXTPL/scripts/install_folly.sh"
+#RUN set -ex \
+#  && \
+#  /bin/bash -c "source /opt/CXXCTP/submodules/CXTPL/scripts/install_g3log.sh" \
+#  && \
+#  # gtest \
+#  /bin/bash -c "source /opt/CXXCTP/submodules/CXTPL/scripts/install_gtest.sh" \
+#  && \
+#  # gflags \
+#  /bin/bash -c "source /opt/CXXCTP/submodules/CXTPL/scripts/install_gflags.sh" \
+#  && \
+#  # folly \
+#  # NOTE: we patched folly for clang support https://github.com/facebook/folly/issues/976 \
+#  /bin/bash -c "source /opt/CXXCTP/submodules/CXTPL/scripts/install_folly.sh"
+
+RUN ["bash", "-c", "bash /opt/CXXCTP/submodules/CXTPL/scripts/install_g3log.sh \
+                        && \
+                        bash /opt/CXXCTP/submodules/CXTPL/scripts/install_gtest.sh \
+                        && \
+                        bash /opt/CXXCTP/submodules/CXTPL/scripts/install_gflags.sh \
+                        && \
+                        bash /opt/CXXCTP/submodules/CXTPL/scripts/install_folly.sh"]
+
+RUN ls -artl submodules/folly \
+    && \
+    ls -artl submodules/folly/build/fbcode_builder/CMake \
+    && \
+    file /usr/local/include/folly/folly-config.h
 
 RUN export CC=gcc \
   && \
@@ -650,7 +691,7 @@ RUN         $APT remove -y \
                     git \
                     wget
 
-RUN echo ClientAliveInterval 60 >> /etc/ssh/sshd_config
+RUN mkdir -p /etc/ssh/ && echo ClientAliveInterval 60 >> /etc/ssh/sshd_config
 
 #RUN service ssh restart
 

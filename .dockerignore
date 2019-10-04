@@ -11,6 +11,11 @@
 **/build/*
 **/*-build
 **/build-*
+**/build/
+**/cling-build/
+!submodules/CXTPL/submodules/folly/**/build/*
+!submodules/CXTPL/submodules/folly/build/
+!submodules/CXTPL/submodules/folly/build/*
 **/bin/*
 **/node_modules
 **/tmp
@@ -55,8 +60,6 @@
 **/*.out
 **/*.app
 **/.directory
-**/build/
-**/cling-build/
 **/CMakeLists\.txt\.user
 **/generated/
 **/custom_plugins\.cmake

@@ -30,19 +30,33 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -frtti")
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti")
 
-option(USE_G3LOG "Use g3log logger" ON)
+set(USE_G3LOG
+  TRUE CACHE BOOL
+  "Use g3log logger")
 
-option(USE_FOLLY "Use facebook/folly library (Apache License 2.0)" ON)
+set(USE_FOLLY
+  TRUE CACHE BOOL
+  "Use facebook/folly library (Apache License 2.0)")
 
-option(USE_RANG "Use RANG for coloring terminal" OFF)
+set(USE_RANG
+  FALSE CACHE BOOL
+  "Use RANG for coloring terminal")
 
-option(BUILD_SHARED_LIBS "Use .so/.dll" OFF)
+set(BUILD_SHARED_LIBS
+  FALSE CACHE BOOL
+  "Use .so/.dll")
 
-option(BUILD_EXAMPLES "Use built-in examples" OFF)
+set(BUILD_EXAMPLES
+  FALSE CACHE BOOL
+  "Use built-in examples")
 
-option(ENABLE_TESTS "Use unit tests" OFF)
+set(ENABLE_TESTS
+  FALSE CACHE BOOL
+  "Use unit tests")
 
-option(BUNDLE_EXAMPLE_SCRIPTS "Use built-in scripts from examples" OFF)
+set(BUNDLE_EXAMPLE_SCRIPTS
+  FALSE CACHE BOOL
+  "Use built-in scripts from examples")
 
 if(BUILD_SHARED_LIBS)
   set(CORE_LIB_TYPE SHARED)
@@ -50,15 +64,17 @@ else()
   set(CORE_LIB_TYPE STATIC)
 endif(BUILD_SHARED_LIBS)
 
-include(Dependencies.cmake)
-
 set(ENABLE_CLING TRUE CACHE BOOL "ENABLE_CLING")
 
-option(ALLOW_PER_PROJECT_CTP_SCRIPTS "Use per-project ctp_scripts (requires Cling)" ON)
+set(ALLOW_PER_PROJECT_CTP_SCRIPTS
+  TRUE CACHE BOOL
+  "Use per-project ctp_scripts (requires Cling)")
 
 set(INSTALL_CLING TRUE CACHE BOOL "INSTALL_CLING")
 
 set(ENABLE_CXXCTP TRUE CACHE BOOL "ENABLE_CXXCTP")
+
+include(Dependencies.cmake)
 
 include(Utils.cmake)
 
@@ -360,7 +376,8 @@ if(ENABLE_CXXCTP)
     CXXCTP_core
     PUBLIC
       ${CMAKE_CURRENT_SOURCE_DIR}/submodules/boost.outcome/include/outcome/quickcpplib/include/ # TODO
-      ${CMAKE_CURRENT_SOURCE_DIR}/submodules/folly # TODO
+      # fatal error: folly/executors/CPUThreadPoolExecutor.h: No such file or directory
+      #${CMAKE_CURRENT_SOURCE_DIR}/submodules/folly # TODO
       ${CMAKE_CURRENT_SOURCE_DIR}/include
       ${CMAKE_CURRENT_SOURCE_DIR}/ # path to ctp_scripts
       ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple # path to ctp_scripts
@@ -384,7 +401,6 @@ if(ENABLE_CXXCTP)
   target_compile_definitions(CXXCTP_core
                              PUBLIC
                              ${CLING_DEFINITIONS}
-                             FOLLY_NO_CONFIG=1 # we don't build a folly/folly-config.h
                              )
 
   target_compile_definitions(CXXCTP_core PRIVATE
