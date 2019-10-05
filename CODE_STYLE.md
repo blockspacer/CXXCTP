@@ -10,7 +10,7 @@ Prefer clang-format, see `.clang-format` file.
 
 Use tools like [vera++](https://bitbucket.org/verateam/vera/wiki/Home)
 
-## Static analisis
+## Static analysis
 
 Use any tools from [list of tools for static code analysis]( https://en.wikipedia.org/wiki/List_of_tools_for_static_code_analysis#C.2B.2B)
 
@@ -54,7 +54,7 @@ Note: function implementations and class declarations always have the left brace
 ## Files
 
 Every source file should have an associated header file.
-Prefer .h and .cpp extentions for C++ files.
+Prefer .h and .cpp extensions for C++ files.
 
 ## Header files
 
@@ -77,7 +77,7 @@ All of a project's header files should be listed as descendants of the project's
 
 Order of Includes (Within each section the includes should be ordered alphabetically):
 
-* Precompiled header file or project headers neccecary for containing compile unit. For example, for file "fooserver.cpp" it may be "fooserver.h".
+* Precompiled header file or project headers necessary for containing compile unit. For example, for file "fooserver.cpp" it may be "fooserver.h".
 * C system files.
 * C++ system files.
 * Other libraries' .h files.
@@ -88,7 +88,7 @@ Example:
 ```cpp
 #include "PrecompiledHeader.h" // Precompiled header files
 
-#include "MainProjectClass.h" // Project headers neccecary for containing compile unit MainProjectClass.cpp
+#include "MainProjectClass.h" // Project headers necessary for containing compile unit MainProjectClass.cpp
 
 #include <math.h> // C system files
 #include <stdarg.h>
@@ -555,7 +555,7 @@ The problem with C casts is the ambiguity of the operation. Do not use cast form
 * Use static_cast as the equivalent of a C-style cast that does value conversion, when you need to explicitly up-cast a pointer from a class to its superclass, or when you need to explicitly cast a pointer from a superclass to a subclass. In this last case, you must be sure your object is actually an instance of the subclass.
 * Use "const_cast" to remove the const qualifier (see const) only if its really necessary. Avoid use of "const_cast". When object is needed to be modified, but only const versions are accessible, create a function that clearly gives an editable version of the object.
 * Use reinterpret_cast to do unsafe conversions of pointer types to and from integer and other pointer types. Use this only if you know what you are doing and you understand the aliasing issues.
-* Prefer the brace initialisation to in initialise objects and values of unknown type in generic code;
+* Prefer the brace initialisation to in initialize objects and values of unknown type in generic code;
 
 ```cpp
 template <typename T>
@@ -1555,7 +1555,7 @@ almostEquals(T a, T b)
 
 ## Avoid "using namespace std;" e.t.c
 
-Use "using" only where its neccesary.
+Use "using" only where its necessary.
 
 ## Include Units in Names
 
@@ -1878,7 +1878,7 @@ public:
 ```
 
 * Use parentheses to group expressions.
-* Avoid 64-bit enum values. Not all compilers suppert them.
+* Avoid 64-bit enum values. Not all compilers support them.
 enum class Enum2 : __int64 {Val1, Val2, val3}; // Avoid
 * The binary operators = (assignment), [] (array subscription), -> (member access), as well as the n-ary () (function call) operator, must always be implemented as member functions, because the syntax of the language requires them to. Other operators can be implemented either as members or as non-members.For all operators where you have to choose to either implement them as a member function or a non-member function, use the following [rules of thumb to decide](http://stackoverflow.com/a/4421729) where possible:
   * If it is a unary operator, implement it as a member function.

@@ -869,6 +869,13 @@ Please note that this project is released with a [Code of Conduct](CODE_OF_CONDU
 - [![twitter-alt][twitter-img]](https://twitter.com/anindita_basu)
   [![github-alt][github-img]](https://github.com/AninditaBasu)
 
+#### C
+
+##### Cássio Espíndola
+
+- Analyst Developer
+- [![github-alt][github-img]](https://github.com/cassioesp)
+
 #### D
 
 ##### Denis trofimov
