@@ -39,8 +39,38 @@ Metaprogramming is an “art” of writing programs to treat other programs as t
 
 Note: This project is provided as it is, without any warranty (see License).
 
-## Usage examples
+## Features
 
+- C++ as compile-time scripting language (https://github.com/derofim/cling-cmake)
+- Template engine with full C++ power (transpiles template to valid C++ code, supports Cling, etc.). https://github.com/blockspacer/CXTPL
+- Ability to modify source files (implement metaclasses, transpile from C++X to C++Y etc.)
+- Ability to create new files (separate generated class to .hpp and .cpp, etc.)
+- Ability to check source files (implement style checks, design patterns, etc.)
+- Ability to compile scripts (rules for code transformations) for maximum performance, not only interpret them in Cling.
+- 
+## Motivation
+
+Why wouldn't you just extend clang since it also provides some experimental features (modules for instance)?
+
+Clang is a compiler while this project is a transpiler, that transforms code to standardized c++ code without the need to modify llvm/assembly.
+
+Because the tool's output is C++ code, you can compile transpiled code using emscripten, use static code analizers, run code inside cling etc.
+
+CXXCTP allows you to create and share scripts for
+
+- source code check (like codestyle validation)
+- source code transformation (like alphabetical sort of all public functions inside some class)
+- compile-time programming (like retrieve source code modification rules from remote server and save them in some folder)
+- etc.
+
+## Project status
+
+In development, see examples. Currently supports only Linux.
+
+Note that you can run Linux containers under Windows/Mac/etc.
+
+
+# ⚙️ Usage examples
 - enum_gen_hpp.cxtpl - (codegen) enum to string + reflection metadata.
 
 ```cpp
@@ -149,25 +179,7 @@ SomeInterfaceName {
 };
 ```
 
-## 📈 Features
-
-- C++ as compile-time scripting language (https://github.com/derofim/cling-cmake)
-- Template engine with full C++ power (transpiles template to valid C++ code, supports Cling, etc.). https://github.com/blockspacer/CXTPL
-- Ability to modify source files (implement metaclasses, transpile from C++X to C++Y etc.)
-- Ability to create new files (separate generated class to .hpp and .cpp, etc.)
-- Ability to check source files (implement style checks, design patterns, etc.)
-- Ability to compile scripts (rules for code transformations) for maximum performance, not only interpret them in Cling.
-
-## Project status
-
-In development, see examples
-
-Currently supports only linux.
-
-Note that you can run linux containers under windows/mac/etc.
-
-### Clone code
-
+# 🖥️ Cloning and setup
 ```bash
 git submodule sync --recursive
 git fetch --recurse-submodules
@@ -176,9 +188,9 @@ git submodule update --init --recursive --depth 5
 git submodule update --force --recursive --init --remote
 ```
 
-## Install & use under Docker
+## Install & use with Docker
 
-Install and configure Docker https://medium.com/@saniaky/configure-docker-to-use-a-host-proxy-e88bd988c0aa
+Install and configure Docker: https://medium.com/@saniaky/configure-docker-to-use-a-host-proxy-e88bd988c0aa
 
 Clone code (as above) and `cd` into cloned dir.
 
@@ -219,7 +231,7 @@ sudo -E docker run --rm -v "$PWD":/home/u/cxxctp -w /home/u/cxxctp/build cpp-doc
 # ./build/<app>
 ```
 
-## DEPENDENCIES
+## Dependencies
 
 - Boost
 
@@ -460,21 +472,8 @@ Example:
 cmake -E chdir build ./tool/CXXCTP_tool --ctp_scripts_paths=$PWD -L .=DBG9 -extra-arg=-I$PWD/include -extra-arg=-I../resources ../resources/ReflShapeKind.hpp ../resources/test_typeclass_base1.hpp ../resources/test_typeclass_instance1.hpp ../resources/test.cpp
 ```
 
-## Motivation
-
-Why wouldn't you just extend clang since it also provides some experimental features (modules for instance)?
-
-Clang is a compiler while this project is a transpiler, that transforms code to standardized c++ code without the need to modify llvm/assembly.
-
-Because the tool's output is C++ code, you can compile transpiled code using emscripten, use static code analizers, run code inside cling etc.
-
-CXXCTP allows you to create and share scripts for
-
-- source code check (like codestyle validation)
-- source code transformation (like alphabetical sort of all public functions inside some class)
-- compile-time programming (like retrieve source code modification rules from remote server and save them in some folder)
-- etc.
-
+# ⌨️ Developing with CXXCTP 
+The following sections cover usage, custom rules and debugging for CXXCTP.
 ## Writing code that writes code
 
 You can write custom C++ scripts for source code transformation or use existing ones.
@@ -781,6 +780,8 @@ Check that all needed paths are in `-extra-arg=`.
 
 Make a log to file in `DBG9` mode and check `.log` files.
 
+# 🔧 Tools used by CXXCTP
+
 ## About libtooling
 
 CXXCTP uses LibTooling to parse and modify C++.
@@ -837,7 +838,7 @@ Useful links:
 - Create & use `.clang-format` file https://leimao.github.io/blog/Clang-Format-Quick-Tutorial/
 - Integrate with your IDE ( QT instructions http://doc.qt.io/qtcreator/creator-beautifier.html ) Import .clang-format rules to IDE settings.
 
-## ⭐️ How to Contribute
+# ⭐️ How to Contribute
 
 Please read our [contributing](CONTRIBUTING.md) guidelines before making your pull request.
 
@@ -922,7 +923,7 @@ There is an official Visual Studio extension, details of which can be found [her
 
 Follow CMake StyleGuide https://github.com/ruslo/0
 
-## Similar projects
+# 📋 Similar projects
 
 - Clava https://github.com/specs-feup/clava
 - Compile-time EXecution of C++ code https://github.com/MaliusArth/cex/blob/6f6e700a253b06c7ae6801e1a3c1f3d842931d77/tool/src/MatchCallbacks/AnnotatedFunctionCallback.cpp
