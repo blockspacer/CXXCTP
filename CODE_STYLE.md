@@ -252,14 +252,14 @@ When defining a function, parameter order is:
 * parameters that are both input and output
 * outputs
 
-Dont use function arguments as both input and optput. Prefer separate varibale for function output and separate varibale for function input.
+Don't use function arguments as both input and optput. Prefer separate varibale for function output and separate varibale for function input.
 Always use const for parameters that dont change inside function.
 
 ## Write Short Functions
 
 Prefer small and focused functions.
 
-## Dont write comments for obvious things
+## Don't write comments for obvious things
 
 * Do not be unnecessarily verbose or state the completely obvious. Notice below that it is not necessary to say "returns false otherwise" because this is implied.
 
@@ -499,11 +499,11 @@ auto d = double{1.23};  // Good -- d is a double, not a std::initializer_list.
 
 We do not use C++ exceptions.
 Exceptions can be hard to maintain. For existing code, the introduction of exceptions has implications on all dependent code.
-Emscripten dont allow them.
+Emscripten don't allow them.
 
 ## Threads
 
-Emscripten dont like them, use
+Emscripten don't like them, use
 
 ```cpp
 #ifdef __EMSCRIPTEN__
@@ -893,7 +893,7 @@ Use the override specifier on all derived from a base class overriding functions
 
 You may use final keyword when overriding the virtual method and requiring that no further subclasses can override it.
 
-Dont annotate a method with more than one of the virtual, override, or final keywords.
+Don't annotate a method with more than one of the virtual, override, or final keywords.
 
 ## Namespace Names
 
@@ -1511,7 +1511,7 @@ init   <->    initialize
 max    <->    maximum
 cnt    <->    current
 
-Dont use that rule for abbrevations (html, cpu)
+Don't use that rule for abbrevations (html, cpu)
 
 ## Dont use "p" or "ptr" prefix for pointers/parameters
 
@@ -1529,7 +1529,7 @@ Line* line; // Dont use Line* pLine; or Line* linePtr;
 
 ## Language
 
-Use english language in source code. All code is ascii only (7-bit characters only).
+Use English language in source code. All code is ascii only (7-bit characters only).
 
 ## Comparison and boolean check
 
@@ -1555,7 +1555,7 @@ almostEquals(T a, T b)
 
 ## Avoid "using namespace std;" e.t.c
 
-Use "using" only where its necessary.
+Use "using" only where it's necessary.
 
 ## Include Units in Names
 
@@ -1577,7 +1577,7 @@ double total = 0.5;    // Bad:  double total = .5;
 
 ## Containers
 
-Prefer 1D (one-dimensional approach) to 2D (two-dimensional approach) [for 2D array representation](http://stackoverflow.com/a/17260533). For dense matrices the 1D approach is likely to be faster since it offers better memory locality and less allocation and deallocation overhead. Dynamic-1D consumes less memory than the 2D approach. The latter also requires more allocations.
+Prefer 1D (one-dimensional approach) to 2D (two-dimensional approach) [for 2D array representation](http://stackoverflow.com/a/17260533). For dense matrices, the 1D approach is likely to be faster since it offers better memory locality and less allocation and deallocation overhead. Dynamic-1D consumes less memory than the 2D approach. The latter also requires more allocations.
 
 Two-dimensional approach (Bad):
 
@@ -1681,7 +1681,7 @@ Static constructors and destructors (e.g. global variables whose types have a co
 * As a rule of thumb, struct should be kept to structures where all members are declared public.
 * Do not use Braced Initializer Lists to Call a Constructor
 * #include as Little as Possible
-* Use the “assert” macro from `<cassert>` to its fullest (assert is good for checking a case during run-time). Use static assert to make assertions at compile time.
+* Use the “assert” macro from `<cassert>` to it's fullest (assert is good for checking a case during run-time). Use static assert to make assertions at compile time.
 
 ```cpp
 inline Value *getOperand(unsigned I) {
@@ -1690,7 +1690,7 @@ inline Value *getOperand(unsigned I) {
 }
 ```
 
-Note: You should never depend on assert to do anything because the code can be compiled with NDEBUG defined and then assert does nothing. Production code is oftentimes compiled with NDEBUG defined to ensure that those assert statements disappear.
+Note: You should never depend on assert to do anything because the code can be compiled with NDEBUG defined and then assert does nothing. Production code is often times compiled with NDEBUG defined to ensure that those assert statements disappear.
 
 * Use #ifdef with platfom dependant code
 * Don’t evaluate end() every time through a loop.
@@ -1749,7 +1749,7 @@ return condition ? 1 : 0; // Good, bad is: return condition ? 1:0;
 for (auto& plugin : plugins) // Good, bad is: for (auto& plugin: plugins)
 ```
 
-* Each statement should get its own line, so do not put multiple statements on one line.
+* Each statement should get it's own line, so do not put multiple statements on one line.
 
 Good:
 
@@ -1813,7 +1813,7 @@ if (condition) {
 }
 ```
 
-* Function definitions: place each brace on its own line. Other braces: place the open brace on the line preceding the code block; place the close brace on its own line.
+* Function definitions: place each brace on it's own line. Other braces: place the open brace on the line preceding the code block; place the close brace on it's own line.
 
 Good:
 
@@ -1883,7 +1883,7 @@ enum class Enum2 : __int64 {Val1, Val2, val3}; // Avoid
 * The binary operators = (assignment), [] (array subscription), -> (member access), as well as the n-ary () (function call) operator, must always be implemented as member functions, because the syntax of the language requires them to. Other operators can be implemented either as members or as non-members.For all operators where you have to choose to either implement them as a member function or a non-member function, use the following [rules of thumb to decide](http://stackoverflow.com/a/4421729) where possible:
   * If it is a unary operator, implement it as a member function.
   * If a binary operator treats both operands equally (it leaves them unchanged), implement this operator as a non-member function.
-  * If a binary operator does not treat both of its operands equally (usually it will change its left operand), it might be useful to make it a member function of its left operand’s type, if it has to access the operand's private parts.
+  * If a binary operator does not treat both of its operands equally (usually it will change it's left operand), it might be useful to make it a member function of it's left operand’s type, if it has to access the operand's private parts.
 Also dont forget about ["self assignment"](http://yosefk.com/c++fqa/assign.html):
 
 ```cpp
