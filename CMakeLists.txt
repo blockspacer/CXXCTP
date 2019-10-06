@@ -465,7 +465,9 @@ if(ENABLE_CLING AND INSTALL_CLING)
     DESTINATION "${CMAKE_INSTALL_PREFIX}/lib" # target directory
     FILES_MATCHING # install only matched files
     PATTERN "*.so"
+    PATTERN "*.so.*"
     PATTERN "*.dll"
+    PATTERN "*.dll.*"
     PATTERN "*.a"
     PATTERN "*.lib"
     PATTERN "CMake" EXCLUDE
