@@ -878,6 +878,11 @@ Please note that this project is released with a [Code of Conduct](CODE_OF_CONDU
 - Technical writer
 - [![twitter-alt][twitter-img]](https://twitter.com/anindita_basu)
   [![github-alt][github-img]](https://github.com/AninditaBasu)
+  
+##### Anna Hayhurst
+
+- Junior Developer
+- [![github-alt][github-img]](https://github.com/annahayhurst)
 
 #### C
 
