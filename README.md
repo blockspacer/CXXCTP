@@ -27,7 +27,16 @@
 [![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/blockspacer/CXXCTP.svg)](http://isitmaintained.com/project/blockspacer/CXXCTP "Average time to resolve an issue")
 [![Percentage of issues still open](http://isitmaintained.com/badge/open/blockspacer/CXXCTP.svg)](http://isitmaintained.com/project/blockspacer/CXXCTP "Percentage of issues still open")
 
-# 📚 About CXXCTP (CXX compile-time programming)
+# 🔗 Navigation
+
+ - [About CXXCTP](#about)
+ - [Usage Examples](#usage)
+ - [Cloning and setup](#cloning)
+ - [Developing with CXXCTP](#developing)
+ - [Tools used by CXXCTP](#tools)
+ - [How to contribute](#contribute)
+
+# 📚 <a name="about"></a> About CXXCTP (CXX compile-time programming)
 
 CXXCTP is a transpiler that extends C++ for new introspection, reflection and compile-time execution.
 
@@ -70,7 +79,7 @@ In development, see examples. Currently supports only Linux.
 Note that you can run Linux containers under Windows/Mac/etc.
 
 
-# ⚙️ Usage examples
+# ⚙️ <a name="usage"></a>Usage examples
 - enum_gen_hpp.cxtpl - (codegen) enum to string + reflection metadata.
 
 ```cpp
@@ -179,7 +188,7 @@ SomeInterfaceName {
 };
 ```
 
-# 🖥️ Cloning and setup
+# 🖥️ <a name="cloning"></a>Cloning and setup
 ```bash
 git submodule sync --recursive
 git fetch --recurse-submodules
@@ -216,7 +225,7 @@ sudo -E docker run --rm -v "$PWD":/home/u/cxxctp -w /home/u/cxxctp  -it  -e DISP
 CXTPL_tool -version --version
 ```
 
-## Develop under Docker
+## Develop with Docker
 
 ```bash
 # Run a terminal in container
@@ -472,7 +481,7 @@ Example:
 cmake -E chdir build ./tool/CXXCTP_tool --ctp_scripts_paths=$PWD -L .=DBG9 -extra-arg=-I$PWD/include -extra-arg=-I../resources ../resources/ReflShapeKind.hpp ../resources/test_typeclass_base1.hpp ../resources/test_typeclass_instance1.hpp ../resources/test.cpp
 ```
 
-# ⌨️ Developing with CXXCTP 
+# ⌨️ <a name="developing"></a>Developing with CXXCTP 
 The following sections cover usage, custom rules and debugging for CXXCTP.
 ## Writing code that writes code
 
@@ -780,7 +789,7 @@ Check that all needed paths are in `-extra-arg=`.
 
 Make a log to file in `DBG9` mode and check `.log` files.
 
-# 🔧 Tools used by CXXCTP
+# 🔧 <a name="tools"></a>Tools used by CXXCTP
 
 ## About libtooling
 
@@ -838,7 +847,7 @@ Useful links:
 - Create & use `.clang-format` file https://leimao.github.io/blog/Clang-Format-Quick-Tutorial/
 - Integrate with your IDE ( QT instructions http://doc.qt.io/qtcreator/creator-beautifier.html ) Import .clang-format rules to IDE settings.
 
-# ⭐️ How to Contribute
+# ⭐️ <a name="contribute"></a>How to Contribute
 
 Please read our [contributing](CONTRIBUTING.md) guidelines before making your pull request.
 
