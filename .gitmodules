@@ -1,9 +1,7 @@
-[submodule "submodules/CXTPL"]
+﻿[submodule "submodules/CXTPL"]
 	path = submodules/CXTPL
   url = http://github.com/blockspacer/CXTPL.git
-	branch = master
-	fetchRecurseSubmodules = true
-  ignore = all
+ fetchRecurseSubmodules = true
 [submodule "submodules/boost.outcome"]
 	path = submodules/boost.outcome
   url = http://github.com/ned14/outcome.git
