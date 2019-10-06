@@ -4,7 +4,7 @@
     <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Cpp-Francophonie.svg/512px-Cpp-Francophonie.svg.png" width="100px" alt="CXXCTP" />
   </a>
 </p>
-<h3 align="center">Add custom features to C++ language, like <a href="https://www.fluentcpp.com/2018/03/09/c-metaclasses-proposal-less-5-minutes/">metaclasses</a>, <a href="https://twitter.com/TartanLlama/status/1159457033441165313">Rust-like traits</a>, reflection and any more</h3>
+<h3 align="center">Add custom features to C++ language, like <a href="https://www.fluentcpp.com/2018/03/09/c-metaclasses-proposal-less-5-minutes/">metaclasses</a>, <a href="https://twitter.com/TartanLlama/status/1159457033441165313">Rust-like traits</a>, reflection and many more</h3>
 <p align="center">A fully open source, powerful solution for modification and generation of C++ source code. Reduce the amount of boilerplate code in your C++ projects.</p>
 <hr />
 
@@ -348,12 +348,12 @@ Useful links:
 ```bash
 BEFORE install_cling.sh:
 sudo apt-get update && sudo apt-get upgrade
-sudo apt-get install clang libstdc++6 libstdc++-6-dev
+sudo apt-get install clang-6.0 libstdc++6 libstdc++-6-dev
 sudo update-alternatives --config c++
 sudo update-alternatives --config cc
 sudo ldconfig
-export CC=clang
-export CXX=clang++
+export CC=clang-6.0
+export CXX=clang++-6.0
 ```
 
 ```bash
@@ -403,8 +403,8 @@ Run bash scripts/install_folly.sh from https://github.com/blockspacer/CXTPL or p
 Use clang (NOT GCC!) before build and `-DENABLE_CLING=TRUE`:
 
 ```bash
-export CC=clang
-export CXX=clang++
+export CC=clang-6.0
+export CXX=clang++-6.0
 sudo rm -rf examples/*/ctp_scripts/*/*/generated/
 cmake -E remove_directory build
 cmake -E make_directory build
