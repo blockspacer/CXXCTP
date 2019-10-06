@@ -59,7 +59,8 @@ ENV LC_ALL=C.UTF-8 \
     LANG=en_US.UTF-8 \
     LANGUAGE=en_US:en \
     #TERM=screen \
-    PATH=/usr/local/bin/:/usr/local/include/:/usr/lib/clang/6.0/include:/usr/lib/llvm-6.0/include/:$PATH \
+    PATH=/usr/local/bin/:/usr/local/include/:/usr/local/lib/:/usr/lib/clang/6.0/include:/usr/lib/llvm-6.0/include/:$PATH \
+    LD_LIBRARY_PATH=/usr/local/lib/:$LD_LIBRARY_PATH \
     GIT_AUTHOR_NAME=$GIT_USERNAME \
     GIT_AUTHOR_EMAIL=$GIT_EMAIL \
     GIT_COMMITTER_NAME=$GIT_USERNAME \
@@ -74,6 +75,7 @@ ARG NO_SSL="True"
 # RUN export DEBIAN_FRONTEND=noninteractive
 # Set it via ARG as this only is available during build:
 RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
+RUN ldconfig
 
 # TODO
 # better dev-env https://github.com/aya/infra/blob/318b16621c7f6d3cd33cfd481f46eed5d750b6aa/stack/ide/docker/ide/Dockerfile
@@ -466,7 +468,8 @@ ENV LC_ALL=C.UTF-8 \
     LANG=en_US.UTF-8 \
     LANGUAGE=en_US:en \
     #TERM=screen \
-    PATH=/usr/local/bin/:/usr/local/include/:/usr/lib/clang/6.0/include:/usr/lib/llvm-6.0/include/:$PATH \
+    PATH=/usr/local/bin/:/usr/local/include/:/usr/local/lib/:/usr/lib/clang/6.0/include:/usr/lib/llvm-6.0/include/:$PATH \
+    LD_LIBRARY_PATH=/usr/local/lib/:$LD_LIBRARY_PATH \
     GIT_AUTHOR_NAME=$GIT_USERNAME \
     GIT_AUTHOR_EMAIL=$GIT_EMAIL \
     GIT_COMMITTER_NAME=$GIT_USERNAME \
@@ -478,6 +481,7 @@ RUN mkdir -p $WDIR
 # RUN export DEBIAN_FRONTEND=noninteractive
 # Set it via ARG as this only is available during build:
 RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
+RUN ldconfig
 
 # NOTE: create folder `.ca-certificates` with custom certs
 # switch to root
