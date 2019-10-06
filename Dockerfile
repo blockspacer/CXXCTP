@@ -10,6 +10,8 @@
 ARG UBUNTU_VERSION=18.04
 FROM        ubuntu:${UBUNTU_VERSION} as cxxctp_build_env
 
+# TODO: move to pydocker https://github.com/moby/moby/issues/16058#issuecomment-489116273
+
 # Give docker the rights to access X-server
 # sudo -E xhost +local:docker
 
@@ -75,7 +77,6 @@ ARG NO_SSL="True"
 # RUN export DEBIAN_FRONTEND=noninteractive
 # Set it via ARG as this only is available during build:
 RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
-RUN ldconfig
 
 # TODO
 # better dev-env https://github.com/aya/infra/blob/318b16621c7f6d3cd33cfd481f46eed5d750b6aa/stack/ide/docker/ide/Dockerfile
@@ -93,6 +94,8 @@ RUN ldconfig
 # (!!!) Turns off SSL verification on the whole system (!!!)
 #
 RUN set -ex \
+  && \
+  ldconfig \
   && \
   if [ "$NO_SSL" = "True" ]; then \
     echo 'NODE_TLS_REJECT_UNAUTHORIZED=0' >> ~/.bashrc \
@@ -139,14 +142,11 @@ RUN set -ex \
   && \
   $APT install -y gnupg2 wget \
   && \
-  wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key --no-check-certificate | apt-key add -
-
-# See `How to add an Ubuntu apt-get key from behind a firewall`
-# + http://redcrackle.com/blog/how-add-ubuntu-apt-get-key-behind-firewall
-
-# NOTE: need to set at least empty http-proxy
-# https://github.com/EtiennePerot/parcimonie.sh/issues/15
-RUN set -ex \
+  wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key --no-check-certificate | apt-key add - \
+  # See `How to add an Ubuntu apt-get key from behind a firewall` \
+  # + http://redcrackle.com/blog/how-add-ubuntu-apt-get-key-behind-firewall \
+  # NOTE: need to set at least empty http-proxy \
+  # https://github.com/EtiennePerot/parcimonie.sh/issues/15 \
   && \
   if [ ! -z "$http_proxy" ]; then \
     apt-key adv --keyserver-options http-proxy=$http_proxy --keyserver keyserver.ubuntu.com --recv-keys 94558F59 \
@@ -183,30 +183,7 @@ RUN set -ex \
                     software-properties-common \
                     git \
                     wget \
-                    locales
-# TODO
-#RUN set -ex \
-#    && for key in \
-#    4ED778F539E3634C779C87C6D7062848A1AB005C \
-#    B9E2F5981AA6E0CD28160D9FF13993A75599653C \
-#    94AE36675C464D64BAFA68DD7434390BDBE9B9C5 \
-#    B9AE9905FFD7803F25714661B63B535A4C206CA9 \
-#    77984A986EBC2AA786BC0F66B01FBB92821C587A \
-#    71DCFD284A79C3B38668286BC97EC7A07EDE3FC1 \
-#    FD3A5288F042B6850C66B31F09FE44734EB7990E \
-#    8FCCA13FEF1D0C2E91008E09770F7A9A5AE15600 \
-#    C4F0DFFF4E8C1A8236409D08E73BC641CC11F4C8 \
-#    DD8F2338BAE7501E3DD5AC78C273792F7D83545D \
-#    A48C2BEE680E841632CD4E44F07496B3EB3C1762 \
-#    ; do \
-#    gpg --batch --keyserver ipv4.pool.sks-keyservers.net --recv-keys "$key" || \
-#    gpg --batch --keyserver pool.sks-keyservers.net --recv-keys "$key" || \
-#    gpg --batch --keyserver pgp.mit.edu --recv-keys "$key" || \
-#    gpg --batch --keyserver keyserver.pgp.com --recv-keys "$key" || \
-#    gpg --batch --keyserver ha.pool.sks-keyservers.net --recv-keys "$key" ; \
-#    done
-
-RUN set -ex \
+                    locales \
   && \
   if [ "$NO_SSL" = "True" ]; then \
     git config --global http.sslVerify false \
@@ -220,24 +197,18 @@ RUN set -ex \
     ; \
   fi \
   && \
-  $APT update \
-  && \
   $APT install -y \
                     make \
                     autoconf automake autotools-dev libtool \
                     git \
                     curl \
                     vim \
-                    vim-gnome \
   && \
   $APT install -y build-essential \
   && \
     if [ "$ENABLE_LLVM" = "True" ]; then \
     $APT install -y \
-                    clang-6.0 python-lldb-6.0 lldb-6.0 lld-6.0 llvm-6.0-dev \
-                    clang-tools-6.0 libclang-common-6.0-dev libclang-6.0-dev \
-                    libc++abi-dev libc++-dev libclang-common-6.0-dev libclang1-6.0 libclang-6.0-dev \
-                    libstdc++6 libstdc++-6-dev \
+                    clang-6.0 libstdc++6 \
     ; \
     fi \
   && \
@@ -273,7 +244,6 @@ RUN set -ex \
                     libsqlite3-dev \
                     libtool \
                     netcat-openbsd \
-                    sudo \
                     unzip \
                     gcc \
                     g++ \
@@ -294,51 +264,19 @@ RUN set -ex \
                             python3 \
                             python3-pip \
                             python3-dev \
-                            python3-setuptools \
+                            python3-setuptools  \
+  # For convenience, alias (but don't sym-link) python & pip to python3 & pip3 as recommended in: \
+  # http://askubuntu.com/questions/351318/changing-symlink-python-to-python3-causes-problems \
+  && \
+  echo "alias python='python3'" >> /root/.bash_aliases \
+  && \
+  echo "alias pip='pip3'" >> /root/.bash_aliases \
   && \
   $APT install -y nano \
                             mc \
-                            bash
-
-#                            python \
-#                            python-dev \
-#                            python-pip \
-#                            python-setuptools
-
-# RUN mkdir ~/.pip && echo "[global]\n#index-urls:  https://pypi.douban.com, https://mirrors.aliyun.com/pypi,\ncheckout https://www.pypi-mirrors.org/ for more available mirror servers\nindex-url = https://pypi.douban.com/simple\ntrusted-host = pypi.douban.com" > ~/.pip/pip.conf
-
-# pip install pip setuptools --index-url=https://pypi.python.org/simple/ --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org
-
-# RUN mkdir -p $HOME/.config/pip/
-# # https://stackoverflow.com/a/54397762
-# RUN echo $'
-# [global]
-# timeout = 60
-# index-url = https://pypi.python.org/simple/
-# extra-index-url = http://151.101.112.223/root/pypi/+simple/
-#                 http://pypi.python.org/simple
-# trusted-host = download.zope.org
-#             pypi.python.org
-#             secondary.extra.host
-#             https://pypi.org
-#             pypi.org
-#             pypi.org:443
-#             151.101.128.223
-#             151.101.128.223:443
-#             https://pypi.python.org
-#             pypi.python.org
-#             pypi.python.org:443
-#             151.101.112.223
-#             151.101.112.223:443
-#             https://files.pythonhosted.org
-#             files.pythonhosted.org
-#             files.pythonhosted.org:443
-#             151.101.113.63
-#             151.101.113.63:443
-# ' >> $HOME/.config/pip/pip.conf
-
-# TODO https://github.com/moby/moby/issues/1799#issuecomment-489119778
-RUN mkdir -p $HOME/.pip/ \
+                            bash \
+  && \
+  mkdir -p $HOME/.pip/ \
   && \
   echo "[global]" >> $HOME/.pip/pip.conf \
   && \
@@ -384,7 +322,74 @@ RUN mkdir -p $HOME/.pip/ \
   && \
   echo "               151.101.113.63" >> $HOME/.pip/pip.conf \
   && \
-  echo "               151.101.113.63:443" >> $HOME/.pip/pip.conf
+  echo "               151.101.113.63:443" >> $HOME/.pip/pip.conf \
+  && \
+  $APT clean \
+  && \
+  $APT autoremove \
+  && \
+  rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# TODO
+#RUN set -ex \
+#    && for key in \
+#    4ED778F539E3634C779C87C6D7062848A1AB005C \
+#    B9E2F5981AA6E0CD28160D9FF13993A75599653C \
+#    94AE36675C464D64BAFA68DD7434390BDBE9B9C5 \
+#    B9AE9905FFD7803F25714661B63B535A4C206CA9 \
+#    77984A986EBC2AA786BC0F66B01FBB92821C587A \
+#    71DCFD284A79C3B38668286BC97EC7A07EDE3FC1 \
+#    FD3A5288F042B6850C66B31F09FE44734EB7990E \
+#    8FCCA13FEF1D0C2E91008E09770F7A9A5AE15600 \
+#    C4F0DFFF4E8C1A8236409D08E73BC641CC11F4C8 \
+#    DD8F2338BAE7501E3DD5AC78C273792F7D83545D \
+#    A48C2BEE680E841632CD4E44F07496B3EB3C1762 \
+#    ; do \
+#    gpg --batch --keyserver ipv4.pool.sks-keyservers.net --recv-keys "$key" || \
+#    gpg --batch --keyserver pool.sks-keyservers.net --recv-keys "$key" || \
+#    gpg --batch --keyserver pgp.mit.edu --recv-keys "$key" || \
+#    gpg --batch --keyserver keyserver.pgp.com --recv-keys "$key" || \
+#    gpg --batch --keyserver ha.pool.sks-keyservers.net --recv-keys "$key" ; \
+#    done
+
+#                            python \
+#                            python-dev \
+#                            python-pip \
+#                            python-setuptools
+
+# RUN mkdir ~/.pip && echo "[global]\n#index-urls:  https://pypi.douban.com, https://mirrors.aliyun.com/pypi,\ncheckout https://www.pypi-mirrors.org/ for more available mirror servers\nindex-url = https://pypi.douban.com/simple\ntrusted-host = pypi.douban.com" > ~/.pip/pip.conf
+
+# pip install pip setuptools --index-url=https://pypi.python.org/simple/ --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org
+
+# RUN mkdir -p $HOME/.config/pip/
+# # https://stackoverflow.com/a/54397762
+# RUN echo $'
+# [global]
+# timeout = 60
+# index-url = https://pypi.python.org/simple/
+# extra-index-url = http://151.101.112.223/root/pypi/+simple/
+#                 http://pypi.python.org/simple
+# trusted-host = download.zope.org
+#             pypi.python.org
+#             secondary.extra.host
+#             https://pypi.org
+#             pypi.org
+#             pypi.org:443
+#             151.101.128.223
+#             151.101.128.223:443
+#             https://pypi.python.org
+#             pypi.python.org
+#             pypi.python.org:443
+#             151.101.112.223
+#             151.101.112.223:443
+#             https://files.pythonhosted.org
+#             files.pythonhosted.org
+#             files.pythonhosted.org:443
+#             151.101.113.63
+#             151.101.113.63:443
+# ' >> $HOME/.config/pip/pip.conf
+
+# TODO https://github.com/moby/moby/issues/1799#issuecomment-489119778
 
 # RUN cat $HOME/.pip/pip.conf
 
@@ -393,18 +398,18 @@ WORKDIR $WDIR
 # pip install setuptools --upgrade
 
 # /usr/lib/python3.6/distutils/dist.py:261: UserWarning: Unknown distribution option: 'long_description_content_type'
-RUN pip3 install --index-url=https://pypi.python.org/simple/ --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org wheel \
+RUN pip3 install --no-cache-dir --index-url=https://pypi.python.org/simple/ --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org wheel \
   && \
-  pip3 install --index-url=https://pypi.python.org/simple/ --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org virtualenv \
+  pip3 install --no-cache-dir --index-url=https://pypi.python.org/simple/ --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org virtualenv \
   && \
-  pip3 install --index-url=https://pypi.python.org/simple/ --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org conan \
+  pip3 install --no-cache-dir --index-url=https://pypi.python.org/simple/ --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org conan \
   && \
-  pip3 install --index-url=https://pypi.python.org/simple/ --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org conan_package_tools
-
-RUN conan remote update conan-center https://conan.bintray.com False
-
-# TODO: use conan profile new https://github.com/conan-io/conan/issues/1541#issuecomment-321235829
-RUN mkdir -p $HOME/.conan/profiles/ \
+  pip3 install --no-cache-dir --index-url=https://pypi.python.org/simple/ --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org conan_package_tools \
+  && \
+  conan remote update conan-center https://conan.bintray.com False \
+  # TODO: use conan profile new https://github.com/conan-io/conan/issues/1541#issuecomment-321235829 \
+  && \
+  mkdir -p $HOME/.conan/profiles/ \
   && \
   echo "[settings]" >> ~/.conan/profiles/clang \
   && \
@@ -428,10 +433,10 @@ RUN mkdir -p $HOME/.conan/profiles/ \
   && \
   echo "CC=/usr/bin/clang-6.0" >> ~/.conan/profiles/clang \
   && \
-  echo "CXX=/usr/bin/clang++-6.0" >> ~/.conan/profiles/clang
-
-# TODO: use conan profile new https://github.com/conan-io/conan/issues/1541#issuecomment-321235829
-RUN mkdir -p $HOME/.conan/profiles/ \
+  echo "CXX=/usr/bin/clang++-6.0" >> ~/.conan/profiles/clang \
+  && \
+  # TODO: use conan profile new https://github.com/conan-io/conan/issues/1541#issuecomment-321235829 \
+  mkdir -p $HOME/.conan/profiles/ \
   && \
   echo "[settings]" >> ~/.conan/profiles/gcc \
   && \
@@ -503,21 +508,17 @@ WORKDIR $WDIR/CXXCTP
 # need some git config to apply git patch
 RUN git config --global user.email "$GIT_EMAIL" \
   && \
-  git config --global user.name "$GIT_USERNAME"
+  git config --global user.name "$GIT_USERNAME" \
+  && \
+  git submodule update --init --recursive --depth 50 || true
 
 # TODO https://stackoverflow.com/a/40465312
 # RUN git submodule deinit -f . || true
 #RUN git pull --recurse-submodules || true
 #RUN git submodule sync --recursive || true
 #RUN git fetch --recurse-submodules || true
-RUN git submodule update --init --recursive --depth 5 || true
+#RUN git submodule update --init --recursive --depth 5 || true
 #RUN git submodule update --force --recursive --init --remote || true
-
-RUN ls -artl $WDIR/CXXCTP/ \
-  && \
-  ls -artl $WDIR/CXXCTP/scripts \
-  && \
-  ls -artl $WDIR/CXXCTP/submodules
 
 # CMake
 #RUN /bin/bash -c "source $WDIR/CXXCTP/scripts/install_cmake.sh"
@@ -532,7 +533,7 @@ RUN ["chmod", "+x", "submodules/CXTPL/scripts/install_gtest.sh"]
 RUN ["chmod", "+x", "submodules/CXTPL/scripts/install_gflags.sh"]
 RUN ["chmod", "+x", "submodules/CXTPL/scripts/install_folly.sh"]
 
-# Uninstall the default version provided by Ubuntu�s package manager, so we can install custom one
+# Uninstall the default version provided by Ubuntu package manager, so we can install custom one
 RUN set -ex \
   && \
   $APT purge -y cmake || true
@@ -584,15 +585,13 @@ RUN ["bash", "-c", "bash $WDIR/CXXCTP/submodules/CXTPL/scripts/install_g3log.sh 
                         && \
                         bash $WDIR/CXXCTP/submodules/CXTPL/scripts/install_folly.sh"]
 
-RUN ls -artl submodules/folly \
-    && \
-    ls -artl submodules/folly/build/fbcode_builder/CMake \
-    && \
-    file /usr/local/include/folly/folly-config.h
-
 RUN export CC=gcc \
   && \
   export CXX=g++ \
+  #&& \
+  #cmake -E remove_directory build \
+  #&& \
+  #cmake -E remove_directory *-build \
   && \
   # create build dir \
   cmake -E make_directory build \
@@ -606,13 +605,24 @@ RUN export CC=gcc \
   cmake -E chdir build cmake -E time cmake --build . -- -j6 \
   && \
   # install lib and CXTPL_tool \
-  cmake -E chdir build make install
+  cmake -E chdir build make install \
+  #&& \
+  #cmake -E remove_directory build \
+  #&& \
+  # \
+  #cmake -E remove_directory *-build \
+  && \
+  rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 WORKDIR $WDIR/CXXCTP
 
 RUN export CC=clang-6.0 \
   && \
   export CXX=clang++-6.0 \
+  #&& \
+  #cmake -E remove_directory build \
+  #&& \
+  #cmake -E remove_directory *-build \
   && \
   cmake -E make_directory build \
   && \
@@ -628,25 +638,30 @@ RUN export CC=clang-6.0 \
   cmake -E chdir build make install \
   #  check supported plugins \
   && \
-  /usr/local/bin/CXXCTP_tool --plugins
-
-WORKDIR $WDIR/CXXCTP
-
-RUN rm -rf $WDIR/CXXCTP
-
-# reset
-WORKDIR $WDIR
-# LD_LIBRARY_PATH=/usr/lib:/usr/local/lib
+  /usr/local/bin/CXXCTP_tool --plugins \
+  #&& \
+  #cmake -E remove_directory build \
+  #&& \
+  #cmake -E remove_directory *-build \
+  && \
+  rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # remove unused apps after install
-RUN         $APT remove -y \
+RUN set -ex \
+  && \
+  rm -rf $WDIR/CXXCTP \
+  && \
+  $APT remove -y \
                     git \
-                    wget
-
-RUN         $APT clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
-RUN mkdir -p /etc/ssh/ && echo ClientAliveInterval 60 >> /etc/ssh/sshd_config
+                    wget \
+  && \
+  $APT clean \
+  && \
+  $APT autoremove \
+  && \
+  rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
+  && \
+  mkdir -p /etc/ssh/ && echo ClientAliveInterval 60 >> /etc/ssh/sshd_config
 
 #RUN service ssh restart
 
