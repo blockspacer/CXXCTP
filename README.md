@@ -63,7 +63,7 @@ Why wouldn't you just extend clang since it also provides some experimental feat
 
 Clang is a compiler while this project is a transpiler, that transforms code to standardized c++ code without the need to modify llvm/assembly.
 
-Because the tool's output is C++ code, you can compile transpiled code using emscripten, use static code analizers, run code inside cling etc.
+Because the tool's output is C++ code, you can compile transpiled code using emscripten, use static code analyzers, run code inside cling etc.
 
 CXXCTP allows you to create and share scripts for
 
@@ -899,6 +899,13 @@ Please note that this project is released with a [Code of Conduct](CODE_OF_CONDU
 - [![github-alt][github-img]](https://github.com/blockspacer)
 - [![github-alt][github-img]](https://github.com/derofim)
 - [<img src="imgs/linkedin.svg" width="20" height="20">](https://www.linkedin.com/in/denis-trofimov-4335bb13b/)
+
+#### M
+
+##### Mohib Qureshi
+
+- Software Development Enthusiast
+- [![github-alt][github-img]](https://github.com/mohibqureshi)
 
 #### Y
 
