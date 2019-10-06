@@ -288,8 +288,8 @@ compiler.version=6.0
 compiler.libcxx=libstdc++11
 
 [env]
-CC=/usr/bin/clang
-CXX=/usr/bin/clang++
+CC=/usr/bin/clang-6.0
+CXX=/usr/bin/clang++-6.0
 ```
 
 And then `conan install ***** --profile clang`
