@@ -54,16 +54,7 @@ struct _tc_combined_t<[[~]] /* no newline */
     _tc_combined_t() = default;
 
 [[~]]  { // startscope
-[[~]]    for(size_t index = 0; index < ReflectedTypeclassesSize; index++) {
-[[~]]      const auto typeclassName = typeclassNames.at(index);
-[[~]]
-    _tc_combined_t(std::reference_wrapper<
-      _tc_combined_t<[[+ typeclassName +]]>>&& rhs) noexcept {
-        if(rhs.get())
-            [[+ typeclassModelName(typeclassName) +]] = rhs.get().ref_model();
-    }
-[[~]]
-[[~]]    } // endfor
+[[include constructors_tc_combined_t.inc.cxtpl include]]
 [[~]]  } // endscope
 
     /*/// \note moves passed argument

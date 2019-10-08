@@ -235,7 +235,8 @@ static void process_ctp_scripts_dir(const std::string& ctp_scripts_path) {
 #if defined(CLING_IS_ON)
 #if defined(ALLOW_PER_PROJECT_CTP_SCRIPTS)
     // Init InterpreterModule files
-    if(const auto Interp_it = InterpreterModule::moduleToSources.find("main_module")
+    if(const auto Interp_it
+       = InterpreterModule::moduleToSources.find("main_module")
        ; Interp_it == InterpreterModule::moduleToSources.end())
     {
       std::vector<fs::path> ctp_scripts_paths(

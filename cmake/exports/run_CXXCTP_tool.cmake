@@ -2,12 +2,25 @@ string(REPLACE ";" " " INPUTS "${INPUTS}")
 
 message(STATUS "CXXCTP_tool_PROGRAM = ${CXXCTP_tool_PROGRAM}")
 message(STATUS "EXTRA_ARGS = ${EXTRA_ARGS}")
-message(STATUS "sources path (for ${CXXCTP_tool_PROGRAM}) = ${SRCDIR}")
-message(STATUS "input_files (for ${CXXCTP_tool_PROGRAM}) = ${INPUTS}")
-message(STATUS "output dir (for ${CXXCTP_tool_PROGRAM}) = ${OUTDIR}")
-message(
-  STATUS "CXXCTP_tool_LOG_CONFIG (for ${CXXCTP_tool_PROGRAM}) = ${CXXCTP_tool_LOG_CONFIG}"
-  )
+message(STATUS "sources path
+  (for ${CXXCTP_tool_PROGRAM}) = ${SRCDIR}")
+message(STATUS "input_files
+  (for ${CXXCTP_tool_PROGRAM}) = ${INPUTS}")
+message(STATUS "output dir
+  (for ${CXXCTP_tool_PROGRAM}) = ${OUTDIR}")
+message(STATUS "CXXCTP_tool_LOG_CONFIG
+  (for ${CXXCTP_tool_PROGRAM}) = ${CXXCTP_tool_LOG_CONFIG}")
+
+message(STATUS "running CXXCTP_tool command:
+${CXXCTP_tool_PROGRAM} \
+          -L \
+          \"${CXXCTP_tool_LOG_CONFIG}\" \
+          --ctp_scripts_paths=${SRCDIR} \
+          --srcdir=${SRCDIR} \
+          --resdir=${OUTDIR} \
+          ${EXTRA_ARGS} \
+          ${INPUTS} \
+")
 
 if(CXXCTP_tool_CLEAN)
   if(EXISTS ${OUTDIR})

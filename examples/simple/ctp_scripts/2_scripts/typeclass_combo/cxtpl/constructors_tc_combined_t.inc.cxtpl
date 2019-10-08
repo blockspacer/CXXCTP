@@ -1,0 +1,10 @@
+[[~]]    for(size_t index = 0; index < ReflectedTypeclassesSize; index++) {
+[[~]]      const auto typeclassName = typeclassNames.at(index);
+[[~]]
+    _tc_combined_t(std::reference_wrapper<
+      _tc_combined_t<[[+ typeclassName +]]>>&& rhs) noexcept {
+        if(rhs.get())
+            [[+ typeclassModelName(typeclassName) +]] = rhs.get().ref_model();
+    }
+[[~]]
+[[~]]    } // endfor

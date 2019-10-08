@@ -1,0 +1,9 @@
+[[~]]    size_t elemIter = 0;
+[[~]]    for(const auto& [name, value]: GeneratedEnumItems) {
+[[~]]      const std::string delim  =
+[[~]]        (elemIter != GeneratedEnumItemsSize) ? "," : "";
+[[~]]      const std::string comment  =
+[[~]]        name + " = " + value + " at " + std::to_string(elemIter);
+    [[+name+]] = [[+value+]] [[+delim+]] // [[+comment+]]
+[[~]]      elemIter++;
+[[~]]    } // endfor
