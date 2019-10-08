@@ -40,7 +40,7 @@
 
 CXXCTP is a transpiler that extends C++ for new introspection, reflection and compile-time execution.
 
-CXXCTP doesn't aim to create predefined set of source code transformations. Users can share C++ scripts for source code transformation.
+CXXCTP doesn't aim to create a predefined set of source code transformations. Users can share C++ scripts for source code transformation.
 
 Suppose someone shared useful scripts like `interface.cxx` and `enum_to_json.cxx` to the open-source community. You can use them in your project just by placing them into the `ctp_scripts` folder.
 
@@ -571,7 +571,7 @@ SomeInterfaceName {
 };
 ```
 
-Using a similar approach you can apply multiple soure code transformation steps to same the `class` / `struct` / etc.
+Using a similar approach you can apply multiple source code transformation steps to the same `class` / `struct` / etc.
 
 ## How to add custom code transformation rules
 
@@ -596,7 +596,7 @@ add_ctp_plugin(
 
 Check that your function name exists in generated file `ctp_registry.cpp` (may be skipped in Cling / dev-mode)
 
-Function signature for code transformation must be compatable with `cxxctp_callback`:
+Function signature for code transformation must be compatible with `cxxctp_callback`:
 
 ```cpp
 typedef std::function<const char*(
@@ -633,13 +633,13 @@ $apply(make_interface;
 If you need code generation:
 
 - Create template file (`.cxtpl`). Build your file using CXTPL_tool https://github.com/blockspacer/CXTPL
-- Create all needed template arguments inside of your function. Names, types, etc. for arguments must be same as in template (cause generated template is valid C++ code).
+- Create all needed template arguments inside of your function. Names, types, etc. for arguments must be the same as in template (cause generated template is valid C++ code).
 - Create variable `std::string cxtpl_output`, that will store result of template rendering with some arguments.
 - Include file generation from template file (`.cxtpl`) inside of your function.
 
 ## What is `.cxtpl`
 
-`.cxtpl` is the file extention for the C++ template engine https://github.com/blockspacer/CXTPL
+`.cxtpl` is the file extension for the C++ template engine https://github.com/blockspacer/CXTPL
 
 ## How to add `.cxtpl` at compile-time (CMake)
 
