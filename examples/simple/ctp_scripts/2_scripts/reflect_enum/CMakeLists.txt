@@ -11,4 +11,6 @@ list(APPEND cxtpl_outputs "${cxtpl_out_dir}/enum_gen_cpp.cxtpl.cpp")
 conditional_remove(TRUE ${cxtpl_out_dir} ${CMAKE_CURRENT_SOURCE_DIR})
 
 # create new codegen files
-target_add_cxtpl_tool(CXXCTP_core "reflect_enum" "${cxtpl_inputs}" "${cxtpl_outputs}")
+target_add_cxtpl_tool(CXXCTP_core "reflect_enum"
+  "${cxtpl_in_dir}" "${cxtpl_out_dir}"
+  "${cxtpl_inputs}" "${cxtpl_outputs}")

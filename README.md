@@ -457,7 +457,7 @@ cat ./build/examples/simple/CXXCTP_tool_for_CXXCTP_example.log
 Check that `.log` find doesn`t contain errors
 
 # run examples
-build/examples/simple/CXXCTP_example
+build/bin/CXXCTP_example
 ```
 
 Don't forget to set Cling include paths by`-extra-arg=-I\$PWD/include`and library paths by`-extra-arg=-L\$PWD/build`and .so/.dll libs by`-extra-arg=-lCXXCTP_core`:
