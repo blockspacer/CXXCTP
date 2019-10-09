@@ -923,6 +923,28 @@ Articles about flexferrum's `autoprogrammer` in media:
 - [RUS] метаклассах по-русски https://habr.com/ru/article/448466/
 - [RUS] Метаклассы в C++17 Фантастика? Реальность! https://assets.ctfassets.net/oxjq45e8ilak/55bGdX2PnYzmrpM8rwCjcE/791e7eee3236c2023e86e169faca8a0e/Sergei_Sadovnikov_Metaclasses_in_C___dream_Reality.pdf
 
+## LICENSE for open source components
+
+All the open source components are used under their associated open source licences.
+
+Used open source components:
+* icu
+* ced
+* boost
+* harfbuzz
+* boost.outcome
+* chromium (base)
+* libevent
+* modp_b64
+* tcmalloc
+* xdg_mime
+* xdg_user_dirs
+* dynamic_annotations
+* (Facebook) Folly
+* (Microsoft) GSL
+
+See LICENSE files
+
 ### CMake Code style
 
 CMake files pass style checks, can be fixed by running run-cmake-format.py from the root of the repository. This requires Python 3 and [cmake_format](https://github.com/cheshirekow/cmake_format) (note: this currently does not work on Windows)
