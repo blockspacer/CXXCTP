@@ -56,7 +56,7 @@ Note: This project is provided as it is, without any warranty (see License).
 - Ability to create new files (separate generated class to .hpp and .cpp, etc.)
 - Ability to check source files (implement style checks, design patterns, etc.)
 - Ability to compile scripts (rules for code transformations) for maximum performance, not only interpret them in Cling.
-- 
+
 ## Motivation
 
 Why wouldn't you just extend clang since it also provides some experimental features (modules for instance)?
@@ -69,8 +69,7 @@ CXXCTP allows you to create and share scripts for
 
 - source code check (like codestyle validation)
 - source code transformation (like alphabetical sort of all public functions inside some class)
-- compile-time programming (like retrieve source code modification rules from remote server and save them in some folder)
-- etc.
+- compile-time programming (like retrieve source code modification rules from remote server and save them in some folder) etc.
 
 ## Project status
 
