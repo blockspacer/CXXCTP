@@ -4,7 +4,7 @@ This library follows [Semantic Versioning](http://semver.org/). Please note it
 is currently under active development. Any release versioned 0.x.y is subject to
 backwards-incompatible changes at any time.
 
-**GA**: Libraries defined at a GA quality level are expected to be stable. All updates in the libraries are guaranteed to be backward-compatible. Any changes that are not 
+**GA**: Libraries defined at a GA quality level are expected to be stable. All updates in the libraries are guaranteed to be backward-compatible. Any changes that are not
 backward-compatible lead to the major version increment
 (1.x.y -> 2.0.0).
 

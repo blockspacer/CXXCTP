@@ -12,7 +12,7 @@ Use tools like [vera++](https://bitbucket.org/verateam/vera/wiki/Home)
 
 ## Static analysis
 
-Use any tools from [list of tools for static code analysis]( https://en.wikipedia.org/wiki/List_of_tools_for_static_code_analysis#C.2B.2B)
+Use any tools from the [list of tools for static code analysis]( https://en.wikipedia.org/wiki/List_of_tools_for_static_code_analysis#C.2B.2B)
 
 ## Version control
 
@@ -20,7 +20,7 @@ Prefer git.
 
 ## Scanning project
 
-Scan whole project before pushing code to version control system.
+Scan the whole project before pushing code to version control system.
 
 ## Naming schemes
 

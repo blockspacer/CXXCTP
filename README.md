@@ -480,7 +480,7 @@ Example:
 cmake -E chdir build ./tool/CXXCTP_tool --ctp_scripts_paths=$PWD -L .=DBG9 -extra-arg=-I$PWD/include -extra-arg=-I../resources ../resources/ReflShapeKind.hpp ../resources/test_typeclass_base1.hpp ../resources/test_typeclass_instance1.hpp ../resources/test.cpp
 ```
 
-# ⌨️ <a name="developing"></a>Developing with CXXCTP 
+# ⌨️ <a name="developing"></a>Developing with CXXCTP
 The following sections cover usage, custom rules and debugging for CXXCTP.
 ## Writing code that writes code
 
@@ -877,7 +877,7 @@ Please note that this project is released with a [Code of Conduct](CODE_OF_CONDU
 - Technical writer
 - [![twitter-alt][twitter-img]](https://twitter.com/anindita_basu)
   [![github-alt][github-img]](https://github.com/AninditaBasu)
-  
+
 ##### Anna Hayhurst
 
 - Junior Developer
