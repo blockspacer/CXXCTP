@@ -115,11 +115,11 @@ The order you list your includes shouldn't matter from a technical point of view
 
 With few exceptions, place code in a namespace.
 Never use "using namespace" in Header Files.
-Always use "std::", never use "using nmespace std;".
+Always use "std::", never use "using namespace std;".
 Do not use using-directives (e.g. using namespace foo). Do not use inline namespaces.
 Namespaces should have unique names based on the project name, and possibly its path.
 Unnamed namespaces are allowed.
-Dont use indentations for namespaces.
+Don't use indentations for namespaces.
 Place "{" right after namespace name.
 Prefer :: prefix (refers to the global namespace).
 
@@ -227,7 +227,7 @@ Use a struct only for passive objects that carry data; everything else is a clas
 
 ## Class const methods
 
-Always make class methods ëconstí when they do not modify any class variables.
+Always make class methods ‚Äòconst‚Äô when they do not modify any class variables.
 
 ## Declaration Order
 
@@ -252,8 +252,8 @@ When defining a function, parameter order is:
 * parameters that are both input and output
 * outputs
 
-Don't use function arguments as both input and optput. Prefer separate varibale for function output and separate varibale for function input.
-Always use const for parameters that dont change inside function.
+Don't use function arguments as both input and optput. Prefer separate variable for function output and separate variable for function input.
+Always use const for parameters that don't change inside function.
 
 ## Write Short Functions
 
@@ -371,7 +371,7 @@ a = array([ [ 1, 0,     0 ], // Notice padding
             [ 0, 0,     1 ] ]);
 ```
 
-But dont align operators or arguments:
+But don't align operators or arguments:
 
 ```cpp
 abcd = hello(34, 12) +   fgh( 2,  3); // Bad
@@ -528,7 +528,7 @@ Avoid using Run Time Type Information (RTTI): dynamic_cast, typeid.
 Use CppUnit, Google Test or any other  [testing frameworks](https://en.wikipedia.org/wiki/List_of_unit_testing_frameworks).
 Unit tests and performance tests should be placed in the same directory as the functionality they're testing.
 Use compile autotests to see whether a C++ feature is supported by all compilers in the test farm.
-Dont forget to write regretion tests.
+Don't forget to write regression tests.
 
 ## Continuos integration
 
@@ -567,7 +567,7 @@ void func()
 
 ## Preincrement and Predecrement
 
-Use preincrementation (++i) whenever possible. The semantics of postincrement (i++) include making a copy of the value being incremented, returning it, and then preincrementing the ìwork valueî.
+Use preincrementation (++i) whenever possible. The semantics of postincrement (i++) include making a copy of the value being incremented, returning it, and then preincrementing the ‚Äúwork value‚Äù.
 Use prefix form (++i) of the increment and decrement operators with iterators and other template objects.
 
 ## Use of const
@@ -592,7 +592,7 @@ int const *p;           // Perfer "const int *p;"
 ## Integer Types
 
 If your variable represents a value that could ever be greater than or equal to 2^31 (2GiB), use a 64-bit type such as int64.
-Don't use an unsigned type where possible (especially dont use unsigned type in loop).
+Don't use an unsigned type where possible (especially don't use unsigned type in loop).
 
 ## Documentation
 
@@ -657,7 +657,7 @@ void restart() override;
 ## 64-bit Portability
 
 Code should be 64-bit and 32-bit friendly.
-Dont use printf() where possible.
+Don't use printf() where possible.
 
 ## Aliases
 
@@ -670,7 +670,7 @@ template <typename T> using my_type = whatever<T>;
 
 Local convenience aliases are allowed in function definitions, private sections of classes, explicitly marked internal namespaces, and in .cc files.
 
-Use type aliases in classes where possible if its helps readability and maintainance:
+Use type aliases in classes where possible if its helps readability and maintenance:
 
 ```cpp
 class Student
@@ -993,7 +993,7 @@ Use 4 spaces for tabulation.
 Set editor settings to use 4 spaces. Instructions for VS2015 [Options, Text Editor, All Languages, Tabs](https://msdn.microsoft.com/en-us/library/7sffa753.aspx).
 No whitespace at the end of a line.
 
-In all cases, prefer spaces to tabs in source files. People have different preferred indentation levels, and different styles of indentation that they like; this is fine. What isnít fine is that different editors/viewers expand tabs out to different tab stops. This can cause your code to look completely unreadable, and it is not worth dealing with.
+In all cases, prefer spaces to tabs in source files. People have different preferred indentation levels, and different styles of indentation that they like; this is fine. What isn‚Äôt fine is that different editors/viewers expand tabs out to different tab stops. This can cause your code to look completely unreadable, and it is not worth dealing with.
 
 ## Line Length
 
@@ -1064,7 +1064,7 @@ x = (y * 0.5f + (y * 0.5f));
 ## Loops and Switch Statements
 
 * Proper space after Loop/Switch and before
-* Donít use default labels in fully covered switches over enumerations.
+* Don‚Äôt use default labels in fully covered switches over enumerations.
 * Not fully covered switch statements should always have a default case.  If the default case should never execute, simply assert:
 
 ```cpp
@@ -1405,7 +1405,7 @@ Use "b" prefix for boolean variables.
         /**  Is timer running **/
         bool mb_Running;
 
-        bool bError; // Dont use isError/isNotError
+        bool bError; // Don't use isError/isNotError
 ```
 
 ## Abbreviations
@@ -1420,7 +1420,7 @@ dvdReader();         // Good
 
 ## Types to use
 
-* Do not use unsigned types to mean ìthis value should never be < 0î. For that, use assertions or run-time checks (as appropriate).
+* Do not use unsigned types to mean ‚Äúthis value should never be < 0‚Äù. For that, use assertions or run-time checks (as appropriate).
 * Use size_t for object and allocation sizes, object counts, array and pointer offsets, vector indices, and so on. The signed types are incorrect and unsafe for these purposes (e.g. integer overflow behavior for signed types is undefined in the C and C++ standards, while the behavior is defined for unsigned types.) The C++ STL is a guide here: they use size_t and foo::size_type for very good reasons.
 * Use size_t directly in preference to std::string::size_type and similar.
 * In cases where the exact size of the type matters (e.g. a 32-bit pixel value, a bitmask, or a counter that has to be a particular width), use one of the sized types.
@@ -1500,7 +1500,7 @@ If "is" not appropriate use has/an/should e.t.c.
 ## Prefer full names
 
 ```cpp
-int maximumAverage = computeAverage() / c_CurrentAverage;   // Dont use compAvg(), maxAvg or c_cntAvg
+int maximumAverage = computeAverage() / c_CurrentAverage;   // Don't use compAvg(), maxAvg or c_cntAvg
 ```
 
 cmd    <->    command
@@ -1513,9 +1513,9 @@ cnt    <->    current
 
 Don't use that rule for abbrevations (html, cpu)
 
-## Dont use "p" or "ptr" prefix for pointers/parameters
+## Don't use "p" or "ptr" prefix for pointers/parameters
 
-Line* line; // Dont use Line* pLine; or Line* linePtr;
+Line* line; // Don't use Line* pLine; or Line* linePtr;
 
 ## Initialize variables
 
@@ -1681,7 +1681,7 @@ Static constructors and destructors (e.g. global variables whose types have a co
 * As a rule of thumb, struct should be kept to structures where all members are declared public.
 * Do not use Braced Initializer Lists to Call a Constructor
 * #include as Little as Possible
-* Use the ìassertî macro from `<cassert>` to it's fullest (assert is good for checking a case during run-time). Use static assert to make assertions at compile time.
+* Use the ‚Äúassert‚Äù macro from `<cassert>` to it's fullest (assert is good for checking a case during run-time). Use static assert to make assertions at compile time.
 
 ```cpp
 inline Value *getOperand(unsigned I) {
@@ -1693,7 +1693,7 @@ inline Value *getOperand(unsigned I) {
 Note: You should never depend on assert to do anything because the code can be compiled with NDEBUG defined and then assert does nothing. Production code is often times compiled with NDEBUG defined to ensure that those assert statements disappear.
 
 * Use #ifdef with platfom dependant code
-* Donít evaluate end() every time through a loop.
+* Don‚Äôt evaluate end() every time through a loop.
 
 ```cpp
 BasicBlock *BB = ...
@@ -1706,10 +1706,10 @@ for (BasicBlock::iterator I = BB->begin(), E = BB->end(); I != E; ++I) { // Good
 }
 ```
 
-It may be less efficient than evaluating it at the start of the loop. Also if you write the loop in the second form, it is immediately obvious without even looking at the body of the loop that the container isnít being modified.
+It may be less efficient than evaluating it at the start of the loop. Also if you write the loop in the second form, it is immediately obvious without even looking at the body of the loop that the container isn‚Äôt being modified.
 
 * Avoid #include `<iostream>`, because many common implementations transparently inject a static constructor into every translation unit that includes it.
-* Avoid std::endl because most of the time, you probably have no reason to flush the output stream, so itís better to use a literal '\n'.
+* Avoid std::endl because most of the time, you probably have no reason to flush the output stream, so it‚Äôs better to use a literal '\n'.
 * Spaces Before Parentheses in control flow statements, but not in normal function call expressions and function-like macros.
 
 ```cpp
@@ -1724,7 +1724,7 @@ A = foo(42, 92) + bar(X); // Good, bad is: A = foo (42, 92) + bar (X);
 ```
 
 * Use UTF-8 file encodings.
-* Avoid putting projectís header files into the [precompiled header file](http://www.cygnus-software.com/papers/precompiledheaders.html). Put only headers thatíll not change in your precompiled headers ñ like windows.h, STL headers and header only implementations like rapid json..
+* Avoid putting project‚Äôs header files into the [precompiled header file](http://www.cygnus-software.com/papers/precompiledheaders.html). Put only headers that‚Äôll not change in your precompiled headers ‚Äì like windows.h, STL headers and header only implementations like rapid json..
 * Use LF line endings: Unix-style linebreaks ('\n'), not Windows-style ('\r\n').
 * Be careful about your accessors. Always provide the const version, the non-const version is optional. Return by value should be avoided as you will copy the content of your object.
 
@@ -1866,10 +1866,10 @@ void setCount(size_t count); // Good, bad is: void setCount(size_t count);
 void doSomething(ScriptExecutionContext* context); // Good, bad is: void doSomething(ScriptExecutionContext* context);
 ```
 
-* Avoid ìusingî statements in namespace (or global) scope of header files.
+* Avoid ‚Äúusing‚Äù statements in namespace (or global) scope of header files.
 * Singleton pattern
 
-Use a static member function named ìinstance()î to access the instance of the singleton.
+Use a static member function named ‚Äúinstance()‚Äù to access the instance of the singleton.
 
 ```cpp
 class MySingleton {
@@ -1883,8 +1883,8 @@ enum class Enum2 : __int64 {Val1, Val2, val3}; // Avoid
 * The binary operators = (assignment), [] (array subscription), -> (member access), as well as the n-ary () (function call) operator, must always be implemented as member functions, because the syntax of the language requires them to. Other operators can be implemented either as members or as non-members.For all operators where you have to choose to either implement them as a member function or a non-member function, use the following [rules of thumb to decide](http://stackoverflow.com/a/4421729) where possible:
   * If it is a unary operator, implement it as a member function.
   * If a binary operator treats both operands equally (it leaves them unchanged), implement this operator as a non-member function.
-  * If a binary operator does not treat both of its operands equally (usually it will change it's left operand), it might be useful to make it a member function of it's left operandís type, if it has to access the operand's private parts.
-Also dont forget about ["self assignment"](http://yosefk.com/c++fqa/assign.html):
+  * If a binary operator does not treat both of its operands equally (usually it will change it's left operand), it might be useful to make it a member function of it's left operand‚Äôs type, if it has to access the operand's private parts.
+Also don't forget about ["self assignment"](http://yosefk.com/c++fqa/assign.html):
 
 ```cpp
 MyClass& MyClass::operator=(const MyClass& other)  // copy assignment operator
@@ -2054,9 +2054,9 @@ WindowDesc::WindowDesc()
 
 * [Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html)
 * [LLVM coding standards](http://llvm.org/docs/CodingStandards.html)
-* [Chromiumís style guide](http://www.chromium.org/developers/coding-style)
-* [Mozillaís style guide](https://developer.mozilla.org/en-US/docs/Developer_Guide/Coding_Style)
-* [WebKitís style guide](http://www.webkit.org/coding/coding-style.html)
+* [Chromium‚Äôs style guide](http://www.chromium.org/developers/coding-style)
+* [Mozilla‚Äôs style guide](https://developer.mozilla.org/en-US/docs/Developer_Guide/Coding_Style)
+* [WebKit‚Äôs style guide](http://www.webkit.org/coding/coding-style.html)
 * [Qt Coding Style](http://wiki.qt.io/Qt_Coding_Style)
 * [Qt - API Design Principles](https://wiki.qt.io/API_Design_Principles)
 * [Unreal Engine Coding Standard](https://docs.unrealengine.com/latest/INT/Programming/Development/CodingStandard/)
