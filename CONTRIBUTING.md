@@ -4,7 +4,7 @@
 
 This repository is built for the purpose of encouraging your contributions, big or small. **All** changes are considered, as long as they do not complicate the process for others.
 
-That said, suggested ways to contribute include:
+That said, suggested ways to contribute includes:
 
 * Fork the project in GitHub
 * Clone your forked repo locally
@@ -25,7 +25,7 @@ That said, suggested ways to contribute include:
   [![github-alt][github-img]](https://github.com/example)
 ```
 
-* Make sure you add your name to the correct letter section (alphabetically by first name)
+* Make sure to add your name to the correct letter section (alphabetically by first name)
 * Avoid making any whitespace changes or alterations to someone else's profile
 
 ### A code sample
@@ -36,4 +36,4 @@ That said, suggested ways to contribute include:
 
 ## Code of Conduct
 
-Please note that this project is released with a [Contributor Code of Conduct](CODE_OF_CONDUCT.md). By participating in this project you agree to abide by its terms.
+Please note that [Contributor Code of Conduct](CODE_OF_CONDUCT.md) files are provided along with the project and by participating in this project you agree to abide by the terms and conditions. Please read them carefully before making any contributions.
