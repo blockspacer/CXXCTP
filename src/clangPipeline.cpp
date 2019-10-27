@@ -16,7 +16,6 @@
 #include <experimental/filesystem>
 #endif // __has_include
 
-#include <clang/Rewrite/Core/RewriteBuffer.h>
 #include <clang/Rewrite/Core/Rewriter.h>
 #include <clang/ASTMatchers/ASTMatchers.h>
 #include <clang/AST/ASTContext.h>
