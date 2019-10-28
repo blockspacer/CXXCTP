@@ -913,6 +913,11 @@ Please note that this project is released with a [Code of Conduct](CODE_OF_CONDU
 - Web/Mobile Developer.
 - [![github-alt][github-img]](https://github.com/yousifm)
 
+##### Yves Mancera
+
+- Software Engineer
+- [![github-alt][github-img]](https://github.com/yvesmh)
+
 ## Standing on the Shoulders of Giants
 
 That project possible because of [flexferrum's `autoprogrammer`](https://github.com/flexferrum/autoprogrammer).
