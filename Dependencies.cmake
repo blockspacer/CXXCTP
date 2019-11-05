@@ -113,6 +113,3 @@ message(STATUS "LIBLZMA_LIBRARIES=${DOUBLE_CONVERSION_INCLUDE_DIR}")
 find_package(LibEvent REQUIRED)
 message(STATUS "LZ4_LIBRARY=${LZ4_LIBRARY}")
 message(STATUS "LZ4_LIBRARY_DEBUG=${LZ4_LIBRARY_DEBUG}")
-
-# This project needs cling.
-find_package(Cling REQUIRED)
