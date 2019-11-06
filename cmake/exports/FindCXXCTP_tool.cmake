@@ -63,15 +63,16 @@ if(CXXCTP_tool)
     # NOTE: regen files at build step
     add_custom_target(
       CXXCTP_tool_target_for_${TARGET}_${GUID} ALL
+      VERBATIM # If VERBATIM is given then all arguments to the commands will be escaped properly
       COMMAND
         ${CMAKE_COMMAND}
         -DCXXCTP_tool_PROGRAM=${CXXCTP_tool_PROGRAM}
         -DCXXCTP_tool_CLEAN=${CLEAN_GEN}
-        -DSRCDIR="${CMAKE_CURRENT_SOURCE_DIR}"
-        -DINPUTS="${INPUTS}"
-        -DOUTDIR="${OUTDIR}"
-        -DEXTRA_ARGS="${EXTRA_ARGS}"
-        -DCXXCTP_tool_LOG_CONFIG=".:=DBG9:default:console\;default=file:path=CXXCTP_tool_for_${TARGET}.log,async=true,sync_level=DBG9\;console=stream:stream=stderr"
+        -DSRCDIR=${CMAKE_CURRENT_SOURCE_DIR}
+        -DINPUTS=${INPUTS_as_string}
+        -DOUTDIR=${OUTDIR}
+        -DEXTRA_ARGS=${EXTRA_ARGS_as_string}
+        -DCXXCTP_tool_LOG_CONFIG=.:=DBG9:default:console\;default=file:path=CXXCTP_tool_for_${TARGET}.log,async=true,sync_level=DBG9\;console=stream:stream=stderr
         -P
         ${FindCXXCTP_tool_LIST_DIR}/run_CXXCTP_tool.cmake)
 
