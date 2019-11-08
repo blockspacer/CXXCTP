@@ -2,6 +2,7 @@
 
 #if defined(CLING_IS_ON)
 
+/// \todo use boost outcome for error reporting
 #include <folly/logging/xlog.h>
 
 // __has_include is currently supported by GCC and Clang. However GCC 4.9 may have issues and
@@ -48,12 +49,26 @@ std::mutex InterpreterModule::clingReadyMutex{};
 std::condition_variable InterpreterModule::clingReadyCV{};
 
 void processCode(cling::Interpreter& interp, const std::string& code) {
+    cling::Interpreter::CompilationResult interpRes;
     cling::Value res; // Will hold the result of the expression evaluation.
-    interp.process(code.c_str(), &res);
+    interpRes = interp.process(code.c_str(), &res);
+    if(interpRes
+        != cling::Interpreter::Interpreter::kSuccess) {
+      /// \todo use boost outcome for error reporting
+      XLOG(ERR) <<  "ERROR while running code\n" << code.substr(0, 100);
+      std::terminate();
+    }
 }
 
 void executeCode(cling::Interpreter& interp, const std::string& code) {
-    interp.execute(code.c_str());
+    cling::Interpreter::CompilationResult interpRes;
+    interpRes = interp.execute(code.c_str());
+    if(interpRes
+        != cling::Interpreter::Interpreter::kSuccess) {
+      /// \todo use boost outcome for error reporting
+      XLOG(ERR) <<  "ERROR while running code\n" << code.substr(0, 100);
+      std::terminate();
+    }
 }
 
 void removeClingModule(const std::string& module_id) {
@@ -61,6 +76,7 @@ void removeClingModule(const std::string& module_id) {
         //printf("erased module %s\n", module_id.c_str());
         InterpreterModule::interpMap.erase(module_id);
     } else {
+        /// \todo use boost outcome for error reporting
         XLOG(WARN) << "module not found!" << module_id.c_str();
         for(const auto& it : InterpreterModule::interpMap) {
             XLOG(WARN) << "maybe you wanted to type " << it.first.c_str();
@@ -86,6 +102,7 @@ InterpreterModule::~InterpreterModule() {
         metaProcessor_->process(id_ + "_cling_shutdown();", compilationResult, nullptr, true);
         if(compilationResult
             != cling::Interpreter::Interpreter::kSuccess) {
+          /// \todo use boost outcome for error reporting
           XLOG(ERR) << "ERROR while running cling code:\n" << sstr.str();
         }
     }*/
@@ -147,6 +164,7 @@ void add_default_cling_args(std::vector<std::string> &args) {
 
     for(const auto& it: InterpreterModule::extra_args) {
       args.push_back(it);
+      /// \todo use boost outcome for error reporting
       XLOG(DBG9) << "InterpreterModule::extra_args = " << it;
     }
 }
@@ -201,6 +219,7 @@ void InterpreterModule::prepare() {
             metaProcessor_->process(".L " + it, compilationResult, nullptr, true);
             if(compilationResult
                 != cling::Interpreter::Interpreter::kSuccess) {
+              /// \todo use boost outcome for error reporting
               XLOG(ERR) << "ERROR while running cling code:\n" << it;
             }
         }
@@ -216,6 +235,7 @@ void InterpreterModule::run() {
             metaProcessor_->process(id_ + "_cling_run();", compilationResult, nullptr, true);
             if(compilationResult
                 != cling::Interpreter::Interpreter::kSuccess) {
+              /// \todo use boost outcome for error reporting
               XLOG(ERR) << "ERROR while running cling code:\n" << sstr.str();
             }
         });
@@ -254,6 +274,7 @@ static void process_ctp_scripts_dir(const std::string& ctp_scripts_path) {
            && full_path.string().find("generated") == std::string::npos)
         {
           InterpreterModule::moduleToSources["main_module"].push_back(full_path.string());
+          /// \todo use boost outcome for error reporting
           XLOG(DBG9) << "added to InterpreterModule file " << full_path.string();
         }
       }
@@ -261,6 +282,7 @@ static void process_ctp_scripts_dir(const std::string& ctp_scripts_path) {
 
     for(const auto& it : InterpreterModule::moduleToSources) {
         reloadClingModule(it.first, it.second);
+        /// \todo use boost outcome for error reporting
         XLOG(DBG9) << "reloaded module " << it.first;
     }
 #else
@@ -291,6 +313,7 @@ void reloadAllCling() {
         InterpreterModule::interpMap.erase(it.first);
     }
 
+    /// \todo use boost outcome for error reporting
     XLOG(DBG9) << "LLVMDIR is " << LLVMDIR;
 
     fs::path abs_cur_path = fs::absolute(fs::current_path());
@@ -321,6 +344,7 @@ void reloadAllCling() {
             std::make_shared<cxxctp::utils::DispatchQueue>(std::string{"Cling Dispatch Queue"}, 0);
 
     InterpreterModule::receivedMessagesQueue_->dispatch([] {
+        /// \todo use boost outcome for error reporting
         XLOG(DBG9) << "dispatched reloadAllCling event!... ";
         reloadAllCling();
         {
