@@ -509,6 +509,16 @@ Utils must load before scripts (Cling related), so we added `1_`, `2_`, ... befo
 
 You can use `#include`, use filesystem, access the internet, etc. in C++ scripts.
 
+## Got error `libcling.so.5: cannot open shared object file: No such file or
+directory`
+
+Install with `-DENABLE_CLING=TRUE -DINSTALL_CLING=TRUE` and set `LD_LIBRARY_PATH`
+
+```bash
+export LD_LIBRARY_PATH=/usr/local/lib/:$LD_LIBRARY_PATH
+sudo ldconfig
+```
+
 ## About CXXCTP code annotations
 
 You can use C++ annotations to tell CXXCTP what actions it must execute.
