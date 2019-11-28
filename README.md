@@ -980,6 +980,10 @@ There is an official Visual Studio extension, details of which can be found [her
 
 Follow CMake StyleGuide https://github.com/ruslo/0
 
+## Projects that use `.cxtpl`
+
+- [SKG](https://github.com/blockspacer/skia-opengl-emscripten) C++ HTML/CSS UI.
+
 # 📋 Similar projects
 
 - Clava https://github.com/specs-feup/clava
