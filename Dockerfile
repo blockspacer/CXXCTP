@@ -510,7 +510,7 @@ RUN git config --global user.email "$GIT_EMAIL" \
   && \
   git config --global user.name "$GIT_USERNAME" \
   && \
-  git submodule update --init --recursive --depth 50 || true
+  git submodule update --init --recursive --depth 50 --progress || true
 
 # TODO https://stackoverflow.com/a/40465312
 # RUN git submodule deinit -f . || true

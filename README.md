@@ -191,7 +191,7 @@ SomeInterfaceName {
 ```bash
 git submodule sync --recursive
 git fetch --recurse-submodules
-git submodule update --init --recursive --depth 100
+git submodule update --init --recursive --depth 100 --progress
 # or
 git submodule update --force --recursive --init --remote
 ```
