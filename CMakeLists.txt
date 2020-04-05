@@ -379,8 +379,8 @@ if(ENABLE_CXXCTP)
          ${LZ4_LIBRARY} # used by folly
          ${LIBUNWIND_LIBRARIES} # used by folly
          ${LIBLZMA_LIBRARIES} # used by folly
-         ${LIBGFLAGS_LIBRARY} # used by folly
-         ${G3LOG_LIBRARIES} # used by folly
+         #${LIBGFLAGS_LIBRARY} # used by folly
+         #${G3LOG_LIBRARIES} # used by folly
          #glog
          #gflags
          CONAN_PKG::clang_folly_conan
@@ -440,10 +440,10 @@ if(ENABLE_CXXCTP)
       ${CMAKE_CURRENT_SOURCE_DIR}/ # path to ctp_scripts
       ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple # path to ctp_scripts
       ${LIBIBERTY_INCLUDE_DIR} # used by folly
-      ${G3LOG_INCLUDE_DIR} # used by folly
+      #${G3LOG_INCLUDE_DIR} # used by folly
       ${LIBEVENT_INCLUDE_DIR} # used by folly
       ${LZ4_INCLUDE_DIR} # used by folly
-      ${LIBGFLAGS_INCLUDE_DIR} # used by folly
+      #${LIBGFLAGS_INCLUDE_DIR} # used by folly
       ${FOLLY_INCLUDE_DIR}
       ${CONAN_INCLUDE_DIRS})
 

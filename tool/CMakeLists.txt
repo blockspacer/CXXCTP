@@ -25,6 +25,11 @@ target_link_libraries(CXXCTP_tool PUBLIC
   CXXCTP_core
 )
 
+target_link_libraries( CXXCTP_tool PRIVATE
+  ${base_LIB}
+  ${build_util_LIB}
+)
+
 # NOTE: don`t link twice to clang or you will get
 # `LLVM ERROR: inconsistency in registered CommandLine options`
 #target_link_libraries(CXXCTP_tool PRIVATE

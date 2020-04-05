@@ -120,7 +120,7 @@ class CXXCTPProject(ConanFile):
 
         self.requires("snappy/1.1.7@bincrafters/stable")
 
-        self.requires("bzip2/1.0.8")
+        self.requires("bzip2/1.0.8@dev/stable")
 
         self.requires("libsodium/1.0.18@bincrafters/stable")
 

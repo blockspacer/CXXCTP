@@ -46,3 +46,4 @@ src/ctp_registry\.cpp
 .ca-certificates/**
 !.ca-certificates/.gitkeep
 *.txt.user*
+/typescript

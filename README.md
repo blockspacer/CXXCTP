@@ -483,7 +483,21 @@ cmake -E make_directory build
 cmake -E remove_directory resources/cxtpl/generated
 cmake -E make_directory resources/cxtpl/generated
 # NOTE: clang profile!
-cmake -E chdir build conan install --build=missing --profile clang -o enable_tests=False ..
+# NOTE: change `build_type=Debug` to `build_type=Release` in production
+CONAN_REVISIONS_ENABLED=1 \
+  CONAN_VERBOSE_TRACEBACK=1 \
+  CONAN_PRINT_RUN_COMMANDS=1 \
+  CONAN_LOGGING_LEVEL=10 \
+  GIT_SSL_NO_VERIFY=true \
+  cmake -E chdir build  \
+    cmake -E time \
+      conan install \
+        -s build_type=Debug \
+        --build=missing \
+        --profile clang \
+        -o enable_tests=False \
+        -o openssl:shared=True \
+        ..
 cmake -E chdir build cmake -E time cmake -DENABLE_CLING=TRUE -DBUILD_SHARED_LIBS=TRUE -DALLOW_PER_PROJECT_CTP_SCRIPTS=TRUE -DBUILD_EXAMPLES=FALSE -DBUNDLE_EXAMPLE_SCRIPTS=FALSE -DCLEAN_CXXCTP_GEN=TRUE -DCMAKE_BUILD_TYPE=Debug -DENABLE_CXXCTP=TRUE ..
 # OR cmake -E chdir build cmake -E time cmake -DENABLE_CLING=TRUE -DBUILD_SHARED_LIBS=TRUE -DALLOW_PER_PROJECT_CTP_SCRIPTS=FALSE -DBUILD_EXAMPLES=FALSE -DBUNDLE_EXAMPLE_SCRIPTS=TRUE -DCLEAN_CXXCTP_GEN=TRUE -DCMAKE_BUILD_TYPE=Debug -DENABLE_CXXCTP=TRUE ..
 cmake -E chdir build cmake -E time cmake --build . -- -j6

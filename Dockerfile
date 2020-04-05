@@ -313,20 +313,24 @@ RUN set -ex \
   && \
   $APT install -y \
                     #libboost-dev \
-                    openmpi-bin \
-                    openmpi-common \
-                    libopenmpi-dev \
                     #libevent-dev \
                     #libdouble-conversion-dev \
-                    #libgoogle-glog-dev \
-                    #libgflags-dev \
                     #libiberty-dev \
                     #liblz4-dev \
                     #liblzma-dev \
                     #libsnappy-dev \
                     #zlib1g-dev \
-                    binutils-dev \
+                    #libboost-all-dev \
+                    #
+                    #libgoogle-glog-dev \
+                    #libgflags-dev \
+                    #libgtest-dev \
+                    #libzstd-dev \
                     #libjemalloc-dev \
+                    openmpi-bin \
+                    openmpi-common \
+                    libopenmpi-dev \
+                    binutils-dev \
                     libssl-dev \
                     pkg-config \
                     autoconf-archive \
@@ -334,7 +338,6 @@ RUN set -ex \
                     flex \
                     gperf \
                     joe \
-                    #libboost-all-dev \
                     libcap-dev \
                     libkrb5-dev \
                     libpcre3-dev \
@@ -349,13 +352,13 @@ RUN set -ex \
                     g++ \
                     gnutls-bin \
                     openssl \
-                    #libgtest-dev \
                     fakeroot \
                     dpkg-dev \
                     libcurl4-openssl-dev \
-                    #libzstd-dev \
   && \
   $APT install -y mesa-utils \
+                            libegl1-mesa-dev \
+                            libgles2-mesa-dev \
                             libglu1-mesa-dev \
                             dbus-x11 \
                             libx11-dev \
