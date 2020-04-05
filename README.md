@@ -986,6 +986,8 @@ Follow CMake StyleGuide https://github.com/ruslo/0
 
 # 📋 Similar projects
 
+- https://github.com/cppreflect/metapp
+- https://github.com/flexferrum/autoprogrammer/blob/8c9867d357450b99202dac81730851ffc8faa891/src/generators/pimpl_generator.cpp
 - Clava https://github.com/specs-feup/clava
 - Compile-time EXecution of C++ code https://github.com/MaliusArth/cex/blob/6f6e700a253b06c7ae6801e1a3c1f3d842931d77/tool/src/MatchCallbacks/AnnotatedFunctionCallback.cpp
 - circle https://github.com/seanbaxter/circle/blob/master/examples/README.md
@@ -993,7 +995,6 @@ Follow CMake StyleGuide https://github.com/ruslo/0
 - ExtendedCpp https://github.com/reneeichhorn/extended-cpp
 - https://github.com/dobkeratops/compiler
 - transpiling_cpp17_to_cpp11 https://github.com/neobrain/cftf
-- https://github.com/flexferrum/autoprogrammer/blob/8c9867d357450b99202dac81730851ffc8faa891/src/generators/pimpl_generator.cpp
 - https://github.com/llvm-mirror/clang-tools-extra/blob/388528d/clang-tidy/add_new_check.py
 - https://github.com/aantron/better-enums
 - https://github.com/Neargye/magic_enum
