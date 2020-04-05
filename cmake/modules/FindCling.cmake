@@ -19,6 +19,8 @@ find_path(CLING_Interpreter_INCLUDE_DIR ClingOptions.h
                 /opt/local/include/cling/Interpreter
           NO_DEFAULT_PATH)
 
+message(STATUS "[cling] CLING_Interpreter_INCLUDE_DIR: ${CLING_Interpreter_INCLUDE_DIR}")
+
 include(
 
   ${CLING_Interpreter_INCLUDE_DIR}/../../../../../../build/lib/cmake/llvm/LLVMConfig.cmake
@@ -35,16 +37,16 @@ list(APPEND CLING_DEFINITIONS LLVMDIR="${LLVM_BUILD_BINARY_DIR}")
 list(APPEND CLING_INCLUDE_DIRS ${LLVM_BUILD_BINARY_DIR}/include)
 list(APPEND CLING_INCLUDE_DIRS ${CLING_Interpreter_INCLUDE_DIR}/../..)
 list(APPEND CLING_INCLUDE_DIRS
-            ${CLING_Interpreter_INCLUDE_DIR}/../../../../../../build/include)
+            ${CLING_DIR}/build/include)
 # path to "llvm/Config/llvm-config.h"
 list(APPEND CLING_INCLUDE_DIRS
-            ${CLING_Interpreter_INCLUDE_DIR}/../../../../../../src/include)
+            ${CLING_DIR}/src/include)
 # path to "llvm/ADT/StringRef.h"
 list(APPEND CLING_INCLUDE_DIRS
-            ${CLING_Interpreter_INCLUDE_DIR}/../../../../../../src/tools/clang/include/)
+            ${CLING_DIR}/src/tools/clang/include/)
 # path to "clang/Lex/HeaderSearchOptions.h"
 list(APPEND CLING_INCLUDE_DIRS
-            ${CLING_Interpreter_INCLUDE_DIR}/../../../../../../build/tools/clang/include/)
+            ${CLING_DIR}/build/tools/clang/include/)
 # path to "clang/Basic/DiagnosticCommonKinds.inc"
 
 set(LIBRARY_SEARCH_PATHS
@@ -100,8 +102,9 @@ if(NOT TARGET Cling::clingUtils)
 endif()
 
 find_program(CLING_BIN cling
-             HINTS ${CLING_DIR}/build/bin/
+             HINTS ${CLING_DIR}/build/bin
                    ${CLING_PREFIX}/bin
+                   ${CLING_DIR}/src/tools
                    /usr/bin
                    /usr/local/bin
                    $PATH

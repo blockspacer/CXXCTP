@@ -21,7 +21,7 @@ class CXXCTPProject(ConanFile):
     }
 
     default_options = (
-        "use_system_boost=True",
+        "use_system_boost=False",
         "enable_tests=False",
         "enable_sanitizers=False",
         # boost
@@ -36,7 +36,6 @@ class CXXCTPProject(ConanFile):
         "boost:without_math=True",
         "boost:without_mpi=True",
         "boost:without_serialization=True",
-        "boost:without_signals=True",
         "boost:without_test=True",
         "boost:without_timer=True",
         "boost:without_type_erasure=True",
@@ -44,7 +43,8 @@ class CXXCTPProject(ConanFile):
         # FakeIt
         "FakeIt:integration=catch",
         # build
-        "*:shared=False"
+        "*:shared=False",
+        "openssl:shared=True"
     )
 
     generators = 'cmake_find_package', "cmake", "cmake_paths"
@@ -85,7 +85,50 @@ class CXXCTPProject(ConanFile):
             self.requires("FakeIt/[>=2.0.4]@gasuketsu/stable")
 
         if not self.options.use_system_boost:
-            self.requires("boost/[>=1.66.0]@conan/stable")
+            self.requires("boost/1.71.0@dev/stable")
+
+        self.requires("chromium_build_util/master@conan/stable")
+
+        self.requires("chromium_base/master@conan/stable")
+
+        self.requires("corrade/2019.10@magnum/stable")
+
+        self.requires("type_safe/0.2@conan/stable")
+
+        self.requires("double-conversion/3.1.1@bincrafters/stable")
+
+        self.requires("gflags/2.2.2@bincrafters/stable")
+
+        self.requires("glog/0.4.0@bincrafters/stable")
+
+        # patched to support "openssl/OpenSSL_1_1_1-stable@conan/stable"
+        #self.requires("libevent/2.1.11@dev/stable")
+
+        self.requires("lz4/1.8.3@bincrafters/stable")
+
+        # must match openssl version used in webrtc
+        ##self.requires("openssl/OpenSSL_1_1_1-stable@conan/stable")
+
+        #self.requires("OpenSSL/1.1.1c@conan/stable")
+
+        # patched to support "openssl/OpenSSL_1_1_1-stable@conan/stable"
+        self.requires("zlib/v1.2.11@conan/stable")
+
+        self.requires("lzma/5.2.4@bincrafters/stable")
+
+        self.requires("zstd/1.3.8@bincrafters/stable")
+
+        self.requires("snappy/1.1.7@bincrafters/stable")
+
+        self.requires("bzip2/1.0.8")
+
+        self.requires("libsodium/1.0.18@bincrafters/stable")
+
+        self.requires("libelf/0.8.13@bincrafters/stable")
+
+        self.requires("libdwarf/20190505@bincrafters/stable")
+
+        self.requires("clang_folly_conan/v2019.01.14.00@conan/stable")
 
     def package(self):
         cmake = CMake(self)

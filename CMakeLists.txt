@@ -8,6 +8,17 @@ project(${PROJECT_NAME} VERSION ${PROJECT_VERSION} LANGUAGES CXX)
 
 set(CLING_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cling-build/" CACHE STRING "CLING DIR")
 
+# Conan package manager List of packages used by the project is container in
+# conanfile.py
+option(CONAN_AUTO_INSTALL "Let CMake call conan install automatically" ON)
+if (CONAN_AUTO_INSTALL)
+  set(CONAN_PROFILE
+      "clang"
+      CACHE STRING "Conan profile to use during installation")
+  include(cmake/conan-auto-install.cmake)
+  conan_auto_install(${CONAN_PROFILE})
+endif()
+
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules")
 list(
@@ -77,6 +88,12 @@ message(STATUS "INSTALL_CLING=${INSTALL_CLING}")
 
 set(ENABLE_CXXCTP TRUE CACHE BOOL "ENABLE_CXXCTP")
 message(STATUS "ENABLE_CXXCTP=${ENABLE_CXXCTP}")
+
+set(CUSTOM_PLUGINS
+    "${CMAKE_CURRENT_SOURCE_DIR}/custom_plugins.cmake"
+    CACHE STRING
+    "Path to custom plugins")
+message(STATUS "CUSTOM_PLUGINS=${CUSTOM_PLUGINS}")
 
 include(Dependencies.cmake)
 
@@ -184,8 +201,8 @@ else(ENABLE_CLING)
   endif(ENABLE_CXXCTP)
 endif(ENABLE_CLING)
 
-if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/custom_plugins.cmake")
-  include(${CMAKE_CURRENT_SOURCE_DIR}/custom_plugins.cmake)
+if(EXISTS ${CUSTOM_PLUGINS})
+  include(${CUSTOM_PLUGINS})
 endif()
 
 if(BUNDLE_EXAMPLE_SCRIPTS)
@@ -265,103 +282,138 @@ set(USED_SYSTEM_LIBS
     stdc++fs # C++17 std::filesystem
     CACHE INTERNAL "USED_SYSTEM_LIBS")
 
-set(USED_BOOST_LIBS
-    Boost::boost
-    Boost::coroutine
-    Boost::fiber
-    Boost::context
-    Boost::filesystem
-    Boost::program_options
-    Boost::regex
-    Boost::system
-    CACHE INTERNAL "USED_BOOST_LIBS")
+#set(USED_BOOST_LIBS
+#    Boost::boost
+#    Boost::coroutine
+#    Boost::fiber
+#    Boost::context
+#    Boost::filesystem
+#    Boost::program_options
+#    Boost::regex
+#    Boost::system
+#    CACHE INTERNAL "USED_BOOST_LIBS")
 
-list(
-  APPEND
-    CLING_LIBS
-    # TODO: use FindClang.cmake
-    ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangARCMigrate.a
-    ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangAnalysis.a
-    ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangAST.a
-    ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangASTMatchers.a
-    ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangBasic.a
-    ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangCodeGen.a
-    ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangDriver.a
-    ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangDynamicASTMatchers.a
-    ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangEdit.a
-    ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangFormat.a
-    ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangFrontend.a
-    ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangFrontendTool.a
-    ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangIndex.a
-    ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangLex.a
-    ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangParse.a
-    ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangRewrite.a
-    ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangRewriteFrontend.a
-    ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangSema.a
-    ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangSerialization.a
-    ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangStaticAnalyzerCheckers.a
-    ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangStaticAnalyzerCore.a
-    ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangStaticAnalyzerFrontend.a
-    ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangTooling.a
-    ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangToolingCore.a
-    ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangToolingRefactor.a
-    ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangStaticAnalyzerCore.a
-    ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangDynamicASTMatchers.a
-    ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangCodeGen.a
-    ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangFrontendTool.a
-    ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclang.so
-    ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangEdit.a
-    ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangRewriteFrontend.a
-    ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangDriver.a
-    ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangSema.a
-    ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangASTMatchers.a
-    ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangSerialization.a
-    ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangBasic.a
-    ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangAST.a
-    ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangTooling.a
-    ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangStaticAnalyzerFrontend.a
-    ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangFormat.a
-    ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangToolingRefactor.a
-    ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangLex.a
-    ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangFrontend.a
-    ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangRewrite.a
-    ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangToolingCore.a
-    ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangIndex.a
-    ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangAnalysis.a
-    ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangParse.a
-    ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangStaticAnalyzerCheckers.a
-    ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangARCMigrate.a)
+if(ENABLE_CLING)
+    list(
+      APPEND
+        CLING_LIBS
+        # TODO: use FindClang.cmake
+        ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangARCMigrate.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangAnalysis.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangAST.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangASTMatchers.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangBasic.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangCodeGen.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangDriver.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangDynamicASTMatchers.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangEdit.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangFormat.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangFrontend.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangFrontendTool.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangIndex.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangLex.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangParse.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangRewrite.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangRewriteFrontend.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangSema.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangSerialization.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangStaticAnalyzerCheckers.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangStaticAnalyzerCore.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangStaticAnalyzerFrontend.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangTooling.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangToolingCore.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangToolingRefactor.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangStaticAnalyzerCore.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangDynamicASTMatchers.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangCodeGen.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangFrontendTool.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclang.so
+        ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangEdit.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangRewriteFrontend.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangDriver.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangSema.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangASTMatchers.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangSerialization.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangBasic.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangAST.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangTooling.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangStaticAnalyzerFrontend.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangFormat.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangToolingRefactor.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangLex.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangFrontend.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangRewrite.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangToolingCore.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangIndex.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangAnalysis.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangParse.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangStaticAnalyzerCheckers.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/cling-build/build/lib/libclangARCMigrate.a)
+endif(ENABLE_CLING)
 
 # ...which links against clingInterpreter (and its dependencies).
 if(ENABLE_CXXCTP)
+  if(ENABLE_CLING)
+    target_link_libraries(
+      CXXCTP_core
+      PUBLIC
+             Cling::Cling
+             Cling::ClingInterpreter
+             Cling::clingUtils
+             Cling::clingMetaProcessor
+             ${CLING_LIBS}
+             #${CONAN_LIBS}
+             #CONAN_PKG::catch2
+      )
+  endif(ENABLE_CLING)
 
   target_link_libraries(
     CXXCTP_core
     PUBLIC ${FOLLY_LIBRARIES}
-           # system libs
-           ${USED_SYSTEM_LIBS}
-           # @note: Order matters https://stackoverflow.com/a/10269201/10904212
-           ${LIBIBERTY_LIBRARY} # used by folly
-           ${DOUBLE_CONVERSION_LIBRARY} # used by folly
-           ${LIBEVENT_LIB} # used by folly
-           ${LZ4_LIBRARY} # used by folly
-           ${LIBUNWIND_LIBRARIES} # used by folly
-           ${LIBLZMA_LIBRARIES} # used by folly
-           ${LIBGFLAGS_LIBRARY} # used by folly
-           ${G3LOG_LIBRARIES} # used by folly
-           glog
-           gflags
-           # boost libs
-           ${USED_BOOST_LIBS}
-           boost_outcome
-           microsoft_gsl
-           Cling::Cling
-           Cling::ClingInterpreter
-           Cling::clingUtils
-           Cling::clingMetaProcessor
-           ${CLING_LIBS}
-           #${CONAN_LIBS}
-           #CONAN_PKG::catch2
+         # system libs
+         ${USED_SYSTEM_LIBS}
+         # @note: Order matters https://stackoverflow.com/a/10269201/10904212
+         ${LIBIBERTY_LIBRARY} # used by folly
+         ${DOUBLE_CONVERSION_LIBRARY} # used by folly
+         ${LIBEVENT_LIB} # used by folly
+         ${LZ4_LIBRARY} # used by folly
+         ${LIBUNWIND_LIBRARIES} # used by folly
+         ${LIBLZMA_LIBRARIES} # used by folly
+         ${LIBGFLAGS_LIBRARY} # used by folly
+         ${G3LOG_LIBRARIES} # used by folly
+         #glog
+         #gflags
+         CONAN_PKG::clang_folly_conan
+         CONAN_PKG::boost
+         CONAN_PKG::double-conversion
+         CONAN_PKG::glog
+         #CONAN_PKG::libevent
+         CONAN_PKG::lz4
+         #CONAN_PKG::openssl
+         CONAN_PKG::lzma
+         CONAN_PKG::zstd
+         CONAN_PKG::snappy
+         CONAN_PKG::libsodium
+         CONAN_PKG::libdwarf
+         CONAN_PKG::bzip2
+         CONAN_PKG::gflags
+         CONAN_PKG::libunwind
+         #CONAN_PKG::poco
+         #CONAN_PKG::OpenSSL
+         CONAN_PKG::libelf
+         #CONAN_PKG::zlib
+         CONAN_PKG::xz_utils
+         # boost libs
+         ${USED_BOOST_LIBS}
+         boost_outcome
+         microsoft_gsl
+         #${CONAN_LIBS}
+         #CONAN_PKG::catch2
+    )
+
+    target_link_libraries( CXXCTP_core PRIVATE
+      ${base_LIB}
+      ${build_util_LIB}
     )
 
   #target_link_libraries(CXXCTP_core PRIVATE

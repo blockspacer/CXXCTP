@@ -1,0 +1,6 @@
+conan-center https://conan.bintray.com True
+bincrafters https://api.bintray.com/conan/bincrafters/public-conan True
+skypjack https://api.bintray.com/conan/skypjack/conan True
+conan-doom_strong_types https://api.bintray.com/conan/milerius/doom_strong_types True
+google_aardappel_flatbuffers https://api.bintray.com/conan/aardappel/flatbuffers True
+Manu343726 https://api.bintray.com/conan/manu343726/conan-packages True

@@ -215,13 +215,13 @@ sudo -E docker build --no-cache -t cpp-docker-cxxctp .
 sudo -E docker images
 
 # Run in container without leaving host terminal
-sudo -E docker run -v "$PWD":/home/u/cxxctp -w /home/u/cxxctp cpp-docker-cxxctp CXTPL_tool -version --version
+sudo -E docker run -v "$PWD":/home/u/cxxctp -w /home/u/cxxctp cpp-docker-cxxctp CXXCTP_tool -version --version
 
 # Run a terminal in container
 sudo -E docker run --rm -v "$PWD":/home/u/cxxctp -w /home/u/cxxctp  -it  -e DISPLAY         -v /tmp/.X11-unix:/tmp/.X11-unix  cpp-docker-cxxctp
 
 # type in container terminal
-CXTPL_tool -version --version
+CXXCTP_tool -version --version
 ```
 
 ## Develop with Docker
@@ -238,34 +238,6 @@ sudo -E docker run --rm -v "$PWD":/home/u/cxxctp -w /home/u/cxxctp/build cpp-doc
 # Run resulting app in host OS:
 # ./build/<app>
 ```
-
-## Dependencies
-
-- Boost
-
-```bash
-sudo add-apt-repository ppa:boost-latest/ppa
-sudo apt-get update && sudo apt-get upgrade
-aptitude search boost
-sudo apt-get install libboost-dev
-```
-
-- MPI
-
-```bash
-sudo apt-get install openmpi-bin openmpi-common libopenmpi-dev
-```
-
-- CMake
-
-```bash
-sudo -E apt-get purge -y cmake
-bash scripts/install_cmake.sh
-```
-
-Install CXTPL library https://github.com/blockspacer/CXTPL
-
-Install CXTPL_tool https://github.com/blockspacer/CXTPL#how-to-build
 
 ## Install conan - a crossplatform dependency manager for C++
 
@@ -363,6 +335,72 @@ Useful links:
 - CONAN_PKG::cppzmq https://github.com/chaplin89/prontocpp/blob/master/CMakeLists.txt#L42
 - https://github.com/conan-io/examples
 
+## Add conan remotes
+
+To be able to add the list of dependency remotes please type the following command:
+
+```bash
+cmake -E time conan config install conan/remotes/
+# OR:
+# cmake -E time conan config install conan/remotes_disabled_ssl/
+```
+
+## Dependencies
+
+```bash
+# NOTE: don't forget to re-run `conan install` after command below
+# NOTE: change `build_type=Debug` to `build_type=Release` in production
+cmake -DEXTRA_CONAN_OPTS="--profile;clang;-s;build_type=Debug;--build;missing" -P tools/buildConanThirdparty.cmake
+```
+
+- type_safe
+
+```bash
+conan remote add Manu343726 https://api.bintray.com/conan/manu343726/conan-packages False
+
+git clone https://github.com/foonathan/type_safe.git -b v0.2.1
+
+cd type_safe
+
+# NOTE: change `build_type=Debug` to `build_type=Release` in production
+CONAN_REVISIONS_ENABLED=1 \
+    CONAN_VERBOSE_TRACEBACK=1 \
+    CONAN_PRINT_RUN_COMMANDS=1 \
+    CONAN_LOGGING_LEVEL=10 \
+    GIT_SSL_NO_VERIFY=true \
+    conan create . conan/stable -s build_type=Debug --profile clang --build missing
+```
+
+- corrade
+
+```bash
+# NOTE: change `build_type=Debug` to `build_type=Release` in production
+git clone git://github.com/mosra/corrade && cd corrade
+CONAN_REVISIONS_ENABLED=1 \
+    CONAN_VERBOSE_TRACEBACK=1 \
+    CONAN_PRINT_RUN_COMMANDS=1 \
+    CONAN_LOGGING_LEVEL=10 \
+    GIT_SSL_NO_VERIFY=true \
+    conan create . magnum/stable -s build_type=Debug --profile clang --build missing -tf package/conan/test_package
+```
+
+- MPI
+
+```bash
+sudo apt-get install openmpi-bin openmpi-common libopenmpi-dev
+```
+
+- CMake
+
+```bash
+sudo -E apt-get purge -y cmake
+bash scripts/install_cmake.sh
+```
+
+Install CXTPL library https://github.com/blockspacer/CXTPL
+
+Install CXTPL_tool https://github.com/blockspacer/CXTPL#how-to-build
+
 ## How to build
 
 ```bash
@@ -385,14 +423,28 @@ bash install_cling.sh
 Install deps as in CXTPL https://github.com/blockspacer/CXTPL#how-to-build
 
 ```bash
-export CC=gcc
-export CXX=g++
+export CC=clang-6.0
+export CXX=clang++-6.0
 cmake -E remove_directory build
 cmake -E make_directory build
 cmake -E remove_directory resources/cxtpl/generated
 cmake -E make_directory resources/cxtpl/generated
-cmake -E chdir build conan install --build=missing --profile gcc -o enable_tests=False ..
-cmake -E chdir build cmake -E time cmake -DENABLE_CLING=FALSE -DBUILD_SHARED_LIBS=FALSE -DBUILD_EXAMPLES=FALSE -DALLOW_PER_PROJECT_CTP_SCRIPTS=TRUE  -DBUNDLE_EXAMPLE_SCRIPTS=FALSE -DCMAKE_BUILD_TYPE=Debug -DENABLE_CXXCTP=TRUE ..
+# NOTE: change `build_type=Debug` to `build_type=Release` in production
+CONAN_REVISIONS_ENABLED=1 \
+  CONAN_VERBOSE_TRACEBACK=1 \
+  CONAN_PRINT_RUN_COMMANDS=1 \
+  CONAN_LOGGING_LEVEL=10 \
+  GIT_SSL_NO_VERIFY=true \
+  cmake -E chdir build  \
+    cmake -E time \
+      conan install \
+        -s build_type=Debug \
+        --build=missing \
+        --profile clang \
+        -o enable_tests=False \
+        -o openssl:shared=True \
+        ..
+cmake -E chdir build cmake -E time cmake -DENABLE_CLING=TRUE -DBUILD_SHARED_LIBS=FALSE -DBUILD_EXAMPLES=FALSE -DALLOW_PER_PROJECT_CTP_SCRIPTS=TRUE  -DBUNDLE_EXAMPLE_SCRIPTS=FALSE -DCMAKE_BUILD_TYPE=Debug -DENABLE_CXXCTP=TRUE ..
 cmake -E chdir build cmake -E time cmake --build . -- -j6
 
 # you can install CXXCTP_tool:
@@ -720,9 +772,9 @@ std::cout << arguments.arg1;
 
 See `resources/cxtpl/enum_gen_hpp.cxtpl` as an example.
 
-## How to use CXTPL_tool
+## How to use CXXCTP_tool
 
-CXTPL_tool wrapls libtooling to add custom command-line options.
+CXXCTP_tool wraps libtooling to add custom command-line options.
 
 Options related to libtooling (type -help or --help):
 
@@ -740,7 +792,7 @@ Use override options:
   -p=<string>                - Build path
 ```
 
-Options related to CXTPL_tool (type --help, not -help):
+Options related to CXXCTP_tool (type --help, not -help):
 
 `ctp_scripts_paths` - list of paths where toll will search for ctp_scripts subfolder
 
@@ -751,7 +803,7 @@ NOTE: `ctp_scripts_paths` requires `-DENABLE_CLING=TRUE`
 Example of log configuration that writes both into the file and console stream:
 
 ```bash
-./build/tool/CXTPL_tool -L ".:=INFO:default:console; default=file:path=y.log,async=true,sync_level=DBG9;console=stream:stream=stderr"
+./build/bin/CXXCTP_tool -L ".:=INFO:default:console; default=file:path=y.log,async=true,sync_level=DBG9;console=stream:stream=stderr"
 ```
 
 `--srcdir` to change current filesystem path for input files.
@@ -771,7 +823,7 @@ rm -rf build/*generated*
 
 # Build files to `gen/out` dir
 mkdir -p gen/out
-cmake -E chdir gen ../build/tool/CXXCTP_tool --resdir=$PWD/gen/out --ctp_scripts_paths=$PWD -L .=DBG9 -extra-arg=-I$PWD/include -extra-arg=-I../resources ../resources/ReflShapeKind.hpp ../resources/test_typeclass_base1.hpp ../resources/test_typeclass_instance1.hpp ../resources/test.cpp
+cmake -E chdir gen ../build/bin/CXXCTP_tool --resdir=$PWD/gen/out --ctp_scripts_paths=$PWD -L .=DBG9 -extra-arg=-I$PWD/include -extra-arg=-I../resources ../resources/ReflShapeKind.hpp ../resources/test_typeclass_base1.hpp ../resources/test_typeclass_instance1.hpp ../resources/test.cpp
 ```
 
 ## How to debug `ctp_scripts`
