@@ -304,15 +304,15 @@ RUN set -ex \
     fi \
   && \
   $APT install -y \
-                    #libboost-dev \
-                    #libevent-dev \
-                    #libdouble-conversion-dev \
-                    #libiberty-dev \
-                    #liblz4-dev \
-                    #liblzma-dev \
-                    #libsnappy-dev \
-                    #zlib1g-dev \
-                    #libboost-all-dev \
+                    libboost-dev \
+                    libevent-dev \
+                    libdouble-conversion-dev \
+                    libiberty-dev \
+                    liblz4-dev \
+                    liblzma-dev \
+                    libsnappy-dev \
+                    zlib1g-dev \
+                    libboost-all-dev \
                     #
                     #libgoogle-glog-dev \
                     #libgflags-dev \
@@ -422,6 +422,9 @@ RUN set -ex \
     dpkg-buildpackage -rfakeroot -b -uc -us \
     && \
     dpkg -i ../git_*ubuntu*.deb \
+    ; \
+  else \
+    $APT install -y git \
     ; \
   fi \
   && \
