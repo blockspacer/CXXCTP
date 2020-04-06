@@ -59,6 +59,9 @@ ARG GIT_EMAIL="you@example.com"
 ARG GIT_USERNAME="Your Name"
 # SEE: http://kefhifi.com/?p=701
 ARG GIT_WITH_OPENSSL=""
+# see git config --global http.sslCAInfo
+ARG GIT="git"
+ARG GIT_CA_INFO=""
 ENV LC_ALL=C.UTF-8 \
     LANG=en_US.UTF-8 \
     LANGUAGE=en_US:en \
@@ -154,6 +157,8 @@ RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selectio
 # pip install setuptools --upgrade
 
 # /usr/lib/python3.6/distutils/dist.py:261: UserWarning: Unknown distribution option: 'long_description_content_type'
+
+COPY ./.ca-certificates/* /usr/local/share/ca-certificates/
 
 # NO_SSL usefull under proxy, you can disable it with --build-arg NO_SSL="False"
 # Also change http-proxy.conf and ~/.docker/config.json like so https://medium.com/@saniaky/configure-docker-to-use-a-host-proxy-e88bd988c0aa
@@ -280,28 +285,15 @@ RUN set -ex \
   $APT install -y \
                     ca-certificates \
                     software-properties-common \
-                    git \
+                    #git \
                     wget \
                     locales \
-  && \
-  if [ "$NO_SSL" = "True" ]; then \
-    git config --global http.sslVerify false \
-    && \
-    git config --global http.postBuffer 1048576000 \
-    && \
-    # solves 'Connection time out' on server in company domain. \
-    git config --global url."https://github.com".insteadOf git://github.com \
-    && \
-    export GIT_SSL_NO_VERIFY=true \
-    ; \
-  fi \
-  && \
-  $APT install -y \
                     make \
                     autoconf automake autotools-dev libtool \
-                    git \
                     curl \
                     vim \
+  && \
+  update-ca-certificates --fresh \
   && \
   $APT install -y build-essential \
   && \
@@ -430,6 +422,31 @@ RUN set -ex \
     dpkg-buildpackage -rfakeroot -b -uc -us \
     && \
     dpkg -i ../git_*ubuntu*.deb \
+    ; \
+  fi \
+  && \
+  if [ "$NO_SSL" = "True" ]; then \
+    echo 'WARNING: GIT SSL CHECKS DISABLED! SEE NO_SSL FLAG IN DOCKERFILE' \
+    && \
+    ($GIT config --global http.sslVerify false || true) \
+    && \
+    ($GIT config --global https.sslVerify false || true) \
+    && \
+    ($GIT config --global http.postBuffer 1048576000 || true) \
+    && \
+    # solves 'Connection time out' on server in company domain. \
+    ($GIT config --global url."https://github.com".insteadOf git://github.com || true) \
+    && \
+    export GIT_SSL_NO_VERIFY=true \
+    ; \
+  fi \
+  && \
+  if [ "$GIT_CA_INFO" != "" ]; then \
+    echo 'WARNING: GIT_CA_INFO CHANGED! SEE GIT_CA_INFO FLAG IN DOCKERFILE' \
+    && \
+    ($GIT config --global http.sslCAInfo $GIT_CA_INFO || true) \
+    && \
+    ($GIT config --global http.sslCAPath $GIT_CA_INFO || true) \
     ; \
   fi \
   && \
@@ -568,6 +585,9 @@ FROM        cxxctp_build_env as cxxctp_tool
 ARG GIT_EMAIL="you@example.com"
 ARG GIT_USERNAME="Your Name"
 ARG APT="apt-get -qq --no-install-recommends"
+ARG GIT="git"
+ARG GIT_CA_INFO=""
+ARG NO_SSL="True"
 # NOTE: UPPERCASE (TRUE or FALSE)
 ARG ENABLE_CLING="TRUE"
 ENV LC_ALL=C.UTF-8 \
@@ -649,6 +669,31 @@ WORKDIR $WDIR/CXXCTP
 
 RUN set -ex \
   && \
+  if [ "$NO_SSL" = "True" ]; then \
+    echo 'WARNING: GIT SSL CHECKS DISABLED! SEE NO_SSL FLAG IN DOCKERFILE' \
+    && \
+    ($GIT config --global http.sslVerify false || true) \
+    && \
+    ($GIT config --global https.sslVerify false || true) \
+    && \
+    ($GIT config --global http.postBuffer 1048576000 || true) \
+    && \
+    # solves 'Connection time out' on server in company domain. \
+    ($GIT config --global url."https://github.com".insteadOf git://github.com || true) \
+    && \
+    export GIT_SSL_NO_VERIFY=true \
+    ; \
+  fi \
+  && \
+  if [ "$GIT_CA_INFO" != "" ]; then \
+    echo 'WARNING: GIT_CA_INFO CHANGED! SEE GIT_CA_INFO FLAG IN DOCKERFILE' \
+    && \
+    ($GIT config --global http.sslCAInfo $GIT_CA_INFO || true) \
+    && \
+    ($GIT config --global http.sslCAPath $GIT_CA_INFO || true) \
+    ; \
+  fi \
+  && \
   # need some git config to apply git patch
   git config --global user.email "$GIT_EMAIL" \
   && \
@@ -725,7 +770,7 @@ RUN set -ex \
   #type_safe
   conan remote add Manu343726 https://api.bintray.com/conan/manu343726/conan-packages False \
   && \
-  git clone https://github.com/foonathan/type_safe.git -b v0.2.1 \
+  git clone http://github.com/foonathan/type_safe.git -b v0.2.1 \
   && \
   cd type_safe \
   && \
@@ -741,7 +786,7 @@ RUN set -ex \
   && \
   #corrade
   # NOTE: change `build_type=Debug` to `build_type=Release` in production
-  git clone git://github.com/mosra/corrade \
+  git clone http://github.com/mosra/corrade.git  \
   && \
   cd corrade \
   && \

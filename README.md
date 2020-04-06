@@ -358,7 +358,7 @@ cmake -DEXTRA_CONAN_OPTS="--profile;clang;-s;build_type=Debug;--build;missing" -
 ```bash
 conan remote add Manu343726 https://api.bintray.com/conan/manu343726/conan-packages False
 
-git clone https://github.com/foonathan/type_safe.git -b v0.2.1
+git clone http://github.com/foonathan/type_safe.git -b v0.2.1
 
 cd type_safe
 
@@ -375,7 +375,7 @@ CONAN_REVISIONS_ENABLED=1 \
 
 ```bash
 # NOTE: change `build_type=Debug` to `build_type=Release` in production
-git clone git://github.com/mosra/corrade && cd corrade
+git clone http://github.com/mosra/corrade.git && cd corrade
 CONAN_REVISIONS_ENABLED=1 \
     CONAN_VERBOSE_TRACEBACK=1 \
     CONAN_PRINT_RUN_COMMANDS=1 \

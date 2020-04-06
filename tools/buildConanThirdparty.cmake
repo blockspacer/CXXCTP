@@ -160,7 +160,7 @@ cmake_make_dir("${CURRENT_SCRIPT_DIR}/.tmp")
 
 if(NOT EXISTS "${CURRENT_SCRIPT_DIR}/.tmp/cmake_platform_detection_conan")
   git_clone("${CURRENT_SCRIPT_DIR}/.tmp/cmake_platform_detection_conan"
-      "https://github.com/blockspacer/cmake_platform_detection_conan.git"
+      "http://github.com/blockspacer/cmake_platform_detection_conan.git"
       "")
 endif()
 conan_build_target_if(
@@ -171,7 +171,7 @@ conan_build_target_if(
 
 if(NOT EXISTS "${CURRENT_SCRIPT_DIR}/.tmp/cmake_build_options_conan")
   git_clone("${CURRENT_SCRIPT_DIR}/.tmp/cmake_build_options_conan"
-      "https://github.com/blockspacer/cmake_build_options_conan.git"
+      "http://github.com/blockspacer/cmake_build_options_conan.git"
       "")
 endif()
 conan_build_target_if(
@@ -182,7 +182,7 @@ conan_build_target_if(
 
 if(NOT EXISTS "${CURRENT_SCRIPT_DIR}/.tmp/chromium_build_util_conan")
   git_clone("${CURRENT_SCRIPT_DIR}/.tmp/chromium_build_util_conan"
-      "https://github.com/blockspacer/chromium_build_util_conan.git"
+      "http://github.com/blockspacer/chromium_build_util_conan.git"
       "")
 endif()
 conan_build_target_if(
@@ -193,7 +193,7 @@ conan_build_target_if(
 
 if(NOT EXISTS "${CURRENT_SCRIPT_DIR}/.tmp/conan_zlib")
   git_clone("${CURRENT_SCRIPT_DIR}/.tmp/conan_zlib"
-      "https://github.com/blockspacer/conan_zlib.git"
+      "http://github.com/blockspacer/conan_zlib.git"
       "")
 endif()
 conan_build_target_if(
@@ -204,7 +204,7 @@ conan_build_target_if(
 
 if(NOT EXISTS "${CURRENT_SCRIPT_DIR}/.tmp/conan_openssl")
   git_clone("${CURRENT_SCRIPT_DIR}/.tmp/conan_openssl"
-      "https://github.com/blockspacer/conan_openssl.git"
+      "http://github.com/blockspacer/conan_openssl.git"
       "")
 endif()
 conan_build_target_if(
@@ -215,7 +215,7 @@ conan_build_target_if(
 
 if(NOT EXISTS "${CURRENT_SCRIPT_DIR}/.tmp/conan_libevent")
   git_clone("${CURRENT_SCRIPT_DIR}/.tmp/conan_libevent"
-      "https://github.com/blockspacer/conan_libevent.git"
+      "http://github.com/blockspacer/conan_libevent.git"
       "")
 endif()
 conan_build_target_if(
@@ -226,7 +226,7 @@ conan_build_target_if(
 
 if(NOT EXISTS "${CURRENT_SCRIPT_DIR}/.tmp/chromium_libevent_conan")
   git_clone("${CURRENT_SCRIPT_DIR}/.tmp/chromium_libevent_conan"
-      "https://github.com/blockspacer/chromium_libevent_conan.git"
+      "http://github.com/blockspacer/chromium_libevent_conan.git"
       "")
 endif()
 conan_build_target_if(
@@ -237,7 +237,7 @@ conan_build_target_if(
 
 if(NOT EXISTS "${CURRENT_SCRIPT_DIR}/.tmp/chromium_libevent_conan")
   git_clone("${CURRENT_SCRIPT_DIR}/.tmp/chromium_libevent_conan"
-      "https://github.com/blockspacer/chromium_libevent_conan.git"
+      "http://github.com/blockspacer/chromium_libevent_conan.git"
       "")
 endif()
 conan_build_target_if(
@@ -248,7 +248,7 @@ conan_build_target_if(
 
 if(NOT EXISTS "${CURRENT_SCRIPT_DIR}/.tmp/chromium_dynamic_annotations_conan")
   git_clone("${CURRENT_SCRIPT_DIR}/.tmp/chromium_dynamic_annotations_conan"
-      "https://github.com/blockspacer/chromium_dynamic_annotations_conan.git"
+      "http://github.com/blockspacer/chromium_dynamic_annotations_conan.git"
       "")
 endif()
 conan_build_target_if(
@@ -259,7 +259,7 @@ conan_build_target_if(
 
 if(NOT EXISTS "${CURRENT_SCRIPT_DIR}/.tmp/chromium_tcmalloc_conan")
   git_clone("${CURRENT_SCRIPT_DIR}/.tmp/chromium_tcmalloc_conan"
-      "https://github.com/blockspacer/chromium_tcmalloc_conan.git"
+      "http://github.com/blockspacer/chromium_tcmalloc_conan.git"
       "")
 endif()
 conan_build_target_if(
@@ -270,7 +270,7 @@ conan_build_target_if(
 
 if(NOT EXISTS "${CURRENT_SCRIPT_DIR}/.tmp/chromium_xdg_user_dirs_conan")
   git_clone("${CURRENT_SCRIPT_DIR}/.tmp/chromium_xdg_user_dirs_conan"
-      "https://github.com/blockspacer/chromium_xdg_user_dirs_conan.git"
+      "http://github.com/blockspacer/chromium_xdg_user_dirs_conan.git"
       "")
 endif()
 conan_build_target_if(
@@ -281,7 +281,7 @@ conan_build_target_if(
 
 if(NOT EXISTS "${CURRENT_SCRIPT_DIR}/.tmp/chromium_xdg_mime_conan")
   git_clone("${CURRENT_SCRIPT_DIR}/.tmp/chromium_xdg_mime_conan"
-      "https://github.com/blockspacer/chromium_xdg_mime_conan.git"
+      "http://github.com/blockspacer/chromium_xdg_mime_conan.git"
       "")
 endif()
 conan_build_target_if(
@@ -292,7 +292,7 @@ conan_build_target_if(
 
 if(NOT EXISTS "${CURRENT_SCRIPT_DIR}/.tmp/chromium_modp_b64_conan")
   git_clone("${CURRENT_SCRIPT_DIR}/.tmp/chromium_modp_b64_conan"
-      "https://github.com/blockspacer/chromium_modp_b64_conan.git"
+      "http://github.com/blockspacer/chromium_modp_b64_conan.git"
       "")
 endif()
 conan_build_target_if(
@@ -303,7 +303,7 @@ conan_build_target_if(
 
 if(NOT EXISTS "${CURRENT_SCRIPT_DIR}/.tmp/chromium_icu_conan")
   git_clone("${CURRENT_SCRIPT_DIR}/.tmp/chromium_icu_conan"
-      "https://github.com/blockspacer/chromium_icu_conan.git"
+      "http://github.com/blockspacer/chromium_icu_conan.git"
       "")
 endif()
 conan_build_target_if(
@@ -314,7 +314,7 @@ conan_build_target_if(
 
 if(NOT EXISTS "${CURRENT_SCRIPT_DIR}/.tmp/chromium_compact_enc_det_conan")
   git_clone("${CURRENT_SCRIPT_DIR}/.tmp/chromium_compact_enc_det_conan"
-      "https://github.com/blockspacer/chromium_compact_enc_det_conan.git"
+      "http://github.com/blockspacer/chromium_compact_enc_det_conan.git"
       "")
 endif()
 conan_build_target_if(
@@ -325,7 +325,7 @@ conan_build_target_if(
 
 if(NOT EXISTS "${CURRENT_SCRIPT_DIR}/.tmp/cobalt_starboard_headers_only")
   git_clone("${CURRENT_SCRIPT_DIR}/.tmp/cobalt_starboard_headers_only"
-      "https://github.com/blockspacer/cobalt_starboard_headers_only.git"
+      "http://github.com/blockspacer/cobalt_starboard_headers_only.git"
       "")
 endif()
 conan_build_target_if(
@@ -336,7 +336,7 @@ conan_build_target_if(
 
 if(NOT EXISTS "${CURRENT_SCRIPT_DIR}/.tmp/chromium_zlib_conan")
   git_clone("${CURRENT_SCRIPT_DIR}/.tmp/chromium_zlib_conan"
-      "https://github.com/blockspacer/chromium_zlib_conan.git"
+      "http://github.com/blockspacer/chromium_zlib_conan.git"
       "")
 endif()
 conan_build_target_if(
@@ -347,7 +347,7 @@ conan_build_target_if(
 
 if(NOT EXISTS "${CURRENT_SCRIPT_DIR}/.tmp/cobalt_glm_conan")
   git_clone("${CURRENT_SCRIPT_DIR}/.tmp/cobalt_glm_conan"
-      "https://github.com/blockspacer/cobalt_glm_conan.git"
+      "http://github.com/blockspacer/cobalt_glm_conan.git"
       "")
 endif()
 conan_build_target_if(
@@ -358,7 +358,7 @@ conan_build_target_if(
 
 if(NOT EXISTS "${CURRENT_SCRIPT_DIR}/.tmp/chromium_libxml_conan")
   git_clone("${CURRENT_SCRIPT_DIR}/.tmp/chromium_libxml_conan"
-      "https://github.com/blockspacer/chromium_libxml_conan.git"
+      "http://github.com/blockspacer/chromium_libxml_conan.git"
       "")
 endif()
 conan_build_target_if(
@@ -369,7 +369,7 @@ conan_build_target_if(
 
 if(NOT EXISTS "${CURRENT_SCRIPT_DIR}/.tmp/conan_bzip2")
   git_clone("${CURRENT_SCRIPT_DIR}/.tmp/conan_bzip2"
-      "https://github.com/blockspacer/conan_bzip2.git"
+      "http://github.com/blockspacer/conan_bzip2.git"
       "")
 endif()
 conan_build_target_if(
@@ -380,7 +380,7 @@ conan_build_target_if(
 
 if(NOT EXISTS "${CURRENT_SCRIPT_DIR}/.tmp/conan_boost")
   git_clone("${CURRENT_SCRIPT_DIR}/.tmp/conan_boost"
-      "https://github.com/blockspacer/conan_boost.git"
+      "http://github.com/blockspacer/conan_boost.git"
       "")
 endif()
 conan_build_target_if(
@@ -391,7 +391,7 @@ conan_build_target_if(
 
 if(NOT EXISTS "${CURRENT_SCRIPT_DIR}/.tmp/cobalt_starboard_conan")
   git_clone("${CURRENT_SCRIPT_DIR}/.tmp/cobalt_starboard_conan"
-      "https://github.com/blockspacer/cobalt_starboard_conan.git"
+      "http://github.com/blockspacer/cobalt_starboard_conan.git"
       "")
 endif()
 conan_build_target_if(
@@ -402,7 +402,7 @@ conan_build_target_if(
 
 if(NOT EXISTS "${CURRENT_SCRIPT_DIR}/.tmp/chromium_base_conan")
   git_clone("${CURRENT_SCRIPT_DIR}/.tmp/chromium_base_conan"
-      "https://github.com/blockspacer/chromium_base_conan.git"
+      "http://github.com/blockspacer/chromium_base_conan.git"
       "")
 endif()
 conan_build_target_if(
@@ -413,7 +413,7 @@ conan_build_target_if(
 
 if(NOT EXISTS "${CURRENT_SCRIPT_DIR}/.tmp/clang_folly_conan")
   git_clone("${CURRENT_SCRIPT_DIR}/.tmp/clang_folly_conan"
-      "https://github.com/blockspacer/clang_folly_conan.git"
+      "http://github.com/blockspacer/clang_folly_conan.git"
       "")
 endif()
 conan_build_target_if(
