@@ -128,7 +128,7 @@ class CXXCTPProject(ConanFile):
 
         self.requires("libdwarf/20190505@bincrafters/stable")
 
-        self.requires("clang_folly_conan/v2019.01.14.00@conan/stable")
+        #self.requires("clang_folly_conan/v2019.01.14.00@conan/stable")
 
     def package(self):
         cmake = CMake(self)

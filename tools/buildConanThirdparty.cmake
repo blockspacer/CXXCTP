@@ -94,6 +94,11 @@ endmacro(git_clone)
 macro(conan_remove_target TARGET_NAME)
   #
   message(STATUS "running `conan remove -f` for ${TARGET_NAME}")
+  set(ENV{CONAN_REVISIONS_ENABLED} 1)
+  set(ENV{CONAN_VERBOSE_TRACEBACK} 1)
+  set(ENV{CONAN_PRINT_RUN_COMMANDS} 1)
+  set(ENV{CONAN_LOGGING_LEVEL} 1)
+  set(ENV{GIT_SSL_NO_VERIFY} 1)
   execute_process(
     COMMAND
       ${COLORED_OUTPUT_ENABLER}
@@ -105,7 +110,7 @@ macro(conan_remove_target TARGET_NAME)
     ${OUTPUT_VARS} # may create `stdout` variable
   )
   if(NOT "${retcode}" STREQUAL "0")
-    message( FATAL_ERROR "(conan_remove_target)
+    message( WARNING "(conan_remove_target)
       Bad exit status ${retcode} ${stdout} ${stderr}")
   endif()
 endmacro(conan_remove_target)
@@ -119,6 +124,11 @@ macro(conan_create_target TARGET_PATH TARGET_CHANNEL)
   endif()
   #
   message(STATUS "running `conan create` for ${TARGET_PATH}")
+  set(ENV{CONAN_REVISIONS_ENABLED} 1)
+  set(ENV{CONAN_VERBOSE_TRACEBACK} 1)
+  set(ENV{CONAN_PRINT_RUN_COMMANDS} 1)
+  set(ENV{CONAN_LOGGING_LEVEL} 1)
+  set(ENV{GIT_SSL_NO_VERIFY} 1)
   execute_process(
     COMMAND
       ${COLORED_OUTPUT_ENABLER}

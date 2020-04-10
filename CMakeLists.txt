@@ -16,7 +16,12 @@ if (CONAN_AUTO_INSTALL)
       "clang"
       CACHE STRING "Conan profile to use during installation")
   include(cmake/conan-auto-install.cmake)
-  conan_auto_install(${CONAN_PROFILE})
+  if (NOT CMAKE_BUILD_TYPE MATCHES "Debug" )
+    set(conan_build_type "Release")
+  else()
+    set(conan_build_type "Debug")
+  endif()
+  conan_auto_install(${CONAN_PROFILE} "-s;build_type=${conan_build_type};--build=missing;-o;enable_tests=False;-o;openssl:shared=True")
 endif()
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
@@ -46,7 +51,7 @@ set(USE_G3LOG
   "Use g3log logger")
 
 set(USE_FOLLY
-  TRUE CACHE BOOL
+  FALSE CACHE BOOL
   "Use facebook/folly library (Apache License 2.0)")
 
 set(USE_RANG
@@ -369,7 +374,7 @@ if(ENABLE_CXXCTP)
 
   target_link_libraries(
     CXXCTP_core
-    PUBLIC ${FOLLY_LIBRARIES}
+    PUBLIC
          # system libs
          ${USED_SYSTEM_LIBS}
          # @note: Order matters https://stackoverflow.com/a/10269201/10904212
@@ -379,10 +384,6 @@ if(ENABLE_CXXCTP)
          ${LZ4_LIBRARY} # used by folly
          ${LIBUNWIND_LIBRARIES} # used by folly
          ${LIBLZMA_LIBRARIES} # used by folly
-         #${LIBGFLAGS_LIBRARY} # used by folly
-         #${G3LOG_LIBRARIES} # used by folly
-         #glog
-         #gflags
          CONAN_PKG::clang_folly_conan
          CONAN_PKG::boost
          CONAN_PKG::double-conversion
@@ -434,8 +435,6 @@ if(ENABLE_CXXCTP)
     CXXCTP_core
     PUBLIC
       ${CMAKE_CURRENT_SOURCE_DIR}/submodules/boost.outcome/include/outcome/quickcpplib/include/ # TODO
-      # fatal error: folly/executors/CPUThreadPoolExecutor.h: No such file or directory
-      #${CMAKE_CURRENT_SOURCE_DIR}/submodules/folly # TODO
       ${CMAKE_CURRENT_SOURCE_DIR}/include
       ${CMAKE_CURRENT_SOURCE_DIR}/ # path to ctp_scripts
       ${CMAKE_CURRENT_SOURCE_DIR}/examples/simple # path to ctp_scripts
@@ -443,8 +442,6 @@ if(ENABLE_CXXCTP)
       #${G3LOG_INCLUDE_DIR} # used by folly
       ${LIBEVENT_INCLUDE_DIR} # used by folly
       ${LZ4_INCLUDE_DIR} # used by folly
-      #${LIBGFLAGS_INCLUDE_DIR} # used by folly
-      ${FOLLY_INCLUDE_DIR}
       ${CONAN_INCLUDE_DIRS})
 
   if(BUNDLE_EXAMPLE_SCRIPTS)
