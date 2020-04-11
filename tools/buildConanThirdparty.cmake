@@ -37,6 +37,17 @@ if(EXTRA_CONAN_OPTS STREQUAL "")
     provide EXTRA_CONAN_OPTS, see comments in .cmake file")
 endif()
 
+find_program(CONAN_PATH conan
+             HINTS ${CONAN_DIR}
+                   /usr/bin
+                   /usr/local/bin
+                   $PATH
+                   CMAKE_SYSTEM_PROGRAM_PATH)
+
+if(NOT CONAN_PATH)
+  message(FATAL_ERROR "conan not found! Aborting...")
+endif() # NOT CONAN_PATH
+
 macro(cmake_remove_directory DIR_PATH)
     message(STATUS "running `git clone` for ${PATH_URI}")
     execute_process(
@@ -102,7 +113,7 @@ macro(conan_remove_target TARGET_NAME)
   execute_process(
     COMMAND
       ${COLORED_OUTPUT_ENABLER}
-        ${CMAKE_COMMAND} "-E" "time" "conan" "remove" ${TARGET_NAME} "-f"
+        ${CMAKE_COMMAND} "-E" "time" "${CONAN_PATH}" "remove" ${TARGET_NAME} "-f"
     WORKING_DIRECTORY ${CURRENT_SCRIPT_DIR}
     TIMEOUT 7200 # sec
     RESULT_VARIABLE retcode
@@ -133,7 +144,7 @@ macro(conan_install_target TARGET_PATH)
     COMMAND
       ${COLORED_OUTPUT_ENABLER}
         ${CMAKE_COMMAND} "-E" "time"
-          "conan" "install" "." ${EXTRA_CONAN_OPTS}
+          "${CONAN_PATH}" "install" "." ${EXTRA_CONAN_OPTS}
     WORKING_DIRECTORY ${TARGET_PATH}
     TIMEOUT 7200 # sec
     RESULT_VARIABLE retcode
@@ -164,7 +175,7 @@ macro(conan_create_target TARGET_PATH TARGET_CHANNEL)
     COMMAND
       ${COLORED_OUTPUT_ENABLER}
         ${CMAKE_COMMAND} "-E" "time"
-          "conan" "create" "." "${TARGET_CHANNEL}" ${EXTRA_CONAN_OPTS}
+          "${CONAN_PATH}" "create" "." "${TARGET_CHANNEL}" ${EXTRA_CONAN_OPTS}
     WORKING_DIRECTORY ${TARGET_PATH}
     TIMEOUT 7200 # sec
     RESULT_VARIABLE retcode

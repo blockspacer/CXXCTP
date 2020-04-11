@@ -55,7 +55,7 @@ function(conan_auto_install profile)
          ${CONAN_PATH} install ${CMAKE_SOURCE_DIR} \
          --no-imports \
          --profile ${profile} \
-         --install-folder ${CMAKE_CURRENT_BINARY_DIR}\
+         --install-folder ${CMAKE_CURRENT_BINARY_DIR} \
          ${CONAN_OPTIONS}"
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         TIMEOUT 7200 # sec
