@@ -209,7 +209,10 @@ NOTE: You may want to build Docker image with `--build-arg NO_SSL="False"`. Read
 sudo -E xhost +local:docker
 
 # build Dockerfile
-sudo -E docker build --no-cache -t cpp-docker-cxxctp .
+sudo -E docker build --no-cache \
+  --build-arg GIT_WITH_OPENSSL="" \
+  --build-arg NO_SSL="False" \
+  -t cpp-docker-cxxctp .
 
 # Now let’s check if our image has been created.
 sudo -E docker images
@@ -233,7 +236,7 @@ sudo -E docker run --rm -v "$PWD":/home/u/cxxctp -w /home/u/cxxctp  -it  -e DISP
 # An example of how to build (with Makefile generated from cmake) inside the container
 # Mounts $PWD to /home/u/cxxctp and runs command
 mkdir build
-sudo -E docker run --rm -v "$PWD":/home/u/cxxctp -w /home/u/cxxctp/build cpp-docker-cxxctp cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=TRUE ..
+sudo -E docker run --rm -v "$PWD":/home/u/cxxctp -w /home/u/cxxctp/build cpp-docker-cxxctp cmake -DCONAN_AUTO_INSTALL=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=TRUE ..
 
 # Run resulting app in host OS:
 # ./build/<app>
@@ -499,7 +502,7 @@ CONAN_REVISIONS_ENABLED=1 \
         -o openssl:shared=True \
         ..
 cmake -E chdir build cmake -E time cmake -DCONAN_AUTO_INSTALL=OFF -DENABLE_CLING=TRUE -DBUILD_SHARED_LIBS=TRUE -DALLOW_PER_PROJECT_CTP_SCRIPTS=TRUE -DBUILD_EXAMPLES=FALSE -DBUNDLE_EXAMPLE_SCRIPTS=FALSE -DCLEAN_CXXCTP_GEN=TRUE -DCMAKE_BUILD_TYPE=Debug -DENABLE_CXXCTP=TRUE ..
-# OR cmake -E chdir build cmake -E time cmake -DENABLE_CLING=TRUE -DBUILD_SHARED_LIBS=TRUE -DALLOW_PER_PROJECT_CTP_SCRIPTS=FALSE -DBUILD_EXAMPLES=FALSE -DBUNDLE_EXAMPLE_SCRIPTS=TRUE -DCLEAN_CXXCTP_GEN=TRUE -DCMAKE_BUILD_TYPE=Debug -DENABLE_CXXCTP=TRUE ..
+# OR cmake -E chdir build cmake -E time cmake -DCONAN_AUTO_INSTALL=OFF -DENABLE_CLING=TRUE -DBUILD_SHARED_LIBS=TRUE -DALLOW_PER_PROJECT_CTP_SCRIPTS=FALSE -DBUILD_EXAMPLES=FALSE -DBUNDLE_EXAMPLE_SCRIPTS=TRUE -DCLEAN_CXXCTP_GEN=TRUE -DCMAKE_BUILD_TYPE=Debug -DENABLE_CXXCTP=TRUE ..
 cmake -E chdir build cmake -E time cmake --build . -- -j6
 # you can install CXXCTP_tool:
 sudo cmake -E chdir build make install

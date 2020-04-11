@@ -9,7 +9,9 @@ message(STATUS "CMAKE_THREAD_LIBS_INIT = ${CMAKE_THREAD_LIBS_INIT}")
 if(ENABLE_CLING)
     find_package(Cling REQUIRED)
 endif(ENABLE_CLING)
-find_package(CXTPL_tool REQUIRED)
+if(BUILD_EXAMPLES)
+    find_package(CXTPL_tool REQUIRED)
+endif(BUILD_EXAMPLES)
 
 #
 # If you have built boost statically you will need to set the Boost_USE_STATIC_LIBS CMake variable to ON
@@ -40,14 +42,14 @@ find_package(CXTPL_tool REQUIRED)
 #  add_definitions(-DBOOST_BEAST_SEPARATE_COMPILATION -DBOOST_ASIO_SEPARATE_COMPILATION)
 #endif()
 
-find_package( Boost 1.71.0
-  COMPONENTS program_options filesystem regex date_time system thread graph
-  EXACT REQUIRED )
-if(NOT TARGET CONAN_PKG::boost)
-  message(FATAL_ERROR "Use boost from conan")
-endif()
-message(STATUS "Boost_LIBRARIES=${Boost_LIBRARIES}")
-message(STATUS "Boost_INCLUDE_DIRS=${Boost_INCLUDE_DIRS}")
+#find_package( Boost 1.71.0
+#  COMPONENTS program_options filesystem regex date_time system thread graph
+#  EXACT REQUIRED )
+#if(NOT TARGET CONAN_PKG::boost)
+#  message(FATAL_ERROR "Use boost from conan")
+#endif()
+#message(STATUS "Boost_LIBRARIES=${Boost_LIBRARIES}")
+#message(STATUS "Boost_INCLUDE_DIRS=${Boost_INCLUDE_DIRS}")
 
 if(NOT TARGET CONAN_PKG::clang_folly_conan)
   message(FATAL_ERROR "Use clang_folly_conan from conan")

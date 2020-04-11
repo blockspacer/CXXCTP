@@ -94,6 +94,11 @@ endmacro(git_clone)
 macro(conan_remove_target TARGET_NAME)
   #
   message(STATUS "running `conan remove -f` for ${TARGET_NAME}")
+  set(ENV{CONAN_REVISIONS_ENABLED} 1)
+  set(ENV{CONAN_VERBOSE_TRACEBACK} 1)
+  set(ENV{CONAN_PRINT_RUN_COMMANDS} 1)
+  set(ENV{CONAN_LOGGING_LEVEL} 1)
+  set(ENV{GIT_SSL_NO_VERIFY} 1)
   execute_process(
     COMMAND
       ${COLORED_OUTPUT_ENABLER}
@@ -105,10 +110,41 @@ macro(conan_remove_target TARGET_NAME)
     ${OUTPUT_VARS} # may create `stdout` variable
   )
   if(NOT "${retcode}" STREQUAL "0")
-    message( FATAL_ERROR "(conan_remove_target)
+    message( WARNING "(conan_remove_target)
       Bad exit status ${retcode} ${stdout} ${stderr}")
   endif()
 endmacro(conan_remove_target)
+
+macro(conan_install_target TARGET_PATH)
+  #
+  if(NOT EXISTS "${TARGET_PATH}/conanfile.py" AND NOT EXISTS "${TARGET_PATH}/conanfile.txt")
+    message(FATAL_ERROR "(conan_install_target)
+      path not found: ${TARGET_PATH}/conanfile.py
+      AND ${TARGET_PATH}/conanfile.txt")
+  endif()
+  #
+  message(STATUS "running `conan install` for ${TARGET_PATH}")
+  set(ENV{CONAN_REVISIONS_ENABLED} 1)
+  set(ENV{CONAN_VERBOSE_TRACEBACK} 1)
+  set(ENV{CONAN_PRINT_RUN_COMMANDS} 1)
+  set(ENV{CONAN_LOGGING_LEVEL} 1)
+  set(ENV{GIT_SSL_NO_VERIFY} 1)
+  execute_process(
+    COMMAND
+      ${COLORED_OUTPUT_ENABLER}
+        ${CMAKE_COMMAND} "-E" "time"
+          "conan" "install" "." ${EXTRA_CONAN_OPTS}
+    WORKING_DIRECTORY ${TARGET_PATH}
+    TIMEOUT 7200 # sec
+    RESULT_VARIABLE retcode
+    ERROR_VARIABLE stderr
+    ${OUTPUT_VARS} # may create `stdout` variable
+  )
+  if(NOT "${retcode}" STREQUAL "0")
+    message( FATAL_ERROR "(conan_install_target)
+      Bad exit status ${retcode} ${stdout} ${stderr}")
+  endif()
+endmacro(conan_install_target)
 
 macro(conan_create_target TARGET_PATH TARGET_CHANNEL)
   #
@@ -119,6 +155,11 @@ macro(conan_create_target TARGET_PATH TARGET_CHANNEL)
   endif()
   #
   message(STATUS "running `conan create` for ${TARGET_PATH}")
+  set(ENV{CONAN_REVISIONS_ENABLED} 1)
+  set(ENV{CONAN_VERBOSE_TRACEBACK} 1)
+  set(ENV{CONAN_PRINT_RUN_COMMANDS} 1)
+  set(ENV{CONAN_LOGGING_LEVEL} 1)
+  set(ENV{GIT_SSL_NO_VERIFY} 1)
   execute_process(
     COMMAND
       ${COLORED_OUTPUT_ENABLER}
@@ -146,6 +187,7 @@ macro(conan_build_target_if TARGET_NAME TARGET_CHANNEL TARGET_PATH OPTION_NAME)
     if(CLEAN_BUILD)
       conan_remove_target(${TARGET_NAME})
     endif(CLEAN_BUILD)
+    conan_install_target(${TARGET_PATH})
     conan_create_target(${TARGET_PATH} ${TARGET_CHANNEL})
   endif(${OPTION_NAME})
 endmacro(conan_build_target_if)
