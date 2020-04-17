@@ -28,6 +28,8 @@ target_link_libraries(CXXCTP_tool PUBLIC
 target_link_libraries( CXXCTP_tool PRIVATE
   ${base_LIB}
   ${build_util_LIB}
+  CONAN_PKG::corrade
+  Corrade::PluginManager
 )
 
 # NOTE: don`t link twice to clang or you will get

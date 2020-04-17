@@ -478,3 +478,14 @@ conan_build_target_if(
 if(EXISTS "${CURRENT_SCRIPT_DIR}/.tmp")
   cmake_remove_directory("${CURRENT_SCRIPT_DIR}/.tmp")
 endif()
+
+if(NOT EXISTS "${CURRENT_SCRIPT_DIR}/.tmp/corrade")
+  git_clone("${CURRENT_SCRIPT_DIR}/.tmp/corrade"
+      "https://github.com/mosra/corrade.git"
+      "")
+endif()
+conan_build_target_if(
+  "corrade" # target to clean
+  "magnum/stable"
+  "${CURRENT_SCRIPT_DIR}/.tmp/corrade" # target to build
+  ALWAYS_BUILD)

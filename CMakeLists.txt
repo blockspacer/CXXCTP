@@ -417,6 +417,8 @@ if(ENABLE_CXXCTP)
          CONAN_PKG::libelf
          #CONAN_PKG::zlib
          CONAN_PKG::xz_utils
+         CONAN_PKG::corrade
+         Corrade::PluginManager
          # boost libs
          ${USED_BOOST_LIBS}
          boost_outcome
