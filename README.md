@@ -27,6 +27,12 @@
 [![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/blockspacer/CXXCTP.svg)](http://isitmaintained.com/project/blockspacer/CXXCTP "Average time to resolve an issue")
 [![Percentage of issues still open](http://isitmaintained.com/badge/open/blockspacer/CXXCTP.svg)](http://isitmaintained.com/project/blockspacer/CXXCTP "Percentage of issues still open")
 
+# NOTE
+
+This repo will be migrated to https://github.com/blockspacer/flextool as soon as possible
+
+CXXCTP will be deprecated. Prefer flextool
+
 # 🔗 Navigation
 
  - [About CXXCTP](#about)
